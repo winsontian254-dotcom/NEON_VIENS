@@ -2923,19 +2923,20 @@ NV.Level = (() => {
       const i = Math.round((it.x - 1) / BB), j = Math.round((it.y - 1) / BB), xL = it.x * TILE, xR = (it.x + 2) * TILE, zT = it.y * TILE, zB = (it.y + 2) * TILE, cx = (xL + xR) / 2, cz = (zT + zB) / 2;
       const open = (x, z) => !solid(x, z);
       if ([[i - 1, j - 1], [i, j - 1], [i - 1, j], [i, j]].some(([a, b]) => M.TB.includes(a) && M.TB.includes(b))) return; // the tower plaza is one open square
-      const rot90 = BABYLON.Quaternion.RotationYawPitchRoll(Math.PI / 2, 0, 0);
-      if (j > 0 && open(cx, zT - 2)) { zebra.push(NV.M(3.2, .02, 8, cx, .03, zT - 2, rot90)); stopl.push(NV.M(4, .03, .4, cx + 2, .03, zT - 4.1)); }
-      if (open(cx, zB + 2)) { zebra.push(NV.M(3.2, .02, 8, cx, .03, zB + 2, rot90)); stopl.push(NV.M(4, .03, .4, cx - 2, .03, zB + 4.1)); }
-      if (i > 0 && open(xL - 2, cz)) { zebra.push(NV.M(3.2, .02, 8, xL - 2, .03, cz, null)); stopl.push(NV.M(.4, .03, 4, xL - 4.1, .03, cz - 2)); }
-      if (open(xR + 2, cz)) { zebra.push(NV.M(3.2, .02, 8, xR + 2, .03, cz, null)); stopl.push(NV.M(.4, .03, 4, xR + 4.1, .03, cz + 2)); }
+      // zebra bars run parallel to the traffic, spaced across the road you walk over
+      const zebraX = (x, z) => { for (let k = 0; k < 8; k++) zebra.push(NV.M(.5, .03, 3, x - 3.5 + k, .03, z)); }; // crossing a z-running road: walk along x
+      const zebraZ = (x, z) => { for (let k = 0; k < 8; k++) zebra.push(NV.M(3, .03, .5, x, .03, z - 3.5 + k)); }; // crossing an x-running road: walk along z
+      if (j > 0 && open(cx, zT - 2)) { zebraX(cx, zT - 2); stopl.push(NV.M(4, .03, .4, cx + 2, .03, zT - 4.1)); }
+      if (open(cx, zB + 2)) { zebraX(cx, zB + 2); stopl.push(NV.M(4, .03, .4, cx - 2, .03, zB + 4.1)); }
+      if (i > 0 && open(xL - 2, cz)) { zebraZ(xL - 2, cz); stopl.push(NV.M(.4, .03, 4, xL - 4.1, .03, cz - 2)); }
+      if (open(xR + 2, cz)) { zebraZ(xR + 2, cz); stopl.push(NV.M(.4, .03, 4, xR + 4.1, .03, cz + 2)); }
       // corners: NW + SE poles signal traffic on the z streets, NE + SW poles the x streets
       [[xL - 1, zT - 1, 'z'], [xR + 1, zB + 1, 'z'], [xR + 1, zT - 1, 'x'], [xL - 1, zB + 1, 'x']].forEach(([x, z, ax]) => {
         if (!open(x, z)) return;
         pole.push(NV.M(.2, 4.8, .2, x, 2.4, z)); heads.push(NV.M(.55, 1.1, .55, x, 5.1, z)); lens.push(NV.M(.42, .42, .42, x, 5.3, z)); lights.push({ i, j, ax });
       });
     });
-    const zm = mat(scene, 'zebram', '#ffffff'); zm.diffuseTexture = NV.tex(scene, 128, 32, (c, w, h) => { c.clearRect(0, 0, w, h); c.fillStyle = 'rgba(230,230,240,.85)'; for (let k = 0; k < 8; k++) c.fillRect(k * 16 + 3, 2, 10, h - 4); });
-    zm.diffuseTexture.hasAlpha = true; zm.useAlphaFromDiffuseTexture = true; zm.specularColor = new BABYLON.Color3(.2, .2, .2);
+    const zm = mat(scene, 'zebram', '#d8d8e2'); zm.specularColor = new BABYLON.Color3(.2, .2, .2);
     mk('zebra', zm, zebra);
     mk('stopl', mat(scene, 'stoplm', '#dcdce6'), stopl);
     mk('sighead', mat(scene, 'sigheadm', '#0c0b12'), heads);
