@@ -74,6 +74,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#05030b;color:var(--
 .chip small{display:block;font-family:var(--fb);letter-spacing:0;text-transform:none;font-size:12px;margin-top:3px;opacity:.85}
 .slab{font-family:var(--fm);font-size:12px;letter-spacing:.3em;color:var(--pink);margin:14px 0 4px;text-transform:uppercase}
 @media (max-width:720px){#create .panel{grid-template-columns:1fr}#create canvas{max-height:30vh;width:auto}}
+body.cine #story{bottom:11vh;inset:0 0 11vh 0;z-index:5}
 #story{position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(3,2,10,.78))}
 .dlg{position:absolute;left:50%;bottom:4vh;transform:translateX(-50%);width:min(1100px,94vw);min-height:150px;display:flex;gap:18px;padding:20px 26px 18px;cursor:pointer}
 .dlg .portrait{flex:0 0 auto;width:118px;height:118px;border:1px solid var(--line);background:#0a0716}
@@ -3058,7 +3059,7 @@ NV.Level = (() => {
     const was = L.cine;
     L.cine = { shot, partner, t: 0, orbit: was ? was.orbit : Math.random() * 6.28, cut: !was || was.shot !== shot || was.partner !== partner, walk: null };
     L.cineOff = 0;
-    if (!was) { G.x = p.x; G.z = p.z; G.root.rotation.y = p.yaw; L.gunWas = L.gun.node.isEnabled(); L.gun.node.setEnabled(false); document.getElementById('hud').classList.add('cine'); }
+    if (!was) { G.x = p.x; G.z = p.z; G.root.rotation.y = p.yaw; L.gunWas = L.gun.node.isEnabled(); L.gun.node.setEnabled(false); document.getElementById('hud').classList.add('cine'); document.body.classList.add('cine'); }
     G.root.setEnabled(true);
     // "Ghost steps onto / walks toward ..." — the avatar actually moves there
     if (ghostActs && MOVE_RE.test(text)) {
@@ -3075,7 +3076,7 @@ NV.Level = (() => {
     p.pitch = 0; L.cine = null; L.cineOff = 0; L.look.dx = L.look.dy = 0;
     if (L.gunWas) L.gun.node.setEnabled(true);
     L.cam.position.set(p.x, EYE, p.z); L.cam.rotation.set(0, p.yaw, 0);
-    const h = document.getElementById('hud'); if (h) h.classList.remove('cine');
+    const h = document.getElementById('hud'); if (h) h.classList.remove('cine'); document.body.classList.remove('cine');
   }
   function cineUpdate(dt) {
     const C = L.cine, G = L.ghost, cam = L.cam; C.t += dt; C.orbit += dt * .07;
@@ -3135,6 +3136,7 @@ NV.Level = (() => {
     setTimeout(() => end(won ? { won: true, stats: s } : { died: true, stats: s }), won ? 400 : 900);
   }
   function end(res) {
+    document.body.classList.remove('cine');
     NV.Audio.engine(0);
     if (L.city && L.map && L.map.city) { const c = toCell(L.p.x, L.p.z); if (L.map.g[c.y] && L.map.g[c.y][c.x] === 0) zone = c; }
     const done = L.resolve; const sc = L.scene; L = null; hudCache = {};
