@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEON VEINS</title>
+<script src="https://cdn.babylonjs.com/babylon.js"></script>
+<script src="https://cdn.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
+<style>
+  html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
+  #rc { width: 100%; height: 100%; display: block; outline: none; touch-action: none; }
+  #hud { position: fixed; left: 12px; top: 10px; color: #19f0ff; font: 12px monospace; pointer-events: none; }
+</style>
+</head>
+<body>
+<canvas id="rc"></canvas>
+<div id="hud">Click to look · WASD to move · Esc to release mouse</div>
+<script>
+(async () => {
+  const canvas = document.getElementById('rc');
+  const hud = document.getElementById('hud');
+
+  // Engine boot: WebGPU when the browser supports it, WebGL2 otherwise.
+  let engine;
+  if (await BABYLON.WebGPUEngine.IsSupportedAsync) {
+    engine = new BABYLON.WebGPUEngine(canvas, { antialias: true });
+    await engine.initAsync();
+  } else {
+    engine = new BABYLON.Engine(canvas, true);
+  }
+  hud.textContent = (engine.isWebGPU ? 'WebGPU' : 'WebGL') + ' · ' + hud.textContent;
+
+  const scene = new BABYLON.Scene(engine);
+  scene.clearColor = new BABYLON.Color4(0.02, 0.01, 0.05, 1);
+  scene.gravity = new BABYLON.Vector3(0, -0.5, 0);
+  scene.collisionsEnabled = true;
+
+  new BABYLON.HemisphericLight('sun', new BABYLON.Vector3(0.3, 1, 0.2), scene);
+
+  const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: 200, height: 200 }, scene);
+  const groundMat = new BABYLON.StandardMaterial('groundMat', scene);
+  groundMat.diffuseColor = new BABYLON.Color3(0.5, 0.5, 0.5);
+  groundMat.specularColor = BABYLON.Color3.Black();
+  ground.material = groundMat;
+  ground.checkCollisions = true;
+
+  // First-person camera: WASD + mouse look.
+  const camera = new BABYLON.UniversalCamera('fp', new BABYLON.Vector3(0, 1.8, -10), scene);
+  camera.setTarget(new BABYLON.Vector3(0, 1.8, 0));
+  camera.attachControl(canvas, true);
+  camera.keysUp = [87];    // W
+  camera.keysDown = [83];  // S
+  camera.keysLeft = [65];  // A
+  camera.keysRight = [68]; // D
+  camera.speed = 0.35;
+  camera.angularSensibility = 2500;
+  camera.minZ = 0.05;
+  camera.applyGravity = true;
+  camera.checkCollisions = true;
+  camera.ellipsoid = new BABYLON.Vector3(0.4, 0.9, 0.4);
+
+  // Pointer lock for proper mouse look.
+  canvas.addEventListener('click', () => {
+    if (document.pointerLockElement !== canvas) canvas.requestPointerLock();
+  });
+
+  engine.runRenderLoop(() => scene.render());
+  window.addEventListener('resize', () => engine.resize());
+})();
+</script>
+</body>
+</html>
