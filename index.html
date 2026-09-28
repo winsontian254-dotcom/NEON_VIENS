@@ -379,6 +379,45 @@ NV.Audio = (() => {
   return A;
 })();
 
+
+/* =====================================================================
+   Voice acting — Web Speech API: a consistent, distinct voice per character
+   ===================================================================== */
+NV.Voice = (() => {
+  const synth = window.speechSynthesis;
+  let voices = [], busy = false, last = null;
+  const load = () => { if (!synth) return; const all = synth.getVoices(); voices = all.filter(v => /^en([-_]|$)/i.test(v.lang)); if (!voices.length) voices = all; };
+  if (synth) { load(); synth.onvoiceschanged = load; setInterval(() => { if (synth.speaking && !synth.paused) { synth.pause(); synth.resume(); } }, 9000); } // Chrome long-utterance workaround
+  const FEM = /female|woman|zira|samantha|victoria|karen|moira|tessa|fiona|susan|serena|allison|ava|kate|libby|sonia|hazel|aria|jenny|emma|amy|natasha|salli|joanna|kimberly|ivy|michelle|ana\b/i;
+  const MALE = /\bmale|\bman\b|david|mark|daniel|alex|fred|george|ryan|guy|brian|matthew|joey|justin|arthur|oliver|thomas|james|rishi|christopher|eric|roger|steffan/i;
+  const pool = f => { const fem = voices.filter(v => FEM.test(v.name)), male = voices.filter(v => MALE.test(v.name) && !FEM.test(v.name)); const p = f ? fem : male; return p.length ? p : voices; };
+  function profile(speaker) {
+    if (!speaker) return { f: 0, pitch: .92, rate: .97, key: '__narrator', narr: true };
+    const name = String(speaker).replace(/\s*\([^)]*\)\s*/g, ' ').trim(), info = NV.speakerInfo(name), h = U.hash(name), S = NV.State.get();
+    if (name === 'Ghost') { const v = S ? S.profile.voice : 1; return { f: v === 2, pitch: [.72, .95, 1.12][v], rate: 1.03, key: '__ghost' + v }; }
+    if (name === 'ASCENSION' || name === 'Ari') return { f: 1, pitch: 1.35, rate: .9, key: name };
+    if (info.kind === 'mask') return { f: 0, pitch: .3, rate: .9, key: name };
+    if (info.kind === 'ai' || info.kind === 'sys') return { f: h & 1, pitch: .5 + (h % 20) / 100, rate: 1.1, key: name };
+    return { f: !!info.f, pitch: .82 + (h % 38) / 100, rate: .94 + ((h >> 4) % 16) / 100, key: name };
+  }
+  const cast = {};
+  const voiceFor = pr => { if (!voices.length) return null; if (!cast[pr.key]) { const p = pool(pr.f); cast[pr.key] = p[U.hash(pr.key) % p.length]; } return cast[pr.key]; };
+  const clean = t => String(t).replace(/[“”"]/g, '').replace(/\s*—\s*/g, ', ').replace(/\[[^\]]*\]/g, '').replace(/¢/g, ' credits');
+  return {
+    speak(speaker, text) {
+      const set = NV.Settings.get(); if (!synth || !set.voice) return false;
+      const pr = profile(speaker); if (pr.narr && !set.narrator) return false;
+      synth.cancel();
+      const u = new SpeechSynthesisUtterance(clean(text)); const v = voiceFor(pr); if (v) u.voice = v;
+      u.pitch = U.clamp(pr.pitch, 0, 2); u.rate = U.clamp(pr.rate * (set.voiceRate || 1), .5, 2); u.volume = U.clamp((set.voiceVol == null ? .9 : set.voiceVol) * set.master, 0, 1);
+      busy = true; last = u; u.onend = u.onerror = () => { if (last === u) busy = false; };
+      synth.speak(u); return true;
+    },
+    stop() { if (synth && (synth.speaking || synth.pending)) synth.cancel(); busy = false; },
+    busy: () => busy,
+  };
+})();
+
 /* =====================================================================
    Input — keyboard / mouse / gamepad, with one-frame "pressed" edges
    ===================================================================== */
@@ -423,7 +462,7 @@ NV.In = (() => {
    ===================================================================== */
 NV.Settings = (() => {
   const KEY = 'nv_settings_v1';
-  const DEF = { master: .8, music: .6, sfx: .8, textSpeed: 2, sens: 1, fov: 80, shake: 1, scan: 1, showStats: 1, walk: 1, travel: 1, g: null, showFps: 0, invertY: 0 };
+  const DEF = { master: .8, music: .6, sfx: .8, textSpeed: 2, sens: 1, fov: 80, shake: 1, scan: 1, showStats: 1, voice: 1, voiceVol: .9, voiceRate: 1, narrator: 1, walk: 1, travel: 1, g: null, showFps: 0, invertY: 0 };
   let s = { ...DEF };
   try { Object.assign(s, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { }
   return {
@@ -741,6 +780,60 @@ NV.signAtlas = scene => {
 };
 NV.signUV = i => { const c = i % 2, r = Math.floor(i / 2) % 8; return new BABYLON.Vector4(c * .5, 1 - (r + 1) / 8, c * .5 + .5, 1 - r / 8); };
 
+
+/* =====================================================================
+   One New Avalon: a single city plan shared by the cutscene skyline and
+   the walkable open world (16x16 blocks, ~650 m, Helix Tower at the core)
+   ===================================================================== */
+NV.TILE = 4;
+NV.CityPlan = (() => {
+  let P = null;
+  function make() {
+    const r = U.rng(2098), N = 16, B = 10, W = N * B + 3, H = W;
+    const g = Array.from({ length: H }, (_, y) => Array.from({ length: W }, (_, x) => (x === 0 || y === 0 || x === W - 1 || y === H - 1) ? 1 : 0));
+    const buildings = [], plazas = [], inter = [], TB = [7, 8];
+    for (let by = 0; by < N; by++) for (let bx = 0; bx < N; bx++) {
+      const x0 = 3 + bx * B, y0 = 3 + by * B;
+      inter.push({ x: 1 + bx * B, y: 1 + by * B });
+      if (TB.includes(bx) && TB.includes(by)) continue; // Helix Tower plaza
+      const safe = bx === 6 && by === 8, dc = Math.hypot(bx - 7.5, by - 7.5);
+      if (safe || r() < .1) { plazas.push({ x: x0, y: y0, w: 8, h: 8, cx: x0 + 4, cy: y0 + 4, safe }); continue; }
+      const sp = r();
+      const rects = sp < .22 ? [[0, 0, 8, 8]] : sp < .44 ? [[0, 0, 8, 4], [0, 4, 8, 4]] : sp < .66 ? [[0, 0, 4, 8], [4, 0, 4, 8]] : sp < .85 ? [[0, 0, 4, 4], [4, 0, 4, 4], [0, 4, 4, 4], [4, 4, 4, 4]] : [[0, 0, 8, 3], [0, 3, 4, 5], [4, 3, 4, 5]];
+      rects.forEach(([rx, ry, rw, rh]) => {
+        let w = rw, h = rh;
+        if (rects.length > 1 && r() < .35) { if (rw >= rh) h--; else w--; }
+        const ht = 14 + Math.pow(r(), 1.6) * (55 + Math.max(0, 8 - dc) * 16) + Math.max(0, 6 - dc) * 12;
+        for (let yy = y0 + ry; yy < y0 + ry + h; yy++) for (let xx = x0 + rx; xx < x0 + rx + w; xx++) g[yy][xx] = 1;
+        buildings.push({ x: x0 + rx, y: y0 + ry, w, h, ht });
+      });
+    }
+    const tc = { cx: (3 + 7 * B + 3 + 8 * B + 8) / 2, cy: (3 + 7 * B + 3 + 8 * B + 8) / 2 };
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (Math.hypot(x + .5 - tc.cx, y + .5 - tc.cy) < 6) g[y][x] = 1; // tower footprint
+    const safe = plazas.find(p => p.safe);
+    plazas.sort((a, b) => (b.safe ? 1 : 0) - (a.safe ? 1 : 0));
+    return { W, H, g, N, B, buildings, plazas, inter, tower: tc, start: { x: safe.cx, y: safe.cy } };
+  }
+  return () => P || (P = make());
+})();
+/* the Helix Tower (same model in cutscenes and free roam) */
+NV.helixTower = (scene, tm, ringM, beaconM, x, z) => {
+  let y = 0; const secs = [], rings = [], out = [];
+  [[46, 34, 160], [34, 24, 220], [24, 14, 260], [14, 4, 180]].forEach(([b, t, h], i) => {
+    const c = BABYLON.MeshBuilder.CreateCylinder('tw' + i, { diameterBottom: b, diameterTop: t, height: h, tessellation: 16 }, scene); c.position.set(x, y + h / 2, z); secs.push(c);
+    for (let k = 0; k < 4; k++) { const d = U.lerp(b, t, (k + .5) / 4) + 1; rings.push(NV.M(d, d, d, x, y + h * (k + .5) / 4, z)); }
+    y += h;
+  });
+  const tower = BABYLON.Mesh.MergeMeshes(secs, true, true); tower.material = tm; out.push(tower);
+  const ring = BABYLON.MeshBuilder.CreateTorus('trings', { diameter: 1, thickness: .6 / 30, tessellation: 40 }, scene); ring.material = ringM; NV.thin(ring, rings); out.push(ring);
+  const lines = []; for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; lines.push(NV.M(.5, y, .5, x + Math.cos(a) * 17, y / 2, z + Math.sin(a) * 17)); }
+  const lb = BABYLON.MeshBuilder.CreateBox('tlines', { size: 1 }, scene); lb.material = ringM; NV.thin(lb, lines); out.push(lb);
+  const spire = BABYLON.MeshBuilder.CreateCylinder('spire', { diameterBottom: 3, diameterTop: 0, height: 160, tessellation: 8 }, scene); spire.position.set(x, y + 80, z); spire.material = ringM; out.push(spire);
+  const beacon = BABYLON.MeshBuilder.CreateSphere('beacon', { diameter: 8, segments: 8 }, scene); beacon.position.set(x, y + 165, z); beacon.material = beaconM; out.push(beacon);
+  out.forEach(m => m.isPickable = false);
+  return { meshes: out, beacon, top: y };
+};
+
 /* palette + theme detection from a scene heading */
 NV.DISTRICTS = [
   [/orbital|skyfall|satellite|orbit|space|shuttle|stars|launch|eclipse|beyond the veins/i, { a: '#9bd4ff', b: '#ffffff', fog: '#02030a', sky: ['#000000', '#02040c', '#0a1a3a'], th: 'space', d: 'ORBITAL ELEVATOR' }],
@@ -824,51 +917,37 @@ NV.Backdrop = (() => {
   function buildCity() {
     const root = new BABYLON.TransformNode('city', scene); const r = U.rng(9001);
     const statics = [];
-    const ground = BABYLON.MeshBuilder.CreateGround('cg', { width: 1400, height: 1400 }, scene);
+    const ground = BABYLON.MeshBuilder.CreateGround('cg', { width: 1600, height: 1600 }, scene);
     const gm = mat('cgm', '#07050c'); gm.specularColor = new BABYLON.Color3(.55, .45, .65); gm.specularPower = 64; ground.material = gm; own(root, ground); statics.push(ground);
-    // street light strips: 26 boxes -> one thin-instanced mesh
+    // the exact city plan the player walks in free roam, centred on the Helix Tower
+    const plan = NV.CityPlan(), T4 = NV.TILE, OX = plan.tower.cx * T4, OZ = plan.tower.cy * T4, HALF = plan.W * T4 / 2;
     const strip = mat('strip', '#000', '#ff2bd6'); D.strip = strip;
     const st = BABYLON.MeshBuilder.CreateBox('strips', { size: 1 }, scene); st.material = strip; own(root, st);
     const sm = [], rotY = BABYLON.Quaternion.RotationYawPitchRoll(Math.PI / 2, 0, 0);
-    for (let i = -6; i <= 6; i++) { sm.push(NV.M(1200, .1, .4, 0, .05, i * 48 + 12)); sm.push(NV.M(1200, .1, .4, i * 48 + 12, .05, 0, rotY)); }
+    for (let k = 0; k <= plan.N; k++) { const c = (2 + k * plan.B) * T4; sm.push(NV.M(plan.W * T4, .1, .4, HALF - OX, .05, c - OZ)); sm.push(NV.M(plan.W * T4, .1, .4, c - OX, .05, HALF - OZ, rotY)); }
     NV.thin(st, sm);
-    const classes = [{ h: [18, 40], v: 2 }, { h: [40, 90], v: 5 }, { h: [90, 190], v: 10 }];
-    classes.forEach((cl, ci) => {
+    const classes = [[0, 35, 3], [35, 70, 6], [70, 1e9, 10]], sets = [[], [], []];
+    const cls = h => h < 35 ? 0 : h < 70 ? 1 : 2;
+    plan.buildings.forEach(b => sets[cls(b.ht)].push(NV.M(b.w * T4 - .1, b.ht, b.h * T4 - .1, (b.x + b.w / 2) * T4 - OX, b.ht / 2, (b.y + b.h / 2) * T4 - OZ)));
+    // outer districts to the horizon (beyond the walkable map)
+    for (let gx = -15; gx <= 15; gx++) for (let gz = -15; gz <= 15; gz++) {
+      const x = gx * 48 + r() * 10 - 5, z = gz * 48 + r() * 10 - 5;
+      if (Math.abs(x) < HALF + 24 && Math.abs(z) < HALF + 24) continue;
+      if (r() < .3) continue;
+      const h = 20 + Math.pow(r(), 1.5) * 140, w = 12 + r() * 14, d = 12 + r() * 14;
+      sets[cls(h)].push(NV.M(w, h, d, x, h / 2, z));
+    }
+    classes.forEach(([, , v], ci) => {
       const m = mat('bm' + ci, '#000000'); m.emissiveTexture = NV.windowTex(scene, 100 + ci, '#ff2bd6', '#19f0ff');
-      m.emissiveTexture.vScale = cl.v; m.emissiveTexture.uScale = 1.5; m.emissiveTexture.level = .85; m.emissiveTexture.anisotropicFilteringLevel = 8; m.specularColor = new BABYLON.Color3(.2, .2, .3);
+      m.emissiveTexture.vScale = v; m.emissiveTexture.uScale = 2; m.emissiveTexture.level = .85; m.emissiveTexture.anisotropicFilteringLevel = 8; m.specularColor = new BABYLON.Color3(.2, .2, .3);
       const box = BABYLON.MeshBuilder.CreateBox('b' + ci, { size: 1 }, scene); box.material = m; own(root, box);
-      const mats = [];
-      for (let gx = -12; gx <= 12; gx++) for (let gz = -12; gz <= 12; gz++) {
-        const x = gx * 48 + r() * 10 - 5, z = gz * 48 + r() * 10 - 5, dist = Math.hypot(x, z);
-        if (dist < 60 || r() < .25) continue;
-        for (let k = 0; k < 2; k++) {
-          const near = U.clamp(1 - dist / 600, 0, 1);
-          const h = cl.h[0] + r() * (cl.h[1] - cl.h[0]);
-          if ((ci === 2 && r() > .25 + near * .6) || (ci === 0 && r() > .7)) continue;
-          if (ci === 1 && r() > .55) continue;
-          const w = 10 + r() * 12, d = 10 + r() * 12;
-          mats.push(NV.M(w, h, d, x + (k ? 1 : -1) * (6 + r() * 6), h / 2, z + (r() - .5) * 20));
-        }
-      }
-      NV.thin(box, mats); statics.push(box);
+      NV.thin(box, sets[ci]); statics.push(box);
     });
-    // rooftop beacons: tiny blinking-red boxes on tall towers (one draw call)
-    // Helix Tower: 4 tapered sections merged into one mesh
     const tm = mat('tower', '#05060c', null); tm.specularColor = new BABYLON.Color3(.6, .6, .8); tm.specularPower = 128;
     const ringM = mat('ringm', '#000', '#19f0ff'); D.ringM = ringM;
-    let y = 0; const secs = [], rings = [];
-    [[46, 34, 160], [34, 24, 220], [24, 14, 260], [14, 4, 180]].forEach(([b, t, h], i) => {
-      const c = BABYLON.MeshBuilder.CreateCylinder('tw' + i, { diameterBottom: b, diameterTop: t, height: h, tessellation: 16 }, scene); c.position.y = y + h / 2; secs.push(c);
-      for (let k = 0; k < 4; k++) { const d = U.lerp(b, t, (k + .5) / 4) + 1; rings.push(NV.M(d, d, d, 0, y + h * (k + .5) / 4, 0)); }
-      y += h;
-    });
-    const tower = BABYLON.Mesh.MergeMeshes(secs, true, true); tower.material = tm; own(root, tower); statics.push(tower);
-    const ring = BABYLON.MeshBuilder.CreateTorus('trings', { diameter: 1, thickness: .6 / 30, tessellation: 40 }, scene); ring.material = ringM; own(root, ring); NV.thin(ring, rings);
-    const lines = []; for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; lines.push(NV.M(.5, y, .5, Math.cos(a) * 17, y / 2, Math.sin(a) * 17)); }
-    const lb = BABYLON.MeshBuilder.CreateBox('tlines', { size: 1 }, scene); lb.material = ringM; own(root, lb); NV.thin(lb, lines);
-    const spire = BABYLON.MeshBuilder.CreateCylinder('spire', { diameterBottom: 3, diameterTop: 0, height: 160 }, scene); spire.position.y = y + 80; spire.material = ringM; own(root, spire);
-    D.beacon = BABYLON.MeshBuilder.CreateSphere('beacon', { diameter: 8, segments: 8 }, scene); D.beacon.position.y = y + 165; D.beacon.material = mat('bcn', '#000', '#ff3355'); own(root, D.beacon);
-    D.towerTop = y;
+    const HT = NV.helixTower(scene, tm, ringM, mat('bcn', '#000', '#ff3355'), 0, 0);
+    HT.meshes.forEach(m => own(root, m)); statics.push(HT.meshes[0]);
+    D.beacon = HT.beacon; D.towerTop = HT.top;
     // holo signs: shared atlas, merged into two meshes (one per colour)
     const atlas = NV.signAtlas(scene);
     const smA = mat('signA', '#000', '#ff2bd6'), smB = mat('signB', '#000', '#19f0ff');
@@ -1171,7 +1250,8 @@ NV.Level = (() => {
     const cyber = th === 'cyber', outdoor = th === 'city' || th === 'water' || th === 'space';
     scene.clearColor = BABYLON.Color4.FromColor3(C3(pal.fog).scale(.6), 1);
     scene.fogMode = BABYLON.Scene.FOGMODE_EXP2; scene.fogColor = C3(pal.fog); scene.fogDensity = cyber ? .012 : outdoor ? .014 : .03;
-    const cam = new BABYLON.UniversalCamera('fp', V3(0, EYE, 0), scene); cam.minZ = .05; cam.maxZ = q.draw; cam.fov = NV.Settings.get().fov * Math.PI / 180 * .75; cam.inputs.clear();
+    const cam = new BABYLON.UniversalCamera('fp', V3(0, EYE, 0), scene); cam.minZ = .05; cam.maxZ = q.draw;
+    if (op.m === 'free') { cam.maxZ = Math.max(q.draw, 1500); scene.fogDensity = .0035; } cam.fov = NV.Settings.get().fov * Math.PI / 180 * .75; cam.inputs.clear();
     const hemi = new BABYLON.HemisphericLight('h', V3(.2, 1, .1), scene); hemi.intensity = outdoor ? .75 : .6; hemi.diffuse = C3('#b8b0ff'); hemi.groundColor = C3(pal.fog);
     const plight = new BABYLON.PointLight('pl', V3(0, 2, 0), scene); plight.range = 16; plight.intensity = .7; plight.diffuse = C3(pal.b);
     const fx = NV.Quality.setup(scene, cam), glow = fx.glow || { addExcludedMesh() { } };
@@ -2018,29 +2098,10 @@ NV.Level = (() => {
      OPEN WORLD — New Avalon free roam (streets, gigs, vendor, shards)
      ===================================================================== */
   const SHARD_IDS = Array.from({ length: 24 }, (_, i) => i * 2 + 1);
-  function genCity(seed) {
-    const r = U.rng(seed), W = 66, H = 66, B = 8;
-    const g = Array.from({ length: H }, (_, y) => Array.from({ length: W }, (_, x) => (x === 0 || y === 0 || x === W - 1 || y === H - 1) ? 1 : 0));
-    const buildings = [], plazas = [], inter = [];
-    for (let by = 0; by < 8; by++) for (let bx = 0; bx < 8; bx++) {
-      const x0 = 3 + bx * B, y0 = 3 + by * B;
-      inter.push({ x: 1 + bx * B, y: 1 + by * B });
-      const safe = bx === 3 && by === 3;
-      if (safe || r() < .14) { plazas.push({ x: x0, y: y0, w: 6, h: 6, cx: x0 + 3, cy: y0 + 3, safe }); continue; }
-      const sp = r();
-      const rects = sp < .3 ? [[0, 0, 6, 6]] : sp < .6 ? [[0, 0, 6, 3], [0, 3, 6, 3]] : sp < .85 ? [[0, 0, 3, 6], [3, 0, 3, 6]] : [[0, 0, 3, 3], [3, 0, 3, 3], [0, 3, 3, 3], [3, 3, 3, 3]];
-      const core = Math.abs(bx - 3.5) + Math.abs(by - 3.5) < 3;
-      rects.forEach(([rx, ry, rw, rh]) => {
-        let w = rw, h = rh;
-        if (rects.length > 1 && r() < .35) { if (rw > rh) h--; else w--; } // alleys between towers
-        const ht = 12 + Math.pow(r(), 1.7) * 70 + (core ? 30 : 0);
-        for (let yy = y0 + ry; yy < y0 + ry + h; yy++) for (let xx = x0 + rx; xx < x0 + rx + w; xx++) g[yy][xx] = 1;
-        buildings.push({ x: x0 + rx, y: y0 + ry, w, h, ht });
-      });
-    }
-    const safe = plazas.find(p => p.safe);
-    plazas.sort((a, b) => (b.safe ? 1 : 0) - (a.safe ? 1 : 0));
-    return { W, H, g, rooms: plazas, start: { x: safe.cx, y: safe.cy }, exit: { x: safe.cx, y: safe.cy }, buildings, plazas, inter, city: true };
+  function genCity() {
+    const plan = NV.CityPlan();
+    const inter = plan.inter.filter(i => plan.g[i.y][i.x] === 0 && plan.g[i.y + 1][i.x + 1] === 0 && plan.g[i.y + 1][i.x] === 0 && plan.g[i.y][i.x + 1] === 0);
+    return { W: plan.W, H: plan.H, g: plan.g.map(row => row.slice()), rooms: plan.plazas, start: plan.start, exit: plan.start, buildings: plan.buildings, plazas: plan.plazas, inter, tower: plan.tower, B: plan.B, N: plan.N, city: true };
   }
 
   function cityMeshes(scene, statics, pal, faces) {
@@ -2062,8 +2123,10 @@ NV.Level = (() => {
       const side = Math.floor(Math.random() * 4), dx = [0, 0, -1, 1][side], dy = [-1, 1, 0, 0][side];
       faces.push({ x: dx ? (dx < 0 ? b.x : b.x + b.w - 1) : b.x + Math.floor(b.w / 2), y: dy ? (dy < 0 ? b.y : b.y + b.h - 1) : b.y + Math.floor(b.h / 2), dx, dy });
     });
+    const tw = NV.helixTower(scene, mat(scene, 'towerm', '#05060c'), mat(scene, 'ringm2', '#000', '#19f0ff'), mat(scene, 'bcnm', '#000', '#ff3355'), L.map.tower.cx * TILE, L.map.tower.cy * TILE);
+    tw.meshes.forEach(m => statics.push(m));
     L.map.inter.forEach(i => { const x = (i.x + 1) * TILE, z = (i.y + 1) * TILE; pole.push(NV.M(.18, 6, .18, x + 3.6, 3, z + 3.6)); lamp.push(NV.M(1.4, .15, .5, x + 3.1, 6, z + 3.6)); });
-    for (let k = 0; k < 8; k++) { const c = (2 + k * 8) * TILE; for (let t = 2; t < L.map.W * TILE - 2; t += 5) { dash.push(NV.M(.12, .03, 2, c, .02, t), NV.M(2, .03, .12, t, .02, c)); } }
+    for (let k = 0; k <= L.map.N; k++) { const c = (2 + k * L.map.B) * TILE; for (let t = 2; t < L.map.W * TILE - 2; t += 6) { dash.push(NV.M(.12, .03, 2, c, .02, t), NV.M(2, .03, .12, t, .02, c)); } }
     const mk = (name, m, arr) => { if (!arr.length) return; const b = BABYLON.MeshBuilder.CreateBox(name, { size: 1 }, scene); b.material = m; NV.thin(b, arr); statics.push(b); };
     mk('ftrim', mat(scene, 'ftm', '#000', pal.a), trim);
     mk('ant', mat(scene, 'antm', '#000', '#ff3355'), ant);
@@ -2098,11 +2161,13 @@ NV.Level = (() => {
     const streets = [];
     for (let y = 1; y < map.H - 1; y++) for (let x = 1; x < map.W - 1; x++) if (map.g[y][x] === 0) streets.push({ x, y });
     const spot = (minD) => { for (let t = 0; t < 50; t++) { const c = streets[Math.floor(r() * streets.length)], p = cellC(c.x, c.y); if (Math.hypot(p.x - st.x, p.z - st.z) > minD) return p; } return cellC(streets[0].x, streets[0].y); };
+    const spotNear = (lo, hi) => { for (let t = 0; t < 80; t++) { const c = streets[Math.floor(r() * streets.length)], q = cellC(c.x, c.y), d = Math.hypot(q.x - L.p.x, q.z - L.p.z); if (d > lo && d < hi) return q; } return spot(4); };
+    L.spotNear = spotNear;
     SHARD_IDS.forEach((id, k) => { if (S.shards.includes(id)) return; const p = spot(15); const m = NV_DATA.missions[id]; addPickup('lore', p.x, p.z, m ? m.title : ''); L.pickups[L.pickups.length - 1].sid = id; });
     for (let i = 0; i < 6; i++) { const p = spot(10); addPickup('med', p.x, p.z); }
     // Helix street patrols (sleep when far away to save CPU)
     const pts = map.inter.map(interC).filter(c => Math.hypot(c.x - st.x, c.z - st.z) > 34);
-    const nP = 10 + Math.min(8, L.act * 2);
+    const nP = 24 + Math.min(10, L.act * 2);
     for (let i = 0; i < nP; i++) {
       const a = pts[Math.floor(r() * pts.length)], b = pts[Math.floor(r() * pts.length)];
       const v = r(), kind = v < .12 + L.act * .03 ? 'heavy' : v < .45 ? 'drone' : 'guard';
@@ -2116,7 +2181,7 @@ NV.Level = (() => {
     const shared = { head: Pp(limbShape('head', L.scene), skin), hand: Pp(limbShape('hand', L.scene), skin), leg: Pp(limbShape('leg', L.scene), pants), foot: Pp(limbShape('foot', L.scene), pants) };
     const strip = Pp(BABYLON.MeshBuilder.CreateBox('pds', { width: .05, height: .4, depth: .05 }, L.scene), mat(L.scene, 'pdsm', '#000', L.palette.a));
     for (let i = 0; i < NV.Quality.get().peds; i++) {
-      const p = spot(4), root = new BABYLON.TransformNode('ped', L.scene);
+      const p = spotNear(8, 110), root = new BABYLON.TransformNode('ped', L.scene);
       const rig = rigBuild(root, k => (k === 'torso' ? torsos[i % 4] : k === 'arm' ? arms[i % 4] : shared[k]).createInstance('i'), false);
       inst(strip, root, .16, 1.3, .22);
       const pd = { root, rig, x: p.x + (r() - .5) * 2, z: p.z + (r() - .5) * 2, sp: 1.1 + r() * .9, ph: r() * 6 };
@@ -2136,6 +2201,7 @@ NV.Level = (() => {
     L.peds.forEach(pd => {
       const dx = pd.tx - pd.x, dz = pd.tz - pd.z, d = Math.hypot(dx, dz);
       const far = Math.abs(pd.x - p.x) + Math.abs(pd.z - p.z) > 110;
+      if (Math.abs(pd.x - p.x) + Math.abs(pd.z - p.z) > 180) { const q = L.spotNear(50, 110); pd.x = q.x; pd.z = q.z; pedTarget(pd); }
       if (far) return;
       const scared = panic && Math.hypot(pd.x - p.x, pd.z - p.z) < 30;
       if (d < .3) pedTarget(pd);
@@ -2615,6 +2681,7 @@ NV.UI = (() => {
     const S = NV.Settings;
     const rows = [
       ['master', 'Master volume', 'range', 0, 1, .1], ['music', 'Music volume', 'range', 0, 1, .1], ['sfx', 'Effects volume', 'range', 0, 1, .1],
+      ['voice', 'Voice acting', 'bool'], ['voiceVol', 'Voice volume', 'range', 0, 1, .1], ['voiceRate', 'Speech speed', 'range', .7, 1.5, .05], ['narrator', 'Narrator voice', 'bool'],
       ['textSpeed', 'Text speed', 'enum', ['Slow', 'Normal', 'Fast', 'Instant'], 0], ['sens', 'Mouse sensitivity', 'range', .3, 3, .1],
       ['fov', 'Field of view', 'range', 65, 110, 5], ['invertY', 'Invert Y axis', 'bool'], ['shake', 'Screen shake', 'bool'],
       ['scan', 'Scanline filter', 'bool'], ['showStats', 'Show world-state changes', 'bool'], ['walk', 'Walkable story scenes', 'bool'], ['travel', 'Travel to missions in the city', 'bool'], ['showFps', 'Show FPS', 'bool'], ['gfxmenu', 'Graphics settings', 'open'],
@@ -2778,8 +2845,10 @@ NV.UI = (() => {
     } else { s.who.textContent = ''; s.pitch = 0; }
     s.txt.textContent = ''; s.cont.classList.add('hidden');
     let shown = 0, t = 0, doneT = 0, finished = false;
+    const skippingNow = s.skip || NV.In.key('ControlLeft') || NV.In.key('ControlRight');
+    const voiced = !skippingNow && NV.Voice.speak(speaker, text);
     const full = () => { shown = text.length; s.txt.textContent = text; s.cont.classList.remove('hidden'); };
-    const fin = v => { UI.pop(h); s.dlg.onclick = null; res(v); };
+    const fin = v => { UI.pop(h); s.dlg.onclick = null; NV.Voice.stop(); res(v); };
     s.dlg.onclick = () => { if (shown < text.length) full(); else fin(); };
     const h = UI.push({
       async tick(dt) {
@@ -2801,7 +2870,7 @@ NV.UI = (() => {
         }
         doneT += dt;
         if (I.confirm()) { finished = true; fin(); return; }
-        if (s.auto && doneT > 1.2 + text.length * .03) { finished = true; fin(); }
+        if (s.auto && (voiced ? !NV.Voice.busy() && doneT > .4 : doneT > 1.2 + text.length * .03)) { finished = true; fin(); }
       },
     });
   });
