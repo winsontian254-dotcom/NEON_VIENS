@@ -2922,11 +2922,12 @@ NV.Level = (() => {
     M.inter.forEach(it => {
       const i = Math.round((it.x - 1) / BB), j = Math.round((it.y - 1) / BB), xL = it.x * TILE, xR = (it.x + 2) * TILE, zT = it.y * TILE, zB = (it.y + 2) * TILE, cx = (xL + xR) / 2, cz = (zT + zB) / 2;
       const open = (x, z) => !solid(x, z);
+      if ([[i - 1, j - 1], [i, j - 1], [i - 1, j], [i, j]].some(([a, b]) => M.TB.includes(a) && M.TB.includes(b))) return; // the tower plaza is one open square
       const rot90 = BABYLON.Quaternion.RotationYawPitchRoll(Math.PI / 2, 0, 0);
-      if (j > 0 && open(cx, zT - 2)) { zebra.push(NV.M(8, .02, 3.2, cx, .03, zT - 2, null)); stopl.push(NV.M(4, .03, .4, cx + 2, .03, zT - 4.1)); }
-      if (open(cx, zB + 2)) { zebra.push(NV.M(8, .02, 3.2, cx, .03, zB + 2, null)); stopl.push(NV.M(4, .03, .4, cx - 2, .03, zB + 4.1)); }
-      if (i > 0 && open(xL - 2, cz)) { zebra.push(NV.M(8, .02, 3.2, xL - 2, .03, cz, rot90)); stopl.push(NV.M(.4, .03, 4, xL - 4.1, .03, cz - 2)); }
-      if (open(xR + 2, cz)) { zebra.push(NV.M(8, .02, 3.2, xR + 2, .03, cz, rot90)); stopl.push(NV.M(.4, .03, 4, xR + 4.1, .03, cz + 2)); }
+      if (j > 0 && open(cx, zT - 2)) { zebra.push(NV.M(3.2, .02, 8, cx, .03, zT - 2, rot90)); stopl.push(NV.M(4, .03, .4, cx + 2, .03, zT - 4.1)); }
+      if (open(cx, zB + 2)) { zebra.push(NV.M(3.2, .02, 8, cx, .03, zB + 2, rot90)); stopl.push(NV.M(4, .03, .4, cx - 2, .03, zB + 4.1)); }
+      if (i > 0 && open(xL - 2, cz)) { zebra.push(NV.M(3.2, .02, 8, xL - 2, .03, cz, null)); stopl.push(NV.M(.4, .03, 4, xL - 4.1, .03, cz - 2)); }
+      if (open(xR + 2, cz)) { zebra.push(NV.M(3.2, .02, 8, xR + 2, .03, cz, null)); stopl.push(NV.M(.4, .03, 4, xR + 4.1, .03, cz + 2)); }
       // corners: NW + SE poles signal traffic on the z streets, NE + SW poles the x streets
       [[xL - 1, zT - 1, 'z'], [xR + 1, zB + 1, 'z'], [xR + 1, zT - 1, 'x'], [xL - 1, zB + 1, 'x']].forEach(([x, z, ax]) => {
         if (!open(x, z)) return;
