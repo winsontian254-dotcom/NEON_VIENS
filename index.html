@@ -664,15 +664,18 @@ NV.tex = (scene, w, h, draw, name, noMip) => {
   const g = t.getContext(); draw(g, w, h); t.update(); return t;
 };
 NV.windowTex = (scene, seed, hueA, hueB) => NV.tex(scene, 128, 256, (g, w, h) => {
-  const r = U.rng(seed); g.fillStyle = '#040208'; g.fillRect(0, 0, w, h);
-  for (let y = 4; y < h; y += 8) for (let x = 3; x < w; x += 8) {
-    const v = r(); if (v < .5) continue;
-    g.fillStyle = v > .96 ? hueA : v > .92 ? hueB : v > .8 ? '#ffe2a0' : v > .7 ? '#a8c0ff' : '#140f24';
-    g.fillRect(x, y, 5, 4);
+  const r = U.rng(seed); g.fillStyle = '#05030a'; g.fillRect(0, 0, w, h);
+  // whole floors light up together so towers read as lit from far away (mipmaps average to a warm glow)
+  for (let y = 1; y < h; y += 8) {
+    const floorLit = r() < .45, tint = r();
+    for (let x = 1; x < w; x += 8) {
+      const v = r(); if (!floorLit && v < .75) continue; if (v < .25) continue;
+      g.fillStyle = v > .93 ? hueA : v > .86 ? hueB : tint > .62 ? '#ffcf80' : tint > .25 ? '#7fa8ff' : '#ff7ad0';
+      g.globalAlpha = .45 + v * .5; g.fillRect(x, y, 6, 5); g.globalAlpha = 1;
+    }
   }
-  // floor bands + roof edge highlight give the towers more structure
-  g.fillStyle = 'rgba(255,255,255,.035)'; for (let y = 0; y < h; y += 32) g.fillRect(0, y, w, 1);
-}, 'win' + seed, true);
+  g.fillStyle = 'rgba(0,0,0,.6)'; for (let y = 0; y < h; y += 64) g.fillRect(0, y, w, 3);
+}, 'win' + seed);
 /* one texture atlas for every holo sign (16 cells of 512x128) -> signs merge into one draw call */
 NV.SIGN_WORDS = ['HELIX', 'O₂ PLANS', 'MEMORY INSURANCE', 'TOMORROW IS TESTED', 'NEON', 'OPEN 24H', 'SUBSCRIBE TO BREATHE', 'AVALON', 'SYNTH', 'RENT A LIFE', 'NO SIGNAL', 'KEYBEARER?', '新アヴァロン', 'CLINIC', 'NOODLES', 'EXIT C'];
 NV.signAtlas = scene => {
@@ -783,7 +786,7 @@ NV.Backdrop = (() => {
     const classes = [{ h: [18, 40], v: 2 }, { h: [40, 90], v: 5 }, { h: [90, 190], v: 10 }];
     classes.forEach((cl, ci) => {
       const m = mat('bm' + ci, '#000000'); m.emissiveTexture = NV.windowTex(scene, 100 + ci, '#ff2bd6', '#19f0ff');
-      m.emissiveTexture.vScale = cl.v; m.emissiveTexture.uScale = 1.5; m.specularColor = new BABYLON.Color3(.2, .2, .3);
+      m.emissiveTexture.vScale = cl.v; m.emissiveTexture.uScale = 1.5; m.emissiveTexture.level = .85; m.emissiveTexture.anisotropicFilteringLevel = 8; m.specularColor = new BABYLON.Color3(.2, .2, .3);
       const box = BABYLON.MeshBuilder.CreateBox('b' + ci, { size: 1 }, scene); box.material = m; own(root, box);
       const mats = [];
       for (let gx = -12; gx <= 12; gx++) for (let gz = -12; gz <= 12; gz++) {
@@ -966,7 +969,7 @@ NV.Backdrop = (() => {
     Object.entries(groups).forEach(([k, g]) => g.setEnabled(k === th || (th === 'water' && k === 'city')));
     theme = th;
     scene.fogColor = C3(pal.fog); scene.clearColor = BABYLON.Color4.FromColor3(C3(pal.fog).scale(.5), 1);
-    scene.fogDensity = th === 'space' ? 0 : th === 'cyber' ? .004 : th === 'tunnel' || th === 'interior' ? .018 : .0055;
+    scene.fogDensity = th === 'space' ? 0 : th === 'cyber' ? .003 : th === 'tunnel' || th === 'interior' ? .016 : .0022;
     if (prev !== pal) { if (skyMat.emissiveTexture) skyMat.emissiveTexture.dispose(); skyMat.emissiveTexture = NV.skyTex(scene, pal); }
     sky.setEnabled(th !== 'space' && th !== 'tunnel' && th !== 'interior');
     const a = C3(pal.a), b = C3(pal.b);
