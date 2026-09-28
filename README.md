@@ -62,6 +62,9 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 | Interact / Takedown / Hack | `E` | X |
 | EMP pulse | `Q` | Y |
 | Fast travel (free roam) | `T` | Select |
+| Enter / exit vehicle (free roam) | `F` | X |
+| Drive: throttle / reverse, steer | `W`/`S`, `A`/`D` | RT / LT, left stick |
+| Drive: handbrake, boost, horn | `Space`, `Shift`, `H` | A, LB, R3 |
 | Pause | `Esc` | Start |
 | Advance dialogue | `Space` / click | A |
 | Choose option | `1-4` / click | dpad + A |
