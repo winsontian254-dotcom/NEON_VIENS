@@ -162,6 +162,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#05030b;color:var(--
 .credits .roll{position:absolute;left:0;right:0;text-align:center;top:100%}
 .credits h2{font-family:var(--fh);letter-spacing:.3em;font-size:14px;color:var(--pink);margin:44px 0 10px}
 .credits p{font-size:20px;margin:4px 0}
+#fps{position:fixed;left:8px;bottom:6px;z-index:70;font-family:var(--fm);font-size:11px;letter-spacing:.1em;color:#3dffa8;background:rgba(0,0,0,.55);padding:2px 7px;pointer-events:none;display:none}
+body.lowfx .panel{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(10,6,24,.94)}
+body.lowfx .logo{animation:none}
+body.lowfx .toast,body.lowfx .choice.focus,body.lowfx .door.focus{box-shadow:none}
 #loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;background:#05030b;z-index:60;font-family:var(--fm);letter-spacing:.3em;color:var(--cyan);font-size:13px;gap:16px;transition:opacity .6s}
 #loading .lb{width:240px;height:3px;background:rgba(255,255,255,.1);overflow:hidden}
 #loading .lb i{display:block;height:100%;width:40%;background:var(--pink);animation:ld 1s infinite ease-in-out}
@@ -416,7 +420,7 @@ NV.In = (() => {
    ===================================================================== */
 NV.Settings = (() => {
   const KEY = 'nv_settings_v1';
-  const DEF = { master: .8, music: .6, sfx: .8, textSpeed: 2, sens: 1, fov: 80, shake: 1, scan: 1, showStats: 1, quality: 1, invertY: 0 };
+  const DEF = { master: .8, music: .6, sfx: .8, textSpeed: 2, sens: 1, fov: 80, shake: 1, scan: 1, showStats: 1, gfx: 0, dynRes: 1, showFps: 0, invertY: 0 };
   let s = { ...DEF };
   try { Object.assign(s, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { }
   return {
@@ -544,72 +548,173 @@ NV.Cond = (() => {
 /* =====================================================================
    Graphics — engine boot + shared helpers
    ===================================================================== */
-NV.G = { engine: null, canvas: null, active: null };
-const B = () => window.BABYLON;
+NV.G = { engine: null, canvas: null, active: null, scale: 1 };
 const C3 = h => BABYLON.Color3.FromHexString(h);
 const V3 = (x, y, z) => new BABYLON.Vector3(x, y, z);
+
+/* =====================================================================
+   Quality tiers — auto-detects weak hardware (Chromebooks, iGPUs, phones)
+   ===================================================================== */
+NV.Quality = (() => {
+  const dpr = Math.min(1.5, devicePixelRatio || 1);
+  const P = {
+    low: { key: 'low', name: 'Low', scale: 1.6, min: 1.3, max: 2.6, glow: 0, fx: 0, aa: false, rain: 450, lrain: 260, sparks: 120, beams: 0, cones: 0, signs: 1, detail: 0 },
+    medium: { key: 'medium', name: 'Medium', scale: 1.15, min: 1, max: 2.2, glow: 1, glowRatio: .25, kernel: 16, fx: 1, aa: false, rain: 1500, lrain: 800, sparks: 300, beams: 1, cones: 1, signs: 1, detail: 1 },
+    high: { key: 'high', name: 'High', scale: 1 / dpr, min: 1 / dpr, max: 1.7, glow: 1, glowRatio: .5, kernel: 32, fx: 2, aa: true, rain: 3600, lrain: 1800, sparks: 600, beams: 1, cones: 1, signs: 1, detail: 2 },
+  };
+  let tier = null, gpu = '';
+  function detect() {
+    const ua = navigator.userAgent;
+    let weak = /CrOS|Android|iPhone|iPad|Mobile/i.test(ua) || (navigator.hardwareConcurrency || 4) <= 4 || (navigator.deviceMemory || 8) <= 4;
+    try {
+      const gl = document.createElement('canvas').getContext('webgl');
+      const ext = gl && gl.getExtension('WEBGL_debug_renderer_info');
+      gpu = ext ? String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)) : '';
+      if (/SwiftShader|llvmpipe|Software|Mali|PowerVR|Adreno [1-5]|HD Graphics|UHD Graphics [0-9]{3}\b/i.test(gpu)) weak = true;
+      if (/RTX|GTX|Radeon RX|Apple M[1-9]|Arc/i.test(gpu)) weak = false;
+    } catch (e) { }
+    return weak ? 'low' : 'medium';
+  }
+  const Q = {
+    get() { if (!tier) { const g = NV.Settings.get().gfx | 0; tier = g === 1 ? 'low' : g === 2 ? 'medium' : g === 3 ? 'high' : detect(); document.body.classList.toggle('lowfx', tier === 'low'); } return P[tier]; },
+    reset() { tier = null; return Q.get(); },
+    get gpu() { return gpu; },
+    /* per-scene setup: cheap in-shader colour grading + optional glow/post */
+    setup(scene, cam) {
+      const q = Q.get();
+      scene.skipPointerMovePicking = true; scene.skipPointerDownPicking = true; scene.skipPointerUpPicking = true;
+      scene.constantlyUpdateMeshUnderPointer = false;
+      const ip = scene.imageProcessingConfiguration;
+      ip.contrast = 1.25; ip.exposure = 1.1; ip.vignetteEnabled = true; ip.vignetteWeight = 2.2; ip.vignetteStretch = .3; ip.vignetteColor = new BABYLON.Color4(0, 0, 0, 0);
+      ip.toneMappingEnabled = q.detail >= 2; ip.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
+      const out = { glow: null, post: null };
+      if (q.glow) { out.glow = new BABYLON.GlowLayer('glow', scene, { mainTextureRatio: q.glowRatio, blurKernelSize: q.kernel, mainTextureSamples: 1 }); out.glow.intensity = q.detail >= 2 ? .9 : 1.1; }
+      try {
+        if (q.fx === 1) out.post = new BABYLON.FxaaPostProcess('fxaa', 1, cam);
+        if (q.fx === 2) {
+          const pp = new BABYLON.DefaultRenderingPipeline('pp', false, scene, [cam]);
+          pp.imageProcessingEnabled = false; pp.fxaaEnabled = true;
+          pp.chromaticAberrationEnabled = true; pp.chromaticAberration.aberrationAmount = 5;
+          pp.grainEnabled = true; pp.grain.intensity = 5; pp.grain.animated = true;
+          out.post = pp;
+        }
+      } catch (e) { console.warn('post-processing unavailable', e); }
+      return out;
+    },
+    teardown(fx) { if (!fx) return; if (fx.glow) fx.glow.dispose(); if (fx.post) fx.post.dispose(); },
+  };
+  return Q;
+})();
+
+/* mark static meshes so Babylon skips per-frame matrix/bounds work */
+NV.freeze = (meshes, keepMats) => meshes.forEach(m => {
+  m.isPickable = false; m.doNotSyncBoundingInfo = true; m.freezeWorldMatrix();
+  if (!keepMats && m.material && m.material.freeze) m.material.freeze();
+});
+NV.thin = (mesh, mats) => {
+  const buf = new Float32Array(mats.length * 16); mats.forEach((m4, i) => m4.copyToArray(buf, i * 16));
+  mesh.thinInstanceSetBuffer('matrix', buf, 16, true); mesh.thinInstanceRefreshBoundingInfo(false); mesh.isPickable = false; return mesh;
+};
+NV.M = (sx, sy, sz, x, y, z, q) => BABYLON.Matrix.Compose(V3(sx, sy, sz), q || BABYLON.Quaternion.Identity(), V3(x, y, z));
 
 NV.bootEngine = async () => {
   const canvas = document.getElementById('rc');
   NV.G.canvas = canvas;
+  const q = NV.Quality.get();
   let engine = null;
   try {
     if (await BABYLON.WebGPUEngine.IsSupportedAsync) {
-      engine = new BABYLON.WebGPUEngine(canvas, { antialias: true, stencil: true });
+      engine = new BABYLON.WebGPUEngine(canvas, { antialias: q.aa, stencil: true, powerPreference: 'high-performance' });
       await engine.initAsync();
     }
   } catch (e) { console.warn('WebGPU init failed, falling back to WebGL', e); engine = null; }
-  if (!engine) engine = new BABYLON.Engine(canvas, true, { stencil: true, preserveDrawingBuffer: false }, true);
+  if (!engine) engine = new BABYLON.Engine(canvas, q.aa, { stencil: true, powerPreference: 'high-performance', preserveDrawingBuffer: false, doNotHandleContextLost: false }, false);
   NV.G.engine = engine;
-  engine.setHardwareScalingLevel(NV.Settings.get().quality ? 1 / Math.min(1.5, devicePixelRatio || 1) : 1.5);
+  engine.enableOfflineSupport = false;
+  NV.G.scale = q.scale; engine.setHardwareScalingLevel(NV.G.scale);
   addEventListener('resize', () => engine.resize());
-  let last = performance.now();
+  const fpsEl = U.el('div', '', ''); fpsEl.id = 'fps'; document.body.appendChild(fpsEl);
+  let last = performance.now(), acc = 0, frames = 0, settle = 0;
   engine.runRenderLoop(() => {
-    const now = performance.now(), dt = Math.min(.05, (now - last) / 1000); last = now;
+    const now = performance.now(), raw = (now - last) / 1000, dt = Math.min(.05, raw); last = now;
     NV.In.poll();
     if (NV.tick) NV.tick(dt);
     if (NV.G.active) NV.G.active.render();
     NV.In.endFrame();
+    // dynamic resolution: keep ~50-60 fps by trading pixels for frame time
+    acc += raw; frames++;
+    if (acc >= 1.2) {
+      const fps = frames / acc, S = NV.Settings.get(), Q = NV.Quality.get(); acc = 0; frames = 0;
+      if (S.dynRes && --settle < 0) {
+        let s = NV.G.scale;
+        if (fps < 30) s += .3; else if (fps < 47) s += .12; else if (fps > 58 && s > Q.min) s -= .06;
+        s = U.clamp(s, Q.min, Q.max);
+        if (Math.abs(s - NV.G.scale) > .01) { NV.G.scale = s; engine.setHardwareScalingLevel(s); settle = 1; }
+      }
+      fpsEl.style.display = S.showFps ? 'block' : 'none';
+      if (S.showFps) fpsEl.textContent = Math.round(fps) + ' FPS · ' + Q.name.toUpperCase() + ' · ' + Math.round(100 / NV.G.scale) + '% RES';
+    }
   });
   return engine;
 };
 
 /* canvas-texture helpers */
-NV.tex = (scene, w, h, draw, name) => {
-  const t = new BABYLON.DynamicTexture(name || 'dt' + Math.random(), { width: w, height: h }, scene, true);
+NV.tex = (scene, w, h, draw, name, noMip) => {
+  const t = new BABYLON.DynamicTexture(name || 'dt' + Math.random(), { width: w, height: h }, scene, !noMip, noMip ? BABYLON.Texture.BILINEAR_SAMPLINGMODE : BABYLON.Texture.TRILINEAR_SAMPLINGMODE);
   const g = t.getContext(); draw(g, w, h); t.update(); return t;
 };
 NV.windowTex = (scene, seed, hueA, hueB) => NV.tex(scene, 128, 256, (g, w, h) => {
   const r = U.rng(seed); g.fillStyle = '#040208'; g.fillRect(0, 0, w, h);
   for (let y = 4; y < h; y += 8) for (let x = 3; x < w; x += 8) {
     const v = r(); if (v < .5) continue;
-    g.fillStyle = v > .96 ? hueA : v > .92 ? hueB : v > .8 ? '#ffe7b0' : v > .7 ? '#9fb8ff' : '#2a2440';
+    g.fillStyle = v > .96 ? hueA : v > .92 ? hueB : v > .8 ? '#ffe2a0' : v > .7 ? '#a8c0ff' : '#140f24';
     g.fillRect(x, y, 5, 4);
   }
-}, 'win' + seed);
+  // floor bands + roof edge highlight give the towers more structure
+  g.fillStyle = 'rgba(255,255,255,.035)'; for (let y = 0; y < h; y += 32) g.fillRect(0, y, w, 1);
+}, 'win' + seed, true);
+/* one texture atlas for every holo sign (16 cells of 512x128) -> signs merge into one draw call */
+NV.SIGN_WORDS = ['HELIX', 'O₂ PLANS', 'MEMORY INSURANCE', 'TOMORROW IS TESTED', 'NEON', 'OPEN 24H', 'SUBSCRIBE TO BREATHE', 'AVALON', 'SYNTH', 'RENT A LIFE', 'NO SIGNAL', 'KEYBEARER?', '新アヴァロン', 'CLINIC', 'NOODLES', 'EXIT C'];
+NV.signAtlas = scene => {
+  const t = NV.tex(scene, 1024, 1024, (g, w, h) => {
+    g.clearRect(0, 0, w, h);
+    NV.SIGN_WORDS.forEach((word, i) => {
+      const cx = (i % 2) * 512, cy = Math.floor(i / 2) * 128;
+      g.strokeStyle = '#fff'; g.lineWidth = 5; g.strokeRect(cx + 8, cy + 8, 496, 112);
+      g.font = 'bold ' + (word.length > 12 ? 44 : 66) + 'px Orbitron, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#fff';
+      g.fillText(word, cx + 256, cy + 66, 470);
+    });
+  }, 'signatlas');
+  t.hasAlpha = true; return t;
+};
+NV.signUV = i => { const c = i % 2, r = Math.floor(i / 2) % 8; return new BABYLON.Vector4(c * .5, 1 - (r + 1) / 8, c * .5 + .5, 1 - r / 8); };
 
 /* palette + theme detection from a scene heading */
 NV.DISTRICTS = [
-  [/orbital|skyfall|satellite|orbit|space|shuttle|stars|launch|eclipse|beyond the veins/i, { a: '#9bd4ff', b: '#ffffff', fog: '#02030a', th: 'space', d: 'ORBITAL ELEVATOR' }],
-  [/quantum|core|cyber|digital|network|firewall|zero space|memory|dream|server|simulation|mind|ari.s room|your name|architectures|conversations|final choice|assembly|dead|black ice|ascension|garden of|constellation|last request|goodbye|relay space|virtual|archive/i, { a: '#9b5cff', b: '#19f0ff', fog: '#08031a', th: 'cyber', d: 'QUANTUM DEPTHS' }],
-  [/rust harbor|harbour|harbor|port |dock|pier|selene|ocean|sea|flood|drown|water|tide|canal/i, { a: '#ff7a2b', b: '#19c8ff', fog: '#06121a', th: 'water', d: 'RUST HARBOR' }],
-  [/metro|sector 9|station|platform|tunnel|rail|train|junction|cable tower|switchback|relay chamber|carriage/i, { a: '#ffb238', b: '#ff5a1f', fog: '#140b04', th: 'tunnel', d: 'METRO SECTOR 9' }],
-  [/underdeep|depths|fault|cavern|pipes|sewer|underground|beneath/i, { a: '#19f0c8', b: '#3d6bff', fog: '#021010', th: 'tunnel', d: 'THE UNDERDEEP' }],
-  [/hive|factory|plant|industrial|foundry|forge|warehouse/i, { a: '#ffd23d', b: '#ff3b3b', fog: '#140e04', th: 'interior', d: 'THE HIVE' }],
-  [/sky garden|gardens|luxury|gala|penthouse|estate/i, { a: '#3dffa8', b: '#f4e6b0', fog: '#04120c', th: 'city', d: 'SKY GARDENS' }],
-  [/helix|arcology|level 88|boardroom|office|executive|lab|clinic|hospital|vault|control room|corporate|tribunal|hall|room|apartment|den|corridor|chamber|studio|interior|ward|tier/i, { a: '#e8f4ff', b: '#4d7dff', fog: '#070b18', th: 'interior', d: 'HELIX ARCOLOGY' }],
-  [/black zone|quarantine|ruin|collapse|fire|siege|burn|war/i, { a: '#ff3355', b: '#ff9a3d', fog: '#180405', th: 'city', d: 'THE BLACK ZONE' }],
+  [/orbital|skyfall|satellite|orbit|space|shuttle|stars|launch|eclipse|beyond the veins/i, { a: '#9bd4ff', b: '#ffffff', fog: '#02030a', sky: ['#000000', '#02040c', '#0a1a3a'], th: 'space', d: 'ORBITAL ELEVATOR' }],
+  [/quantum|core|cyber|digital|network|firewall|zero space|memory|dream|server|simulation|mind|ari.s room|your name|architectures|conversations|final choice|assembly|dead|black ice|ascension|garden of|constellation|last request|goodbye|relay space|virtual|archive/i, { a: '#9b5cff', b: '#19f0ff', fog: '#08031a', sky: ['#02000a', '#0c0420', '#2a0f55'], th: 'cyber', d: 'QUANTUM DEPTHS' }],
+  [/rust harbor|harbour|harbor|port |dock|pier|selene|ocean|sea|flood|drown|water|tide|canal/i, { a: '#ff7a2b', b: '#19c8ff', fog: '#06121a', sky: ['#01040a', '#07182a', '#3a2a30'], th: 'water', d: 'RUST HARBOR' }],
+  [/metro|sector 9|station|platform|tunnel|rail|train|junction|cable tower|switchback|relay chamber|carriage/i, { a: '#ffb238', b: '#ff5a1f', fog: '#140b04', sky: ['#050200', '#140b04', '#3a1d08'], th: 'tunnel', d: 'METRO SECTOR 9' }],
+  [/underdeep|depths|fault|cavern|pipes|sewer|underground|beneath/i, { a: '#19f0c8', b: '#3d6bff', fog: '#021010', sky: ['#000404', '#021010', '#06302c'], th: 'tunnel', d: 'THE UNDERDEEP' }],
+  [/hive|factory|plant|industrial|foundry|forge|warehouse/i, { a: '#ffd23d', b: '#ff3b3b', fog: '#140e04', sky: ['#040200', '#140e04', '#3d2a08'], th: 'interior', d: 'THE HIVE' }],
+  [/sky garden|gardens|luxury|gala|penthouse|estate/i, { a: '#3dffa8', b: '#f4e6b0', fog: '#04120c', sky: ['#01060a', '#06201c', '#3a5a4a'], th: 'city', d: 'SKY GARDENS' }],
+  [/helix|arcology|level 88|boardroom|office|executive|lab|clinic|hospital|vault|control room|corporate|tribunal|hall|room|apartment|den|corridor|chamber|studio|interior|ward|tier/i, { a: '#e8f4ff', b: '#4d7dff', fog: '#070b18', sky: ['#01020a', '#070b18', '#1a2a55'], th: 'interior', d: 'HELIX ARCOLOGY' }],
+  [/black zone|quarantine|ruin|collapse|fire|siege|burn|war/i, { a: '#ff3355', b: '#ff9a3d', fog: '#180405', sky: ['#050000', '#1a0406', '#5a1a0a'], th: 'city', d: 'THE BLACK ZONE' }],
 ];
 NV.paletteFor = name => {
   for (const [re, p] of NV.DISTRICTS) if (re.test(name)) return p;
-  return { a: '#ff2bd6', b: '#19f0ff', fog: '#14061f', th: 'city', d: 'NEON HEIGHTS' };
+  return { a: '#ff2bd6', b: '#19f0ff', fog: '#14061f', sky: ['#030108', '#12061f', '#4a1450'], th: 'city', d: 'NEON HEIGHTS' };
 };
+NV.skyTex = (scene, pal, name) => NV.tex(scene, 16, 512, (g, w, h) => {
+  const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, pal.sky[0]); gr.addColorStop(.42, pal.sky[1]); gr.addColorStop(.5, pal.sky[2]); gr.addColorStop(.56, pal.sky[1]); gr.addColorStop(1, '#000');
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+}, name || 'skygrad');
 
 /* =====================================================================
    Backdrop — cinematic world used by the title screen and story scenes
    ===================================================================== */
 NV.Backdrop = (() => {
-  let scene, cam, glow, pipe, rain, hemi, groups = {}, cars = [], signs = [], shot = null, time = 0, pal = null, theme = '';
+  let scene, cam, fx = null, rain, hemi, sky, skyMat, groups = {}, cars = [], signMeshes = [], beams = [], shot = null, time = 0, pal = null, theme = '';
   const D = {};
 
   function build(engine) {
@@ -619,34 +724,40 @@ NV.Backdrop = (() => {
     scene.ambientColor = new BABYLON.Color3(.2, .2, .3);
     cam = new BABYLON.FreeCamera('bdcam', V3(0, 40, -160), scene); cam.fov = .9; cam.minZ = .5; cam.maxZ = 3000;
     hemi = new BABYLON.HemisphericLight('h', V3(0, 1, 0), scene); hemi.intensity = .35; hemi.groundColor = new BABYLON.Color3(.05, .02, .1);
-    glow = new BABYLON.GlowLayer('glow', scene, { mainTextureSamples: 2, blurKernelSize: 48 }); glow.intensity = .85;
-    try {
-      pipe = new BABYLON.DefaultRenderingPipeline('pp', true, scene, [cam]);
-      pipe.imageProcessingEnabled = true; pipe.imageProcessing.vignetteEnabled = true; pipe.imageProcessing.vignetteWeight = 2.4;
-      pipe.imageProcessing.contrast = 1.25; pipe.imageProcessing.exposure = 1.1;
-      pipe.chromaticAberrationEnabled = true; pipe.chromaticAberration.aberrationAmount = 8;
-      pipe.grainEnabled = true; pipe.grain.intensity = 8; pipe.grain.animated = true;
-      pipe.fxaaEnabled = true;
-    } catch (e) { console.warn('post pipeline unavailable', e); }
-    buildRain();
+    // gradient sky dome with a glowing horizon band
+    sky = BABYLON.MeshBuilder.CreateSphere('skydome', { diameter: 2600, segments: 12, sideOrientation: BABYLON.Mesh.BACKSIDE }, scene);
+    skyMat = new BABYLON.StandardMaterial('skym', scene); skyMat.disableLighting = true; skyMat.fogEnabled = false; skyMat.backFaceCulling = false;
+    sky.material = skyMat; sky.infiniteDistance = true; sky.applyFog = false; sky.isPickable = false;
+    applyQuality();
     scene.onBeforeRenderObservable.add(update);
     return scene;
   }
 
-  function buildRain() {
-    rain = new BABYLON.ParticleSystem('rain', 5000, scene);
+  function applyQuality() {
+    const q = NV.Quality.get();
+    NV.Quality.teardown(fx); fx = NV.Quality.setup(scene, cam);
+    if (fx.glow) { fx.glow.addExcludedMesh(sky); beams.forEach(b => fx.glow.addExcludedMesh(b)); }
+    if (rain) rain.dispose();
+    buildRain(q.rain);
+    beams.forEach(b => b.setEnabled(!!q.beams && (theme === 'city' || theme === 'water')));
+    if (pal) setRainFor(theme);
+  }
+
+  function buildRain(cap) {
+    rain = new BABYLON.ParticleSystem('rain', cap, scene);
     rain.particleTexture = NV.tex(scene, 8, 64, (g, w, h) => { const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(1, 'rgba(200,230,255,.9)'); g.fillStyle = gr; g.fillRect(3, 0, 2, h); }, 'raintex');
     rain.emitter = V3(0, 0, 0);
-    const em = rain.createBoxEmitter(V3(-2, -12, -1), V3(2, -14, 1), V3(-60, 30, -60), V3(60, 34, 60));
+    rain.createBoxEmitter(V3(-2, -12, -1), V3(2, -14, 1), V3(-60, 30, -60), V3(60, 34, 60));
     rain.minEmitPower = 2.2; rain.maxEmitPower = 3; rain.updateSpeed = .02;
     rain.minSize = .08; rain.maxSize = .16; rain.minScaleY = 6; rain.maxScaleY = 12;
-    rain.minLifeTime = 1.6; rain.maxLifeTime = 2.2; rain.emitRate = 2200;
+    rain.minLifeTime = 1.6; rain.maxLifeTime = 2.2; rain.emitRate = 0; rain.cap = cap;
     rain.color1 = new BABYLON.Color4(.7, .85, 1, .35); rain.color2 = new BABYLON.Color4(1, .6, 1, .25); rain.colorDead = new BABYLON.Color4(0, 0, 0, 0);
     rain.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
     rain.billboardMode = BABYLON.ParticleSystem.BILLBOARDMODE_STRETCHED;
     rain.gravity = V3(0, -20, 0);
     rain.start();
   }
+  function setRainFor(th) { rain.emitRate = (th === 'city' || th === 'water') ? rain.cap / 2.1 : th === 'tunnel' ? rain.cap / 20 : 0; }
 
   function mat(name, hex, emis, alpha) {
     const m = new BABYLON.StandardMaterial(name, scene);
@@ -655,131 +766,144 @@ NV.Backdrop = (() => {
     if (alpha != null) m.alpha = alpha;
     return m;
   }
+  const own = (root, ...ms) => ms.forEach(m => { m.parent = root; m.isPickable = false; });
 
   /* ---------------- city ---------------- */
   function buildCity() {
     const root = new BABYLON.TransformNode('city', scene); const r = U.rng(9001);
+    const statics = [];
     const ground = BABYLON.MeshBuilder.CreateGround('cg', { width: 1400, height: 1400 }, scene);
-    const gm = mat('cgm', '#07050c'); gm.specularColor = new BABYLON.Color3(.5, .4, .6); gm.specularPower = 64; ground.material = gm; ground.parent = root;
-    // street light strips
+    const gm = mat('cgm', '#07050c'); gm.specularColor = new BABYLON.Color3(.55, .45, .65); gm.specularPower = 64; ground.material = gm; own(root, ground); statics.push(ground);
+    // street light strips: 26 boxes -> one thin-instanced mesh
     const strip = mat('strip', '#000', '#ff2bd6'); D.strip = strip;
-    for (let i = -6; i <= 6; i++) {
-      const s = BABYLON.MeshBuilder.CreateBox('st' + i, { width: 1200, height: .1, depth: .4 }, scene); s.position.set(0, .05, i * 48 + 12); s.material = strip; s.parent = root;
-      const s2 = s.clone('st2' + i); s2.rotation.y = Math.PI / 2; s2.position.set(i * 48 + 12, .05, 0);
-    }
+    const st = BABYLON.MeshBuilder.CreateBox('strips', { size: 1 }, scene); st.material = strip; own(root, st);
+    const sm = [], rotY = BABYLON.Quaternion.RotationYawPitchRoll(Math.PI / 2, 0, 0);
+    for (let i = -6; i <= 6; i++) { sm.push(NV.M(1200, .1, .4, 0, .05, i * 48 + 12)); sm.push(NV.M(1200, .1, .4, i * 48 + 12, .05, 0, rotY)); }
+    NV.thin(st, sm);
     const classes = [{ h: [18, 40], v: 2 }, { h: [40, 90], v: 5 }, { h: [90, 190], v: 10 }];
-    D.bmats = [];
     classes.forEach((cl, ci) => {
       const m = mat('bm' + ci, '#000000'); m.emissiveTexture = NV.windowTex(scene, 100 + ci, '#ff2bd6', '#19f0ff');
       m.emissiveTexture.vScale = cl.v; m.emissiveTexture.uScale = 1.5; m.specularColor = new BABYLON.Color3(.2, .2, .3);
-      D.bmats.push(m);
-      const box = BABYLON.MeshBuilder.CreateBox('b' + ci, { size: 1 }, scene); box.material = m; box.parent = root;
+      const box = BABYLON.MeshBuilder.CreateBox('b' + ci, { size: 1 }, scene); box.material = m; own(root, box);
       const mats = [];
       for (let gx = -12; gx <= 12; gx++) for (let gz = -12; gz <= 12; gz++) {
         const x = gx * 48 + r() * 10 - 5, z = gz * 48 + r() * 10 - 5, dist = Math.hypot(x, z);
         if (dist < 60 || r() < .25) continue;
         for (let k = 0; k < 2; k++) {
           const near = U.clamp(1 - dist / 600, 0, 1);
-          let h = cl.h[0] + r() * (cl.h[1] - cl.h[0]);
+          const h = cl.h[0] + r() * (cl.h[1] - cl.h[0]);
           if ((ci === 2 && r() > .25 + near * .6) || (ci === 0 && r() > .7)) continue;
           if (ci === 1 && r() > .55) continue;
           const w = 10 + r() * 12, d = 10 + r() * 12;
-          const ox = (k ? 1 : -1) * (6 + r() * 6), oz = (r() - .5) * 20;
-          mats.push(BABYLON.Matrix.Compose(V3(w, h, d), BABYLON.Quaternion.Identity(), V3(x + ox, h / 2, z + oz)));
+          mats.push(NV.M(w, h, d, x + (k ? 1 : -1) * (6 + r() * 6), h / 2, z + (r() - .5) * 20));
         }
       }
-      const buf = new Float32Array(mats.length * 16); mats.forEach((m4, i) => m4.copyToArray(buf, i * 16));
-      box.thinInstanceSetBuffer('matrix', buf, 16);
+      NV.thin(box, mats); statics.push(box);
     });
-    // Helix Tower
+    // rooftop beacons: tiny blinking-red boxes on tall towers (one draw call)
+    // Helix Tower: 4 tapered sections merged into one mesh
     const tm = mat('tower', '#05060c', null); tm.specularColor = new BABYLON.Color3(.6, .6, .8); tm.specularPower = 128;
     const ringM = mat('ringm', '#000', '#19f0ff'); D.ringM = ringM;
-    let y = 0;
+    let y = 0; const secs = [], rings = [];
     [[46, 34, 160], [34, 24, 220], [24, 14, 260], [14, 4, 180]].forEach(([b, t, h], i) => {
-      const c = BABYLON.MeshBuilder.CreateCylinder('tw' + i, { diameterBottom: b, diameterTop: t, height: h, tessellation: 12 }, scene); c.position.y = y + h / 2; c.material = tm; c.parent = root;
-      for (let k = 0; k < 4; k++) { const ring = BABYLON.MeshBuilder.CreateTorus('tr' + i + k, { diameter: U.lerp(b, t, (k + .5) / 4) + 1, thickness: .6, tessellation: 32 }, scene); ring.position.y = y + h * (k + .5) / 4; ring.material = ringM; ring.parent = root; }
+      const c = BABYLON.MeshBuilder.CreateCylinder('tw' + i, { diameterBottom: b, diameterTop: t, height: h, tessellation: 16 }, scene); c.position.y = y + h / 2; secs.push(c);
+      for (let k = 0; k < 4; k++) { const d = U.lerp(b, t, (k + .5) / 4) + 1; rings.push(NV.M(d, d, d, 0, y + h * (k + .5) / 4, 0)); }
       y += h;
     });
-    const spire = BABYLON.MeshBuilder.CreateCylinder('spire', { diameterBottom: 3, diameterTop: 0, height: 160 }, scene); spire.position.y = y + 80; spire.material = ringM; spire.parent = root;
-    D.beacon = BABYLON.MeshBuilder.CreateSphere('beacon', { diameter: 8 }, scene); D.beacon.position.y = y + 165; D.beacon.material = mat('bcn', '#000', '#ff3355'); D.beacon.parent = root;
+    const tower = BABYLON.Mesh.MergeMeshes(secs, true, true); tower.material = tm; own(root, tower); statics.push(tower);
+    const ring = BABYLON.MeshBuilder.CreateTorus('trings', { diameter: 1, thickness: .6 / 30, tessellation: 40 }, scene); ring.material = ringM; own(root, ring); NV.thin(ring, rings);
+    const lines = []; for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; lines.push(NV.M(.5, y, .5, Math.cos(a) * 17, y / 2, Math.sin(a) * 17)); }
+    const lb = BABYLON.MeshBuilder.CreateBox('tlines', { size: 1 }, scene); lb.material = ringM; own(root, lb); NV.thin(lb, lines);
+    const spire = BABYLON.MeshBuilder.CreateCylinder('spire', { diameterBottom: 3, diameterTop: 0, height: 160 }, scene); spire.position.y = y + 80; spire.material = ringM; own(root, spire);
+    D.beacon = BABYLON.MeshBuilder.CreateSphere('beacon', { diameter: 8, segments: 8 }, scene); D.beacon.position.y = y + 165; D.beacon.material = mat('bcn', '#000', '#ff3355'); own(root, D.beacon);
     D.towerTop = y;
-    // vertical light lines on the tower
-    for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; const l = BABYLON.MeshBuilder.CreateBox('tl' + i, { width: .5, height: y, depth: .5 }, scene); l.position.set(Math.cos(a) * 17, y / 2, Math.sin(a) * 17); l.material = ringM; l.parent = root; }
-    // holo signs
-    const words = ['HELIX', 'O₂ PLANS', 'MEMORY INSURANCE', 'TOMORROW IS TESTED', 'NEON', 'OPEN 24H', 'SUBSCRIBE TO BREATHE', 'AVALON', 'SYNTH', 'RENT A LIFE', 'NO SIGNAL', 'KEYBEARER?', '新アヴァロン', 'CLINIC', 'NOODLES'];
-    for (let i = 0; i < 26; i++) {
-      const word = words[i % words.length]; const col = i % 3 ? '#ff2bd6' : '#19f0ff';
-      const tx = NV.tex(scene, 512, 128, (g, w, h) => { g.fillStyle = 'rgba(0,0,0,0)'; g.clearRect(0, 0, w, h); g.font = 'bold 70px Orbitron, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#fff'; g.fillText(word, w / 2, h / 2); g.strokeStyle = '#fff'; g.lineWidth = 4; g.strokeRect(6, 6, w - 12, h - 12); }, 'sg' + i);
-      tx.hasAlpha = true;
-      const m = mat('sgm' + i, '#000', col); m.emissiveTexture = tx; m.opacityTexture = tx; m.disableLighting = true; m.backFaceCulling = false;
-      const p = BABYLON.MeshBuilder.CreatePlane('sign' + i, { width: 24, height: 6 }, scene); p.material = m; p.parent = root;
-      const a = r() * Math.PI * 2, d = 70 + r() * 200;
-      p.position.set(Math.cos(a) * d, 20 + r() * 80, Math.sin(a) * d); p.lookAt(V3(0, p.position.y, 0)); p.rotation.y += Math.PI + (r() - .5) * .6;
-      if (i % 4 === 0) p.rotation.z = Math.PI / 2, p.scaling.set(.6, .6, 1);
-      signs.push({ m: p, mat: m, base: col, ph: r() * 10 });
+    // holo signs: shared atlas, merged into two meshes (one per colour)
+    const atlas = NV.signAtlas(scene);
+    const smA = mat('signA', '#000', '#ff2bd6'), smB = mat('signB', '#000', '#19f0ff');
+    [smA, smB].forEach(m => { m.emissiveTexture = atlas; m.opacityTexture = atlas; m.disableLighting = true; m.backFaceCulling = false; });
+    D.signMats = [smA, smB];
+    const planes = [[], []];
+    for (let i = 0; i < 30; i++) {
+      const uv = NV.signUV(i % 16);
+      const p = BABYLON.MeshBuilder.CreatePlane('sign' + i, { width: 24, height: 6, frontUVs: uv, backUVs: uv, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene);
+      const a = r() * Math.PI * 2, d = 70 + r() * 220;
+      p.position.set(Math.cos(a) * d, 20 + r() * 90, Math.sin(a) * d); p.lookAt(V3(0, p.position.y, 0)); p.rotation.y += Math.PI + (r() - .5) * .6;
+      if (i % 4 === 0) { p.rotation.z = Math.PI / 2; p.scaling.set(.6, .6, 1); }
+      planes[i % 3 ? 0 : 1].push(p);
     }
-    // flying traffic
+    signMeshes = planes.map((ps, k) => { const m = BABYLON.Mesh.MergeMeshes(ps, true, true); m.material = D.signMats[k]; own(root, m); statics.push(m); return m; });
+    // searchlight beams (additive cones, medium+)
+    const bm = mat('beam', '#000', '#9fd8ff', .05); bm.disableLighting = true; bm.alphaMode = BABYLON.Engine.ALPHA_ADD; bm.backFaceCulling = false; bm.fogEnabled = false; D.beamMat = bm;
+    for (let i = 0; i < 5; i++) {
+      const c = BABYLON.MeshBuilder.CreateCylinder('beam' + i, { diameterTop: 60, diameterBottom: 3, height: 700, tessellation: 16, cap: BABYLON.Mesh.NO_CAP }, scene);
+      c.bakeTransformIntoVertices(BABYLON.Matrix.Translation(0, 350, 0)); c.material = bm; own(root, c);
+      const a = i / 5 * Math.PI * 2; c.position.set(Math.cos(a) * 140, 0, Math.sin(a) * 140); c.ph = r() * 6;
+      beams.push(c); if (fx && fx.glow) fx.glow.addExcludedMesh(c);
+    }
+    // flying traffic: 3 thin-instanced meshes updated in one buffer write each frame
     const carM = [mat('carA', '#000', '#ff2bd6'), mat('carB', '#000', '#ffffff'), mat('carC', '#000', '#ffb238')];
-    for (let i = 0; i < 70; i++) {
-      const c = BABYLON.MeshBuilder.CreateBox('car' + i, { width: 1.2, height: .6, depth: 3.4 }, scene); c.material = carM[i % 3]; c.parent = root;
-      const lane = { axis: i % 2, off: (r() - .5) * 500, y: 25 + (i % 5) * 14, sp: (40 + r() * 50) * (r() > .5 ? 1 : -1), p: r() * 1000 };
-      if (lane.axis) c.rotation.y = Math.PI / 2;
-      cars.push({ m: c, ...lane });
-    }
+    D.carMeshes = carM.map((m, k) => { const c = BABYLON.MeshBuilder.CreateBox('cars' + k, { width: 1.2, height: .6, depth: 3.4 }, scene); c.material = m; own(root, c); c.alwaysSelectAsActiveMesh = true; c.doNotSyncBoundingInfo = true; return c; });
+    const counts = [0, 0, 0];
+    for (let i = 0; i < 72; i++) { const k = i % 3; cars.push({ k, idx: counts[k]++, axis: i % 2, off: (r() - .5) * 500, y: 25 + (i % 5) * 14, sp: (40 + r() * 50) * (r() > .5 ? 1 : -1), p: r() * 1000 }); }
+    D.carBufs = counts.map(n => new Float32Array(n * 16));
+    D.carMeshes.forEach((m, k) => m.thinInstanceSetBuffer('matrix', D.carBufs[k], 16, false));
+    NV.freeze(statics);
     return root;
   }
 
-  /* ---------------- interior / tunnel corridor ---------------- */
+  /* ---------------- interior / tunnel corridor (all thin instances) ---------------- */
   function buildCorridor(kind) {
-    const root = new BABYLON.TransformNode(kind, scene);
+    const root = new BABYLON.TransformNode(kind, scene), statics = [];
     const dark = mat(kind + 'd', '#0b0914'); dark.specularColor = new BABYLON.Color3(.3, .3, .4);
     const la = mat(kind + 'la', '#000', '#ffffff'), lb = mat(kind + 'lb', '#000', '#ffffff');
     D[kind] = { la, lb };
     const floor = BABYLON.MeshBuilder.CreateGround(kind + 'f', { width: 30, height: 600 }, scene); floor.position.z = 280;
-    const fm = mat(kind + 'fm', '#08060e'); fm.specularColor = new BABYLON.Color3(.7, .6, .9); fm.specularPower = 90; floor.material = fm; floor.parent = root;
+    const fm = mat(kind + 'fm', '#08060e'); fm.specularColor = new BABYLON.Color3(.7, .6, .9); fm.specularPower = 90; floor.material = fm; own(root, floor); statics.push(floor);
+    const box = (name, m, mats) => { const b = BABYLON.MeshBuilder.CreateBox(name, { size: 1 }, scene); b.material = m; own(root, b); NV.thin(b, mats); return b; };
     if (kind === 'tunnel') {
-      const shell = BABYLON.MeshBuilder.CreateCylinder('tsh', { diameter: 16, height: 600, tessellation: 24, sideOrientation: BABYLON.Mesh.BACKSIDE }, scene);
-      shell.rotation.x = Math.PI / 2; shell.position.set(0, 2, 280); shell.material = dark; shell.parent = root;
-      for (let i = 0; i < 60; i++) {
-        const t = BABYLON.MeshBuilder.CreateTorus('tt' + i, { diameter: 15.4, thickness: .35, tessellation: 32 }, scene);
-        t.rotation.x = Math.PI / 2; t.position.set(0, 2, i * 10); t.material = i % 3 ? la : lb; t.parent = root;
-      }
-      for (const x of [-2.2, 2.2]) { const rail = BABYLON.MeshBuilder.CreateBox('rail' + x, { width: .25, height: .25, depth: 600 }, scene); rail.position.set(x, .15, 280); rail.material = lb; rail.parent = root; }
+      const shell = BABYLON.MeshBuilder.CreateCylinder('tsh', { diameter: 16, height: 600, tessellation: 20, sideOrientation: BABYLON.Mesh.BACKSIDE }, scene);
+      shell.rotation.x = Math.PI / 2; shell.position.set(0, 2, 280); shell.material = dark; own(root, shell); statics.push(shell);
+      const rx = BABYLON.Quaternion.RotationYawPitchRoll(0, Math.PI / 2, 0), A = [], Bm = [];
+      for (let i = 0; i < 60; i++) (i % 3 ? A : Bm).push(NV.M(1, 1, 1, 0, 2, i * 10, rx));
+      [[la, A], [lb, Bm]].forEach(([m, arr], k) => { const t = BABYLON.MeshBuilder.CreateTorus('tt' + k, { diameter: 15.4, thickness: .35, tessellation: 28 }, scene); t.material = m; own(root, t); NV.thin(t, arr); });
+      box('rails', lb, [NV.M(.25, .25, 600, -2.2, .15, 280), NV.M(.25, .25, 600, 2.2, .15, 280)]);
     } else {
+      const darkM = [], aM = [], bM = [];
       for (let i = 0; i < 70; i++) {
         const z = i * 8;
-        for (const x of [-7, 7]) { const w = BABYLON.MeshBuilder.CreateBox('wl' + i + x, { width: 1, height: 9, depth: 1.2 }, scene); w.position.set(x, 4.5, z); w.material = dark; w.parent = root; }
-        const top = BABYLON.MeshBuilder.CreateBox('tp' + i, { width: 15, height: 1, depth: 1.2 }, scene); top.position.set(0, 9, z); top.material = dark; top.parent = root;
-        const s = BABYLON.MeshBuilder.CreateBox('ls' + i, { width: 12, height: .12, depth: .3 }, scene); s.position.set(0, 8.4, z); s.material = i % 4 ? la : lb; s.parent = root;
-        for (const x of [-6.4, 6.4]) { const v = BABYLON.MeshBuilder.CreateBox('lv' + i + x, { width: .12, height: 7, depth: .3 }, scene); v.position.set(x, 4, z + 4); v.material = la; v.parent = root; }
-        if (i % 5 === 2) { const scr = BABYLON.MeshBuilder.CreatePlane('scr' + i, { width: 4, height: 2.4 }, scene); scr.position.set(-6.3, 4, z + 2); scr.rotation.y = -Math.PI / 2; scr.material = lb; scr.parent = root; }
+        darkM.push(NV.M(1, 9, 1.2, -7, 4.5, z), NV.M(1, 9, 1.2, 7, 4.5, z), NV.M(15, 1, 1.2, 0, 9, z));
+        (i % 4 ? aM : bM).push(NV.M(12, .12, .3, 0, 8.4, z));
+        aM.push(NV.M(.12, 7, .3, -6.4, 4, z + 4), NV.M(.12, 7, .3, 6.4, 4, z + 4));
+        if (i % 5 === 2) bM.push(NV.M(.1, 2.4, 4, -6.3, 4, z + 2));
       }
-      const walls = [-7.5, 7.5].map(x => { const w = BABYLON.MeshBuilder.CreateBox('wall' + x, { width: .5, height: 9, depth: 600 }, scene); w.position.set(x, 4.5, 280); w.material = dark; w.parent = root; return w; });
-      const ceil = BABYLON.MeshBuilder.CreateBox('ceil', { width: 15, height: .5, depth: 600 }, scene); ceil.position.set(0, 9.4, 280); ceil.material = dark; ceil.parent = root;
+      darkM.push(NV.M(.5, 9, 600, -7.5, 4.5, 280), NV.M(.5, 9, 600, 7.5, 4.5, 280), NV.M(15, .5, 600, 0, 9.4, 280));
+      box('ribs', dark, darkM); box('la', la, aM); box('lb', lb, bM);
     }
+    NV.freeze(statics);
     return root;
   }
 
   /* ---------------- cyberspace ---------------- */
   function buildCyber() {
     const root = new BABYLON.TransformNode('cyber', scene);
-    const g = BABYLON.MeshBuilder.CreateGround('cyg', { width: 1600, height: 1600 }, scene); g.parent = root;
+    const g = BABYLON.MeshBuilder.CreateGround('cyg', { width: 1600, height: 1600 }, scene); own(root, g);
     if (BABYLON.GridMaterial) {
       const gm = new BABYLON.GridMaterial('cygm', scene); gm.majorUnitFrequency = 5; gm.minorUnitVisibility = .35; gm.gridRatio = 4;
       gm.mainColor = new BABYLON.Color3(.01, 0, .03); gm.lineColor = C3('#9b5cff'); gm.opacity = .98; g.material = gm; D.cyg = gm;
     } else { const m = mat('cygm2', '#05020c', '#1a0833'); m.wireframe = true; g.material = m; }
     const cm = mat('cubes', '#000', '#19f0ff', .55); cm.wireframe = true; D.cubes = cm;
-    const cube = BABYLON.MeshBuilder.CreateBox('cube', { size: 1 }, scene); cube.material = cm; cube.parent = root;
+    const cube = BABYLON.MeshBuilder.CreateBox('cube', { size: 1 }, scene); cube.material = cm; own(root, cube);
     const r = U.rng(77), arr = [];
-    for (let i = 0; i < 260; i++) { const s = 1 + r() * 8; const a = r() * Math.PI * 2, d = 20 + r() * 300; arr.push(BABYLON.Matrix.Compose(V3(s, s, s), BABYLON.Quaternion.RotationYawPitchRoll(r() * 3, r() * 3, r() * 3), V3(Math.cos(a) * d, 4 + r() * 120, Math.sin(a) * d))); }
-    const buf = new Float32Array(arr.length * 16); arr.forEach((m4, i) => m4.copyToArray(buf, i * 16)); cube.thinInstanceSetBuffer('matrix', buf, 16);
+    for (let i = 0; i < 260; i++) { const s = 1 + r() * 8; const a = r() * Math.PI * 2, d = 20 + r() * 300; arr.push(NV.M(s, s, s, Math.cos(a) * d, 4 + r() * 120, Math.sin(a) * d, BABYLON.Quaternion.RotationYawPitchRoll(r() * 3, r() * 3, r() * 3))); }
+    NV.thin(cube, arr);
     const colM = mat('cols', '#000', '#9b5cff', .7); D.cols = colM;
-    const col = BABYLON.MeshBuilder.CreateBox('col', { width: 1, height: 1, depth: 1 }, scene); col.material = colM; col.parent = root;
+    const col = BABYLON.MeshBuilder.CreateBox('col', { size: 1 }, scene); col.material = colM; own(root, col);
     const arr2 = [];
-    for (let i = 0; i < 90; i++) { const h = 20 + r() * 260; const a = r() * Math.PI * 2, d = 40 + r() * 400; arr2.push(BABYLON.Matrix.Compose(V3(.6, h, .6), BABYLON.Quaternion.Identity(), V3(Math.cos(a) * d, h / 2, Math.sin(a) * d))); }
-    const buf2 = new Float32Array(arr2.length * 16); arr2.forEach((m4, i) => m4.copyToArray(buf2, i * 16)); col.thinInstanceSetBuffer('matrix', buf2, 16);
-    const core = BABYLON.MeshBuilder.CreateIcoSphere('core', { radius: 14, subdivisions: 2 }, scene); core.position.y = 50; core.material = mat('corem', '#000', '#ffffff', .9); core.material.wireframe = true; core.parent = root; D.core = core;
-    const core2 = BABYLON.MeshBuilder.CreateSphere('core2', { diameter: 10 }, scene); core2.position.y = 50; core2.material = mat('core2m', '#000', '#ffffff'); core2.parent = root;
+    for (let i = 0; i < 90; i++) { const h = 20 + r() * 260; const a = r() * Math.PI * 2, d = 40 + r() * 400; arr2.push(NV.M(.6, h, .6, Math.cos(a) * d, h / 2, Math.sin(a) * d)); }
+    NV.thin(col, arr2);
+    const core = BABYLON.MeshBuilder.CreateIcoSphere('core', { radius: 14, subdivisions: 2 }, scene); core.position.y = 50; core.material = mat('corem', '#000', '#ffffff', .9); core.material.wireframe = true; own(root, core); D.core = core;
+    const core2 = BABYLON.MeshBuilder.CreateSphere('core2', { diameter: 10, segments: 12 }, scene); core2.position.y = 50; core2.material = mat('core2m', '#000', '#ffffff'); own(root, core2);
+    NV.freeze([g, col, core2], true);
     D.cyberRoot = root; D.cubeMesh = cube;
     return root;
   }
@@ -787,24 +911,26 @@ NV.Backdrop = (() => {
   /* ---------------- orbit ---------------- */
   function buildSpace() {
     const root = new BABYLON.TransformNode('space', scene);
-    const sky = BABYLON.MeshBuilder.CreateSphere('sky', { diameter: 2400, sideOrientation: BABYLON.Mesh.BACKSIDE }, scene); sky.parent = root; sky.infiniteDistance = true;
-    const sm = mat('skym', '#000'); sm.emissiveTexture = NV.tex(scene, 2048, 1024, (g, w, h) => { g.fillStyle = '#000'; g.fillRect(0, 0, w, h); const r = U.rng(5); for (let i = 0; i < 4000; i++) { const b = r(); g.fillStyle = `rgba(${200 + b * 55},${200 + b * 55},255,${.3 + b * .7})`; const s = b > .97 ? 2.5 : 1.2; g.fillRect(r() * w, r() * h, s, s); } }, 'stars');
-    sm.disableLighting = true; sm.fogEnabled = false; sky.material = sm; sky.applyFog = false;
-    const planet = BABYLON.MeshBuilder.CreateSphere('planet', { diameter: 900, segments: 48 }, scene); planet.position.set(0, -560, 400); planet.parent = root;
+    const st = BABYLON.MeshBuilder.CreateSphere('stars', { diameter: 2400, segments: 12, sideOrientation: BABYLON.Mesh.BACKSIDE }, scene); own(root, st); st.infiniteDistance = true;
+    const sm = mat('starm', '#000'); sm.emissiveTexture = NV.tex(scene, 2048, 1024, (g, w, h) => { g.fillStyle = '#000'; g.fillRect(0, 0, w, h); const r = U.rng(5); for (let i = 0; i < 4000; i++) { const b = r(); g.fillStyle = `rgba(${200 + b * 55},${200 + b * 55},255,${.3 + b * .7})`; const s = b > .97 ? 2.5 : 1.2; g.fillRect(r() * w, r() * h, s, s); } const neb = g.createRadialGradient(w * .7, h * .4, 10, w * .7, h * .4, 380); neb.addColorStop(0, 'rgba(90,60,200,.25)'); neb.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = neb; g.fillRect(0, 0, w, h); }, 'stars');
+    sm.disableLighting = true; sm.fogEnabled = false; st.material = sm; st.applyFog = false; if (fx && fx.glow) fx.glow.addExcludedMesh(st);
+    const planet = BABYLON.MeshBuilder.CreateSphere('planet', { diameter: 900, segments: 40 }, scene); planet.position.set(0, -560, 400); own(root, planet);
     const pm = mat('planetm', '#0b2a55'); pm.emissiveTexture = NV.tex(scene, 1024, 512, (g, w, h) => { const r = U.rng(8); g.fillStyle = '#04122a'; g.fillRect(0, 0, w, h); for (let i = 0; i < 900; i++) { g.fillStyle = r() > .5 ? 'rgba(255,190,90,.6)' : 'rgba(120,220,255,.25)'; g.fillRect(r() * w, h * .3 + r() * h * .5, 1 + r() * 3, 1 + r() * 2); } }, 'planet');
     pm.specularColor = new BABYLON.Color3(.4, .5, .8); planet.material = pm; planet.applyFog = false; D.planet = planet;
-    const atm = BABYLON.MeshBuilder.CreateSphere('atm', { diameter: 930, segments: 32 }, scene); atm.position.copyFrom(planet.position); atm.parent = root;
+    const atm = BABYLON.MeshBuilder.CreateSphere('atm', { diameter: 930, segments: 24 }, scene); atm.position.copyFrom(planet.position); own(root, atm);
     const am = mat('atmm', '#000', '#3d9bff', .25); am.backFaceCulling = false; atm.material = am;
-    const ring = BABYLON.MeshBuilder.CreateTorus('station', { diameter: 70, thickness: 5, tessellation: 64 }, scene); ring.position.set(0, 20, 60); ring.rotation.x = 1.2; ring.parent = root;
+    const ring = BABYLON.MeshBuilder.CreateTorus('station', { diameter: 70, thickness: 5, tessellation: 48 }, scene); ring.position.set(0, 20, 60); ring.rotation.x = 1.2; own(root, ring);
     ring.material = mat('stm', '#1a1d2b', null); D.station = ring;
     const sl = mat('stl', '#000', '#9bd4ff');
-    for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2; const b = BABYLON.MeshBuilder.CreateBox('stl' + i, { width: 2, height: 2, depth: 2 }, scene); b.parent = ring; b.position.set(Math.cos(a) * 35, 0, Math.sin(a) * 35); b.material = sl; }
-    const tether = BABYLON.MeshBuilder.CreateCylinder('tether', { diameter: 1.2, height: 2000 }, scene); tether.position.set(-80, -600, 200); tether.material = sl; tether.parent = root;
+    const lights = BABYLON.MeshBuilder.CreateBox('stlights', { size: 2 }, scene); lights.material = sl; lights.parent = ring; lights.isPickable = false;
+    const lm = []; for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2; lm.push(NV.M(1, 1, 1, Math.cos(a) * 35, 0, Math.sin(a) * 35)); } NV.thin(lights, lm);
+    const tether = BABYLON.MeshBuilder.CreateCylinder('tether', { diameter: 1.2, height: 2000, tessellation: 8 }, scene); tether.position.set(-80, -600, 200); tether.material = sl; own(root, tether);
+    NV.freeze([st, planet, atm, tether]);
     return root;
   }
 
   function water() {
-    const w = BABYLON.MeshBuilder.CreateGround('water', { width: 1400, height: 1400, subdivisions: 1 }, scene); w.position.y = .6;
+    const w = BABYLON.MeshBuilder.CreateGround('water', { width: 1400, height: 1400, subdivisions: 1 }, scene); w.position.y = .6; w.isPickable = false;
     const m = mat('waterm', '#021018'); m.specularColor = new BABYLON.Color3(1, 1, 1); m.specularPower = 200; m.alpha = .82; m.emissiveColor = new BABYLON.Color3(0, .03, .05);
     m.bumpTexture = NV.tex(scene, 256, 256, (g, w2, h) => { const r = U.rng(3); g.fillStyle = 'rgb(128,128,255)'; g.fillRect(0, 0, w2, h); for (let i = 0; i < 500; i++) { g.fillStyle = `rgba(${100 + r() * 60},${100 + r() * 60},255,.5)`; g.fillRect(r() * w2, r() * h, 20 + r() * 40, 2); } }, 'wbump');
     m.bumpTexture.uScale = m.bumpTexture.vScale = 40; w.material = m; D.water = m;
@@ -833,6 +959,7 @@ NV.Backdrop = (() => {
   }
 
   function setScene(name, instant) {
+    const prev = pal;
     pal = NV.paletteFor(name || '');
     const th = pal.th;
     ensure(th);
@@ -840,19 +967,24 @@ NV.Backdrop = (() => {
     theme = th;
     scene.fogColor = C3(pal.fog); scene.clearColor = BABYLON.Color4.FromColor3(C3(pal.fog).scale(.5), 1);
     scene.fogDensity = th === 'space' ? 0 : th === 'cyber' ? .004 : th === 'tunnel' || th === 'interior' ? .018 : .0055;
+    if (prev !== pal) { if (skyMat.emissiveTexture) skyMat.emissiveTexture.dispose(); skyMat.emissiveTexture = NV.skyTex(scene, pal); }
+    sky.setEnabled(th !== 'space' && th !== 'tunnel' && th !== 'interior');
     const a = C3(pal.a), b = C3(pal.b);
     if (D.strip) D.strip.emissiveColor = a;
     if (D.ringM) D.ringM.emissiveColor = b;
-    signs.forEach((s, i) => s.mat.emissiveColor = i % 3 ? a : b);
+    if (D.signMats) { D.signMats[0].emissiveColor = a; D.signMats[1].emissiveColor = b; }
+    if (D.beamMat) D.beamMat.emissiveColor = b.scale(.6).add(new BABYLON.Color3(.25, .25, .3));
     if (D.tunnel) { D.tunnel.la.emissiveColor = a; D.tunnel.lb.emissiveColor = b; }
     if (D.interior) { D.interior.la.emissiveColor = a; D.interior.lb.emissiveColor = b; }
     if (D.cubes) { D.cubes.emissiveColor = b; D.cols.emissiveColor = a; if (D.cyg) D.cyg.lineColor = a; }
-    rain.emitRate = (th === 'city' || th === 'water') ? 2200 : th === 'tunnel' ? 150 : 0;
+    beams.forEach(bm => bm.setEnabled(!!NV.Quality.get().beams && (th === 'city' || th === 'water')));
+    setRainFor(th);
     const S = shotsFor(th), s = /SKYLINE/.test(name) ? S[1] : S[U.hash(name || 'x') % S.length];
     shot = { a: s[0], b: s[1], la: s[2], lb: s[3], t: 0, dur: 26 };
     if (instant) time = 0;
   }
 
+  const tmpM = new BABYLON.Matrix(), rotQ = BABYLON.Quaternion.RotationYawPitchRoll(Math.PI / 2, 0, 0), idQ = BABYLON.Quaternion.Identity(), one = V3(1, 1, 1), pos = V3(0, 0, 0);
   function update() {
     const dt = scene.getEngine().getDeltaTime() / 1000; time += dt;
     if (shot) {
@@ -862,17 +994,22 @@ NV.Backdrop = (() => {
       cam.setTarget(BABYLON.Vector3.Lerp(shot.la, shot.lb, k));
     }
     rain.emitter = cam.position.add(V3(0, 20, 0));
-    cars.forEach(c => { const p = ((c.p + time * c.sp) % 1000 + 1000) % 1000 - 500; if (c.axis) c.m.position.set(p, c.y, c.off); else c.m.position.set(c.off, c.y, p); });
-    signs.forEach(s => { s.m.visibility = (Math.sin(time * 3 + s.ph) > -.95 && Math.random() > .01) ? 1 : .2; });
-    if (D.beacon) D.beacon.material.emissiveColor.r = .5 + .5 * Math.sin(time * 3);
+    if (theme === 'city' || theme === 'water') {
+      if (D.carMeshes) {
+        cars.forEach(c => { const p = ((c.p + time * c.sp) % 1000 + 1000) % 1000 - 500; if (c.axis) pos.set(p, c.y, c.off); else pos.set(c.off, c.y, p); BABYLON.Matrix.ComposeToRef(one, c.axis ? rotQ : idQ, pos, tmpM); tmpM.copyToArray(D.carBufs[c.k], c.idx * 16); });
+        D.carMeshes.forEach(m => m.thinInstanceBufferUpdated('matrix'));
+      }
+      signMeshes.forEach((m, i) => { m.visibility = (Math.sin(time * (2.3 + i) + i * 3) > -.97 && Math.random() > .006) ? 1 : .25; });
+      beams.forEach(b => { if (b.isEnabled()) { b.rotation.z = Math.sin(time * .23 + b.ph) * .35; b.rotation.x = Math.cos(time * .19 + b.ph) * .3; } });
+      if (D.beacon) D.beacon.material.emissiveColor.r = .5 + .5 * Math.sin(time * 3);
+    }
     if (D.cyberRoot && theme === 'cyber') { D.cubeMesh.rotation.y += dt * .03; D.core.rotation.y += dt * .4; D.core.rotation.x += dt * .2; }
     if (D.station && theme === 'space') D.station.rotation.z += dt * .08;
   }
 
   return {
-    build, setScene, get scene() { return scene; }, get palette() { return pal; },
+    build, setScene, applyQuality, get scene() { return scene; }, get palette() { return pal; },
     activate() { NV.G.active = scene; },
-    setRain(on) { rain.emitRate = on ? 2200 : 0; },
   };
 })();
 </script>
@@ -975,80 +1112,99 @@ NV.Level = (() => {
   }
 
   function buildScene(op, ctx) {
-    const engine = NV.G.engine, scene = new BABYLON.Scene(engine);
+    const engine = NV.G.engine, scene = new BABYLON.Scene(engine), q = NV.Quality.get();
     const pal = ctx.palette, th = pal.th;
     const cyber = th === 'cyber', outdoor = th === 'city' || th === 'water' || th === 'space';
     scene.clearColor = BABYLON.Color4.FromColor3(C3(pal.fog).scale(.6), 1);
     scene.fogMode = BABYLON.Scene.FOGMODE_EXP2; scene.fogColor = C3(pal.fog); scene.fogDensity = cyber ? .012 : outdoor ? .014 : .03;
-    const cam = new BABYLON.UniversalCamera('fp', V3(0, EYE, 0), scene); cam.minZ = .05; cam.maxZ = 900; cam.fov = NV.Settings.get().fov * Math.PI / 180 * .75; cam.inputs.clear();
+    const cam = new BABYLON.UniversalCamera('fp', V3(0, EYE, 0), scene); cam.minZ = .05; cam.maxZ = 600; cam.fov = NV.Settings.get().fov * Math.PI / 180 * .75; cam.inputs.clear();
     const hemi = new BABYLON.HemisphericLight('h', V3(.2, 1, .1), scene); hemi.intensity = outdoor ? .75 : .6; hemi.diffuse = C3('#b8b0ff'); hemi.groundColor = C3(pal.fog);
     const plight = new BABYLON.PointLight('pl', V3(0, 2, 0), scene); plight.range = 16; plight.intensity = .7; plight.diffuse = C3(pal.b);
-    const glow = new BABYLON.GlowLayer('glow', scene, { mainTextureSamples: 2, blurKernelSize: 32 }); glow.intensity = .9;
-    try {
-      const pp = new BABYLON.DefaultRenderingPipeline('pp', true, scene, [cam]);
-      pp.imageProcessingEnabled = true; pp.imageProcessing.vignetteEnabled = true; pp.imageProcessing.vignetteWeight = 2; pp.imageProcessing.contrast = 1.2;
-      pp.chromaticAberrationEnabled = true; pp.chromaticAberration.aberrationAmount = 4; pp.grainEnabled = true; pp.grain.intensity = 6; pp.grain.animated = true; pp.fxaaEnabled = true;
-      L.pp = pp;
-    } catch (e) { }
+    const fx = NV.Quality.setup(scene, cam), glow = fx.glow || { addExcludedMesh() { } };
+    L.fx = fx;
+    const statics = [];
     const { W, H, g } = L.map;
     // floor
-    const floor = BABYLON.MeshBuilder.CreateGround('floor', { width: W * TILE, height: H * TILE }, scene); floor.position.set(W * TILE / 2, 0, H * TILE / 2);
+    const floor = BABYLON.MeshBuilder.CreateGround('floor', { width: W * TILE, height: H * TILE }, scene); floor.position.set(W * TILE / 2, 0, H * TILE / 2); statics.push(floor);
     if (cyber && BABYLON.GridMaterial) { const gm = new BABYLON.GridMaterial('fg', scene); gm.gridRatio = TILE / 2; gm.majorUnitFrequency = 2; gm.mainColor = new BABYLON.Color3(.01, 0, .03); gm.lineColor = C3(pal.a); floor.material = gm; }
     else {
-      const fm = mat(scene, 'fm', '#ffffff'); fm.diffuseTexture = NV.tex(scene, 256, 256, (c, w, h) => { c.fillStyle = th === 'water' ? '#15242a' : '#221e2e'; c.fillRect(0, 0, w, h); c.strokeStyle = 'rgba(255,255,255,.12)'; c.lineWidth = 3; c.strokeRect(0, 0, w, h); c.strokeStyle = 'rgba(255,255,255,.035)'; c.beginPath(); c.moveTo(w / 2, 0); c.lineTo(w / 2, h); c.moveTo(0, h / 2); c.lineTo(w, h / 2); c.stroke(); const rr = U.rng(4); for (let i = 0; i < 300; i++) { c.fillStyle = `rgba(0,0,0,${rr() * .25})`; c.fillRect(rr() * w, rr() * h, 3 + rr() * 12, 2); } }, 'floortex');
-      fm.diffuseTexture.uScale = W / 2; fm.diffuseTexture.vScale = H / 2; fm.specularColor = new BABYLON.Color3(.5, .45, .6); fm.specularPower = 60; floor.material = fm;
+      const fm = mat(scene, 'fm', '#ffffff'); fm.diffuseTexture = NV.tex(scene, 256, 256, (c, w, h) => { c.fillStyle = th === 'water' ? '#15242a' : '#221e2e'; c.fillRect(0, 0, w, h); c.strokeStyle = 'rgba(255,255,255,.12)'; c.lineWidth = 3; c.strokeRect(0, 0, w, h); c.strokeStyle = 'rgba(255,255,255,.035)'; c.beginPath(); c.moveTo(w / 2, 0); c.lineTo(w / 2, h); c.moveTo(0, h / 2); c.lineTo(w, h / 2); c.stroke(); const rr = U.rng(4); for (let i = 0; i < 300; i++) { c.fillStyle = `rgba(0,0,0,${rr() * .25})`; c.fillRect(rr() * w, rr() * h, 3 + rr() * 12, 2); } c.fillStyle = 'rgba(255,200,80,.08)'; c.fillRect(0, h - 10, w, 4); }, 'floortex');
+      fm.diffuseTexture.uScale = W / 2; fm.diffuseTexture.vScale = H / 2; fm.specularColor = new BABYLON.Color3(.55, .5, .65); fm.specularPower = 48; floor.material = fm;
     }
-    // walls + neon trim
-    const wallBoxes = [], trims = [];
-    const trimMat = mat(scene, 'trim', '#000', pal.a), trimMat2 = mat(scene, 'trim2', '#000', pal.b);
+    // walls + neon trim (merged: two draw calls for the entire map)
+    const wallBoxes = [], trims = [], faces = [];
+    const trimMat = mat(scene, 'trim', '#000', pal.a);
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       if (g[y][x] !== 1) continue;
       const nb = [[1, 0], [-1, 0], [0, 1], [0, -1]].filter(([dx, dy]) => { const nx = x + dx, ny = y + dy; return nx >= 0 && ny >= 0 && nx < W && ny < H && g[ny][nx] !== 1; });
       if (!nb.length) continue;
       const b = BABYLON.MeshBuilder.CreateBox('w', { width: TILE, height: WALLH, depth: TILE }, scene); b.position.set((x + .5) * TILE, WALLH / 2, (y + .5) * TILE); wallBoxes.push(b);
-      nb.forEach(([dx, dy], k) => {
+      nb.forEach(([dx, dy]) => {
         const tr = BABYLON.MeshBuilder.CreateBox('t', { width: dx ? .06 : TILE, height: .09, depth: dy ? .06 : TILE }, scene);
         tr.position.set((x + .5 + dx * .5) * TILE + dx * .03, ((x + y) % 3 ? .25 : WALLH - .5), (y + .5 + dy * .5) * TILE + dy * .03); trims.push(tr);
+        faces.push({ x, y, dx, dy });
       });
     }
-    const walls = BABYLON.Mesh.MergeMeshes(wallBoxes, true, true);
+    const walls = BABYLON.Mesh.MergeMeshes(wallBoxes, true, true); statics.push(walls);
     const wm = mat(scene, 'wm', '#ffffff');
-    wm.diffuseTexture = NV.tex(scene, 256, 256, (c, w, h) => { c.fillStyle = cyber ? '#140a2a' : '#2c2838'; c.fillRect(0, 0, w, h); c.fillStyle = 'rgba(255,255,255,.08)'; for (let i = 0; i < 4; i++) c.fillRect(0, i * 64 + 60, w, 3); c.fillStyle = 'rgba(0,0,0,.35)'; c.fillRect(0, 0, 4, h); c.fillRect(w - 4, 0, 4, h); const rr = U.rng(11); for (let i = 0; i < 40; i++) { c.fillStyle = `rgba(255,255,255,${rr() * .05})`; c.fillRect(rr() * w, rr() * h, 20 + rr() * 60, 10 + rr() * 30); } }, 'walltex');
+    wm.diffuseTexture = NV.tex(scene, 256, 256, (c, w, h) => { c.fillStyle = cyber ? '#140a2a' : '#2c2838'; c.fillRect(0, 0, w, h); c.fillStyle = 'rgba(255,255,255,.08)'; for (let i = 0; i < 4; i++) c.fillRect(0, i * 64 + 60, w, 3); c.fillStyle = 'rgba(0,0,0,.35)'; c.fillRect(0, 0, 4, h); c.fillRect(w - 4, 0, 4, h); const rr = U.rng(11); for (let i = 0; i < 40; i++) { c.fillStyle = `rgba(255,255,255,${rr() * .05})`; c.fillRect(rr() * w, rr() * h, 20 + rr() * 60, 10 + rr() * 30); } c.fillStyle = 'rgba(0,0,0,.28)'; c.fillRect(0, h - 26, w, 26); for (let i = 0; i < 6; i++) { c.fillStyle = 'rgba(255,255,255,.06)'; c.fillRect(20 + i * 40, 30, 3, 90); } }, 'walltex');
     wm.specularColor = new BABYLON.Color3(.25, .25, .3);
     wm.emissiveColor = C3(pal.a).scale(cyber ? .12 : .035); if (cyber) wm.alpha = .92;
     walls.material = wm;
-    if (trims.length) { const tm = BABYLON.Mesh.MergeMeshes(trims, true, true); tm.material = trimMat; }
-    // ceiling for interiors
+    if (trims.length) { const tm = BABYLON.Mesh.MergeMeshes(trims, true, true); tm.material = trimMat; statics.push(tm); }
+    const r = U.rng(L.seed + 5);
+    // holo signs on walls (shared atlas, one draw call)
+    if (q.signs && faces.length) {
+      const atlas = NV.signAtlas(scene), planes = [];
+      for (let i = 0; i < 12; i++) {
+        const f = faces[Math.floor(r() * faces.length)]; const uv = NV.signUV(Math.floor(r() * 16));
+        const p = BABYLON.MeshBuilder.CreatePlane('ws', { width: 3.2, height: .8, frontUVs: uv, backUVs: uv, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene);
+        p.position.set((f.x + .5 + f.dx * .5) * TILE + f.dx * .08, 3.3 + r() * .8, (f.y + .5 + f.dy * .5) * TILE + f.dy * .08);
+        p.rotation.y = Math.atan2(f.dx, f.dy); planes.push(p);
+      }
+      const sgn = BABYLON.Mesh.MergeMeshes(planes, true, true); const sm = mat(scene, 'wsm', '#000', r() < .5 ? pal.a : pal.b);
+      sm.emissiveTexture = atlas; sm.opacityTexture = atlas; sm.disableLighting = true; sm.backFaceCulling = false; sgn.material = sm; statics.push(sgn);
+    }
+    // ceiling for interiors (+ volumetric-looking light shafts on medium+)
     if (!outdoor && !cyber) {
       const ceil = BABYLON.MeshBuilder.CreatePlane('ceil', { width: W * TILE, height: H * TILE, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene);
       ceil.rotation.x = Math.PI / 2; ceil.position.set(W * TILE / 2, WALLH, H * TILE / 2);
-      const cm = mat(scene, 'cm', '#0a0810'); ceil.material = cm;
-      const panels = [];
-      L.map.rooms.forEach(rm => { const p = BABYLON.MeshBuilder.CreateBox('lp', { width: 2.4, height: .08, depth: .5 }, scene); p.position.set((rm.cx + .5) * TILE, WALLH - .06, (rm.cy + .5) * TILE); panels.push(p); });
-      if (panels.length) { const pm = BABYLON.Mesh.MergeMeshes(panels, true, true); pm.material = mat(scene, 'lpm', '#000', '#ffffff'); pm.material.emissiveColor = C3(pal.b).scale(.8).add(new BABYLON.Color3(.3, .3, .3)); }
+      ceil.material = mat(scene, 'cm', '#0a0810'); statics.push(ceil);
+      const panels = [], cones = [];
+      L.map.rooms.forEach(rm => {
+        const p = BABYLON.MeshBuilder.CreateBox('lp', { width: 2.4, height: .08, depth: .5 }, scene); p.position.set((rm.cx + .5) * TILE, WALLH - .06, (rm.cy + .5) * TILE); panels.push(p);
+        if (q.cones) { const c = BABYLON.MeshBuilder.CreateCylinder('lc', { diameterTop: 1.2, diameterBottom: 5.5, height: WALLH - .1, tessellation: 12, cap: BABYLON.Mesh.NO_CAP }, scene); c.position.set(p.position.x, (WALLH - .1) / 2, p.position.z); cones.push(c); }
+      });
+      if (panels.length) { const pm = BABYLON.Mesh.MergeMeshes(panels, true, true); pm.material = mat(scene, 'lpm', '#000', '#ffffff'); pm.material.emissiveColor = C3(pal.b).scale(.8).add(new BABYLON.Color3(.3, .3, .3)); statics.push(pm); }
+      if (cones.length) {
+        const cm = BABYLON.Mesh.MergeMeshes(cones, true, true); const m = mat(scene, 'lcm', '#000', pal.b, .06);
+        m.emissiveColor = C3(pal.b).scale(.5).add(new BABYLON.Color3(.3, .3, .3)); m.disableLighting = true; m.alphaMode = BABYLON.Engine.ALPHA_ADD; m.backFaceCulling = false; m.fogEnabled = true;
+        cm.material = m; glow.addExcludedMesh(cm); statics.push(cm);
+      }
     }
-    // skyline around outdoor maps
+    // skyline + gradient sky around outdoor maps
     if (outdoor || cyber) {
       const sk = BABYLON.MeshBuilder.CreateBox('sky', { size: 1 }, scene);
       const sm = mat(scene, 'skm', '#000'); sm.emissiveTexture = NV.windowTex(scene, 55, pal.a, pal.b); sm.emissiveTexture.vScale = 6;
       if (cyber) { sm.wireframe = true; sm.emissiveTexture = null; sm.emissiveColor = C3(pal.b); }
       sk.material = sm; const rr = U.rng(21), arr = [];
       const cx = W * TILE / 2, cz = H * TILE / 2;
-      for (let i = 0; i < 90; i++) { const a = rr() * Math.PI * 2, d = W * TILE * .75 + rr() * 160, h = 30 + rr() * 150, w = 12 + rr() * 20; arr.push(BABYLON.Matrix.Compose(V3(w, h, w), BABYLON.Quaternion.Identity(), V3(cx + Math.cos(a) * d, h / 2 - 20, cz + Math.sin(a) * d))); }
-      const buf = new Float32Array(arr.length * 16); arr.forEach((m4, i) => m4.copyToArray(buf, i * 16)); sk.thinInstanceSetBuffer('matrix', buf, 16);
-      if (th !== 'space') {
-        const rain = new BABYLON.ParticleSystem('rain', 2500, scene);
+      for (let i = 0; i < 90; i++) { const a = rr() * Math.PI * 2, d = W * TILE * .75 + rr() * 160, h = 30 + rr() * 150, w = 12 + rr() * 20; arr.push(NV.M(w, h, w, cx + Math.cos(a) * d, h / 2 - 20, cz + Math.sin(a) * d)); }
+      NV.thin(sk, arr); statics.push(sk);
+      const dome = BABYLON.MeshBuilder.CreateSphere('dome', { diameter: 1100, segments: 10, sideOrientation: BABYLON.Mesh.BACKSIDE }, scene);
+      const dm = mat(scene, 'domem', '#000'); dm.emissiveTexture = NV.skyTex(scene, pal, 'lsky'); dm.disableLighting = true; dm.fogEnabled = false; dome.material = dm; dome.applyFog = false; dome.infiniteDistance = true; glow.addExcludedMesh(dome); statics.push(dome);
+      if (th !== 'space' && !cyber) {
+        const rain = new BABYLON.ParticleSystem('rain', q.lrain, scene);
         rain.particleTexture = NV.tex(scene, 8, 64, (c, w, h) => { const gr = c.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(1, 'rgba(200,230,255,.9)'); c.fillStyle = gr; c.fillRect(3, 0, 2, h); }, 'rt');
-        rain.emitter = V3(0, 0, 0); rain.createBoxEmitter(V3(0, -1, 0), V3(0, -1, 0), V3(-25, 14, -25), V3(25, 16, 25));
-        rain.minEmitPower = 25; rain.maxEmitPower = 30; rain.minSize = .03; rain.maxSize = .06; rain.minScaleY = 8; rain.maxScaleY = 14; rain.minLifeTime = .6; rain.maxLifeTime = .8; rain.emitRate = cyber ? 0 : 1500;
+        rain.emitter = V3(0, 0, 0); rain.createBoxEmitter(V3(0, -1, 0), V3(0, -1, 0), V3(-22, 14, -22), V3(22, 16, 22));
+        rain.minEmitPower = 25; rain.maxEmitPower = 30; rain.minSize = .03; rain.maxSize = .06; rain.minScaleY = 8; rain.maxScaleY = 14; rain.minLifeTime = .6; rain.maxLifeTime = .8; rain.emitRate = q.lrain / .75;
         rain.color1 = new BABYLON.Color4(.7, .85, 1, .35); rain.color2 = new BABYLON.Color4(1, .6, 1, .25); rain.colorDead = new BABYLON.Color4(0, 0, 0, 0);
         rain.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD; rain.billboardMode = BABYLON.ParticleSystem.BILLBOARDMODE_STRETCHED; rain.start(); L.rain = rain;
       }
     }
-    // crates / cover
-    const crateMat = mat(scene, 'crate', '#221c33'); crateMat.emissiveTexture = NV.tex(scene, 64, 64, (c, w, h) => { c.fillStyle = '#000'; c.fillRect(0, 0, w, h); c.strokeStyle = pal.a; c.lineWidth = 2; c.strokeRect(2, 2, w - 4, h - 4); c.fillStyle = pal.b; c.fillRect(8, h - 14, 20, 4); }, 'cratetex');
-    const crates = [];
-    const r = U.rng(L.seed + 5);
+    // crates / cover (merged into one mesh)
+    const crateMat = mat(scene, 'crate', '#221c33'); crateMat.emissiveTexture = NV.tex(scene, 64, 64, (c, w, h) => { c.fillStyle = '#000'; c.fillRect(0, 0, w, h); c.strokeStyle = pal.a; c.lineWidth = 2; c.strokeRect(2, 2, w - 4, h - 4); c.fillStyle = pal.b; c.fillRect(8, h - 14, 20, 4); c.fillStyle = 'rgba(255,255,255,.25)'; c.fillRect(w - 18, 8, 10, 3); }, 'cratetex');
+    const crates = [], crateMeshes = [];
     L.map.rooms.forEach((rm, i) => {
       if (i === 0) return;
       const n = Math.floor(r() * 3);
@@ -1058,76 +1214,96 @@ NV.Level = (() => {
         if ([[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => g[y + dy] && g[y + dy][x + dx] === 0 && (x + dx < rm.x || x + dx >= rm.x + rm.w || y + dy < rm.y || y + dy >= rm.y + rm.h))) continue; // keep doorways clear
         g[y][x] = 2;
         const s = 1.4 + r() * .5, c = cellC(x, y);
-        const b = BABYLON.MeshBuilder.CreateBox('cr', { size: s }, scene); b.position.set(c.x + (r() - .5), s / 2, c.z + (r() - .5)); b.rotation.y = r() * .6; b.material = crateMat;
+        const b = BABYLON.MeshBuilder.CreateBox('cr', { size: s }, scene); b.position.set(c.x + (r() - .5), s / 2, c.z + (r() - .5)); b.rotation.y = r() * .6; crateMeshes.push(b);
         crates.push({ x: b.position.x, z: b.position.z, h: s / 2 + .15 });
       }
     });
+    if (crateMeshes.length) { const cm = BABYLON.Mesh.MergeMeshes(crateMeshes, true, true); cm.material = crateMat; statics.push(cm); }
     L.crates = crates;
+    NV.freeze(statics);
     // viewmodel gun
     const gun = new BABYLON.TransformNode('gun', scene); gun.parent = cam; gun.position.set(.3, -.32, .62); gun.rotation.y = -.04;
-    const gunM = mat(scene, 'gunm', '#2a2638'); gunM.specularColor = new BABYLON.Color3(.3, .3, .35); gunM.emissiveColor = new BABYLON.Color3(.03, .02, .05);
+    const gunM = mat(scene, 'gunm', '#2a2638'); gunM.specularColor = new BABYLON.Color3(.35, .35, .4); gunM.emissiveColor = new BABYLON.Color3(.03, .02, .05);
     const gm2 = mat(scene, 'gune', '#000', pal.b);
-    const parts = [BABYLON.MeshBuilder.CreateBox('gb', { width: .12, height: .16, depth: .5 }, scene), BABYLON.MeshBuilder.CreateBox('gg', { width: .1, height: .22, depth: .12 }, scene), BABYLON.MeshBuilder.CreateCylinder('gbar', { diameter: .07, height: .3 }, scene)];
-    parts[1].position.set(0, -.14, -.12); parts[1].rotation.x = .25; parts[2].rotation.x = Math.PI / 2; parts[2].position.set(0, .02, .38);
-    parts.forEach(p => { p.parent = gun; p.material = gunM; p.renderingGroupId = 1; glow.addExcludedMesh(p); plight.excludedMeshes.push(p); });
+    const parts = [BABYLON.MeshBuilder.CreateBox('gb', { width: .12, height: .16, depth: .5 }, scene), BABYLON.MeshBuilder.CreateBox('gg', { width: .1, height: .22, depth: .12 }, scene), BABYLON.MeshBuilder.CreateCylinder('gbar', { diameter: .07, height: .3, tessellation: 10 }, scene), BABYLON.MeshBuilder.CreateBox('gsight', { width: .05, height: .05, depth: .12 }, scene)];
+    parts[1].position.set(0, -.14, -.12); parts[1].rotation.x = .25; parts[2].rotation.x = Math.PI / 2; parts[2].position.set(0, .02, .38); parts[3].position.set(0, .1, -.05);
+    parts.forEach(p => { p.parent = gun; p.material = gunM; p.renderingGroupId = 1; p.isPickable = false; glow.addExcludedMesh(p); plight.excludedMeshes.push(p); });
     const coil = BABYLON.MeshBuilder.CreateBox('gcoil', { width: .025, height: .02, depth: .3 }, scene); coil.parent = gun; coil.position.set(.066, .02, .02); coil.material = gm2; coil.renderingGroupId = 1;
-    const coil2 = BABYLON.MeshBuilder.CreateTorus('gring', { diameter: .1, thickness: .02 }, scene); coil2.parent = gun; coil2.rotation.x = Math.PI / 2; coil2.position.set(0, .02, .5); coil2.material = gm2; coil2.renderingGroupId = 1;
-    [coil, coil2].forEach(m => glow.addExcludedMesh(m));
-    const flash = new BABYLON.PointLight('mf', V3(0, 0, 0), scene); flash.parent = gun; flash.position.z = .7; flash.intensity = 0; flash.range = 10; flash.diffuse = C3(pal.b);
-    L.gun = { node: gun, coil: gm2, flash, kick: 0 };
+    const coil2 = BABYLON.MeshBuilder.CreateTorus('gring', { diameter: .1, thickness: .02, tessellation: 16 }, scene); coil2.parent = gun; coil2.rotation.x = Math.PI / 2; coil2.position.set(0, .02, .5); coil2.material = gm2; coil2.renderingGroupId = 1;
+    [coil, coil2].forEach(m => { glow.addExcludedMesh(m); m.isPickable = false; });
+    // muzzle flash sprite (cheap) + real light only on medium/high
+    const mfm = mat(scene, 'mfm', '#000', '#ffffff'); mfm.emissiveTexture = NV.tex(scene, 64, 64, (c, w, h) => { const gr = c.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(.3, 'rgba(160,240,255,.8)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = gr; c.beginPath(); for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2, rr = i % 2 ? 12 : 32; c.lineTo(32 + Math.cos(a) * rr, 32 + Math.sin(a) * rr); } c.fill(); }, 'mflash');
+    mfm.opacityTexture = mfm.emissiveTexture; mfm.disableLighting = true; mfm.alphaMode = BABYLON.Engine.ALPHA_ADD; mfm.backFaceCulling = false;
+    const mf = BABYLON.MeshBuilder.CreatePlane('mf', { size: .45 }, scene); mf.parent = gun; mf.position.set(0, .02, .68); mf.material = mfm; mf.renderingGroupId = 1; mf.isVisible = false; mf.isPickable = false;
+    const flash = q.detail ? new BABYLON.PointLight('mfl', V3(0, 0, 0), scene) : { intensity: 0 };
+    if (q.detail) { flash.parent = gun; flash.position.z = .7; flash.intensity = 0; flash.range = 10; flash.diffuse = C3(pal.b); }
+    L.gun = { node: gun, coil: gm2, flash, mf, kick: 0 };
     scene.setRenderingAutoClearDepthStencil(1, true, true, false);
     // shared materials
     L.mats = {
-      enemy: mat(scene, 'en', '#1b1a24'), visor: mat(scene, 'vis', '#000', '#ff3355'), visorOff: mat(scene, 'visoff', '#000', '#331018'),
+      enemy: mat(scene, 'en', '#1b1a24'), armor: mat(scene, 'arm', '#34304a'), visor: mat(scene, 'vis', '#000', '#ff3355'), visorOff: mat(scene, 'visoff', '#000', '#331018'),
       drone: mat(scene, 'dr', '#222030'), ice: mat(scene, 'ice', '#000', '#ff2bd6', .9), civ: mat(scene, 'civ', '#4b5a78'), civMark: mat(scene, 'cm2', '#000', '#ffd23d'),
       pbul: mat(scene, 'pb', '#000', pal.b), ebul: mat(scene, 'eb', '#000', '#ff5a3d'), term: mat(scene, 'term', '#141222'), scr: mat(scene, 'scr', '#000', '#ffb238'), scrOk: mat(scene, 'scrok', '#000', '#3dffa8'),
       shard: mat(scene, 'shard', '#000', pal.a), exit: mat(scene, 'exit', '#000', '#3dffa8', .35), exitOff: mat(scene, 'exoff', '#000', '#444455', .2), med: mat(scene, 'med', '#000', '#ff2b6a'),
       mS: mat(scene, 'ms', '#000', '#ffd23d'), mA: mat(scene, 'ma', '#000', '#ff3355'), node: mat(scene, 'node', '#10141f'), nodeE: mat(scene, 'nodee', '#000', '#19f0ff'), tracer: mat(scene, 'trc', '#000', pal.b),
       shield: mat(scene, 'shd', '#000', '#19f0ff', .18), boss: mat(scene, 'boss', '#1a1420'), bossE: mat(scene, 'bosse', '#000', '#ff3355'),
     };
+    L.mats.enemy.specularColor = L.mats.armor.specularColor = new BABYLON.Color3(.4, .4, .5);
     L.mats.ice.wireframe = true; L.mats.exit.backFaceCulling = false; L.mats.exitOff.backFaceCulling = false; L.mats.shield.backFaceCulling = false;
+    // instancing prototypes: every enemy shares these meshes -> one draw call per part type
+    const P = (mesh, m) => { mesh.material = m; mesh.position.y = -1000; mesh.isPickable = false; return mesh; };
+    L.proto = {
+      body: P(BABYLON.MeshBuilder.CreateCapsule('pb', { radius: .38, height: 1.55, tessellation: 12, subdivisions: 2 }, scene), L.mats.enemy),
+      head: P(BABYLON.MeshBuilder.CreateSphere('ph', { diameter: .42, segments: 10 }, scene), L.mats.enemy),
+      pack: P(BABYLON.MeshBuilder.CreateBox('pp', { width: .5, height: .6, depth: .25 }, scene), L.mats.armor),
+      gun: P(BABYLON.MeshBuilder.CreateBox('pg', { width: .1, height: .12, depth: .6 }, scene), L.mats.enemy),
+      pad: P(BABYLON.MeshBuilder.CreateBox('ppad', { width: .26, height: .12, depth: .36 }, scene), L.mats.armor),
+      dbody: P(BABYLON.MeshBuilder.CreateSphere('pdb', { diameter: .7, segments: 10 }, scene), L.mats.drone),
+      arm: P(BABYLON.MeshBuilder.CreateBox('parm', { width: 1.3, height: .05, depth: .08 }, scene), L.mats.drone),
+      ring: P(BABYLON.MeshBuilder.CreateTorus('pr', { diameter: 1.1, thickness: .06, tessellation: 20 }, scene), L.mats.visor),
+      ice: P(BABYLON.MeshBuilder.CreatePolyhedron('pice', { type: 1, size: .55 }, scene), L.mats.ice),
+    };
     // sparks
-    const sp = new BABYLON.ParticleSystem('sparks', 600, scene);
+    const sp = new BABYLON.ParticleSystem('sparks', q.sparks, scene);
     sp.particleTexture = NV.tex(scene, 32, 32, (c, w, h) => { const gr = c.createRadialGradient(16, 16, 0, 16, 16, 16); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = gr; c.fillRect(0, 0, w, h); }, 'spk');
     sp.emitter = V3(0, 0, 0); sp.minSize = .04; sp.maxSize = .14; sp.minLifeTime = .15; sp.maxLifeTime = .45; sp.emitRate = 0; sp.minEmitPower = 3; sp.maxEmitPower = 9; sp.gravity = V3(0, -12, 0);
     sp.createSphereEmitter(.1); sp.color1 = BABYLON.Color4.FromColor3(C3(pal.b)); sp.color2 = new BABYLON.Color4(1, 1, 1, 1); sp.colorDead = new BABYLON.Color4(0, 0, 0, 0); sp.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD; sp.manualEmitCount = 0; sp.start();
     L.sparks = sp;
     L.tracers = [];
-    for (let i = 0; i < 12; i++) { const t = BABYLON.MeshBuilder.CreateBox('tr', { width: .03, height: .03, depth: 1 }, scene); t.material = L.mats.tracer; t.isVisible = false; L.tracers.push({ m: t, life: 0 }); }
+    for (let i = 0; i < 10; i++) { const t = BABYLON.MeshBuilder.CreateBox('tr', { width: .03, height: .03, depth: 1 }, scene); t.material = L.mats.tracer; t.isVisible = false; t.isPickable = false; L.tracers.push({ m: t, life: 0 }); }
     L.bulletPool = [];
     return { scene, cam, plight };
   }
 
-  function spark(p, col, n) { L.sparks.emitter = p.clone ? p.clone() : V3(p.x, p.y, p.z); if (col) L.sparks.color1 = BABYLON.Color4.FromColor3(C3(col)); L.sparks.manualEmitCount = n || 14; }
+  function spark(p, col, n) { L.sparks.emitter = p.clone ? p.clone() : V3(p.x, p.y, p.z); if (col) L.sparks.color1 = BABYLON.Color4.FromColor3(C3(col)); L.sparks.manualEmitCount = Math.min(n || 14, NV.Quality.get().sparks / 6 | 0); }
   function tracer(a, b) {
     const t = L.tracers.find(t => t.life <= 0) || L.tracers[0];
     const mid = a.add(b).scale(.5); t.m.position.copyFrom(mid); t.m.scaling.z = BABYLON.Vector3.Distance(a, b); t.m.lookAt(b); t.m.isVisible = true; t.life = .06;
   }
 
   /* ---------------- entities ---------------- */
+  function inst(proto, root, x, y, z, rx, ry, rz) { const i = proto.createInstance('i'); i.parent = root; i.position.set(x, y, z); if (rx || ry || rz) i.rotation.set(rx || 0, ry || 0, rz || 0); i.isPickable = false; return i; }
   function makeHuman(kind) {
-    const s = L.scene, root = new BABYLON.TransformNode('e', s);
+    const s = L.scene, root = new BABYLON.TransformNode('e', s), P = L.proto;
     const big = kind === 'heavy', sc = big ? 1.25 : 1;
-    const body = BABYLON.MeshBuilder.CreateCapsule('b', { radius: .38 * sc, height: 1.55 * sc }, s); body.position.y = .8 * sc; body.material = L.mats.enemy; body.parent = root;
-    const head = BABYLON.MeshBuilder.CreateSphere('hd', { diameter: .42 * sc }, s); head.position.y = 1.72 * sc; head.material = L.mats.enemy; head.parent = root;
-    const visor = BABYLON.MeshBuilder.CreateBox('v', { width: .36 * sc, height: .08, depth: .1 }, s); visor.position.set(0, 1.74 * sc, .17 * sc); visor.material = L.mats.visor; visor.parent = root;
-    const pack = BABYLON.MeshBuilder.CreateBox('pk', { width: .5 * sc, height: .6 * sc, depth: .25 }, s); pack.position.set(0, 1.1 * sc, -.35 * sc); pack.material = L.mats.enemy; pack.parent = root;
-    const strip = BABYLON.MeshBuilder.CreateBox('st', { width: .04, height: .5 * sc, depth: .04 }, s); strip.position.set(.2, 1.1 * sc, -.48 * sc); strip.material = L.mats.visor; strip.parent = root;
-    const gun = BABYLON.MeshBuilder.CreateBox('g', { width: .1, height: .12, depth: .6 }, s); gun.position.set(.32 * sc, 1.05 * sc, .35); gun.material = L.mats.enemy; gun.parent = root;
-    const mark = BABYLON.MeshBuilder.CreateSphere('mk', { diameter: .18 }, s); mark.position.y = 2.25 * sc; mark.material = L.mats.mS; mark.parent = root; mark.isVisible = false;
-    return { root, visor, mark, parts: [body, head, visor, pack, strip, gun], hy: 1.72 * sc, r: .45 * sc };
+    root.scaling.setAll(sc);
+    inst(P.body, root, 0, .8, 0); inst(P.head, root, 0, 1.72, 0); inst(P.pack, root, 0, 1.1, -.35); inst(P.gun, root, .32, 1.05, .35);
+    inst(P.pad, root, -.36, 1.42, 0, 0, 0, .35); inst(P.pad, root, .36, 1.42, 0, 0, 0, -.35);
+    // per-enemy emissive bits (swap to "off" material when disabled)
+    const visor = BABYLON.MeshBuilder.CreateBox('v', { width: .36, height: .08, depth: .1 }, s); visor.position.set(0, 1.74, .17); visor.material = L.mats.visor; visor.parent = root; visor.isPickable = false;
+    const chest = BABYLON.MeshBuilder.CreateBox('c', { width: .05, height: .05, depth: .04 }, s); chest.position.set(-.12, 1.25, .37); chest.material = L.mats.visor; chest.parent = root; chest.isPickable = false;
+    const mark = BABYLON.MeshBuilder.CreateSphere('mk', { diameter: .18, segments: 6 }, s); mark.position.y = 2.25; mark.material = L.mats.mS; mark.parent = root; mark.isVisible = false; mark.isPickable = false;
+    return { root, visor, extra: [chest], mark, hy: 1.72 * sc, r: .45 * sc };
   }
   function makeDrone(ice) {
-    const s = L.scene, root = new BABYLON.TransformNode('d', s);
-    let body;
-    if (ice) { body = BABYLON.MeshBuilder.CreatePolyhedron('ice', { type: 1, size: .55 }, s); body.material = L.mats.ice; }
-    else { body = BABYLON.MeshBuilder.CreateSphere('db', { diameter: .7, segments: 12 }, s); body.material = L.mats.drone; }
-    body.parent = root;
-    const ring = BABYLON.MeshBuilder.CreateTorus('dr', { diameter: 1.1, thickness: .06, tessellation: 24 }, s); ring.parent = root; ring.material = L.mats.visor;
-    const eye = BABYLON.MeshBuilder.CreateSphere('de', { diameter: .2 }, s); eye.position.z = .32; eye.parent = root; eye.material = L.mats.visor;
-    const mark = BABYLON.MeshBuilder.CreateSphere('mk', { diameter: .16 }, s); mark.position.y = .7; mark.material = L.mats.mS; mark.parent = root; mark.isVisible = false;
+    const s = L.scene, root = new BABYLON.TransformNode('d', s), P = L.proto;
+    const body = inst(ice ? P.ice : P.dbody, root, 0, 0, 0);
+    const ring = inst(P.ring, root, 0, 0, 0);
+    if (!ice) { inst(P.arm, root, 0, .25, 0, 0, Math.PI / 4, 0); inst(P.arm, root, 0, .25, 0, 0, -Math.PI / 4, 0); }
+    const eye = BABYLON.MeshBuilder.CreateSphere('de', { diameter: .2, segments: 6 }, s); eye.position.z = .32; eye.parent = root; eye.material = L.mats.visor; eye.isPickable = false;
+    const mark = BABYLON.MeshBuilder.CreateSphere('mk', { diameter: .16, segments: 6 }, s); mark.position.y = .7; mark.material = L.mats.mS; mark.parent = root; mark.isVisible = false; mark.isPickable = false;
     root.position.y = 2.2;
-    return { root, visor: eye, ring, body, mark, parts: [body, ring, eye], hy: 0, r: .5 };
+    return { root, visor: eye, extra: [], ring, body, mark, hy: 0, r: .5 };
   }
 
   function addEnemy(kind, x, z, patrol) {
@@ -1266,7 +1442,7 @@ NV.Level = (() => {
     const p = L.p; if (p.heat >= 100 || p.over > 0 || p.cd > 0) return;
     p.cd = .16; p.heat += 11; if (p.heat >= 100) { p.over = 1.6; NV.Audio.sfx('hackfail'); }
     NV.Audio.sfx('shoot'); noise(p.x, p.z, 14);
-    L.gun.kick = 1; L.gun.flash.intensity = 2.5; p.pitch -= .012; L.stats.shots++;
+    L.gun.kick = 1; L.gun.flash.intensity = 2.5; L.gun.mf.isVisible = true; L.gun.mf.rotation.z = Math.random() * 6.28; L.gun.mf.scaling.setAll(.8 + Math.random() * .5); L.gun.mfT = .045; p.pitch -= .012; L.stats.shots++;
     const o = L.cam.position.clone(), d = camDir();
     // walls
     let tWall = 60; for (let t = .3; t < 60; t += .25) { const q = o.add(d.scale(t)); if (q.y < 0 || q.y > WALLH || solid(q.x, q.z)) { tWall = t; break; } }
@@ -1308,7 +1484,7 @@ NV.Level = (() => {
   function disable(e, takedown) {
     e.state = 'down'; e.hp = 0; NV.Audio.sfx('down');
     if (takedown) L.stats.takedowns++; else L.stats.disabled++;
-    e.m.visor.material = L.mats.visorOff; e.m.mark.isVisible = false;
+    e.m.visor.material = L.mats.visorOff; e.m.extra.forEach(x => x.material = L.mats.visorOff); e.m.mark.isVisible = false;
     spark(V3(e.x, 1, e.z), '#ffffff', 20);
     if (L.waves) L.waves.alive--;
   }
@@ -1451,7 +1627,7 @@ NV.Level = (() => {
     if (L.rain) L.rain.emitter = V3(p.x, 0, p.z);
     L.cam.fov = U.lerp(L.cam.fov, set.fov * Math.PI / 180 * .75 * (sprint ? 1.08 : 1) * (p.dash > 0 ? 1.15 : 1), dt * 8);
     // gun
-    const G = L.gun; G.kick = Math.max(0, G.kick - dt * 8); G.flash.intensity = Math.max(0, G.flash.intensity - dt * 25);
+    const G = L.gun; G.kick = Math.max(0, G.kick - dt * 8); if (G.mfT > 0) { G.mfT -= dt; if (G.mfT <= 0) G.mf.isVisible = false; } G.flash.intensity = Math.max(0, G.flash.intensity - dt * 25);
     G.node.position.set(.3 + (p.moving ? Math.cos(p.bob * .5) * .015 : 0), -.32 + (p.moving ? Math.abs(Math.sin(p.bob * .5)) * .012 : 0) - (hacking ? .25 : 0), .62 - G.kick * .08);
     G.node.rotation.x = -G.kick * .12; G.coil.emissiveColor = p.over > 0 ? C3('#ff3355') : C3(L.palette.b).scale(1 - p.heat / 160);
     // actions
@@ -1917,7 +2093,7 @@ NV.UI = (() => {
       ['master', 'Master volume', 'range', 0, 1, .1], ['music', 'Music volume', 'range', 0, 1, .1], ['sfx', 'Effects volume', 'range', 0, 1, .1],
       ['textSpeed', 'Text speed', 'enum', ['Slow', 'Normal', 'Fast', 'Instant'], 0], ['sens', 'Mouse sensitivity', 'range', .3, 3, .1],
       ['fov', 'Field of view', 'range', 65, 110, 5], ['invertY', 'Invert Y axis', 'bool'], ['shake', 'Screen shake', 'bool'],
-      ['scan', 'Scanline filter', 'bool'], ['showStats', 'Show world-state changes', 'bool'], ['quality', 'Render quality', 'enum', ['Performance', 'High']],
+      ['scan', 'Scanline filter', 'bool'], ['showStats', 'Show world-state changes', 'bool'], ['gfx', 'Graphics quality', 'enum', ['Auto', 'Low', 'Medium', 'High']], ['dynRes', 'Dynamic resolution', 'bool'], ['showFps', 'Show FPS', 'bool'],
     ];
     const m = modal(`<div class="stitle">SETTINGS</div><div class="rows"></div><button class="btn" style="margin-top:12px">Done</button>
       <p class="muted" style="margin-top:14px;font-size:14px;line-height:1.6">Controls — <span class="kbd">WASD</span> move · <span class="kbd">Mouse</span> look · <span class="kbd">LMB</span> fire · <span class="kbd">Shift</span> sprint · <span class="kbd">C</span> sneak · <span class="kbd">Space</span> dash · <span class="kbd">E</span> interact / takedown / hack · <span class="kbd">Q</span> EMP · <span class="kbd">Esc</span> pause.<br>Story — <span class="kbd">Space</span>/<span class="kbd">Click</span> advance · <span class="kbd">1-4</span> choose · <span class="kbd">A</span> auto · <span class="kbd">Ctrl</span> hold to skip · <span class="kbd">L</span> log. Gamepads supported.</p>`);
@@ -1929,7 +2105,7 @@ NV.UI = (() => {
       const r = rows[k]; if (!r) return; const cur = S.get()[r[0]]; let v;
       if (r[2] === 'bool') v = cur ? 0 : 1; else if (r[2] === 'enum') v = (cur + d + r[3].length) % r[3].length; else v = Math.round(U.clamp(cur + d * r[5], r[3], r[4]) * 100) / 100;
       S.set(r[0], v); els[k].querySelector('.val').textContent = fmt(r); NV.Audio.sfx('ui');
-      if (r[0] === 'quality') NV.G.engine.setHardwareScalingLevel(v ? 1 / Math.min(1.5, devicePixelRatio || 1) : 1.5);
+      if (r[0] === 'gfx') { const q = NV.Quality.reset(); NV.G.scale = q.scale; NV.G.engine.setHardwareScalingLevel(q.scale); NV.Backdrop.applyQuality(); NV.toast('GRAPHICS', q.name + ' — anti-aliasing changes apply after a reload.', '#19f0ff'); }
     };
     const fin = () => { UI.pop(h); m.remove(); res(); };
     const h = UI.push(nav(els, { select: k => { if (k === els.length - 1) fin(); else change(k, 1); }, left: k => change(k, -1), right: k => change(k, 1), back: fin }));
