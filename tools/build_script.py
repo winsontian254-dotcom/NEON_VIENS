@@ -240,6 +240,8 @@ def tokenize(lines):
         if m and is_speaker(m.group(1)):
             toks.append(("line", m.group(1).strip(), m.group(2).strip()))
             continue
+        if re.search(r"[\u2500-\u257f]{3,}", s) or re.fullmatch(r"[\s\u2500-\u257f|+\-=.]+", s):
+            continue  # design-doc diagram, not player text
         toks.append(("narr", s, ""))
     return toks
 

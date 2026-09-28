@@ -232,3 +232,19 @@ PRIORITY SUMMARY
   P2  4.1 dev-time source split      (maintainability)
   P2  6.2 stem-count map             (perf on low tier)
   P3  5.x UX/accessibility, 7.x tests, 8.x docs polish
+
+================================================================================
+STATUS (implemented)
+================================================================================
+  DONE 1.1  Operations cap at 5 retries (then continue the story); "stuck?"
+            hint after 2 deaths.
+  DONE 2.1  Dev hashes (#op=, #chapter=) only work with #dev&... .
+  DONE 2.2  Saves carry a version, are migrated on load (missing fields
+            filled), and a corrupt save is backed up to nv_save_v1_corrupt
+            with an on-screen notice instead of failing silently.
+  DONE 3.3  build_script.py drops box-drawing diagram blocks from narration.
+  DONE 5.3  prefers-reduced-motion disables UI animations, scanlines and
+            screen shake by default.
+  DONE 8.1  README size and dev-hash notes updated.
+  OPEN      1.2/1.3/3.1/3.2 condition IDs + validator, 1.4 mid-op saves,
+            4.x source split, 6.x perf, 7.x automated tests.

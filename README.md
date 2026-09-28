@@ -14,8 +14,8 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 
 **Dev shortcuts** (append to the URL hash):
 
-- `#op=boss&scene=NEON HEIGHTS — ROOFTOP` — boot straight into an operation
-- `#op=hack&k=4` — hack operation with 4 terminals
+- `#dev&op=boss&scene=NEON HEIGHTS — ROOFTOP` — boot straight into an operation
+- `#dev&op=hack&k=4` — hack operation with 4 terminals
 - `#chapter=3` — jump straight to a chapter
 - `#diff=hard` — override difficulty
 
@@ -169,14 +169,14 @@ Chapter snapshots are taken at the start of every chapter, so **Chapter Select**
 - **`runOp` retry loop is unbounded.** A stuck operation can theoretically loop forever. Add a max-retry guard if it becomes an issue.
 - **`NV.Quality.detect()` uses GPU name matching.** New GPU models (Adreno 6xx/7xx, M4, etc.) may fall through to the wrong tier. Update the regex as needed.
 - **Mid-operation saves don't exist.** Dying restarts from the chapter checkpoint, not from the last objective.
-- **The `#op=` dev hash is live in production.** Anyone can skip to any boss.
+- ~~The `#op=` dev hash is live in production.~~ Fixed: dev hashes now need `#dev&...`.
 - **Walkable story scenes are decided by heuristic** (`settings.walk && !chapter70 && has-ghost && theme !== space`). Some scenes become levels, some don't, and the player can't predict which without trying.
 
 ---
 
 ## File size
 
-Single HTML file, currently around 700KB. It has been tested up to 100MB+ in similar single-file projects, so size is not a concern for this game.
+Single HTML file, currently around 1MB (grows with script rebuilds). It has been tested up to 100MB+ in similar single-file projects, so size is not a concern for this game.
 
 ---
 
