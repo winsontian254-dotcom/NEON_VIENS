@@ -801,19 +801,19 @@ const V3 = (x, y, z) => new BABYLON.Vector3(x, y, z);
 NV.Quality = (() => {
   const dpr = () => Math.min(2, devicePixelRatio || 1);
   // every individual graphics option, in menu order
-  const KEYS = ['scale', 'upscaler', 'sharpen', 'dynRes', 'target', 'aa', 'glow', 'glowRes', 'glowBlur', 'glowInt', 'bloom', 'bloomW', 'chroma', 'chromaAmt', 'grain', 'vignette', 'tonemap', 'contrast', 'exposure', 'dof', 'shadows', 'lights', 'fog', 'draw', 'aniso', 'rain', 'particles', 'beams', 'cones', 'signs', 'peds'];
+  const KEYS = ['scale', 'upscaler', 'sharpen', 'dynRes', 'target', 'aa', 'glow', 'glowRes', 'glowBlur', 'glowInt', 'bloom', 'bloomW', 'chroma', 'chromaAmt', 'grain', 'vignette', 'tonemap', 'contrast', 'exposure', 'dof', 'shadows', 'lights', 'fog', 'draw', 'aniso', 'rain', 'particles', 'beams', 'cones', 'signs', 'peds', 'lod'];
   //                  scale  upsc        shp  dyn tgt aa      glow gRes gBlur gInt bloom bW  chr cAmt grain vig tone con   exp  dof shad lights fog draw aniso rain part beams cones signs peds
   const T = {
-    ultra:    [1.0,  'bilinear', .25, 0, 60, 'msaa', 1, .5,  48, 1,   1, .35, 1, 6, 1, 1, 1, 1.25, 1.1, 1, 4096, 1, 1, 1000, 16, 2,   2,   1, 1, 1, 60],
-    veryhigh: [1.0,  'bilinear', .25, 0, 60, 'msaa', 1, .5,  32, 1,   1, .3,  1, 5, 1, 1, 1, 1.25, 1.1, 1, 2048, 1, 1, 850,  16, 1.5, 1.5, 1, 1, 1, 48],
-    high:     [1.0,  'sharpen',  .25, 1, 60, 'fxaa', 1, .5,  32, 1,   0, .3,  1, 5, 1, 1, 1, 1.25, 1.1, 0, 1024, 1, 1, 700,  8,  1.2, 1,   1, 1, 1, 40],
-    medhigh:  [.9,   'sharpen',  .3,  1, 60, 'fxaa', 1, .25, 24, 1.1, 0, .3,  1, 4, 0, 1, 1, 1.25, 1.1, 0, 1024, 1, 1, 600,  8,  1,   1,   1, 1, 1, 32],
-    medium:   [.8,   'sharpen',  .35, 1, 60, 'fxaa', 1, .25, 16, 1.1, 0, .3,  0, 4, 0, 1, 0, 1.25, 1.1, 0, 0,    1, 1, 520,  4,  .8,  .8,  1, 1, 1, 26],
-    medlow:   [.72,  'sharpen',  .4,  1, 60, 'fxaa', 1, .125,12, 1.2, 0, .3,  0, 4, 0, 1, 0, 1.25, 1.1, 0, 0,    0, 1, 450,  4,  .6,  .6,  1, 0, 1, 20],
-    low:      [.62,  'sharpen',  .45, 1, 60, 'off',  0, .125,8,  1,   0, .3,  0, 4, 0, 1, 0, 1.25, 1.1, 0, 0,    0, 1, 380,  2,  .4,  .4,  0, 0, 1, 14],
-    verylow:  [.5,   'bilinear', .3,  1, 45, 'off',  0, .125,8,  1,   0, .3,  0, 4, 0, 0, 0, 1.2,  1.1, 0, 0,    0, 1, 300,  1,  .2,  .25, 0, 0, 0, 8],
-    potato:   [.38,  'bilinear', 0,   1, 30, 'off',  0, .125,8,  1,   0, .3,  0, 4, 0, 0, 0, 1.15, 1.1, 0, 0,    0, 1, 200,  1,  .05, .12, 0, 0, 0, 3],
-    howtf:    [.25,  'nearest',  0,   0, 30, 'off',  0, .125,4,  1,   0, .3,  0, 4, 0, 0, 0, 1.1,  1.15,0, 0,    0, 0, 120,  1,  0,   0,   0, 0, 0, 0],
+    ultra:    [1.0,  'bilinear', .25, 0, 60, 'msaa', 1, .5,  48, 1,   1, .35, 1, 6, 1, 1, 1, 1.25, 1.1, 1, 4096, 1, 1, 1000, 16, 2,   2,   1, 1, 1, 60, 3],
+    veryhigh: [1.0,  'bilinear', .25, 0, 60, 'msaa', 1, .5,  32, 1,   1, .3,  1, 5, 1, 1, 1, 1.25, 1.1, 1, 2048, 1, 1, 850,  16, 1.5, 1.5, 1, 1, 1, 48, 2],
+    high:     [1.0,  'sharpen',  .25, 1, 60, 'fxaa', 1, .5,  32, 1,   0, .3,  1, 5, 1, 1, 1, 1.25, 1.1, 0, 1024, 1, 1, 700,  8,  1.2, 1,   1, 1, 1, 40, 1.5],
+    medhigh:  [.9,   'sharpen',  .3,  1, 60, 'fxaa', 1, .25, 24, 1.1, 0, .3,  1, 4, 0, 1, 1, 1.25, 1.1, 0, 1024, 1, 1, 600,  8,  1,   1,   1, 1, 1, 32, 1.2],
+    medium:   [.8,   'sharpen',  .35, 1, 60, 'fxaa', 1, .25, 16, 1.1, 0, .3,  0, 4, 0, 1, 0, 1.25, 1.1, 0, 0,    1, 1, 520,  4,  .8,  .8,  1, 1, 1, 26, 1],
+    medlow:   [.72,  'sharpen',  .4,  1, 60, 'fxaa', 1, .125,12, 1.2, 0, .3,  0, 4, 0, 1, 0, 1.25, 1.1, 0, 0,    0, 1, 450,  4,  .6,  .6,  1, 0, 1, 20, 0.8],
+    low:      [.62,  'sharpen',  .45, 1, 60, 'off',  0, .125,8,  1,   0, .3,  0, 4, 0, 1, 0, 1.25, 1.1, 0, 0,    0, 1, 380,  2,  .4,  .4,  0, 0, 1, 14, 0.6],
+    verylow:  [.5,   'bilinear', .3,  1, 45, 'off',  0, .125,8,  1,   0, .3,  0, 4, 0, 0, 0, 1.2,  1.1, 0, 0,    0, 1, 300,  1,  .2,  .25, 0, 0, 0, 8, 0.45],
+    potato:   [.38,  'bilinear', 0,   1, 30, 'off',  0, .125,8,  1,   0, .3,  0, 4, 0, 0, 0, 1.15, 1.1, 0, 0,    0, 1, 200,  1,  .05, .12, 0, 0, 0, 3, 0.3],
+    howtf:    [.25,  'nearest',  0,   0, 30, 'off',  0, .125,4,  1,   0, .3,  0, 4, 0, 0, 0, 1.1,  1.15,0, 0,    0, 0, 120,  1,  0,   0,   0, 0, 0, 0, 0.2],
   };
   const NAMES = { ultra: 'Ultra', veryhigh: 'Very High', high: 'High', medhigh: 'Medium High', medium: 'Medium', medlow: 'Medium Low', low: 'Low', verylow: 'Very Low', potato: 'Potato', howtf: 'How the hell is your PC running WebGPU', custom: 'Custom' };
   const ORDER = ['ultra', 'veryhigh', 'high', 'medhigh', 'medium', 'medlow', 'low', 'verylow', 'potato', 'howtf'];
@@ -1597,7 +1597,7 @@ NV.Level = (() => {
     L.mats.enemy.specularColor = L.mats.armor.specularColor = new BABYLON.Color3(.4, .4, .5);
     L.mats.ice.wireframe = true; L.mats.exit.backFaceCulling = false; L.mats.exitOff.backFaceCulling = false; L.mats.shield.backFaceCulling = false;
     // instancing prototypes: every enemy shares these meshes -> one draw call per part type
-    const P = (mesh, m) => { mesh.material = m; mesh.position.y = -1000; mesh.isPickable = false; return mesh; };
+    const P = (mesh, m) => { mesh.material = m; mesh.position.y = -1000; mesh.isPickable = false; return lod(mesh); };
     L.proto = {
       leg: P(limbShape('leg', scene), L.mats.enemy), foot: P(limbShape('foot', scene), L.mats.armor), torso: P(limbShape('torso', scene), L.mats.enemy),
       head: P(limbShape('head', scene), L.mats.enemy), arm: P(limbShape('arm', scene), L.mats.enemy), hand: P(limbShape('hand', scene), L.mats.armor),
@@ -1629,6 +1629,28 @@ NV.Level = (() => {
 
   /* ---------------- humanoid skeleton (limbs) ---------------- */
   // one shape library for every humanoid; enemies/pedestrians instance it, story NPCs get unique copies
+  /* ---------------- level of detail ---------------- */
+  // low-poly stand-ins, used at mid range; tiny parts drop out entirely at distance
+  function lowShape(name, s) {
+    switch (name) {
+      case 'leg': return BABYLON.MeshBuilder.CreateCapsule('legL', { radius: .08, height: .5, tessellation: 4, subdivisions: 1, capSubdivisions: 1 }, s);
+      case 'arm': return BABYLON.MeshBuilder.CreateCapsule('armL', { radius: .06, height: .4, tessellation: 4, subdivisions: 1, capSubdivisions: 1 }, s);
+      case 'torso': return BABYLON.MeshBuilder.CreateCapsule('torsoL', { radius: .25, height: .82, tessellation: 5, subdivisions: 1, capSubdivisions: 1 }, s);
+      case 'head': case 'pdh': return BABYLON.MeshBuilder.CreateSphere('headL', { diameter: .36, segments: 3 }, s);
+      case 'pdb': return BABYLON.MeshBuilder.CreateSphere('dbL', { diameter: .7, segments: 3 }, s);
+      case 'pr': return BABYLON.MeshBuilder.CreateTorus('prL', { diameter: 1.1, thickness: .06, tessellation: 8 }, s);
+    }
+    return null;
+  }
+  const LOD_SMALL = new Set(['hand', 'foot', 'pad', 'pack', 'pg', 'parm', 'pds', 'ne', 'nc', 'nhair']);
+  function lod(mesh) {
+    const m = NV.Quality.get().lod || 1, name = mesh.name;
+    if (LOD_SMALL.has(name)) { mesh.addLODLevel(30 * m, null); return mesh; }
+    const low = lowShape(name, L.scene);
+    if (low) { low.material = mesh.material; low.isPickable = false; mesh.addLODLevel(20 * m, low); if (L.sg) L.sg.addShadowCaster(low, false); }
+    mesh.addLODLevel(95 * m, null);
+    return mesh;
+  }
   function limbShape(k, s) {
     switch (k) {
       case 'leg': return BABYLON.MeshBuilder.CreateCapsule('leg', { radius: .08, height: .5, tessellation: 8, subdivisions: 1 }, s);
@@ -2381,7 +2403,7 @@ NV.Level = (() => {
     }
     // pedestrians (instanced)
     const pm = ['#4b5a78', '#6a4b78', '#78604b', '#3f6b5e'].map((c, i) => mat(L.scene, 'ped' + i, c));
-    const Pp = (mesh, m) => { mesh.material = m; mesh.position.y = -1000; mesh.isPickable = false; return mesh; };
+    const Pp = (mesh, m) => { mesh.material = m; mesh.position.y = -1000; mesh.isPickable = false; return lod(mesh); };
     const torsos = pm.map(m => Pp(limbShape('torso', L.scene), m)), arms = pm.map(m => Pp(limbShape('arm', L.scene), m));
     const skin = mat(L.scene, 'pdhm', '#6d5548'), pants = mat(L.scene, 'pdpm', '#17141f');
     const shared = { head: Pp(limbShape('head', L.scene), skin), hand: Pp(limbShape('hand', L.scene), skin), leg: Pp(limbShape('leg', L.scene), pants), foot: Pp(limbShape('foot', L.scene), pants) };
@@ -2620,7 +2642,7 @@ NV.Level = (() => {
       const body = mat(s, 'npcb' + sp.name, info.hair || '#2a2638'), accent = mat(s, 'npca' + sp.name, '#000', col), skin = mat(s, 'npch' + sp.name, '#6d5548'), pants = mat(s, 'npcp' + sp.name, '#15121e');
       body.specularColor = new BABYLON.Color3(.3, .3, .35);
       const matFor = k => k === 'head' || k === 'hand' ? skin : k === 'leg' || k === 'foot' ? pants : body;
-      root.rig = rigBuild(root, k => { const m = limbShape(k, s); m.material = matFor(k); return m; }, false);
+      root.rig = rigBuild(root, k => { const m = limbShape(k, s); m.material = matFor(k); return lod(m); }, false);
       const P = (mesh, m, y, z2) => { mesh.material = m; mesh.parent = root; mesh.position.y = y; if (z2) mesh.position.z = z2; mesh.isPickable = false; return mesh; };
       P(BABYLON.MeshBuilder.CreateBox('ne', { width: info.kind === 'mask' || info.kind === 'shadow' ? .3 : .22, height: .045, depth: .05 }, s), accent, 1.82, .16);
       P(BABYLON.MeshBuilder.CreateBox('nc', { width: .05, height: .45, depth: .04 }, s), accent, 1.3, .25);
@@ -2938,6 +2960,7 @@ NV.UI = (() => {
       ['aniso', 'Texture filtering', 'enum', [[1, 'Bilinear'], [2, 'Anisotropic 2×'], [4, 'Anisotropic 4×'], [8, 'Anisotropic 8×'], [16, 'Anisotropic 16×']]],
       ['rain', 'Rain density', 'range', 0, 2, .05, pct], ['particles', 'Particle density', 'range', 0, 2, .05, pct],
       ['beams', 'Searchlight beams', 'bool'], ['cones', 'Light shafts', 'bool'], ['signs', 'Holo signs', 'bool'], ['peds', 'Pedestrians', 'range', 0, 60, 1, v => String(v)],
+      ['lod', 'Level of detail', 'enum', [[.2, 'Minimum'], [.3, 'Potato'], [.45, 'Very low'], [.6, 'Low'], [.8, 'Medium low'], [1, 'Medium'], [1.2, 'Medium high'], [1.5, 'High'], [2, 'Very high'], [3, 'Ultra']]],
     ];
     const m = modal(`<div class="stitle">GRAPHICS</div><p class="muted" style="font-size:14px;margin:-6px 0 10px">WebGPU · ${U.esc(NV.G.engine.description || 'Babylon.js')}. Changes apply instantly to post-processing and resolution; shadows, rain, pedestrians and signs apply to the next scene you load.</p><div class="rows"></div><button class="btn" style="margin-top:12px">Done</button>`);
     const box = m.querySelector('.rows');
