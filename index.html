@@ -423,7 +423,7 @@ NV.In = (() => {
    ===================================================================== */
 NV.Settings = (() => {
   const KEY = 'nv_settings_v1';
-  const DEF = { master: .8, music: .6, sfx: .8, textSpeed: 2, sens: 1, fov: 80, shake: 1, scan: 1, showStats: 1, travel: 1, gfx: 0, dynRes: 1, showFps: 0, invertY: 0 };
+  const DEF = { master: .8, music: .6, sfx: .8, textSpeed: 2, sens: 1, fov: 80, shake: 1, scan: 1, showStats: 1, walk: 1, travel: 1, gfx: 0, dynRes: 1, showFps: 0, invertY: 0 };
   let s = { ...DEF };
   try { Object.assign(s, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { }
   return {
@@ -1035,7 +1035,7 @@ NV.Level = (() => {
     L.look.dx += e.movementX; L.look.dy += e.movementY;
   });
   document.addEventListener('pointerlockchange', () => {
-    if (document.pointerLockElement === lockEl()) lockAt = performance.now(); if (L && !(L.map && L.map.apt) && !L.over && !L.paused && document.pointerLockElement !== lockEl() && L.started) L.wantPause = true; });
+    if (document.pointerLockElement === lockEl()) lockAt = performance.now(); if (L && !L.calm && !L.over && !L.paused && document.pointerLockElement !== lockEl() && L.started) L.wantPause = true; });
 
   const RESCUE_RE = /rescue|resident|refugee|civilian|prisoner|children|survivor|hostage|families|patients/i;
 
@@ -1056,8 +1056,8 @@ NV.Level = (() => {
       rooms.push({ x: 2, y: 2, w: W - 4, h: H - 4, cx: 8, cy: 8 });
       return { W, H, g, rooms, start: { x: 8, y: H - 4 }, exit: { x: 8, y: 3 } };
     }
-    W = 30; H = 30; g = Array.from({ length: H }, () => new Array(W).fill(1));
-    for (let t = 0; t < 120 && rooms.length < 11; t++) {
+    W = mode === 'scene' ? 18 : 30; H = W; g = Array.from({ length: H }, () => new Array(W).fill(1));
+    for (let t = 0; t < 120 && rooms.length < (mode === 'scene' ? 5 : 11); t++) {
       const w = 3 + Math.floor(r() * 4), h = 3 + Math.floor(r() * 4), x = 1 + Math.floor(r() * (W - w - 2)), y = 1 + Math.floor(r() * (H - h - 2));
       if (rooms.some(o => x < o.x + o.w + 1 && x + w + 1 > o.x && y < o.y + o.h + 1 && y + h + 1 > o.y)) continue;
       rooms.push({ x, y, w, h, cx: x + (w >> 1), cy: y + (h >> 1) });
@@ -1390,6 +1390,7 @@ NV.Level = (() => {
   function populate(op, ctx) {
     if (op.m === 'free') return populateFree(op);
     if (op.m === 'apartment') return populateApartment(op);
+    if (op.m === 'scene') return populateScene(op);
     const { map } = L, r = U.rng(L.seed + 99), mode = op.m, act = L.act;
     const rooms = map.rooms, st = cellC(map.start.x, map.start.y);
     L.p.x = st.x; L.p.z = st.z;
@@ -1621,7 +1622,7 @@ NV.Level = (() => {
     let spd = (crouch ? 2.6 : sprint ? 8.2 : 5.4) * (L.tags.includes('driver') ? 1.12 : 1);
     const sy = Math.sin(p.yaw), cy = Math.cos(p.yaw);
     let vx = (mx * cy + mz * sy) * spd, vz = (-mx * sy + mz * cy) * spd;
-    if (!L.map.apt && (I.hit('Space') || I.padHit(1)) && p.dashCd <= 0 && p.en >= 22 && ml > 0) { p.dash = .18; p.dashCd = L.tags.includes('driver') ? .5 : .8; p.en -= 22; p.dx = vx / spd; p.dz = vz / spd; NV.Audio.sfx('dash'); p.inv = .15; }
+    if (!L.calm && (I.hit('Space') || I.padHit(1)) && p.dashCd <= 0 && p.en >= 22 && ml > 0) { p.dash = .18; p.dashCd = L.tags.includes('driver') ? .5 : .8; p.en -= 22; p.dx = vx / spd; p.dz = vz / spd; NV.Audio.sfx('dash'); p.inv = .15; }
     if (p.dash > 0) { p.dash -= dt; vx = p.dx * 26; vz = p.dz * 26; }
     moveCircle(p, vx * dt, vz * dt, .45);
     p.moving = ml > 0; if (p.moving) { p.bob += dt * spd * 1.6; p.stepT -= dt * spd; if (p.stepT <= 0) { p.stepT = 2.6; NV.Audio.sfx('step'); if (sprint) noise(p.x, p.z, 7); } }
@@ -1642,7 +1643,7 @@ NV.Level = (() => {
     G.node.position.set(.3 + (p.moving ? Math.cos(p.bob * .5) * .015 : 0), -.32 + (p.moving ? Math.abs(Math.sin(p.bob * .5)) * .012 : 0) - (hacking ? .25 : 0), .62 - G.kick * .08);
     G.node.rotation.x = -G.kick * .12; G.coil.emissiveColor = p.over > 0 ? C3('#ff3355') : C3(L.palette.b).scale(1 - p.heat / 160);
     // actions
-    if (!hacking && !L.map.apt) {
+    if (!hacking && !L.calm) {
       const fireHeld = I.lmb || (I.pad && I.pad.buttons[7] && I.pad.buttons[7].value > .4);
       if (fireHeld) shoot();
       if (I.hit('KeyQ') || I.padHit(3)) emp();
@@ -1651,6 +1652,7 @@ NV.Level = (() => {
     if (hacking) { if (ml > 0 && !I.pad || I.hit('Escape')) { L.hack = null; document.getElementById('hack').classList.add('hidden'); } else drawHack(dt); if (L.hack && Math.hypot(L.hack.t.x - p.x, L.hack.t.z - p.z) > 3) { L.hack = null; document.getElementById('hack').classList.add('hidden'); } }
     if (L.free) updateFree(dt);
     if (L.map.apt) updateApartment(dt);
+    if (L.npcs) updateNpcs(dt);
     updateEnemies(dt); updateBoss(dt); updateBullets(dt); updateWorld(dt); updateMode(dt); hud(dt); tutorial(dt);
   }
 
@@ -1889,9 +1891,10 @@ NV.Level = (() => {
     if (L.boss && L.boss.hp > 0) dot(L.boss.x, L.boss.z, '#ff3355', 6);
     if (L.exit && L.exit.on) dot(L.exit.x, L.exit.z, '#3dffa8', 5);
     if (L.free) L.beacons.forEach(b => dot(b.x, b.z, b.col, 5));
+    if (L.npcs) L.npcs.forEach(n => dot(n.x, n.z, L.guide && L.guide.x === n.x ? '#ffd23d' : '#e9e6ff', 4));
     g.restore();
     g.fillStyle = '#fff'; g.beginPath(); g.moveTo(W / 2, W / 2 - 7); g.lineTo(W / 2 - 5, W / 2 + 5); g.lineTo(W / 2 + 5, W / 2 + 5); g.fill();
-    const tg = L.exit && L.exit.on ? L.exit : L.free ? (L.gig ? L.gig.tgt : L.storyB) : null;
+    const tg = L.exit && L.exit.on ? L.exit : L.free ? (L.gig ? L.gig.tgt : L.storyB) : L.guide || null;
     if (tg) { const a = Math.atan2(tg.x - p.x, tg.z - p.z) - p.yaw; g.fillStyle = tg.col || '#3dffa8'; g.beginPath(); const rr = W / 2 - 8; g.arc(W / 2 + Math.sin(a) * rr, W / 2 - Math.cos(a) * rr, 4, 0, 7); g.fill(); }
   }
 
@@ -2216,10 +2219,80 @@ NV.Level = (() => {
     if (L.breach) { if (Math.random() < dt * 8) spark(V3(12 + (Math.random() - .5) * .8, 1.2 + Math.random(), 19.75), '#ff7a2b', 6); L.doorFrame.emissiveColor.g = .3 + .2 * Math.sin(L.time * 12); }
   }
 
+  /* =====================================================================
+     WALKABLE STORY SCENES — speakers from the script stand in the level
+     ===================================================================== */
+  function nameTag(name, col) {
+    const s = L.scene;
+    const t = NV.tex(s, 512, 96, (g, w, h) => { g.clearRect(0, 0, w, h); g.fillStyle = 'rgba(5,3,12,.75)'; g.fillRect(0, 10, w, h - 20); g.fillStyle = col; g.fillRect(0, 10, 6, h - 20); g.font = 'bold 44px Orbitron, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#ffffff'; g.fillText(name.toUpperCase(), w / 2, h / 2 + 2, w - 30); }, 'tag' + name);
+    t.hasAlpha = true;
+    const m = mat(s, 'tagm' + name, '#000', '#ffffff'); m.emissiveColor = new BABYLON.Color3(0, 0, 0); m.emissiveTexture = t; m.opacityTexture = t; m.disableLighting = true; m.backFaceCulling = false;
+    const p = BABYLON.MeshBuilder.CreatePlane('tag', { width: 1.9, height: .36 }, s); p.material = m; p.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL; p.isPickable = false;
+    return p;
+  }
+  function makeNpc(sp, x, z) {
+    const s = L.scene, info = NV.speakerInfo(sp.name), root = new BABYLON.TransformNode('npc', s), col = info.c || '#19f0ff';
+    let tagY = 2.3;
+    if (sp.kind === 'ai') {
+      const m = mat(s, 'holo' + sp.name, '#000', col, .55); m.wireframe = true;
+      const core = BABYLON.MeshBuilder.CreatePolyhedron('holo', { type: 2, size: .55 }, s); core.position.y = 1.5; core.material = m; core.parent = root;
+      const ring = BABYLON.MeshBuilder.CreateTorus('hr', { diameter: 1.4, thickness: .04, tessellation: 24 }, s); ring.position.y = .1; ring.material = mat(s, 'hrm' + sp.name, '#000', col); ring.parent = root;
+      root.spin = core;
+    } else {
+      const body = mat(s, 'npcb' + sp.name, info.hair || '#2a2638'), accent = mat(s, 'npca' + sp.name, '#000', col);
+      body.specularColor = new BABYLON.Color3(.3, .3, .35);
+      const P = (mesh, m, y, z2) => { mesh.material = m; mesh.parent = root; mesh.position.y = y; if (z2) mesh.position.z = z2; mesh.isPickable = false; return mesh; };
+      P(BABYLON.MeshBuilder.CreateCapsule('nb', { radius: info.f ? .32 : .36, height: 1.6, tessellation: 10, subdivisions: 1 }, s), body, .8);
+      P(BABYLON.MeshBuilder.CreateSphere('nh', { diameter: .38, segments: 10 }, s), mat(s, 'npch' + sp.name, '#6d5548'), 1.72);
+      P(BABYLON.MeshBuilder.CreateBox('ne', { width: info.kind === 'mask' || info.kind === 'shadow' ? .34 : .26, height: .05, depth: .05 }, s), accent, 1.75, .18);
+      P(BABYLON.MeshBuilder.CreateBox('nc', { width: .06, height: .5, depth: .04 }, s), accent, 1.15, .34);
+      if (info.f) P(BABYLON.MeshBuilder.CreateBox('nhair', { width: .42, height: .5, depth: .2 }, s), body, 1.62, -.12);
+    }
+    const tag = nameTag(sp.name, col); tag.parent = root; tag.position.y = tagY;
+    root.position.set(x, 0, z); root.rotation.y = Math.random() * 6;
+    return { name: sp.name, root, x, z, tag, kind: sp.kind, ph: Math.random() * 6 };
+  }
+  function populateScene(op) {
+    const map = L.map, r = U.rng(L.seed + 11);
+    const st = cellC(map.start.x, map.start.y), ex = cellC(map.exit.x, map.exit.y);
+    L.p.x = st.x; L.p.z = st.z; L.p.yaw = Math.atan2(ex.x - st.x, ex.z - st.z);
+    L.obj = { mode: 'scene', total: 0, got: 0, label: op.title || 'Scene' };
+    L.gun.node.setEnabled(false);
+    L.npcs = []; L.props = [];
+    const cast = (op.cast || []).slice(0, 6);
+    const lead = op.lead ? cast.find(c => c.name === op.lead) : null;
+    const spotNear = (c, k) => { const a = k * 2.1 + r() * .6, d = k ? 2.2 + r() * 1.2 : 0; const x = c.x + Math.cos(a) * d, z = c.z + Math.sin(a) * d; return solid(x, z) ? { x: c.x + (k % 2 ? 1.2 : -1.2), z: c.z } : { x, z }; };
+    const home = op.gate && lead ? ex : cellC(map.start.x, map.start.y);
+    const base = op.gate && lead ? ex : { x: st.x + Math.sin(L.p.yaw) * 5, z: st.z + Math.cos(L.p.yaw) * 5 };
+    const b0 = solid(base.x, base.z) ? ex : base;
+    cast.forEach((c, k) => { const q = spotNear(b0, k); L.npcs.push(makeNpc(c, q.x, q.z)); });
+    if (op.gate && lead) {
+      const n = L.npcs.find(x => x.name === lead.name);
+      L.props.push({ id: 'talk', x: n.x, z: n.z, label: 'TALK TO ' + lead.name.toUpperCase(), enabled: true, done: false });
+      L.guide = { x: n.x, z: n.z, col: '#ffd23d' };
+      const gm = mat(L.scene, 'guidem', '#000', '#ffd23d', .22); gm.alphaMode = BABYLON.Engine.ALPHA_ADD; gm.disableLighting = true; gm.backFaceCulling = false;
+      const beam = BABYLON.MeshBuilder.CreateCylinder('guide', { diameter: 1.2, height: 30, tessellation: 12, cap: BABYLON.Mesh.NO_CAP }, L.scene); beam.position.set(n.x, 15, n.z); beam.material = gm; beam.isPickable = false; L.guideBeam = beam;
+    }
+    void home;
+  }
+  function updateNpcs(dt) {
+    const p = L.p;
+    L.npcs.forEach(n => {
+      const d = Math.hypot(p.x - n.x, p.z - n.z);
+      if (d < 9) n.root.rotation.y += U.angDiff(n.root.rotation.y, Math.atan2(p.x - n.x, p.z - n.z)) * Math.min(1, dt * 3);
+      if (n.root.spin) { n.root.spin.rotation.y += dt; n.root.position.y = .2 + Math.sin(L.time * 2 + n.ph) * .08; }
+      const talking = L.speaker && n.name === L.speaker;
+      n.tag.scaling.setAll(U.lerp(n.tag.scaling.x, talking ? 1.25 : 1, dt * 8));
+      n.tag.visibility = talking || d < 14 ? 1 : .45;
+    });
+    if (L.guideBeam) { L.guideBeam.visibility = .6 + Math.sin(L.time * 3) * .25; if (L.props[0] && L.props[0].done) { L.guideBeam.dispose(); L.guideBeam = null; L.guide = null; } }
+    if ((NV.In.hit('KeyT') || NV.In.padHit(8)) && L.guide) { p.x = L.guide.x - Math.sin(L.p.yaw) * 2.2; p.z = L.guide.z - Math.cos(L.p.yaw) * 2.2; if (solid(p.x, p.z)) { p.x = L.guide.x + 1.6; p.z = L.guide.z; } NV.Audio.sfx('dash'); }
+  }
+
   /* ---------------- lifecycle ---------------- */
   function pause() {
     L.paused = true; if (document.pointerLockElement) document.exitPointerLock();
-    NV.UI.levelPause(L.free || L.map.apt).then(ch => {
+    NV.UI.levelPause(L.free || L.calm).then(ch => {
       if (!L) return;
       if (ch === 'resume') { L.paused = false; lock(); }
       else if (ch === 'restart') end({ restart: true });
@@ -2261,6 +2334,7 @@ NV.Level = (() => {
     h.querySelector('.obj .t').textContent = 'OPERATION · ' + L.obj.label.toUpperCase();
     if (L.boss) h.querySelector('.boss .nm').textContent = L.boss.name.toUpperCase();
     if (L.map.apt) { ['.mm', '.status', '.timer', '.bars'].forEach(q => h.querySelector(q).style.display = 'none'); h.querySelector('.obj .t').textContent = 'PROLOGUE · TIER 93'; }
+    if (op.m === 'scene') { ['.status', '.timer', '.bars'].forEach(q => h.querySelector(q).style.display = 'none'); h.querySelector('.obj .t').textContent = 'STORY · ' + (op.title || '').toUpperCase(); }
     document.body.classList.add('inlevel');
   }
 
@@ -2276,6 +2350,7 @@ NV.Level = (() => {
         time: 0, shake: 0, mmT: 0, tut: !!op.tut, tutI: 0, started: false, over: false, paused: false,
       };
       L.free = op.m === 'free'; if (L.free) L.seed = U.hash('new-avalon');
+      L.calm = op.m === 'apartment' || op.m === 'scene';
       L.dmgUp = 1; L.enMul = 1; applyUpgrades(); L.p.hp = L.p.max;
       L.map = gen(op.m, L.seed);
       L.seen = new Uint8Array(L.map.W * L.map.H);
@@ -2294,6 +2369,7 @@ NV.Level = (() => {
     start, get active() { return !!L; }, debug: () => L,
     stop() { if (L) end({ done: true }); },
     event: aptEvent,
+    speaking(name) { if (L) L.speaker = name ? String(name).replace(/\s*\([^)]*\)\s*/g, ' ').trim() : null; },
     objective(t, d) { const h = document.getElementById('hud'); if (!h) return; h.querySelector('.obj .t').textContent = t; h.querySelector('.obj .d').textContent = d; },
     enableProps(ids) { if (L && L.props) L.props.forEach(pr => pr.enabled = ids.includes(pr.id)); },
   };
@@ -2432,7 +2508,7 @@ NV.UI = (() => {
       ['master', 'Master volume', 'range', 0, 1, .1], ['music', 'Music volume', 'range', 0, 1, .1], ['sfx', 'Effects volume', 'range', 0, 1, .1],
       ['textSpeed', 'Text speed', 'enum', ['Slow', 'Normal', 'Fast', 'Instant'], 0], ['sens', 'Mouse sensitivity', 'range', .3, 3, .1],
       ['fov', 'Field of view', 'range', 65, 110, 5], ['invertY', 'Invert Y axis', 'bool'], ['shake', 'Screen shake', 'bool'],
-      ['scan', 'Scanline filter', 'bool'], ['showStats', 'Show world-state changes', 'bool'], ['travel', 'Travel to missions in the city', 'bool'], ['gfx', 'Graphics quality', 'enum', ['Auto', 'Low', 'Medium', 'High']], ['dynRes', 'Dynamic resolution', 'bool'], ['showFps', 'Show FPS', 'bool'],
+      ['scan', 'Scanline filter', 'bool'], ['showStats', 'Show world-state changes', 'bool'], ['walk', 'Walkable story scenes', 'bool'], ['travel', 'Travel to missions in the city', 'bool'], ['gfx', 'Graphics quality', 'enum', ['Auto', 'Low', 'Medium', 'High']], ['dynRes', 'Dynamic resolution', 'bool'], ['showFps', 'Show FPS', 'bool'],
     ];
     const m = modal(`<div class="stitle">SETTINGS</div><div class="rows"></div><button class="btn" style="margin-top:12px">Done</button>
       <p class="muted" style="margin-top:14px;font-size:14px;line-height:1.6">Controls — <span class="kbd">WASD</span> move · <span class="kbd">Mouse</span> look · <span class="kbd">LMB</span> fire · <span class="kbd">Shift</span> sprint · <span class="kbd">C</span> sneak · <span class="kbd">Space</span> dash · <span class="kbd">E</span> interact / takedown / hack · <span class="kbd">Q</span> EMP · <span class="kbd">Esc</span> pause.<br>Story — <span class="kbd">Space</span>/<span class="kbd">Click</span> advance · <span class="kbd">1-4</span> choose · <span class="kbd">A</span> auto · <span class="kbd">Ctrl</span> hold to skip · <span class="kbd">L</span> log. Gamepads supported.</p>`);
@@ -2631,7 +2707,7 @@ NV.UI = (() => {
 
   /* ---------------- gameplay overlays ---------------- */
   UI.opBanner = (op, label) => new Promise(res => {
-    const b = add(`<div class="k">${op.m === 'boss' ? 'BOSS ENCOUNTER' : op.m === 'free' ? (op.travel ? 'TRAVEL' : 'OPEN WORLD · FREE ROAM') : op.m === 'apartment' ? 'PROLOGUE' : 'OPERATION'}</div><div class="t">${U.esc(op.m === 'boss' ? (op.boss || 'Enforcer') : op.m === 'free' ? (op.travel ? op.travel : 'NEW AVALON') : op.m === 'apartment' ? 'TIER 93' : label)}</div><div class="d">${U.esc(op.d || '')}</div><div class="k" style="margin-top:26px;animation:blink 1.4s infinite">CLICK TO ENGAGE</div>`, 'banner');
+    const b = add(`<div class="k">${op.m === 'boss' ? 'BOSS ENCOUNTER' : op.m === 'free' ? (op.travel ? 'TRAVEL' : 'OPEN WORLD · FREE ROAM') : op.m === 'apartment' ? 'PROLOGUE' : op.m === 'scene' ? (op.gate ? 'STORY · FIND ' + String(op.lead).toUpperCase() : 'STORY') : 'OPERATION'}</div><div class="t">${U.esc(op.m === 'boss' ? (op.boss || 'Enforcer') : op.m === 'free' ? (op.travel ? op.travel : 'NEW AVALON') : op.m === 'apartment' ? 'TIER 93' : op.m === 'scene' ? (op.title || '') : label)}</div><div class="d">${U.esc(op.d || '')}</div><div class="k" style="margin-top:26px;animation:blink 1.4s infinite">CLICK TO ENGAGE</div>`, 'banner');
     b.style.pointerEvents = 'auto'; b.style.cursor = 'pointer'; b.style.inset = '0'; b.style.top = '0'; b.style.paddingTop = '34vh'; b.style.background = 'rgba(3,2,10,.55)';
     NV.fade(false, 500);
     if (op.m === 'boss') NV.Audio.sfx('boss');
@@ -2806,7 +2882,42 @@ NV.Story = (() => {
     return r.quit ? Q : null;
   }
 
-  async function runNodes(arr) { for (const n of arr) { const r = await runNode(n); if (r) return r; } return null; }
+
+  /* ---- walkable story scenes (every chapter) ---- */
+  const COMMS = /radio|recording|comms|broadcast|letter|graffiti|announcer|intercom|voice$|\(voice\)|message|feed|log$/i;
+  function sceneCast(arr, i) {
+    const seen = new Map(); let ghost = false;
+    const walk = ns => { for (const n of ns) { if (n.t === 'scene') return true; if (n.t === 'l') { const nm = String(n.s).replace(/\s*\([^)]*\)\s*/g, ' ').trim(); if (/^Ghost$/.test(nm)) ghost = true; else if (!seen.has(nm) && !COMMS.test(n.s)) seen.set(nm, n.s); } if (n.t === 'n' && /\bGhost\b/.test(n.v)) ghost = true; if (n.t === 'choice') { ghost = true; n.o.forEach(o => walk(o.b)); } if (n.t === 'cond') n.b.forEach(b => walk(b.n)); } return false; };
+    walk(arr.slice(i + 1));
+    const cast = [...seen.keys()].map(name => { const k = NV.speakerInfo(name).kind; return { name, kind: k === 'ai' ? 'ai' : k === 'sys' ? 'sys' : 'human' }; }).filter(c => c.kind !== 'sys' && !/^Unknown/.test(c.name));
+    return { cast, ghost };
+  }
+  function walkable(sceneName) {
+    return NV.Settings.get().walk && !/^70/.test(ctx.id) && ctx.cast && ctx.cast.ghost && NV.paletteFor(sceneName).th !== 'space';
+  }
+  async function startSceneWorld(sceneName, gate) {
+    const w = ctx.world = { done: false, quit: false, seen: 0, busy: false, gating: false, scene: true };
+    const cast = ctx.cast.cast, lead = (cast.find(c => c.kind === 'human') || cast[0] || {}).name;
+    let started; const startedP = new Promise(r => started = r);
+    NV.UI.storyHide(true);
+    await NV.fade(true, 350);
+    NV.Level.start({ t: 'play', m: 'scene', k: 0, title: sceneName.split('—')[0].trim().slice(0, 40), cast, lead, gate: !!(gate && lead),
+      d: gate && lead ? 'Find ' + lead + ' and talk to them [E]. Follow the yellow beam — T to fast travel.' : 'The scene plays out around you. Move freely.',
+      onStart: started, onInspect: id => { if (id === 'talk') w.talked = true; } },
+      { act: ctx.act, palette: NV.paletteFor(sceneName), chapter: ctx.id + sceneName, echoes: [], tactic: {} })
+      .then(res => { w.done = true; if (res.quit) w.quit = true; started(); });
+    await startedP;
+    if (gate && lead && !w.done) { const r = await gate2(w); if (r) return r; }
+    NV.UI.storyHide(false);
+    return null;
+  }
+  async function gate2(w) {
+    w.gating = true;
+    while (!w.talked) { if (w.quit) return Q; if (w.done) break; await U.sleep(100); }
+    w.gating = false; return null;
+  }
+
+  async function runNodes(arr) { for (let i = 0; i < arr.length; i++) { const n = arr[i]; if (n.t === 'scene') ctx.cast = sceneCast(arr, i); const r = await runNode(n); if (r) return r; } return null; }
 
   async function runNode(n) {
     const S = NV.State.get();
@@ -2815,6 +2926,8 @@ NV.Story = (() => {
       case 'scene':
         if (ctx.world) await stopWorld();
         if (ctx.id === '1' && /^NEON HEIGHTS, RESIDENTIAL TIER 93/.test(n.v)) { ctx.scene = n.v; ctx.echoes = []; NV.Backdrop.setScene(n.v); await startApartment(); NV.UI.location(n.v, 'NEON HEIGHTS'); return null; }
+        if (walkable(n.v)) { ctx.scene = n.v; ctx.echoes = []; ctx.sceneNode = n; NV.Backdrop.setScene(n.v); const r = await startSceneWorld(n.v, true); if (r) return r; NV.UI.location(n.v, NV.Backdrop.palette.d); return null; }
+        ctx.sceneNode = null;
         ctx.scene = n.v; ctx.echoes = []; NV.Backdrop.setScene(n.v); NV.UI.location(n.v, NV.Backdrop.palette.d);
         NV.Audio.setMood(/interlude|helix|control/i.test(n.v) ? 'tense' : 'story');
         await U.sleep(250); return null;
@@ -2828,7 +2941,9 @@ NV.Story = (() => {
       }
       case 'l': {
         ctx.echoes.push(n.s + ': ' + n.v);
+        if (ctx.world) NV.Level.speaking(n.s);
         if ((await NV.UI.say(n.s, n.v)) === 'quit') return Q;
+        if (ctx.world) NV.Level.speaking(null);
         if (ctx.world && n.s === 'Ghost' && n.v === 'That makes two of us.') return await gate('LOOK AROUND', 'Look around your apartment — inspect at least three things [E].', ['window', 'invoice', 'map', 'helmet', 'mirror', 'bag'], w => w.seen >= 3);
         return null;
       }
@@ -2854,7 +2969,8 @@ NV.Story = (() => {
     const S = NV.State.get();
     let retry = 0;
     if (ctx.world) await stopWorld();
-    if (NV.Settings.get().travel && !n.tut && ['city', 'water', 'tunnel', 'interior'].includes(NV.paletteFor(ctx.scene || '').th)) { if ((await travelTo(n)) === Q) { NV.UI.storyHide(false); return Q; } }
+    const resumeScene = ctx.sceneNode && ctx.cast && walkable(ctx.sceneNode.v) ? ctx.sceneNode.v : null;
+    if (!resumeScene && NV.Settings.get().travel && !n.tut && ['city', 'water', 'tunnel', 'interior'].includes(NV.paletteFor(ctx.scene || '').th)) { if ((await travelTo(n)) === Q) { NV.UI.storyHide(false); return Q; } }
     NV.UI.storyHide(true);
     while (true) {
       await NV.fade(true, 450);
@@ -2881,6 +2997,7 @@ NV.Story = (() => {
     NV.State.save();
     NV.UI.storyHide(false);
     NV.Backdrop.setScene(ctx.scene || ''); NV.Audio.setMood('story');
+    if (resumeScene) { const r = await startSceneWorld(resumeScene, false); if (r) return r; }
     return null;
   }
 
@@ -2920,6 +3037,7 @@ NV.Story = (() => {
     for (let i = cp || 0; i < top.length; i++) {
       const n = top[i];
       if (n.t === 'scene' && i !== cp) { S.cp = i; NV.State.save(); }
+      if (n.t === 'scene') ctx.cast = sceneCast(top, i);
       const r = await runNode(n);
       if (r) return r;
     }
