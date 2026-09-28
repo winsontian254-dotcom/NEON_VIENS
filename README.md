@@ -67,6 +67,7 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 | Drive: handbrake, boost, horn | `Space`, `Shift`, `H` | A, LB, R3 |
 | Pause | `Esc` | Start |
 | Volume down / up, mute | `-` / `=`, `M` | — |
+| Jump (the void after the ending) | `Space` | A |
 | Advance dialogue | `Space` / click | A |
 | Choose option | `1-4` / click | dpad + A |
 | Auto-advance dialogue | `A` | — |
