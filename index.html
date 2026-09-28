@@ -145,6 +145,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#05030b;color:var(--
 #hud .boss .bar i{background:linear-gradient(90deg,#ff3355,#ff9a3d)}
 #hud .boss .sh{font-family:var(--fm);font-size:11px;color:var(--cyan);letter-spacing:.2em;margin-top:4px}
 #hud .dmg{position:absolute;inset:0;box-shadow:inset 0 0 160px rgba(255,20,60,.85);opacity:0;transition:opacity .25s}
+#hud .lb{position:absolute;left:0;right:0;height:0;background:#000;transition:height .45s ease;z-index:1}#hud .lbt{top:0}#hud .lbb{bottom:0}
+#hud.cine .lb{height:11vh}#hud.cine .obj,#hud.cine .mm,#hud.cine .prompt,#hud.cine .xh,#hud.cine .status,#hud.cine .bars,#hud.cine .speedo,#hud.cine .tut{opacity:0;pointer-events:none}
 #hud .speedo{position:absolute;right:20px;bottom:24px;font-family:var(--fm);font-size:44px;color:var(--cyan);text-shadow:0 0 12px var(--cyan);text-align:right;line-height:1}
 #hud .speedo small{display:block;font-size:12px;letter-spacing:.3em;color:var(--ink)}
 #hud .timer{position:absolute;right:20px;top:210px;font-family:var(--fm);font-size:22px;color:var(--amber);width:180px;text-align:center}
@@ -313,10 +315,13 @@ NV.Audio = (() => {
     nextT = ctx.currentTime + .1;
     setInterval(() => { if (ctx.state !== 'running') return; while (nextT < ctx.currentTime + .12) tick(nextT); }, 25);
   }
+  let ducked = false;
+  // lower the music while a character or the narrator is speaking
+  function duck(on) { on = !!on && NV.Settings.get().duck !== 0; if (on === ducked) return; ducked = on; applyVolumes(); }
   function applyVolumes() {
     if (!ctx) return; const s = NV.Settings.get();
     master.gain.setTargetAtTime(s.master, ctx.currentTime, .05);
-    musicBus.gain.setTargetAtTime(s.music * .55, ctx.currentTime, .05);
+    musicBus.gain.setTargetAtTime(s.music * .55 * (ducked ? .3 : 1), ctx.currentTime, ducked ? .15 : .4);
     sfxBus.gain.setTargetAtTime(s.sfx * .8, ctx.currentTime, .05);
   }
   const MOODS = {
@@ -392,7 +397,7 @@ NV.Audio = (() => {
     eng.o.frequency.setTargetAtTime(hz, t, .08); eng.o2.frequency.setTargetAtTime(hz * .5 + 3, t, .08);
     eng.fl.frequency.setTargetAtTime(300 + f * 1400 + (boost ? 900 : 0), t, .1); eng.g.gain.setTargetAtTime(.035 + f * .045, t, .1);
   }
-  A.engine = engine;
+  A.engine = engine; A.duck = duck;
   A.init = init; A.setMood = setMood; A.applyVolumes = applyVolumes;
   A.sfx = (n, a) => { if (ctx && SFX[n]) try { SFX[n](a); } catch (e) { } };
   return A;
@@ -615,13 +620,27 @@ NV.Voice = (() => {
       const p = NV.Voices.profileFor(name), S = NV.State.get();
       let pitch = p.pitch;
       if (/^Ghost\b/.test(name) && S && S.profile) pitch *= [.85, 1, 1.18][S.profile.voice == null ? 1 : S.profile.voice];
-      const vol = U.clamp(p.vol * (set.voiceVol == null ? .9 : set.voiceVol) * set.master, 0, 1);
+      // characters are boosted and the narrator sits under them; both have their own slider
+      const vol = speaker ? U.clamp(Math.max(.9, p.vol) * 1.15 * (set.voiceVol == null ? 1 : set.voiceVol) * set.master * 1.25, 0, 1)
+        : U.clamp(p.vol * (set.narrVol == null ? .5 : set.narrVol) * set.master, 0, 1);
       return !!NV.Voices.speak(name, clean(text), { pitch: U.clamp(pitch, 0, 2), rate: U.clamp(p.rate * (set.voiceRate || 1), .3, 3), vol });
     },
     stop() { NV.Voices.stop(); },
     busy: () => NV.Voices.isSpeaking(),
   };
 })();
+setInterval(() => NV.Audio.duck(NV.Voice.busy()), 200);
+/* quick volume keys anywhere: - / = master volume, M mute */
+let nvUnmute = null;
+addEventListener('keydown', e => {
+  if (e.target && e.target.tagName === 'INPUT' || e.repeat) return;
+  const S = NV.Settings, v = S.get().master;
+  if (e.code === 'Minus' || e.code === 'NumpadSubtract') { S.set('master', Math.max(0, Math.round((v - .1) * 10) / 10)); nvUnmute = null; }
+  else if (e.code === 'Equal' || e.code === 'NumpadAdd') { S.set('master', Math.min(1, Math.round((v + .1) * 10) / 10)); nvUnmute = null; }
+  else if (e.code === 'KeyM') { if (v > 0) { nvUnmute = v; S.set('master', 0); } else S.set('master', nvUnmute || .8); }
+  else return;
+  NV.toast('VOLUME', S.get().master ? Math.round(S.get().master * 100) + '%  ·  - / = adjust · M mute' : 'MUTED  ·  M to unmute', '#19f0ff', 1.4);
+});
 
 /* =====================================================================
    Input — keyboard / mouse / gamepad, with one-frame "pressed" edges
@@ -667,7 +686,7 @@ NV.In = (() => {
    ===================================================================== */
 NV.Settings = (() => {
   const KEY = 'nv_settings_v1';
-  const DEF = { master: .8, music: .6, sfx: .8, textSpeed: 2, sens: 1, fov: 80, shake: 1, scan: 1, showStats: 1, voice: 1, voiceVol: .9, voiceRate: 1, narrator: 1, walk: 1, travel: 1, g: null, showFps: 0, invertY: 0 };
+  const DEF = { master: .8, music: .6, sfx: .8, textSpeed: 2, sens: 1, fov: 80, shake: 1, scan: 1, showStats: 1, voice: 1, voiceVol: 1, narrVol: .5, duck: 1, voiceRate: 1, narrator: 1, walk: 1, travel: 1, g: null, showFps: 0, invertY: 0 };
   let s = { ...DEF };
   if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) { s.shake = 0; s.scan = 0; }
   try { Object.assign(s, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { }
@@ -1384,8 +1403,45 @@ NV.Level = (() => {
   const RESCUE_RE = /rescue|resident|refugee|civilian|prisoner|children|survivor|hostage|families|patients/i;
 
   /* ---------------- map generation ---------------- */
+  /* story scenes + operations staged inside the open-world city, near where the player last stood */
+  let zone = null;
+  function genCityZone(mode, seed) {
+    const m = genCity(), r = U.rng(seed), B = m.B, T = m.tower;
+    const inter = m.inter.filter(i => Math.hypot(i.x - T.cx, i.y - T.cy) > 14);
+    const z = zone || m.start, dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+    const near = inter.slice().sort((a, b) => dist(a, z) - dist(b, z));
+    const home = near[0], cell = i => ({ x: i.x, y: i.y });
+    const ir = i => ({ x: i.x, y: i.y, w: 2, h: 2, cx: i.x, cy: i.y });
+    m.zone = true;
+    if (mode === 'boss' || mode === 'arena' || mode === 'defend') {
+      // the fight happens on the nearest open plaza and the streets around it
+      const pl = m.plazas.filter(p => !p.safe).sort((a, b) => dist({ x: a.cx, y: a.cy }, z) - dist({ x: b.cx, y: b.cy }, z))[0];
+      const ox = pl.x - 4, oy = pl.y - 4;
+      m.aoff = { x: ox, y: oy }; m.rooms = [{ x: pl.x - 2, y: pl.y - 2, w: 12, h: 12, cx: pl.x + 4, cy: pl.y + 4 }];
+      m.start = { x: 8 + ox, y: 13 + oy }; m.exit = { x: 8 + ox, y: 3 + oy };
+      return m;
+    }
+    if (mode === 'scene') {
+      // meet the cast one to three blocks away from where you arrive
+      const cand = inter.filter(i => { const d = dist(i, home); return d > B * 1.2 && d < B * 3.2; });
+      const ex = cand.length ? cand[Math.floor(r() * cand.length)] : near[1];
+      m.rooms = [ir(home), ir(ex)]; m.start = cell(home); m.exit = cell(ex);
+      return m;
+    }
+    // operations: a district of intersections and plazas one to four blocks out
+    const cand = inter.filter(i => { const d = dist(i, home); return d > B * .9 && d < B * 2.2; });
+    const hub = cand.length ? cand[Math.floor(r() * cand.length)] : near[1];
+    const rooms = inter.filter(i => i !== home && dist(i, hub) < B * 1.6).map(ir)
+      .concat(m.plazas.filter(p => !p.safe && dist({ x: p.cx, y: p.cy }, hub) < B * 2).map(p => ({ ...p })));
+    const order = [ir(home)], left = rooms.slice(0, 12);
+    while (left.length) { const last = order[order.length - 1]; left.sort((a, b) => dist({ x: a.cx, y: a.cy }, { x: last.cx, y: last.cy }) - dist({ x: b.cx, y: b.cy }, { x: last.cx, y: last.cy })); order.push(left.shift()); }
+    let far = order[order.length - 1]; order.forEach(o => { if (dist({ x: o.cx, y: o.cy }, home) > dist({ x: far.cx, y: far.cy }, home)) far = o; });
+    m.rooms = order; m.start = cell(home); m.exit = { x: far.cx, y: far.cy };
+    return m;
+  }
   function gen(mode, seed) {
     if (mode === 'free') return genCity(seed);
+    if (L.city) return genCityZone(mode, seed);
     if (mode === 'apartment') return genApartment();
     const r = U.rng(seed);
     const arenaMode = mode === 'boss' || mode === 'arena' || mode === 'defend';
@@ -1466,11 +1522,11 @@ NV.Level = (() => {
   function buildScene(op, ctx) {
     const engine = NV.G.engine, scene = new BABYLON.Scene(engine), q = NV.Quality.get();
     const pal = ctx.palette, th = pal.th;
-    const cyber = th === 'cyber', outdoor = th === 'city' || th === 'water' || th === 'space';
+    const cyber = th === 'cyber', outdoor = th === 'city' || th === 'water' || th === 'space' || !!L.map.city;
     scene.clearColor = BABYLON.Color4.FromColor3(C3(pal.fog).scale(.6), 1);
     scene.fogMode = BABYLON.Scene.FOGMODE_EXP2; scene.fogColor = C3(pal.fog); scene.fogDensity = cyber ? .012 : outdoor ? .014 : .03;
     const cam = new BABYLON.UniversalCamera('fp', V3(0, EYE, 0), scene); cam.minZ = .05; cam.maxZ = q.draw;
-    if (op.m === 'free') { cam.maxZ = Math.max(q.draw, 1500); scene.fogDensity = .0035; } cam.fov = NV.Settings.get().fov * Math.PI / 180 * .75; cam.inputs.clear();
+    if (L.map.city) { cam.maxZ = Math.max(q.draw, 1500); scene.fogDensity = .0035; } cam.fov = NV.Settings.get().fov * Math.PI / 180 * .75; cam.inputs.clear();
     const hemi = new BABYLON.HemisphericLight('h', V3(.2, 1, .1), scene); hemi.intensity = outdoor ? .75 : .6; hemi.diffuse = C3('#b8b0ff'); hemi.groundColor = C3(pal.fog);
     const plight = new BABYLON.PointLight('pl', V3(0, 2, 0), scene); plight.range = 16; plight.intensity = .7; plight.diffuse = C3(pal.b);
     const fx = NV.Quality.setup(scene, cam), glow = fx.glow || { addExcludedMesh() { } };
@@ -1485,7 +1541,7 @@ NV.Level = (() => {
       fm.diffuseTexture.uScale = W / 2; fm.diffuseTexture.vScale = H / 2; fm.specularColor = new BABYLON.Color3(.55, .5, .65); fm.specularPower = 48; floor.material = fm;
     }
     // walls + neon trim (merged: two draw calls for the entire map)
-    const wallBoxes = [], trims = [], faces = [], free = op.m === 'free';
+    const wallBoxes = [], trims = [], faces = [], free = !!L.map.city;
     if (free) cityMeshes(scene, statics, pal, faces);
     const trimMat = mat(scene, 'trim', '#000', pal.a);
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
@@ -1829,23 +1885,25 @@ NV.Level = (() => {
     const baseKind = () => cyber ? (r() < .5 ? 'ice' : 'drone') : r() < .15 + act * .05 ? 'heavy' : r() < .25 ? 'drone' : 'guard';
     L.obj = { mode, total: 0, got: 0, label: '' };
 
+    if (L.map.aoff) L.aoff = L.map.aoff;
+    const ao = L.aoff || { x: 0, y: 0 }, aC = (x, y) => cellC(x + ao.x, y + ao.y);
     if (mode === 'boss' || mode === 'arena' || mode === 'defend') {
       L.p.yaw = Math.PI;
-      const c = cellC(8, 8);
+      const c = aC(8, 8);
       if (mode === 'boss') {
         makeBoss(op.boss || 'Helix Enforcer', c.x, c.z - 2);
-        const a = cellC(3, 8), b = cellC(13, 8);
+        const a = aC(3, 8), b = aC(13, 8);
         addTerminal(a.x, a.z, { need: 2, pylon: true }); addTerminal(b.x, b.z, { need: 2, pylon: true });
         L.obj.label = 'Defeat ' + (op.boss || 'the enforcer').toUpperCase();
-        addPickup('med', cellC(3, 13).x, cellC(3, 13).z); addPickup('med', cellC(13, 13).x, cellC(13, 13).z);
+        addPickup('med', aC(3, 13).x, aC(3, 13).z); addPickup('med', aC(13, 13).x, aC(13, 13).z);
       } else if (mode === 'arena') {
         L.waves = { n: 0, total: Math.max(2, Math.min(4, k)), t: 1.5 }; L.obj.label = 'Survive every wave'; L.obj.total = L.waves.total;
-        addPickup('med', cellC(3, 3).x, cellC(3, 3).z); addPickup('med', cellC(13, 13).x, cellC(13, 13).z);
+        addPickup('med', aC(3, 3).x, aC(3, 3).z); addPickup('med', aC(13, 13).x, aC(13, 13).z);
       } else {
         const n = Math.min(3, k);
-        [[8, 6], [5, 9], [11, 9]].slice(0, n).forEach(([x, y]) => { const q = cellC(x, y); addNode(q.x, q.z); });
+        [[8, 6], [5, 9], [11, 9]].slice(0, n).forEach(([x, y]) => { const q = aC(x, y); addNode(q.x, q.z); });
         L.defend = { t: 45 + act * 8, spawn: 2 }; L.obj.label = 'Protect the ' + (n > 1 ? n + ' uplinks' : 'uplink'); L.obj.total = n;
-        addPickup('med', cellC(3, 3).x, cellC(3, 3).z); addPickup('med', cellC(13, 3).x, cellC(13, 3).z);
+        addPickup('med', aC(3, 3).x, aC(3, 3).z); addPickup('med', aC(13, 3).x, aC(13, 3).z);
       }
       return;
     }
@@ -1920,7 +1978,50 @@ NV.Level = (() => {
     if (e.state !== 'alert') alertEnemy(e, true);
     if (e.hp <= 0) disable(e, false);
   }
-  function disable(e, takedown) {
+  /* ---- procedural ragdoll: the body tumbles around its centre of mass, bounces, slides and goes limp ---- */
+  function ragdoll(o, root, rig, vx, vy, vz, drone) {
+    root.setPivotPoint(V3(0, drone ? 0 : 1, 0));
+    const side = Math.random() < .5 ? -1 : 1, sp = Math.hypot(vx, vz);
+    o.rag = { vx, vy, vz, h: drone ? root.position.y : 1, rx: root.rotation.x, rz: root.rotation.z, yaw: root.rotation.y,
+      wx: (vy > 6 ? 5 + Math.random() * 7 : 2.5 + sp * .3) * (Math.random() < .75 ? -1 : 1), wz: (Math.random() - .5) * (1.5 + sp * .35), wy: (Math.random() - .5) * sp * .3,
+      t: 0, rest: false, drone, side, rest0: drone ? .3 : .22,
+      limb: rig ? { aL: -.9 - Math.random() * .8, aR: .9 + Math.random() * .8, ax: (Math.random() - .5) * 1.4, lL: -.25 - Math.random() * .3, lR: .2 + Math.random() * .3, k: .2 + Math.random() * .7, e: .3 + Math.random() * .9 } : null };
+  }
+  function ragStep(o, root, rig, dt) {
+    const g = o.rag; g.t += dt;
+    if (!g.rest) {
+      g.vy -= 24 * dt;
+      const nx = o.x + g.vx * dt, nz = o.z + g.vz * dt;
+      if (!solid(nx, o.z)) o.x = nx; else { g.vx *= -.35; g.wz += g.vx * .2; }
+      if (!solid(o.x, nz)) o.z = nz; else { g.vz *= -.35; g.wx += g.vz * .2; }
+      g.h += g.vy * dt;
+      const air = g.h > g.rest0 + .05;
+      if (g.h <= g.rest0) { g.h = g.rest0; if (g.vy < -4) { g.vy *= -.28; g.wx *= .5; g.wz *= .5; if (g.vy > 1.5) { NV.Audio.sfx('step'); shakeNear(o, .12); } } else g.vy = 0; }
+      if (air) { g.rx += g.wx * dt; g.rz += g.wz * dt; g.yaw += g.wy * dt; }
+      else {
+        const fr = Math.min(1, dt * 5); g.vx *= 1 - fr; g.vz *= 1 - fr; g.wx *= 1 - fr; g.wz *= 1 - fr;
+        // settle flat on the back or the front, whichever is nearer
+        if (!g.drone) { const tgt = [-Math.PI / 2, Math.PI / 2].map(a => a + Math.round((g.rx - a) / (2 * Math.PI)) * 2 * Math.PI).sort((a, b) => Math.abs(a - g.rx) - Math.abs(b - g.rx))[0]; g.rx += (tgt - g.rx) * Math.min(1, dt * 7); }
+        else g.rx += (0 - g.rx) * Math.min(1, dt * 4);
+        g.rz += (Math.round(g.rz / Math.PI) * Math.PI - g.rz) * Math.min(1, dt * 7);
+        if (Math.hypot(g.vx, g.vz) < .15 && Math.abs(g.vy) < .1 && g.t > .6) g.rest = true;
+      }
+    }
+    root.rotation.set(g.rx, g.yaw, g.rz);
+    root.position.set(o.x, g.h - (g.drone ? 0 : 1), o.z);
+    if (rig && g.limb) {
+      // limbs flail in the air, then flop into a limp sprawl
+      const L2 = g.limb, fl = g.rest ? 0 : Math.min(1.2, Math.hypot(g.vx, g.vy, g.vz) * .08), k = Math.min(1, dt * (g.rest ? 3 : 10)), w = g.t * 17;
+      const to = (n, ax, v) => n.rotation[ax] += (v - n.rotation[ax]) * k;
+      to(rig.armL, 'z', L2.aL + Math.sin(w) * fl); to(rig.armR, 'z', L2.aR + Math.sin(w + 2) * fl); to(rig.armL, 'x', L2.ax + Math.cos(w * .8) * fl); to(rig.armR, 'x', -L2.ax + Math.cos(w * .9 + 1) * fl);
+      to(rig.legL, 'z', L2.lL); to(rig.legR, 'z', L2.lR); to(rig.legL, 'x', Math.sin(w * .7) * fl * .8); to(rig.legR, 'x', Math.sin(w * .7 + 3) * fl * .8);
+      to(rig.kneeL, 'x', L2.k + Math.abs(Math.sin(w)) * fl); to(rig.kneeR, 'x', L2.k * .6 + Math.abs(Math.cos(w)) * fl); to(rig.elbowL, 'x', -L2.e); to(rig.elbowR, 'x', -L2.e * .7);
+    }
+  }
+  function shakeNear(o, a) { if (Math.hypot(o.x - L.p.x, o.z - L.p.z) < 8) shake(a); }
+  function disable(e, takedown, imp) {
+    if (!imp) { const dx = e.x - L.p.x, dz = e.z - L.p.z, d = Math.hypot(dx, dz) || 1, f = takedown ? 1.2 : 3.2; imp = { x: dx / d * f, y: takedown ? .8 : 2.6, z: dz / d * f }; }
+    if (e.m && e.m.root) ragdoll(e, e.m.root, e.m.rig, imp.x, imp.y, imp.z, e.drone);
     e.state = 'down'; e.hp = 0; NV.Audio.sfx('down');
     if (takedown) L.stats.takedowns++; else L.stats.disabled++;
     e.m.visor.material = L.mats.visorOff; e.m.extra.forEach(x => x.material = L.mats.visorOff); e.m.mark.isVisible = false;
@@ -2007,7 +2108,7 @@ NV.Level = (() => {
       B2.x += (dx / dist * want + (-dz / dist) * B2.strafe * .6) * sp * dt; B2.z += (dz / dist * want + (dx / dist) * B2.strafe * .6) * sp * dt;
       if (Math.random() < dt * .3) B2.strafe *= -1;
     }
-    const cx = U.clamp(B2.x, TILE * 2.6, TILE * 14.4), cz = U.clamp(B2.z, TILE * 2.6, TILE * 14.4); B2.x = cx; B2.z = cz;
+    const ao = L.aoff || { x: 0, y: 0 }, cx = U.clamp(B2.x, TILE * (2.6 + ao.x), TILE * (14.4 + ao.x)), cz = U.clamp(B2.z, TILE * (2.6 + ao.y), TILE * (14.4 + ao.y)); B2.x = cx; B2.z = cz;
     B2.root.position.set(B2.x, Math.sin(L.time * 2) * .1, B2.z); B2.root.rotation.y = B2.yaw;
     B2.atk -= dt * (ph === 3 ? 1.5 : 1);
     if (B2.atk <= 0) {
@@ -2019,7 +2120,7 @@ NV.Level = (() => {
       if (pat === 'charge') { B2.charge = .9; B2.vx = dx / dist * 16; B2.vz = dz / dist * 16; NV.Audio.sfx('dash'); B2.atk = 2.2; }
     }
     if (B2.spiral > 0) { B2.spiral -= dt; B2.spT = (B2.spT || 0) - dt; if (B2.spT <= 0) { B2.spT = .07; const a = L.time * 5; for (let k = 0; k < 2; k++) { const aa = a + k * Math.PI; fireEnemy(B2.x, 1.4, B2.z, B2.x + Math.sin(aa) * 10, 1.4, B2.z + Math.cos(aa) * 10, 10, 8 + L.act); } } }
-    if (ph >= 2) { B2.summon -= dt; if (B2.summon <= 0) { B2.summon = 16; for (let i = 0; i < 2; i++) { const c = cellC(i ? 14 : 2, 2); const e = addEnemy('drone', c.x, c.z); alertEnemy(e); } } }
+    if (ph >= 2) { B2.summon -= dt; if (B2.summon <= 0) { B2.summon = 16; for (let i = 0; i < 2; i++) { const ao = L.aoff || { x: 0, y: 0 }, c = cellC((i ? 13 : 2) + ao.x, 2 + ao.y); const e = addEnemy('drone', c.x, c.z); alertEnemy(e); } } }
   }
 
   /* ---------------- per-frame update ---------------- */
@@ -2029,6 +2130,7 @@ NV.Level = (() => {
     if (L.wantPause || I.pause()) { L.wantPause = false; if (!L.paused) pause(); return; }
     if (L.paused) return;
     L.time += dt; L.stats.time += dt;
+    if (L.cine) { cineUpdate(dt); if (L.cine) { if (L.npcs) updateNpcs(dt); if (L.city) updateTraffic(dt); updateWorld(dt); hud(dt); return; } }
     // look
     const sens = .0022 * set.sens;
     L.lastLook = L.look.dx || L.look.dy || (I.pad && (Math.abs(I.pad.axes[2]) > .15 || Math.abs(I.pad.axes[3]) > .15));
@@ -2079,11 +2181,12 @@ NV.Level = (() => {
       if (fireHeld) shoot();
       if (I.hit('KeyQ') || I.padHit(3)) emp();
     }
-    const carKey = L.free && !hacking && (I.hit('KeyF') || (I.padHit(2) && (L.drive || !nearestInteract())));
+    const carKey = L.city && !hacking && (I.hit('KeyF') || (I.padHit(2) && (L.drive || !nearestInteract())));
     if (carKey && (L.drive || nearestCar())) toggleCar();
     else if (I.hit('KeyE') || I.hit('KeyF') || I.padHit(2) || (hacking && I.lmbHit)) interact();
     if (hacking) { if (ml > 0 && !I.pad || I.hit('Escape')) { L.hack = null; document.getElementById('hack').classList.add('hidden'); } else drawHack(dt); if (L.hack && Math.hypot(L.hack.t.x - p.x, L.hack.t.z - p.z) > 3) { L.hack = null; document.getElementById('hack').classList.add('hidden'); } }
-    if (L.free) { updateFree(dt); updateTraffic(dt); }
+    if (L.free) updateFree(dt);
+    if (L.city) updateTraffic(dt);
     if (L.map.apt) updateApartment(dt);
     if (L.npcs) updateNpcs(dt);
     updateEnemies(dt); updateBoss(dt); updateBullets(dt); updateWorld(dt); updateMode(dt); hud(dt); tutorial(dt);
@@ -2119,11 +2222,7 @@ NV.Level = (() => {
     L.enemies.forEach(e => {
       const m = e.m;
       if (L.free && e.state !== 'alert' && e.state !== 'down' && Math.abs(e.x - L.p.x) + Math.abs(e.z - L.p.z) > 90) return;
-      if (e.state === 'down') {
-        if (!e.drone) { m.root.rotation.x = U.lerp(m.root.rotation.x, -Math.PI / 2, dt * 6); m.root.position.y = U.lerp(m.root.position.y, .35, dt * 6); }
-        else m.root.position.y = U.lerp(m.root.position.y, .35, dt * 4);
-        return;
-      }
+      if (e.state === 'down') { if (e.rag && !(e.rag.rest && e.rag.t > 3)) ragStep(e, m.root, m.rig, dt); return; }
       if (e.stun > 0) { e.stun -= dt; m.mark.isVisible = true; m.mark.material = L.mats.tracer; m.root.rotation.z = Math.sin(L.time * 20) * .05; if (e.drone) m.root.position.y = U.lerp(m.root.position.y, 1, dt * 3); return; }
       m.root.rotation.z = 0;
       const vis = canSee(e), dx = p.x - e.x, dz = p.z - e.z, dist = Math.hypot(dx, dz);
@@ -2253,7 +2352,7 @@ NV.Level = (() => {
   }
 
   function spawnWaveEnemy(kind) {
-    const spots = [[8, 1], [8, 15], [1, 8], [15, 8]]; const s = U.pick(spots), c = cellC(s[0], s[1]);
+    const ao = L.aoff || { x: 0, y: 0 }, spots = L.aoff ? [[8, 2], [8, 13], [2, 8], [13, 8]] : [[8, 1], [8, 15], [1, 8], [15, 8]]; const s = U.pick(spots), c = cellC(s[0] + ao.x, s[1] + ao.y);
     const e = addEnemy(kind, c.x, c.z); alertEnemy(e, false); return e;
   }
   function updateMode(dt) {
@@ -2357,12 +2456,12 @@ NV.Level = (() => {
     }
     return false;
   }
-  function populateCars(st) {
+  function populateCars(st, parkedOnly) {
     L.cars = []; L.drive = null; carProtos();
-    const q = NV.Quality.get(), n = q.traffic == null ? 24 : q.traffic;
+    const q = NV.Quality.get(), n = parkedOnly ? 0 : Math.round((q.traffic == null ? 24 : q.traffic) * (L.free ? 1 : .6));
     for (let i = 0; i < n; i++) { const c = makeCar(0, 0, 0, 'traffic'); if (spawnTraffic(c, 12, 170)) { c.root.position.set(c.x, 0, c.z); c.root.rotation.y = c.yaw; } else { c.root.dispose(); L.cars.pop(); } }
     // parked cars along the top edge of the safehouse plaza and a few other plazas (always drivable)
-    L.map.plazas.slice(0, 6).forEach((pz, pi) => {
+    L.map.plazas.slice().sort((a, b) => Math.hypot(a.cx * TILE - st.x, a.cy * TILE - st.z) - Math.hypot(b.cx * TILE - st.x, b.cy * TILE - st.z)).slice(0, L.free ? 6 : 3).forEach((pz, pi) => {
       for (let k = 0; k < (pi ? 2 : 3); k++) {
         const x = (pz.x + 1.5 + k * 2.5) * TILE, z = (pz.y + 1) * TILE;
         if (!solid(x, z)) { const c = makeCar(x, z, 0, 'parked'); c.vh = c.yaw; } // side by side, noses into the plaza
@@ -2375,6 +2474,7 @@ NV.Level = (() => {
     if (test(p.x, p.z, L.drive ? 2.4 : 1.6)) return true;
     if (c.stopT < 4) for (const o of L.cars) if (o !== c && test(o.x, o.z, 1.8)) return true; // creep through gridlock
     for (const pd of L.peds) if (test(pd.x, pd.z, 1.4)) return true;
+    for (const cv of L.civs) if (test(cv.x, cv.z, 1.4)) return true;
     for (const e of L.enemies) if (e.state !== 'down' && !e.drone && test(e.x, e.z, 1.4)) return true;
     return false;
   }
@@ -2460,8 +2560,20 @@ NV.Level = (() => {
     // bump other cars, knock Helix guards down, scatter pedestrians
     L.cars.forEach(o => { if (o === c) return; const dx = o.x - c.x, dz = o.z - c.z, d = Math.hypot(dx, dz); if (d < 3.6 && d > .01) { c.speed *= .5; o.speed = 0; o.stopT = 0; c.x -= dx / d * (3.6 - d) * .5; c.z -= dz / d * (3.6 - d) * .5; if (Math.abs(c.speed) > 6) { NV.Audio.sfx('hit'); shake(.3); } } });
     const fast = Math.abs(c.speed);
-    L.enemies.forEach(e => { if (e.state === 'down' || e.drone) return; const d = Math.hypot(e.x - c.x, e.z - c.z); if (d < 2.5 && fast > 5) { const k = (2.6 - d); e.x += Math.sin(c.vh) * k * 2; e.z += Math.cos(c.vh) * k * 2; if (fast > 14) disable(e, false); else { e.stun = 3; alertEnemy(e, true); } NV.Audio.sfx('hit'); shake(.25); c.speed *= .8; } });
-    L.peds.forEach(pd => { const dx = pd.x - c.x, dz = pd.z - c.z, d = Math.hypot(dx, dz); if (d < 3 && d > .01) { pd.x += dx / d * (3 - d); pd.z += dz / d * (3 - d); pd.sp = 2.4; } });
+    // hits launch bodies: velocity along the car's travel plus a push away from the bumper, and lift that grows with speed
+    const imp = o => { const dx = o.x - c.x, dz = o.z - c.z, d = Math.hypot(dx, dz) || 1, f = c.speed; return { x: Math.sin(c.vh) * f * .85 + dx / d * fast * .25, y: 2.5 + fast * .42, z: Math.cos(c.vh) * f * .85 + dz / d * fast * .25 }; };
+    const hitFx = o => { NV.Audio.sfx('hit'); NV.Audio.sfx('down'); shake(.35); spark(V3(o.x, 1, o.z), '#ffffff', 14); c.speed *= .85; };
+    L.enemies.forEach(e => {
+      if (e.drone && e.state !== 'down') return; const d = Math.hypot(e.x - c.x, e.z - c.z); if (d > 2.6) return;
+      if (e.state === 'down') { if (fast > 6 && e.rag && e.rag.h < .6) { const q = imp(e); ragdoll(e, e.m.root, e.m.rig, q.x, q.y * .7, q.z, e.drone); hitFx(e); } return; }
+      if (fast > 6) { disable(e, false, imp(e)); hitFx(e); }
+      else if (fast > 2) { const k = 2.6 - d; e.x += Math.sin(c.vh) * k * 2; e.z += Math.cos(c.vh) * k * 2; e.stun = 3; alertEnemy(e, true); NV.Audio.sfx('hit'); shake(.2); }
+    });
+    L.peds.forEach(pd => {
+      const dx = pd.x - c.x, dz = pd.z - c.z, d = Math.hypot(dx, dz); if (d > 2.7 || d < .01) return;
+      if (fast > 4 && !(pd.rag && pd.rag.h > .6)) { const q = imp(pd); ragdoll(pd, pd.root, pd.rig, q.x, q.y, q.z, false); hitFx(pd); }
+      else if (!pd.rag) { pd.x += dx / d * (2.7 - d); pd.z += dz / d * (2.7 - d); pd.sp = 2.4; }
+    });
     if (I.hit('KeyH') || I.padHit(11)) NV.Audio.sfx('horn');
     p.x = c.x; p.z = c.z; p.moving = fast > .5;
     c.root.position.set(c.x, 0, c.z); c.root.rotation.y = c.vh; c.root.rotation.z = U.clamp(-steer * fast * .004, -.06, .06);
@@ -2499,7 +2611,7 @@ NV.Level = (() => {
     hset('#hud .obj .c', 'text', cnt);
     hset('#hud .timer', 'text', L.defend ? U.fmtTime(L.defend.t) : '');
     const it = L.hack ? null : nearestInteract();
-    const car = !it && L.free && !L.drive && nearestCar();
+    const car = !it && L.city && !L.drive && nearestCar();
     hset('#hud .prompt', 'show', !!(it || car)); if (it) hset('#hud .prompt', 'html', '<span class="kbd">E</span> ' + it.label); else if (car) hset('#hud .prompt', 'html', '<span class="kbd">F</span> ' + (car.kind === 'traffic' ? 'COMMANDEER VEHICLE' : 'ENTER VEHICLE'));
     hset('#hud .speedo', 'show', !!L.drive); hset('#hud .xh', 'show', !L.drive); if (L.drive) hset('#hud .speedo', 'html', Math.round(Math.abs(L.drive.car.speed) * 3.6) + '<small>KM/H' + (L.drive.car.speed < -.5 ? ' · R' : '') + '</small>');
     if (L.boss) {
@@ -2646,6 +2758,10 @@ NV.Level = (() => {
     }
     populateCars(st);
   }
+  function pedGetUp(pd) {
+    pd.rag = null; pd.root.rotation.set(0, Math.random() * 6.28, 0); pd.root.position.y = 0;
+    const R = pd.rig; R.armL.rotation.z = -.07; R.armR.rotation.z = .07; R.legL.rotation.z = 0; R.legR.rotation.z = 0; pd.sp = 2.4; pedTarget(pd);
+  }
   function pedTarget(pd) {
     const c = toCell(pd.x, pd.z), g = L.map.g, [dx, dy] = U.pick([[1, 0], [-1, 0], [0, 1], [0, -1]]);
     let x = c.x, y = c.y; const len = 3 + Math.floor(Math.random() * 10);
@@ -2657,6 +2773,7 @@ NV.Level = (() => {
     const p = L.p, S = NV.State.get(), panic = L.alertLevel === 2;
     if ((NV.In.hit('KeyT') || NV.In.padHit(8)) && L.storyB && L.alertLevel < 2) { p.x = L.storyB.x + 3.2; p.z = L.storyB.z; p.yaw = -Math.PI / 2; if (L.drive) Object.assign(L.drive.car, { x: p.x, z: p.z, yaw: p.yaw, vh: p.yaw, speed: 0 }); NV.Audio.sfx('dash'); NV.toast('FAST TRAVEL', L.op.travel ? 'Arrived at the mission location.' : 'Arrived at the story marker.', '#19f0ff', 2); }
     L.peds.forEach(pd => {
+      if (pd.rag) { if (Math.abs(pd.x - p.x) + Math.abs(pd.z - p.z) < 150) ragStep(pd, pd.root, pd.rig, dt); if (pd.rag.rest && pd.rag.t > 5) pedGetUp(pd); return; }
       const dx = pd.tx - pd.x, dz = pd.tz - pd.z, d = Math.hypot(dx, dz);
       const far = Math.abs(pd.x - p.x) + Math.abs(pd.z - p.z) > 110;
       if (Math.abs(pd.x - p.x) + Math.abs(pd.z - p.z) > 180) { const q = L.spotNear(50, 110); pd.x = q.x; pd.z = q.z; pedTarget(pd); }
@@ -2922,6 +3039,82 @@ NV.Level = (() => {
     if ((NV.In.hit('KeyT') || NV.In.padHit(8)) && L.guide) { p.x = L.guide.x - Math.sin(L.p.yaw) * 2.2; p.z = L.guide.z - Math.cos(L.p.yaw) * 2.2; if (solid(p.x, p.z)) { p.x = L.guide.x + 1.6; p.z = L.guide.z; } NV.Audio.sfx('dash'); }
   }
 
+
+  /* ---------------- cutscenes: while a line plays, the camera takes over and frames what the text describes ---------------- */
+  const MOVE_RE = /\b(steps?|stepped|walks?|walked|moves?|moved|approach(es|ed)?|cross(es|ed)|heads?|headed|runs?|ran|strides?|goes|went|comes? closer|leans? in|kneels?)\b/i;
+  function cineGhost() {
+    if (!L.ghost) { L.ghost = makeNpc({ name: 'Ghost', kind: 'human' }, L.p.x, L.p.z); L.ghost.tag.setEnabled(false); L.ghost.root.setEnabled(false); }
+    return L.ghost;
+  }
+  function cineStart(o) {
+    if (!L || !L.started) return;
+    const p = L.p, G = cineGhost(), text = o.v || '', spk = o.s ? String(o.s).replace(/\s*\([^)]*\)\s*/g, ' ').trim() : null;
+    const npcs = L.npcs || [], byName = nm => npcs.find(n => n.name === nm);
+    const named = npcs.find(n => new RegExp('\\b' + n.name.split(' ')[0].replace(/[^\w-]/g, '') + '\\b', 'i').test(text));
+    const nearest = npcs.slice().sort((a, b) => Math.hypot(a.x - p.x, a.z - p.z) - Math.hypot(b.x - p.x, b.z - p.z))[0];
+    let partner = (spk && spk !== 'Ghost' && byName(spk)) || named || nearest || null;
+    if (partner && Math.hypot(partner.x - p.x, partner.z - p.z) > 30) partner = byName(spk) || null;
+    const ghostActs = !spk && /\bGhost\b/.test(text), shot = spk === 'Ghost' ? 'ghost' : spk && partner && byName(spk) ? 'npc' : 'wide';
+    const was = L.cine;
+    L.cine = { shot, partner, t: 0, orbit: was ? was.orbit : Math.random() * 6.28, cut: !was || was.shot !== shot || was.partner !== partner, walk: null };
+    L.cineOff = 0;
+    if (!was) { G.x = p.x; G.z = p.z; G.root.rotation.y = p.yaw; L.gunWas = L.gun.node.isEnabled(); L.gun.node.setEnabled(false); document.getElementById('hud').classList.add('cine'); }
+    G.root.setEnabled(true);
+    // "Ghost steps onto / walks toward ..." — the avatar actually moves there
+    if (ghostActs && MOVE_RE.test(text)) {
+      const tgt = partner ? { x: partner.x, z: partner.z, stop: 1.7 } : { x: G.x + Math.sin(G.root.rotation.y) * 4, z: G.z + Math.cos(G.root.rotation.y) * 4, stop: .2 };
+      L.cine.walk = tgt;
+    }
+    L.speaker = spk;
+  }
+  function cineStop(now) {
+    if (!L || !L.cine) return;
+    if (!now) { L.cineOff = .45; return; } // tiny grace so back-to-back lines don't snap the camera
+    const G = L.ghost, p = L.p;
+    if (G) { p.x = G.x; p.z = G.z; p.yaw = G.root.rotation.y; G.root.setEnabled(false); }
+    p.pitch = 0; L.cine = null; L.cineOff = 0; L.look.dx = L.look.dy = 0;
+    if (L.gunWas) L.gun.node.setEnabled(true);
+    L.cam.position.set(p.x, EYE, p.z); L.cam.rotation.set(0, p.yaw, 0);
+    const h = document.getElementById('hud'); if (h) h.classList.remove('cine');
+  }
+  function cineUpdate(dt) {
+    const C = L.cine, G = L.ghost, cam = L.cam; C.t += dt; C.orbit += dt * .07;
+    L.look.dx = L.look.dy = 0;
+    if (L.cineOff > 0) { L.cineOff -= dt; if (L.cineOff <= 0) return cineStop(true); }
+    // Ghost's body: walk if the narration says so, otherwise turn to face whoever matters
+    let moving = false;
+    if (C.walk) {
+      const dx = C.walk.x - G.x, dz = C.walk.z - G.z, d = Math.hypot(dx, dz);
+      if (d > C.walk.stop) { const st = Math.min(d - C.walk.stop, 1.6 * dt), nx = G.x + dx / d * st, nz = G.z + dz / d * st; if (!solid(nx, nz)) { G.x = nx; G.z = nz; moving = true; } else C.walk = null; G.root.rotation.y += U.angDiff(G.root.rotation.y, Math.atan2(dx, dz)) * Math.min(1, dt * 6); }
+      else C.walk = null;
+    } else if (C.partner) G.root.rotation.y += U.angDiff(G.root.rotation.y, Math.atan2(C.partner.x - G.x, C.partner.z - G.z)) * Math.min(1, dt * 4);
+    G.root.position.set(G.x, 0, G.z); L.p.x = G.x; L.p.z = G.z;
+    animRig(G.root.rig, dt, moving, 1.6, C.shot === 'ghost' ? 'talk' : null);
+    // camera placement per shot type
+    const P = C.partner, gh = V3(G.x, 1.62, G.z);
+    let eye, look;
+    if (C.shot === 'npc' && P) { // over Ghost's shoulder onto the speaker
+      const dx = P.x - G.x, dz = P.z - G.z, d = Math.hypot(dx, dz) || 1, ux = dx / d, uz = dz / d;
+      eye = V3(G.x - ux * 1.5 + uz * .65, 1.78, G.z - uz * 1.5 - ux * .65); look = V3(P.x, P.kind === 'ai' ? 1.5 : 1.62, P.z);
+    } else if (C.shot === 'ghost') { // reverse shot: over the listener's shoulder onto Ghost, or a close-up
+      if (P) { const dx = G.x - P.x, dz = G.z - P.z, d = Math.hypot(dx, dz) || 1, ux = dx / d, uz = dz / d; eye = V3(P.x - ux * 1.4 - uz * .6, 1.76, P.z - uz * 1.4 + ux * .6); }
+      else { const f = G.root.rotation.y; eye = V3(G.x + Math.sin(f + .5) * 2.3, 1.7, G.z + Math.cos(f + .5) * 2.3); }
+      look = gh;
+    } else { // wide establishing shot slowly circling the scene
+      const mx = P ? (G.x + P.x) / 2 : G.x, mz = P ? (G.z + P.z) / 2 : G.z, rad = 5.5 + (P ? Math.hypot(P.x - G.x, P.z - G.z) * .5 : 0);
+      eye = V3(mx + Math.cos(C.orbit) * rad, 3 + Math.sin(C.t * .2) * .3, mz + Math.sin(C.orbit) * rad); look = V3(mx, 1.2, mz);
+    }
+    // keep the camera out of walls: slide it toward the subject until it is in open space
+    for (let i = 0; i < 12 && solid(eye.x, eye.z); i++) { eye.x += (look.x - eye.x) * .2; eye.z += (look.z - eye.z) * .2; }
+    const k = C.cut ? 1 : Math.min(1, dt * 2.5); C.cut = false;
+    cam.position.set(U.lerp(cam.position.x, eye.x, k), U.lerp(cam.position.y, eye.y, k), U.lerp(cam.position.z, eye.z, k));
+    const dv = look.subtract(cam.position), yaw = Math.atan2(dv.x, dv.z), pitch = -Math.atan2(dv.y, Math.hypot(dv.x, dv.z));
+    cam.rotation.set(U.lerp(cam.rotation.x, pitch, k), cam.rotation.y + U.angDiff(cam.rotation.y, yaw) * k, 0);
+    cam.fov = U.lerp(cam.fov, NV.Settings.get().fov * Math.PI / 180 * .75 * (C.shot === 'wide' ? .95 : .7), k);
+    L.plight.position.set(G.x, 2, G.z);
+    if (L.sun) L.sun.position.set(G.x + 17, 50, G.z + 12);
+  }
+
   /* ---------------- lifecycle ---------------- */
   function pause() {
     NV.Audio.engine(0); L.paused = true; if (document.pointerLockElement) document.exitPointerLock();
@@ -2943,6 +3136,7 @@ NV.Level = (() => {
   }
   function end(res) {
     NV.Audio.engine(0);
+    if (L.city && L.map && L.map.city) { const c = toCell(L.p.x, L.p.z); if (L.map.g[c.y] && L.map.g[c.y][c.x] === 0) zone = c; }
     const done = L.resolve; const sc = L.scene; L = null; hudCache = {};
     const hudEl = document.getElementById('hud'); if (hudEl) hudEl.remove(); document.body.classList.remove('inlevel');
     NV.G.active = NV.Backdrop.scene;
@@ -2952,7 +3146,7 @@ NV.Level = (() => {
 
   function buildHud(op) {
     const h = U.el('div', '', `
-      <div class="xh"></div><div class="dmg"></div>
+      <div class="xh"></div><div class="dmg"></div><div class="lb lbt"></div><div class="lb lbb"></div>
       <div class="obj"><div class="t">OPERATION</div><div class="d"></div><div class="c"></div></div>
       <div class="status s0">UNDETECTED</div>
       <canvas class="mm" width="180" height="180"></canvas><div class="timer"></div><div class="speedo hidden"></div>
@@ -2984,12 +3178,15 @@ NV.Level = (() => {
         time: 0, shake: 0, mmT: 0, tut: !!op.tut, tutI: 0, started: false, over: false, paused: false,
       };
       L.free = op.m === 'free'; if (L.free) L.seed = U.hash('new-avalon');
+      const th = (ctx.palette || {}).th;
+      L.city = L.free || (op.m !== 'apartment' && !op.rooms && th !== 'space' && th !== 'cyber' && NV.Settings.get().cityOps !== 0);
       L.calm = op.m === 'apartment' || op.m === 'scene';
       L.dmgUp = 1; L.enMul = 1; applyUpgrades(); L.p.hp = L.p.max;
       L.map = gen(op.m, L.seed);
       L.seen = new Uint8Array(L.map.W * L.map.H);
       const built = buildScene(op, ctx); L.scene = built.scene; L.cam = built.cam; L.plight = built.plight;
       populate(op, ctx);
+      if (L.city && !L.free) { L.peds = []; populateCars({ x: L.p.x, z: L.p.z }, !!L.aoff || op.m === 'scene'); }
       buildHud(op);
       L.scene.onBeforeRenderObservable.add(() => update(L ? Math.min(.05, L.scene.getEngine().getDeltaTime() / 1000) : 0));
       L.scene.executeWhenReady(() => {
@@ -3000,10 +3197,12 @@ NV.Level = (() => {
     });
   }
   return {
-    start, get active() { return !!L; }, debug: () => L,
+    start, get active() { return !!L; }, debug: () => L, devApi: () => ({ disable, ragdoll }),
     stop() { if (L) end({ done: true }); },
     event: aptEvent,
     applyQuality() { if (!L) return; NV.Quality.teardown(L.fx); L.fx = NV.Quality.setup(L.scene, L.cam); const q = NV.Quality.get(); L.cam.maxZ = q.draw; },
+    cine(o) { if (!L) return; if (o) cineStart(o); else cineStop(false); },
+    cineOff() { if (L && L.cine) cineStop(true); },
     speaking(name) { if (L) L.speaker = name ? String(name).replace(/\s*\([^)]*\)\s*/g, ' ').trim() : null; },
     objective(t, d) { const h = document.getElementById('hud'); if (!h) return; h.querySelector('.obj .t').textContent = t; h.querySelector('.obj .d').textContent = d; },
     enableProps(ids) { if (L && L.props) L.props.forEach(pr => pr.enabled = ids.includes(pr.id)); },
@@ -3137,16 +3336,17 @@ NV.UI = (() => {
   });
 
   /* ---------------- settings ---------------- */
-  UI.settings = () => new Promise(res => {
+  UI.settings = only => new Promise(res => {
     const S = NV.Settings;
-    const rows = [
+    let rows = [
       ['master', 'Master volume', 'range', 0, 1, .1], ['music', 'Music volume', 'range', 0, 1, .1], ['sfx', 'Effects volume', 'range', 0, 1, .1],
-      ['voice', 'Voice acting', 'bool'], ['voiceVol', 'Voice volume', 'range', 0, 1, .1], ['voiceRate', 'Speech speed', 'range', .7, 1.5, .05], ['narrator', 'Narrator voice', 'bool'], ['voicecast', 'Voice cast', 'open', () => UI.voiceCast()],
+      ['voice', 'Voice acting', 'bool'], ['voiceVol', 'Character voice volume', 'range', 0, 1, .1], ['narrVol', 'Narrator volume', 'range', 0, 1, .1], ['duck', 'Lower music during dialogue', 'bool'], ['voiceRate', 'Speech speed', 'range', .7, 1.5, .05], ['narrator', 'Narrator voice', 'bool'], ['voicecast', 'Voice cast', 'open', () => UI.voiceCast()],
       ['textSpeed', 'Text speed', 'enum', ['Slow', 'Normal', 'Fast', 'Instant'], 0], ['sens', 'Mouse sensitivity', 'range', .3, 3, .1],
       ['fov', 'Field of view', 'range', 65, 110, 5], ['invertY', 'Invert Y axis', 'bool'], ['shake', 'Screen shake', 'bool'],
       ['scan', 'Scanline filter', 'bool'], ['showStats', 'Show world-state changes', 'bool'], ['walk', 'Walkable story scenes', 'bool'], ['travel', 'Travel to missions in the city', 'bool'], ['showFps', 'Show FPS', 'bool'], ['gfxmenu', 'Graphics settings', 'open', () => UI.graphics()],
     ];
-    const m = modal(`<div class="stitle">SETTINGS</div><div class="rows"></div><button class="btn" style="margin-top:12px">Done</button>
+    if (only === 'audio') rows = rows.filter(r => ['master', 'music', 'sfx', 'voice', 'voiceVol', 'narrVol', 'duck', 'narrator', 'voiceRate'].includes(r[0]));
+    const m = modal(`<div class="stitle">${only === 'audio' ? 'AUDIO' : 'SETTINGS'}</div><div class="rows"></div><button class="btn" style="margin-top:12px">Done</button>
       <p class="muted" style="margin-top:14px;font-size:14px;line-height:1.6">Controls — <span class="kbd">WASD</span> move · <span class="kbd">Mouse</span> look · <span class="kbd">LMB</span> fire · <span class="kbd">Shift</span> sprint · <span class="kbd">C</span> sneak · <span class="kbd">Space</span> dash · <span class="kbd">E</span> interact / takedown / hack · <span class="kbd">Q</span> EMP · <span class="kbd">Esc</span> pause.<br>Story — <span class="kbd">Space</span>/<span class="kbd">Click</span> advance · <span class="kbd">1-4</span> choose · <span class="kbd">A</span> auto · <span class="kbd">Ctrl</span> hold to skip · <span class="kbd">L</span> log. Gamepads supported.</p>`);
     const box = m.querySelector('.rows');
     const fmt = r => { if (r[2] === 'open') return (r[0] === 'gfxmenu' ? NV.Quality.get().name : NV.Voices.voices.length + ' voices') + ' ▸'; const v = S.get()[r[0]]; if (r[2] === 'bool') return v ? 'ON' : 'OFF'; if (r[2] === 'enum') return '◂ ' + r[3][v] + ' ▸'; if (r[0] === 'fov') return v + '°'; if (r[0] === 'sens') return v.toFixed(1) + '×'; return Math.round(v * 100) + '%'; };
@@ -3156,6 +3356,7 @@ NV.UI = (() => {
       const r = rows[k]; if (!r) return; if (r[2] === 'open') { r[3]().then(() => els[k].querySelector('.val').textContent = fmt(r)); return; } const cur = S.get()[r[0]]; let v;
       if (r[2] === 'bool') v = cur ? 0 : 1; else if (r[2] === 'enum') v = (cur + d + r[3].length) % r[3].length; else v = Math.round(U.clamp(cur + d * r[5], r[3], r[4]) * 100) / 100;
       S.set(r[0], v); els[k].querySelector('.val').textContent = fmt(r); NV.Audio.sfx('ui');
+      if (r[0] === 'voiceVol' || r[0] === 'narrVol' || r[0] === 'voiceRate') { NV.Voice.stop(); NV.Voice.speak(r[0] === 'narrVol' ? null : 'Ghost', r[0] === 'narrVol' ? 'Artificial rain crawls down the smart-glass.' : 'Rent is due. So is Helix.'); }
     };
     const fin = () => { UI.pop(h); m.remove(); res(); };
     const h = UI.push(nav(els, { select: k => { if (k === els.length - 1) fin(); else change(k, 1); }, left: k => change(k, -1), right: k => change(k, 1), back: fin }));
@@ -3298,10 +3499,10 @@ NV.UI = (() => {
     const h = UI.push({ tick() { const I = NV.In; if (I.back() || I.any('KeyL') || I.confirm()) fin(); if (I.menuUp()) p.scrollTop -= 60; if (I.menuDown()) p.scrollTop += 60; } });
   });
   UI.storyPause = () => new Promise(res => {
-    const m = modal(`<div class="stitle">PAUSED</div><button class="btn">Resume</button><button class="btn">Journal</button><button class="btn">Settings</button><button class="btn">Save &amp; Quit to Title</button>`, true);
+    const m = modal(`<div class="stitle">PAUSED</div><button class="btn">Resume</button><button class="btn">Journal</button><button class="btn">Audio</button><button class="btn">Settings</button><button class="btn">Save &amp; Quit to Title</button>`, true);
     const b = [...m.querySelectorAll('.btn')];
     const fin = v => { UI.pop(h); m.remove(); res(v); };
-    const h = UI.push(nav(b, { select: async k => { if (k === 0) fin(null); if (k === 1) await UI.journal(); if (k === 2) await UI.settings(); if (k === 3) fin('quit'); }, back: () => fin(null) }));
+    const h = UI.push(nav(b, { select: async k => { if (k === 0) fin(null); if (k === 1) await UI.journal(); if (k === 2) await UI.settings('audio'); if (k === 3) await UI.settings(); if (k === 4) fin('quit'); }, back: () => fin(null) }));
   });
 
   const SPEEDS = [28, 60, 130, 1e5];
@@ -3420,12 +3621,12 @@ NV.UI = (() => {
   });
   UI.levelPause = free => new Promise(res => {
     const m = free
-      ? modal(`<div class="stitle">NEW AVALON</div><button class="btn">Resume</button><button class="btn">Journal</button><button class="btn">Settings</button><button class="btn">Save &amp; Quit to Title</button>`, true)
-      : modal(`<div class="stitle">PAUSED</div><button class="btn">Resume</button><button class="btn">Settings</button><button class="btn">Restart Operation</button><button class="btn">Skip Operation<small>Continue the story without clearing this operation</small></button><button class="btn">Save &amp; Quit to Title</button>`, true);
+      ? modal(`<div class="stitle">NEW AVALON</div><button class="btn">Resume</button><button class="btn">Journal</button><button class="btn">Audio</button><button class="btn">Settings</button><button class="btn">Save &amp; Quit to Title</button>`, true)
+      : modal(`<div class="stitle">PAUSED</div><button class="btn">Resume</button><button class="btn">Audio</button><button class="btn">Settings</button><button class="btn">Restart Operation</button><button class="btn">Skip Operation<small>Continue the story without clearing this operation</small></button><button class="btn">Save &amp; Quit to Title</button>`, true);
     const b = [...m.querySelectorAll('.btn')];
     const fin = v => { UI.pop(h); m.remove(); res(v); };
-    const acts = free ? ['resume', 'journal', 'settings', 'quit'] : ['resume', 'settings', 'restart', 'skip', 'quit'];
-    const h = UI.push(nav(b, { select: async k => { const a = acts[k]; if (a === 'settings') await UI.settings(); else if (a === 'journal') await UI.journal(); else fin(a); }, back: () => fin('resume') }));
+    const acts = free ? ['resume', 'journal', 'audio', 'settings', 'quit'] : ['resume', 'audio', 'settings', 'restart', 'skip', 'quit'];
+    const h = UI.push(nav(b, { select: async k => { const a = acts[k]; if (a === 'audio') await UI.settings('audio'); else if (a === 'settings') await UI.settings(); else if (a === 'journal') await UI.journal(); else fin(a); }, back: () => fin('resume') }));
   });
   UI.vendor = () => new Promise(res => {
     const S = NV.State.get(); S.upg = S.upg || { hp: 0, dmg: 0, en: 0 };
@@ -3569,7 +3770,7 @@ NV.Story = (() => {
   }
   async function gate(title, desc, ids, cond) {
     const w = ctx.world; if (!w || w.done) return null;
-    w.gating = true; NV.UI.storyHide(true); NV.Level.objective(title, desc); NV.Level.enableProps(ids);
+    w.gating = true; NV.Level.cineOff(); NV.UI.storyHide(true); NV.Level.objective(title, desc); NV.Level.enableProps(ids);
     NV.toast('OBJECTIVE', desc, '#ffb238', 4);
     while (!cond(w) || w.busy) { if (w.quit) return Q; if (w.done) break; await U.sleep(100); }
     w.gating = false; NV.Level.enableProps([]); NV.UI.storyHide(false);
@@ -3611,7 +3812,7 @@ NV.Story = (() => {
       .then(res => { w.done = true; if (res.quit) w.quit = true; started(); });
     await startedP;
     if (gate && lead && !w.done) { const r = await gate2(w); if (r) return r; }
-    NV.Level.objective('STORY · ' + sceneName.split('—')[0].trim().toUpperCase(), lead ? 'With ' + cast.map(c => c.name).slice(0, 4).join(', ') + '. Move freely while the scene plays.' : 'Move freely while the scene plays.');
+    NV.Level.objective('STORY · ' + sceneName.split('—')[0].trim().toUpperCase(), lead ? 'With ' + cast.map(c => c.name).slice(0, 4).join(', ') + '. Watch the scene play out.' : 'Watch the scene play out.');
     NV.UI.storyHide(false);
     return null;
   }
@@ -3639,26 +3840,31 @@ NV.Story = (() => {
         ctx.echoes.push(n.v);
         if (ctx.world && /^The lights flicker\. Every screen/.test(n.v)) NV.Level.event('voss');
         if (ctx.world && /^The lock begins to melt/.test(n.v)) NV.Level.event('breach');
-        if ((await NV.UI.say(null, n.v)) === 'quit') return Q;
+        if (ctx.world) NV.Level.cine({ v: n.v });
+        const rs = await NV.UI.say(null, n.v);
+        if (ctx.world) NV.Level.cine(null);
+        if (rs === 'quit') return Q;
         if (ctx.world && /^The lock begins to melt/.test(n.v)) return await gate('BREACH', 'Rip the power cell out and get to the door.', ['door'], w => w.door);
         return null;
       }
       case 'l': {
         ctx.echoes.push(n.s + ': ' + n.v);
-        if (ctx.world) NV.Level.speaking(n.s);
-        if ((await NV.UI.say(n.s, n.v)) === 'quit') return Q;
-        if (ctx.world) NV.Level.speaking(null);
+        if (ctx.world) { NV.Level.speaking(n.s); NV.Level.cine({ s: n.s, v: n.v }); }
+        const rl = await NV.UI.say(n.s, n.v);
+        if (ctx.world) { NV.Level.speaking(null); NV.Level.cine(null); }
+        if (rl === 'quit') return Q;
         if (ctx.world && n.s === 'Ghost' && n.v === 'That makes two of us.') return await gate('LOOK AROUND', 'Look around your apartment — inspect at least three things [E].', ['window', 'invoice', 'map', 'helmet', 'mirror', 'bag'], w => w.seen >= 3);
         return null;
       }
       case 'sys': await sys(n); return null;
       case 'choice': {
-        const k = await NV.UI.choose(n.p, n.o); if (k < 0) return Q;
+        if (ctx.world) NV.Level.cine({ s: 'Ghost', v: '' });
+        const k = await NV.UI.choose(n.p, n.o); if (ctx.world) NV.Level.cine(null); if (k < 0) return Q;
         const o = n.o[k];
         NV.State.fact(o.ok || U.stems(o.label + ' ' + o.text)); ctx.lastChoice = o.label + ' ' + o.text;
         (o.f || []).forEach(f => S.flags[f] = (S.flags[f] || 0) + 1);
         applyFx(o.fx, o.text || o.label);
-        if (o.text) { const r = await NV.UI.say('Ghost', o.text); if (r === 'quit') return Q; }
+        if (o.text) { if (ctx.world) NV.Level.cine({ s: 'Ghost', v: o.text }); const r = await NV.UI.say('Ghost', o.text); if (ctx.world) NV.Level.cine(null); if (r === 'quit') return Q; }
         NV.State.save();
         return await runNodes(o.b);
       }
