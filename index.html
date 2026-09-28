@@ -30,6 +30,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#05030b;color:var(--
 @keyframes tout{to{transform:translateX(30px);opacity:0}}
 @keyframes fin{from{opacity:0}}
 @keyframes blink{50%{opacity:.25}}
+.mpf label{display:flex;justify-content:space-between;align-items:center;gap:14px;margin:8px 0;font-size:16px}.mpf input,.mpf select,.mpcode{background:rgba(5,3,12,.8);border:1px solid var(--cyan);color:var(--ink);padding:7px 10px;font:16px var(--fb,sans-serif);min-width:220px}.mpf .chk{justify-content:flex-start}.mpf .chk input{min-width:0}
+.mpjoin{display:flex;gap:10px;align-items:center;margin:8px 0}.mpjoin .btn{width:auto;flex:0 0 auto}.mpcode{font-family:var(--fm);letter-spacing:.3em;text-transform:uppercase;flex:1}.mpstat{min-height:22px;color:var(--amber);font-size:15px;margin:8px 0}
 .btn{display:block;width:100%;text-align:left;background:transparent;border:0;color:var(--ink);font-family:var(--fh);font-weight:700;font-size:clamp(14px,1.6vw,19px);letter-spacing:.18em;padding:11px 18px;cursor:pointer;position:relative;text-transform:uppercase;transition:all .15s}
 .btn::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);transform:scaleY(0);transition:transform .15s}
 .btn.focus,.btn:hover{color:#fff;background:linear-gradient(90deg,rgba(25,240,255,.18),transparent);padding-left:28px;text-shadow:0 0 12px var(--accent)}
@@ -149,6 +151,8 @@ body.cine #story{bottom:11vh;inset:0 0 11vh 0;z-index:5}
 #hud .lb{position:absolute;left:0;right:0;height:0;background:#000;transition:height .45s ease;z-index:1}#hud .lbt{top:0}#hud .lbb{bottom:0}
 #hud.cine .lb{height:11vh}#hud.cine .obj,#hud.cine .mm,#hud.cine .prompt,#hud.cine .xh,#hud.cine .status,#hud.cine .bars,#hud.cine .speedo,#hud.cine .tut{opacity:0;pointer-events:none}
 #hud .loc{position:absolute;right:20px;top:198px;width:220px;font-family:var(--fh);font-size:12px;letter-spacing:.25em;color:var(--ink);text-align:right;text-shadow:0 0 8px #000;opacity:.85}#hud .loc small{display:block;font-size:11px;letter-spacing:.12em;color:var(--amber);margin-top:3px}#hud.cine .loc{opacity:0}
+#hud .chatlog{position:absolute;left:20px;bottom:230px;width:min(460px,60vw);font-size:15px;line-height:1.45;text-shadow:0 0 6px #000}#hud .chatlog div{transition:opacity 1.2s}#hud .chatlog div.old{opacity:0}
+#hud .chatin{position:absolute;left:20px;bottom:196px;width:min(460px,60vw);padding:7px 10px;background:rgba(5,3,12,.85);border:1px solid var(--cyan);color:var(--ink);font:15px var(--fb,sans-serif);outline:none;pointer-events:auto}
 #hud .speedo{position:absolute;right:20px;bottom:24px;font-family:var(--fm);font-size:44px;color:var(--cyan);text-shadow:0 0 12px var(--cyan);text-align:right;line-height:1}
 #hud .speedo small{display:block;font-size:12px;letter-spacing:.3em;color:var(--ink)}
 #hud .timer{position:absolute;right:20px;top:210px;font-family:var(--fm);font-size:22px;color:var(--amber);width:180px;text-align:center}
@@ -710,7 +714,7 @@ NV.DIFF = { story: { name: 'Story', dmg: .45, hp: .7, det: .7 }, normal: { name:
 
 NV.State = (() => {
   const KEY = 'nv_save_v1', META = 'nv_meta_v1', SAVE_VER = 2;
-  let S = null;
+  let S = null, temp = false; // temp: a throwaway state for multiplayer sessions that never touches the story save
   let meta = { endings: [], unlocked: 0, snaps: {} };
   try { Object.assign(meta, JSON.parse(localStorage.getItem(META) || '{}')); } catch (e) { }
   const fresh = profile => ({
@@ -721,10 +725,11 @@ NV.State = (() => {
   const St = {
     get: () => S,
     meta: () => meta,
-    newGame(profile) { S = fresh(profile); St.save(); },
+    newGame(profile) { temp = false; S = fresh(profile); St.save(); },
+    tempGame(profile) { temp = true; S = fresh(profile); },
     hasSave() { try { return !!localStorage.getItem(KEY); } catch (e) { return false; } },
     load() {
-      let raw = null; try { raw = localStorage.getItem(KEY); } catch (e) { return false; }
+      temp = false; let raw = null; try { raw = localStorage.getItem(KEY); } catch (e) { return false; }
       if (!raw) return false;
       try {
         const d = JSON.parse(raw); if (!d || typeof d !== 'object' || !d.profile) throw new Error('bad save');
@@ -737,11 +742,11 @@ NV.State = (() => {
         return false;
       }
     },
-    save() { if (!S) return; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { } },
+    save() { if (!S || temp) return; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { } },
     wipe() { try { [KEY, KEY + '_corrupt', META].forEach(k => localStorage.removeItem(k)); } catch (e) { } S = null; meta = { endings: [], unlocked: 0, snaps: {} }; },
     saveMeta() { try { localStorage.setItem(META, JSON.stringify(meta)); } catch (e) { } },
     snapshot(ci) { meta.snaps[ci] = JSON.stringify({ ...S, ci, cp: 0 }); meta.unlocked = Math.max(meta.unlocked, ci); St.saveMeta(); },
-    fromSnapshot(ci) { try { S = JSON.parse(meta.snaps[ci]); St.save(); return true; } catch (e) { return false; } },
+    fromSnapshot(ci) { try { temp = false; S = JSON.parse(meta.snaps[ci]); St.save(); return true; } catch (e) { return false; } },
     stat(k, d) {
       const v = S.stats[k]; d *= .45;
       const nv = d > 0 ? v + d * (1.25 - v / 100) : v + d * (0.25 + v / 100);
@@ -1927,7 +1932,7 @@ NV.Level = (() => {
     if (kind === 'med') { m = BABYLON.MeshBuilder.CreateBox('med', { size: .45 }, s); m.material = L.mats.med; }
     else { m = BABYLON.MeshBuilder.CreatePolyhedron('pk', { type: kind === 'memory' ? 2 : 1, size: .35 }, s); m.material = L.mats.shard; }
     m.position.set(x, 1.1, z);
-    L.pickups.push({ kind, x, z, m, text, t: Math.random() * 6 });
+    L.pickups.push({ kind, x, z, m, text, t: Math.random() * 6, nid: L.pickN = (L.pickN || 0) + 1 });
   }
   function addCivilian(x, z) {
     const s = L.scene, root = new BABYLON.TransformNode('civ', s);
@@ -2062,9 +2067,14 @@ NV.Level = (() => {
     });
     let bossHit = false;
     if (L.boss && L.boss.hp > 0) { const B2 = L.boss; const rad = B2.shieldOn ? 2.6 : 1.1; const t = test(B2.x, 2.2, B2.z, rad); if (t > 0 && t < tHit) { tHit = t; hit = null; bossHit = true; } }
+    // friendly fire: other players (only when the host turned it on)
+    let pHit = null, pHead = false;
+    if (netOn() && NV.Net.pvp && L.netAv) L.netAv.forEach(a => { if (a.car) return; const n = a.npc; [[1.8, .26, true], [1.25, .5, false], [.6, .45, false]].forEach(([yy, rad, hd]) => { const t = test(n.x, yy, n.z, rad); if (t > 0 && t < tHit) { tHit = t; pHit = a; pHead = hd; hit = null; bossHit = false; } }); });
     const end = o.add(d.scale(tHit));
     const muzzle = L.gun.node.getAbsolutePosition().add(d.scale(.5));
     tracer(muzzle, end);
+    if (netOn()) NV.Net.send({ t: 'shot', a: [muzzle.x, muzzle.y, muzzle.z].map(v => +v.toFixed(2)), b: [end.x, end.y, end.z].map(v => +v.toFixed(2)), lvl: L.netKey });
+    if (pHit) { NV.Net.send({ t: 'hit', to: pHit.id, dmg: 17 * (pHead ? 2 : 1), lvl: L.netKey }); spark(end, '#ff5a3d', 12); flashX(); }
     const dmgMul = L.dmgUp * (1 + (L.implant - 1) * .1) * (L.tags.includes('engineer') ? 1.15 : 1) * (L.tactic.dmg || 1);
     if (hit) {
       const dmg = 34 * dmgMul * (head ? 2 : 1);
@@ -2072,7 +2082,7 @@ NV.Level = (() => {
     } else if (bossHit) {
       const B2 = L.boss;
       if (B2.shieldOn) { spark(end, '#19f0ff', 10); NV.Audio.sfx('shield'); }
-      else { B2.hp -= 34 * dmgMul; spark(end, '#ff5a3d', 16); flashX(); NV.Audio.sfx('hit'); if (B2.hp <= 0) bossDown(); }
+      else { B2.hp -= 34 * dmgMul; if (netOn()) NV.Net.send({ t: 'boss', d: 34 * dmgMul, lvl: L.netKey }); spark(end, '#ff5a3d', 16); flashX(); NV.Audio.sfx('hit'); if (B2.hp <= 0) bossDown(); }
     } else spark(end, null, 8);
   }
   function rayBox(o, d, c) {
@@ -2129,6 +2139,7 @@ NV.Level = (() => {
   function disable(e, takedown, imp) {
     if (!imp) { const dx = e.x - L.p.x, dz = e.z - L.p.z, d = Math.hypot(dx, dz) || 1, f = takedown ? 1.2 : 3.2; imp = { x: dx / d * f, y: takedown ? .8 : 2.6, z: dz / d * f }; }
     if (e.m && e.m.root) ragdoll(e, e.m.root, e.m.rig, imp.x, imp.y, imp.z, e.drone);
+    if (netOn() && e.nid != null && !e.netDown) NV.Net.send({ t: 'edown', k: e.nid, imp: { x: +imp.x.toFixed(2), y: +imp.y.toFixed(2), z: +imp.z.toFixed(2) }, lvl: L.netKey });
     e.state = 'down'; e.hp = 0; NV.Audio.sfx('down');
     if (takedown) L.stats.takedowns++; else L.stats.disabled++;
     e.m.visor.material = L.mats.visorOff; e.m.extra.forEach(x => x.material = L.mats.visorOff); e.m.mark.isVisible = false;
@@ -2159,7 +2170,7 @@ NV.Level = (() => {
     const dm = d * NV.DIFF[L.diff].dmg * (L.tactic.armor || 1);
     L.p.hp -= dm; L.p.regenT = 4; L.stats.dmg += dm; NV.Audio.sfx('hurt'); shake(.35);
     const el = document.querySelector('#hud .dmg'); if (el) { el.style.opacity = U.clamp(dm / 30, .35, 1); clearTimeout(el._t); el._t = setTimeout(() => el.style.opacity = 0, 180); }
-    if (L.p.hp <= 0) { L.p.hp = 0; if (L.free) freeRespawn(); else finish(false); }
+    if (L.p.hp <= 0) { L.p.hp = 0; if (L.free) freeRespawn(); else if (netOn()) mpRespawn(); else finish(false); }
   }
 
   /* ---------------- hacking mini-game ---------------- */
@@ -2173,8 +2184,10 @@ NV.Level = (() => {
     if (d < h.width / 2) { h.hits++; NV.Audio.sfx('hack'); h.zone = Math.random() * 6.28; h.width = Math.max(.42, h.width - .1); h.speed *= 1.12; if (h.hits >= h.t.need) { hackDone(h.t); } }
     else { NV.Audio.sfx('hackfail'); h.hits = Math.max(0, h.hits - 1); h.cool = .35; noise(h.t.x, h.t.z, 12); shake(.15); }
   }
-  function hackDone(t) {
-    t.done = true; t.scr.material = L.mats.scrOk; t.beam.material = L.mats.scrOk; NV.Audio.sfx('hackok'); L.hack = null; document.getElementById('hack').classList.add('hidden');
+  function hackDone(t, fromNet) {
+    t.done = true; t.scr.material = L.mats.scrOk; t.beam.material = L.mats.scrOk; NV.Audio.sfx('hackok');
+    if (!L.hack || L.hack.t === t) { L.hack = null; document.getElementById('hack').classList.add('hidden'); }
+    if (!fromNet && netOn()) NV.Net.send({ t: 'obj', kind: 'term', i: L.terms.indexOf(t), lvl: L.netKey });
     if (t.pylon) { if (L.terms.filter(x => x.pylon).every(x => x.done)) { L.boss.shieldOn = false; L.boss.shieldT = 11; NV.Audio.sfx('shield'); NV.toast('SHIELD DOWN', 'Open fire — the shield reboots in 11s.', '#19f0ff', 3); L.boss.shield.isVisible = false; } }
     else { L.obj.got++; L.stats.found++; if (L.obj.got >= L.obj.total) openExit(); }
   }
@@ -2233,6 +2246,7 @@ NV.Level = (() => {
   /* ---------------- per-frame update ---------------- */
   function update(dt) {
     if (!L || L.over) return;
+    netTick(dt);
     const I = NV.In, set = NV.Settings.get(), p = L.p;
     if (L.wantPause || I.pause()) { L.wantPause = false; if (!L.paused) pause(); return; }
     if (L.paused) return;
@@ -2269,6 +2283,7 @@ NV.Level = (() => {
     if (p.over > 0) { p.over -= dt; if (p.over <= 0) p.heat = 0; } else p.heat = Math.max(0, p.heat - dt * (p.cd < -.25 ? 55 : 10));
     p.regenT -= dt; if (L.tags.includes('medic') && p.regenT <= 0) p.hp = Math.min(p.max, p.hp + dt * 2.5);
     if (L.drive) updateDrive(dt);
+    if (netOn() && I.hit('Enter') && !hacking) chatOpen();
     // camera
     const eyeH = U.lerp(L.cam.position.y, (crouch ? CROUCH : EYE) + (p.moving ? Math.sin(p.bob) * .05 : 0), Math.min(1, dt * 12));
     L.cam.position.set(p.x, eyeH, p.z);
@@ -2443,7 +2458,7 @@ NV.Level = (() => {
     else if (it.kind === 'hack') startHack(it.o);
     else if (it.kind === 'prop') { it.o.done = true; if (L.op.onInspect) L.op.onInspect(it.o.id); }
     else if (it.kind.startsWith('f:')) freeInteract(it);
-    else if (it.kind === 'civ') { it.o.saved = true; L.stats.rescued++; NV.Audio.sfx('pickup'); NV.toast('CIVILIAN FREED', 'They slip away through the service route.', '#ffd23d', 2.5); }
+    else if (it.kind === 'civ') { if (netOn()) NV.Net.send({ t: 'obj', kind: 'civ', i: L.civs.indexOf(it.o), lvl: L.netKey }); it.o.saved = true; L.stats.rescued++; NV.Audio.sfx('pickup'); NV.toast('CIVILIAN FREED', 'They slip away through the service route.', '#ffd23d', 2.5); }
   }
 
   function updateWorld(dt) {
@@ -2451,6 +2466,7 @@ NV.Level = (() => {
     L.pickups = L.pickups.filter(k => {
       k.t += dt; k.m.rotation.y += dt * 2; k.m.position.y = 1.1 + Math.sin(k.t * 2) * .12;
       if (Math.hypot(k.x - p.x, k.z - p.z) < 1.3) {
+        if (netOn() && !L.free && !(k.kind === 'med' && p.hp >= p.max)) NV.Net.send({ t: 'obj', kind: 'pick', i: k.nid, lvl: L.netKey });
         if (k.kind === 'med') { if (p.hp >= p.max) return true; p.hp = Math.min(p.max, p.hp + (L.tags.includes('medic') ? 50 : 35)); NV.Audio.sfx('pickup'); }
         else if (k.kind === 'lore') freeShard(k);
         else { L.obj.got++; L.stats.found++; NV.Audio.sfx('pickup'); if (k.text) showEcho(k.text); if (L.obj.got >= L.obj.total) openExit(); }
@@ -2696,7 +2712,7 @@ NV.Level = (() => {
   /* ---- player driving ---- */
   function nearestCar() {
     if (!L.cars) return null; const p = L.p; let best = null, bd = 3.8;
-    L.cars.forEach(c => { const d = Math.hypot(c.x - p.x, c.z - p.z); if (d < bd) { bd = d; best = c; } });
+    L.cars.forEach(c => { if (c.kind === 'remote') return; const d = Math.hypot(c.x - p.x, c.z - p.z); if (d < bd) { bd = d; best = c; } });
     return best;
   }
   function carCollides(x, z, yaw) {
@@ -3025,7 +3041,7 @@ NV.Level = (() => {
     L.obj = { mode: 'free', total: 0, got: 0, label: 'Free roam — New Avalon' };
     L.beacons = []; L.peds = []; L.gig = null;
     const byDist = (lo, hi) => map.inter.map(interC).filter(c => { const d = Math.hypot(c.x - st.x, c.z - st.z); return d > lo && d < hi; });
-    const sc = U.pick(byDist(op.travel ? 45 : 60, op.travel ? 95 : 120)); L.storyB = beacon(sc.x, sc.z, op.travel ? '#ff5a3d' : '#ffd23d', 'story');
+    const sc = U.pick(byDist(op.travel ? 45 : 60, op.travel ? 95 : 120)); L.storyB = op.mp ? null : beacon(sc.x, sc.z, op.travel ? '#ff5a3d' : '#ffd23d', 'story');
     byDist(20, 150).sort(() => r() - .5).slice(0, 3).forEach(c => beacon(c.x + 3.5, c.z - 3.5, '#19f0ff', 'gig'));
     beacon(st.x + 7, st.z + 7, '#3dffa8', 'vendor');
     // data shards: lore from the script's mission briefs, collected once per save
@@ -3447,11 +3463,92 @@ NV.Level = (() => {
     if (L.sun) L.sun.position.set(G.x + 17, 50, G.z + 12);
   }
 
+
+  /* ---------------- multiplayer: remote players, shared kills + objectives, chat ---------------- */
+  const netOn = () => NV.Net.on && L && L.op.mp;
+  function netTick(dt) {
+    if (!netOn()) return;
+    L.netT = (L.netT || 0) - dt;
+    if (L.netT <= 0) {
+      L.netT = .08; const p = L.p, c = L.drive && L.drive.car;
+      NV.Net.send({ t: 'st', x: +p.x.toFixed(2), z: +p.z.toFixed(2), yaw: +p.yaw.toFixed(3), mv: p.moving ? 1 : 0, car: c ? 1 : 0, cy: c ? +c.vh.toFixed(3) : 0, rag: L.pRag ? 1 : 0, lvl: L.netKey });
+    }
+    netAvatars(dt);
+  }
+  function netAvDrop(id) {
+    const a = L.netAv.get(id); if (!a) return;
+    a.npc.root.dispose(); if (a.car) { a.car.root.dispose(); L.cars = L.cars.filter(x => x !== a.car); } if (a.bubble) a.bubble.dispose(); L.netAv.delete(id);
+  }
+  function netAvatars(dt) {
+    L.netAv = L.netAv || new Map();
+    const now = performance.now(), live = pr => pr && pr.st && pr.st.lvl === L.netKey && now - pr.at < 6000;
+    [...L.netAv.keys()].forEach(id => { if (!live(NV.Net.peers.get(id))) netAvDrop(id); });
+    NV.Net.peers.forEach(pr => {
+      if (!live(pr)) return; const s = pr.st;
+      let a = L.netAv.get(pr.id);
+      if (!a) {
+        const npc = makeNpc({ name: pr.char, kind: 'human' }, s.x, s.z); npc.tag.dispose();
+        npc.tag = nameTag(pr.char + ' · ' + pr.name, NV.speakerInfo(pr.char).c || '#19f0ff'); npc.tag.parent = npc.root; npc.tag.position.y = 2.3;
+        a = { npc, car: null, id: pr.id }; L.netAv.set(pr.id, a);
+      }
+      const n = a.npc, k = Math.min(1, dt * 10), ox = n.x, oz = n.z;
+      n.x += (s.x - n.x) * k; n.z += (s.z - n.z) * k; const sp = Math.hypot(n.x - ox, n.z - oz) / Math.max(dt, 1e-3);
+      if (s.car) {
+        if (!a.car) { a.car = makeCar(n.x, n.z, s.cy, 'remote'); a.car.vh = s.cy; }
+        const c = a.car; c.x = n.x; c.z = n.z; c.speed = sp; c.vh += U.angDiff(c.vh, s.cy) * k; c.yaw = c.vh; c.root.position.set(c.x, 0, c.z); c.root.rotation.y = c.vh; n.root.setEnabled(false);
+      } else {
+        if (a.car) { const c = a.car; c.root.dispose(); L.cars = L.cars.filter(x => x !== c); a.car = null; }
+        n.root.setEnabled(true);
+        n.root.rotation.y += U.angDiff(n.root.rotation.y, s.yaw) * k; n.root.rotation.x = U.lerp(n.root.rotation.x, s.rag ? -Math.PI / 2 : 0, k);
+        n.root.position.set(n.x, s.rag ? .3 : 0, n.z);
+        if (n.root.rig) animRig(n.root.rig, dt, !!s.mv && sp > .3, sp, null);
+      }
+      if (a.bubble) { a.bubbleT -= dt; if (a.bubbleT <= 0) { a.bubble.dispose(); a.bubble = null; } }
+    });
+  }
+  function chatOpen() {
+    const el = document.querySelector('#hud .chatin'); if (!el) return;
+    dispatchEvent(new Event('blur')); // release held keys so Ghost doesn't keep walking while typing
+    el.classList.remove('hidden'); el.value = ''; setTimeout(() => el.focus(), 0);
+  }
+  function chatShow(id, text) {
+    const me = id === NV.Net.id, pr = me ? NV.Net.me : NV.Net.peers.get(id); if (!pr) return;
+    const col = NV.speakerInfo(pr.char).c || '#19f0ff', log = document.querySelector('#hud .chatlog');
+    if (log) { const d = U.el('div', '', `<b style="color:${col}">${U.esc(pr.char)}</b> <span class="muted">(${U.esc(pr.name)})</span> ${U.esc(text)}`); log.appendChild(d); while (log.children.length > 7) log.firstChild.remove(); setTimeout(() => d.classList.add('old'), 14000); }
+    const a = !me && L.netAv && L.netAv.get(id);
+    if (a) { if (a.bubble) a.bubble.dispose(); a.bubble = nameTag('“' + (text.length > 34 ? text.slice(0, 33) + '…' : text) + '”', col); a.bubble.parent = a.npc.root; a.bubble.position.y = 2.75; a.bubbleT = 7; }
+    NV.Voice.speak(pr.char, text); // spoken in the character's voice
+  }
+  function netMsg(m) {
+    const here = m.lvl === L.netKey;
+    switch (m.t) {
+      case 'chat': chatShow(m.from, String(m.text || '').slice(0, 140)); break;
+      case 'shot': if (here && Array.isArray(m.a) && Array.isArray(m.b)) { tracer(V3(m.a[0], m.a[1], m.a[2]), V3(m.b[0], m.b[1], m.b[2])); NV.Audio.sfx('eshoot'); } break;
+      case 'hit': if (here && m.to === NV.Net.id && NV.Net.pvp && !L.over) hurtPlayer(Math.min(80, +m.dmg || 0)); break;
+      case 'edown': if (here) { const e = L.enemies.find(e => e.nid === m.k); if (e && e.state !== 'down') { e.netDown = true; disable(e, false, m.imp); } } break;
+      case 'obj':
+        if (!here) break;
+        if (m.kind === 'term') { const t = L.terms[m.i]; if (t && !t.done) hackDone(t, true); }
+        else if (m.kind === 'pick') { const k = L.pickups.find(k => k.nid === m.i); if (k) { if (k.kind !== 'med' && k.kind !== 'lore') { L.obj.got++; L.stats.found++; if (L.obj.got >= L.obj.total) openExit(); } k.m.dispose(); L.pickups = L.pickups.filter(x => x !== k); } }
+        else if (m.kind === 'civ') { const c = L.civs[m.i]; if (c && !c.saved) { c.saved = true; L.stats.rescued++; } }
+        break;
+      case 'boss': if (here && L.boss && L.boss.hp > 0) { L.boss.hp -= +m.d || 0; if (L.boss.hp <= 0) bossDown(); } break;
+      case 'mission': if (L.free && L.op.mp && !L.over) { NV.UI.dismissModals(); if (document.pointerLockElement) document.exitPointerLock(); end({ mission: m.m }); } break;
+      case 'mend': if (here && !L.over) { L.netEnd = true; finish(!!m.won, m.why); } break;
+    }
+  }
+  function mpRespawn() {
+    const p = L.p; if (L.drive) toggleCar(); if (L.pRag) pRagEnd();
+    p.hp = p.max; p.x = L.mpStart.x; p.z = L.mpStart.z; p.inv = 2;
+    NV.toast('PATCHED UP', 'Your crew dragged you back to the start point.', '#ff3355', 3);
+  }
+
   /* ---------------- lifecycle ---------------- */
   function pause() {
     NV.Audio.engine(0); L.paused = true; if (document.pointerLockElement) document.exitPointerLock();
-    NV.UI.levelPause(L.free || L.calm).then(ch => {
-      if (!L) return;
+    NV.UI.levelPause(L.free || L.calm, netOn() ? { host: NV.Net.isHost } : null).then(ch => {
+      if (!L || L.over) return;
+      if (ch && ch.mission) { ch.mission.op.zone = toCell(L.p.x, L.p.z); NV.Net.send({ t: 'mission', m: ch.mission }); end({ mission: ch.mission }); return; }
       if (ch === 'resume') { L.paused = false; lock(); }
       else if (ch === 'restart') end({ restart: true });
       else if (ch === 'skip') end({ skip: true });
@@ -3460,7 +3557,8 @@ NV.Level = (() => {
   }
   function lock() { try { const r = lockEl().requestPointerLock(); if (r && r.catch) r.catch(() => { }); } catch (e) { } }
   function finish(won, why) {
-    if (L.over) return; L.over = true; L.hack = null;
+    if (L.over) return;
+    if (netOn() && !L.free && !L.netEnd) NV.Net.send({ t: 'mend', won: !!won, why, lvl: L.netKey }); L.over = true; L.hack = null;
     if (document.pointerLockElement) document.exitPointerLock();
     const s = L.stats; s.undetected = s.alerts === 0; s.won = won; s.why = why;
     s.civTotal = L.civs.length;
@@ -3479,7 +3577,7 @@ NV.Level = (() => {
 
   function buildHud(op) {
     const h = U.el('div', '', `
-      <div class="xh"></div><div class="dmg"></div><div class="lb lbt"></div><div class="lb lbb"></div><div class="loc"></div>
+      <div class="xh"></div><div class="dmg"></div><div class="lb lbt"></div><div class="lb lbb"></div><div class="loc"></div><div class="chatlog"></div><input class="chatin hidden" maxlength="140" placeholder="Say something in character — Enter to send, Esc to cancel">
       <div class="obj"><div class="t">OPERATION</div><div class="d"></div><div class="c"></div></div>
       <div class="status s0">UNDETECTED</div>
       <canvas class="mm" width="180" height="180"></canvas><div class="timer"></div><div class="speedo hidden"></div>
@@ -3490,6 +3588,14 @@ NV.Level = (() => {
       <div class="boss hidden"><div class="nm"></div><div class="bar"><i></i></div><div class="sh"></div></div>
       <div id="hack" class="hidden"><canvas width="220" height="220"></canvas><div class="lab">PRESS <span class="kbd">E</span> / CLICK IN THE GREEN ARC</div></div>`);
     h.id = 'hud';
+    const ci = h.querySelector('.chatin');
+    const closeChat = () => { ci.blur(); ci.classList.add('hidden'); };
+    ci.addEventListener('keydown', e => {
+      e.stopPropagation(); // typing never reaches the game controls
+      if (e.key === 'Enter') { const t = ci.value.trim().slice(0, 140); if (t && L && NV.Net.on) { NV.Net.send({ t: 'chat', text: t }); chatShow(NV.Net.id, t); } closeChat(); }
+      else if (e.key === 'Escape') closeChat();
+    });
+    ci.addEventListener('keyup', e => e.stopPropagation());
     document.getElementById('ui').appendChild(h);
     h.querySelector('.obj .d').textContent = op.d || L.obj.label;
     h.querySelector('.obj .t').textContent = 'OPERATION · ' + L.obj.label.toUpperCase();
@@ -3516,10 +3622,13 @@ NV.Level = (() => {
       L.city = L.free || (op.m !== 'apartment' && op.m !== 'void' && !op.rooms && th !== 'space' && th !== 'cyber' && NV.Settings.get().cityOps !== 0);
       L.calm = op.m === 'apartment' || op.m === 'scene' || op.m === 'void';
       L.dmgUp = 1; L.enMul = 1; applyUpgrades(); L.p.hp = L.p.max;
+      if (op.zone) zone = op.zone;
+      L.netKey = op.netKey || 'solo';
       L.map = gen(op.m, L.seed);
       L.seen = new Uint8Array(L.map.W * L.map.H);
       const built = buildScene(op, ctx); L.scene = built.scene; L.cam = built.cam; L.plight = built.plight;
       populate(op, ctx);
+      L.enemies.forEach((e, i) => e.nid = i); L.mpStart = { x: L.p.x, z: L.p.z };
       if (L.city && !L.free) { L.peds = []; populateCars({ x: L.p.x, z: L.p.z }, !!L.aoff || op.m === 'scene'); }
       buildHud(op);
       L.scene.onBeforeRenderObservable.add(() => update(L ? Math.min(.05, L.scene.getEngine().getDeltaTime() / 1000) : 0));
@@ -3535,12 +3644,99 @@ NV.Level = (() => {
     stop() { if (L) end({ done: true }); },
     event: aptEvent,
     applyQuality() { if (!L) return; NV.Quality.teardown(L.fx); L.fx = NV.Quality.setup(L.scene, L.cam); const q = NV.Quality.get(); L.cam.maxZ = q.draw; },
+    net(m) { if (L && netOn()) netMsg(m); },
+    exitWith(res) { if (L && !L.over) { NV.UI.dismissModals(); if (document.pointerLockElement) document.exitPointerLock(); end(res); } },
     cine(o) { if (!L) return; if (o) cineStart(o); else cineStop(false); },
     cineOff() { if (L && L.cine) cineStop(true); },
     speaking(name) { if (L) L.speaker = name ? String(name).replace(/\s*\([^)]*\)\s*/g, ' ').trim() : null; },
     objective(t, d) { const h = document.getElementById('hud'); if (!h) return; h.querySelector('.obj .t').textContent = t; h.querySelector('.obj .d').textContent = d; },
     enableProps(ids) { if (L && L.props) L.props.forEach(pr => pr.enabled = ids.includes(pr.id)); },
   };
+})();
+</script>
+<script>
+'use strict';
+/* =====================================================================
+   Multiplayer — peer-to-peer over WebRTC with a single join code.
+   PeerJS (loaded from the CDN only when multiplayer is opened) does the
+   signalling; the host relays messages to everyone (star topology).
+   Multiplayer has no story: the open world plus co-op missions, and every
+   player role-plays a character from the script.
+   ===================================================================== */
+NV.Net = (() => {
+  const LIB = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js', PREFIX = 'neonveins-v1-';
+  const N = { on: false, isHost: false, id: null, code: null, me: null, pvp: false, peers: new Map() };
+  let peer = null, conns = [], hostConn = null, nextId = 1;
+  const load = () => window.Peer ? Promise.resolve() : new Promise((res, rej) => { const s = document.createElement('script'); s.src = LIB; s.onload = res; s.onerror = () => rej(new Error('Could not load the networking library — are you online?')); document.head.appendChild(s); });
+  const mkCode = () => Array.from({ length: 6 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join('');
+  const roster = () => [{ id: N.id, name: N.me.name, char: N.me.char }].concat([...N.peers.values()].map(p => ({ id: p.id, name: p.name, char: p.char })));
+  function send(msg, except) {
+    if (!N.on) return; if (msg.from == null) msg.from = N.id;
+    if (N.isHost) conns.forEach(c => { if (c.open && c !== except) try { c.send(msg); } catch (e) { } });
+    else if (hostConn && hostConn.open) try { hostConn.send(msg); } catch (e) { }
+  }
+  function recv(msg, conn) {
+    if (!msg || typeof msg !== 'object' || typeof msg.t !== 'string') return;
+    if (N.isHost && conn) {
+      if (msg.t === 'hello') { // a new player: give them an id, tell them who is here, tell everyone else
+        conn.pid = nextId++; const p = { id: conn.pid, name: String(msg.name || 'Runner').slice(0, 20), char: String(msg.char || 'Ghost').slice(0, 40), st: null };
+        N.peers.set(p.id, p); conn.send({ t: 'welcome', id: p.id, pvp: N.pvp, players: roster().filter(x => x.id !== p.id) });
+        send({ t: 'join', id: p.id, name: p.name, char: p.char, from: 0 }, conn); joined(p); return;
+      }
+      msg.from = conn.pid; send(msg, conn); // relay with the real sender id
+    }
+    switch (msg.t) {
+      case 'welcome': N.id = msg.id; N.pvp = !!msg.pvp; msg.players.forEach(p => N.peers.set(p.id, Object.assign({ st: null }, p))); if (N._welcome) N._welcome(); return;
+      case 'join': if (msg.id !== N.id) { const p = { id: msg.id, name: msg.name, char: msg.char, st: null }; N.peers.set(p.id, p); joined(p); } return;
+      case 'leave': { const p = N.peers.get(msg.id); if (p) { N.peers.delete(msg.id); NV.toast('PLAYER LEFT', p.name + ' (' + p.char + ')', '#8a84b3', 3); } return; }
+      case 'st': { const p = N.peers.get(msg.from); if (p) { p.st = msg; p.at = performance.now(); } return; }
+      default: if (NV.Level.net) NV.Level.net(msg);
+    }
+  }
+  function joined(p) { NV.toast('PLAYER JOINED', p.name + ' as ' + p.char, '#3dffa8', 3); NV.Audio.sfx('unlock'); }
+  function drop(conn) {
+    conns = conns.filter(c => c !== conn); if (conn.pid == null) return;
+    const p = N.peers.get(conn.pid); N.peers.delete(conn.pid); send({ t: 'leave', id: conn.pid, from: 0 });
+    if (p) NV.toast('PLAYER LEFT', p.name + ' (' + p.char + ')', '#8a84b3', 3);
+  }
+  N.send = m => send(m);
+  N.hostGame = async (me, pvp) => {
+    await load();
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const code = mkCode();
+      const ok = await new Promise(res => {
+        peer = new Peer(PREFIX + code);
+        peer.on('open', () => res(true));
+        peer.on('error', e => { if (!N.on) { try { peer.destroy(); } catch (x) { } res(e.type === 'unavailable-id' ? false : e); } else NV.toast('NETWORK', String(e.type || e.message), '#ff3355', 3); });
+      });
+      if (ok === false) continue; if (ok !== true) throw new Error('Could not reach the matchmaking server (' + (ok.type || ok.message) + ').');
+      Object.assign(N, { on: true, isHost: true, id: 0, code, me, pvp: !!pvp }); N.peers.clear(); conns = []; nextId = 1;
+      peer.on('connection', c => { c.on('open', () => conns.push(c)); c.on('data', d => recv(d, c)); c.on('close', () => drop(c)); c.on('error', () => drop(c)); });
+      peer.on('disconnected', () => { try { peer.reconnect(); } catch (e) { } });
+      return code;
+    }
+    throw new Error('Could not get a free join code — try again.');
+  };
+  N.joinGame = async (code, me) => {
+    await load(); code = String(code || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (code.length !== 6) throw new Error('Join codes are 6 characters.');
+    return new Promise((res, rej) => {
+      let done = false; const fail = m => { if (done) return; done = true; try { peer.destroy(); } catch (e) { } rej(new Error(m)); };
+      const to = setTimeout(() => fail('Could not reach that game. Check the code, or the host\'s network may block peer-to-peer.'), 15000);
+      peer = new Peer();
+      peer.on('error', e => { if (!done) fail(e.type === 'peer-unavailable' ? 'No game with that code.' : 'Network error: ' + (e.type || e.message)); });
+      peer.on('open', () => {
+        hostConn = peer.connect(PREFIX + code, { reliable: true });
+        hostConn.on('open', () => { Object.assign(N, { on: true, isHost: false, code, me, id: -1 }); N.peers.clear(); hostConn.send({ t: 'hello', name: me.name, char: me.char }); });
+        hostConn.on('data', d => recv(d));
+        hostConn.on('close', () => { if (N.on) { NV.toast('DISCONNECTED', 'The host ended the session.', '#ff3355', 5); N.leave(); if (NV.Level.active) NV.Level.exitWith({ quit: true }); } });
+        N._welcome = () => { if (done) return; done = true; clearTimeout(to); res(code); };
+      });
+    });
+  };
+  N.leave = () => { if (N.on) send({ t: 'leave', id: N.id }); N.on = false; N.isHost = false; N.peers.clear(); conns = []; hostConn = null; try { peer && peer.destroy(); } catch (e) { } peer = null; };
+  addEventListener('beforeunload', () => N.leave());
+  return N;
 })();
 </script>
 <script>
@@ -3599,6 +3795,7 @@ NV.UI = (() => {
       ['new', 'New Game', 'Begin in Neon Heights, Tier 93'],
       ['chapters', 'Chapter Select', meta.unlocked > 0 ? (meta.unlocked + 1) + ' chapters unlocked' : 'Complete a chapter to unlock', !(meta.unlocked > 0)],
       ['journal', 'Journal', 'World state, codex and side quests', !has],
+      ['multiplayer', 'Multiplayer', 'Online co-op · one join code · no story'],
       ['settings', 'Settings', 'Audio, controls, display'],
       ['credits', 'Credits', ''],
     ];
@@ -3609,6 +3806,7 @@ NV.UI = (() => {
       select: async k => {
         const key = items[k][0];
         if (key === 'settings') { await UI.settings(); return; }
+        if (key === 'multiplayer') { if (await UI.multiplayer()) done({ mode: 'mp' }); return; }
         if (key === 'credits') { await UI.credits(false); return; }
         if (key === 'journal') { NV.State.load(); await UI.journal(); return; }
         if (key === 'chapters') { const ci = await UI.chapterSelect(); if (ci == null) return; done({ mode: 'chapter', ci }); return; }
@@ -3953,14 +4151,67 @@ NV.UI = (() => {
     b.onclick = go;
     const h = UI.push({ tick() { if (NV.In.confirm() || NV.In.any('KeyE')) go(); } });
   });
-  UI.levelPause = free => new Promise(res => {
-    const m = free
-      ? modal(`<div class="stitle">NEW AVALON</div><button class="btn">Resume</button><button class="btn">Journal</button><button class="btn">Audio</button><button class="btn">Settings</button><button class="btn">Save &amp; Quit to Title</button>`, true)
-      : modal(`<div class="stitle">PAUSED</div><button class="btn">Resume</button><button class="btn">Audio</button><button class="btn">Settings</button><button class="btn">Restart Operation</button><button class="btn">Skip Operation<small>Continue the story without clearing this operation</small></button><button class="btn">Save &amp; Quit to Title</button>`, true);
+  UI.levelPause = (free, mp) => new Promise(res => {
+    const items = mp
+      ? (free ? [['resume', 'Resume'], ...(mp.host ? [['missions', 'Co-op Missions<small>Start a mission for everyone in the session</small>']] : []), ['players', 'Players &amp; Join Code'], ['audio', 'Audio'], ['settings', 'Settings'], ['quit', 'Leave Session']]
+        : [['resume', 'Resume'], ['players', 'Players &amp; Join Code'], ['audio', 'Audio'], ['settings', 'Settings'], ['skip', 'Abandon Mission<small>Go back to the open world; your crew carries on</small>'], ['quit', 'Leave Session']])
+      : free ? [['resume', 'Resume'], ['journal', 'Journal'], ['audio', 'Audio'], ['settings', 'Settings'], ['quit', 'Save &amp; Quit to Title']]
+        : [['resume', 'Resume'], ['audio', 'Audio'], ['settings', 'Settings'], ['restart', 'Restart Operation'], ['skip', 'Skip Operation<small>Continue the story without clearing this operation</small>'], ['quit', 'Save &amp; Quit to Title']];
+    const m = modal(`<div class="stitle">${mp ? 'SESSION · ' + U.esc(NV.Net.code || '') : free ? 'NEW AVALON' : 'PAUSED'}</div>` + items.map(i => `<button class="btn">${i[1]}</button>`).join(''), true);
     const b = [...m.querySelectorAll('.btn')];
     const fin = v => { UI.pop(h); m.remove(); res(v); };
-    const acts = free ? ['resume', 'journal', 'audio', 'settings', 'quit'] : ['resume', 'audio', 'settings', 'restart', 'skip', 'quit'];
-    const h = UI.push(nav(b, { select: async k => { const a = acts[k]; if (a === 'audio') await UI.settings('audio'); else if (a === 'settings') await UI.settings(); else if (a === 'journal') await UI.journal(); else fin(a); }, back: () => fin('resume') }));
+    const h = UI.push(nav(b, {
+      select: async k => {
+        const a = items[k][0];
+        if (a === 'audio') await UI.settings('audio'); else if (a === 'settings') await UI.settings(); else if (a === 'journal') await UI.journal();
+        else if (a === 'players') await UI.players();
+        else if (a === 'missions') { const ms = await UI.missionBoard(); if (ms) fin({ mission: ms }); }
+        else fin(a);
+      }, back: () => fin('resume'),
+    }));
+  });
+  UI.dismissModals = () => { document.querySelectorAll('#ui > .modal').forEach(m => m.remove()); stack.length = 0; };
+  UI.players = () => new Promise(res => {
+    const N = NV.Net, list = [{ name: N.me.name, char: N.me.char, you: 1, host: N.isHost }].concat([...N.peers.values()].map(p => ({ name: p.name, char: p.char, host: p.id === 0 })));
+    const m = modal(`<div class="stitle">PLAYERS</div><p style="font-size:15px;margin-bottom:8px">Join code: <b style="font-family:var(--fm);font-size:26px;letter-spacing:.2em;color:var(--amber)">${U.esc(N.code)}</b></p><p class="muted" style="font-size:13px;margin-bottom:12px">Friends open Neon Veins → Multiplayer → type this code. Friendly fire: ${N.pvp ? 'ON' : 'off'}.</p>` +
+      list.map(p => `<div class="row"><span><b style="color:${NV.speakerInfo(p.char).c || '#19f0ff'}">${U.esc(p.char)}</b> — ${U.esc(p.name)}</span><span class="val">${p.you ? 'YOU' : ''}${p.host ? ' HOST' : ''}</span></div>`).join('') + '<button class="btn" style="margin-top:12px">Back</button>', true);
+    const fin = () => { UI.pop(h); m.remove(); res(); };
+    const h = UI.push(nav([m.querySelector('.btn')], { select: fin, back: fin }));
+  });
+  UI.missionBoard = () => new Promise(res => {
+    const ids = Object.keys(NV_DATA.missions), types = [['infiltrate', 'Infiltration'], ['hack', 'Data Heist'], ['retrieve', 'Retrieval'], ['defend', 'Hold the Uplinks'], ['arena', 'Squad Ambush'], ['boss', 'Enforcer Hunt'], ['explore', 'Memory Sweep']];
+    const list = types.map(([mm, label], i) => { const id = U.pick(ids), md = NV_DATA.missions[id]; return { id: Date.now().toString(36) + i, title: label + ' — ' + md.title, op: { t: 'play', m: mm, k: 3 + (i % 2), d: label + ': ' + md.title + '. Co-op — kills and objectives are shared.', boss: U.pick(['Warden-3', 'Helix Enforcer', 'Lictor Vanguard']) } }; });
+    const m = modal(`<div class="stitle">CO-OP MISSIONS</div><p class="muted" style="font-size:14px;margin:-6px 0 10px">Everyone in the session drops in next to where you're standing.</p>` + list.map(x => `<button class="btn">${U.esc(x.title)}</button>`).join('') + '<button class="btn">Cancel</button>', true);
+    const b = [...m.querySelectorAll('.btn')];
+    const fin = v => { UI.pop(h); m.remove(); res(v); };
+    const h = UI.push(nav(b, { select: k => fin(list[k] || null), back: () => fin(null) }));
+  });
+  UI.multiplayer = () => new Promise(res => {
+    const chars = [...new Set(NV.Voices.listProfiles().map(p => p.name).filter(n => n !== 'Narrator'))].sort();
+    let saved = {}; try { saved = JSON.parse(localStorage.getItem('nv_mp') || '{}'); } catch (e) { }
+    const m = modal(`<div class="stitle">MULTIPLAYER</div>
+      <p class="muted" style="font-size:14px;margin:-6px 0 12px;line-height:1.5">Peer-to-peer over the internet with one join code. No story — just New Avalon's open world and co-op missions. Role-play as anyone from the script; your chat is spoken in their voice.</p>
+      <div class="mpf">
+        <label>Your name<input class="mpname" maxlength="20" autocomplete="off"></label>
+        <label>Play as<select class="mpchar">${chars.map(c => `<option>${U.esc(c)}</option>`).join('')}</select></label>
+        <label class="chk"><input type="checkbox" class="mppvp"> Friendly fire (host setting)</label>
+      </div>
+      <button class="btn mphost">Host a game<small>You get a 6-character join code to share</small></button>
+      <div class="mpjoin"><input class="mpcode" maxlength="6" placeholder="JOIN CODE" autocomplete="off"><button class="btn mpjoinb">Join</button></div>
+      <div class="mpstat"></div>
+      <button class="btn mpback">Back</button>`);
+    const $ = q => m.querySelector(q), stat = t => $('.mpstat').textContent = t;
+    $('.mpname').value = saved.name || 'Runner-' + (100 + Math.floor(Math.random() * 900)); $('.mpchar').value = chars.includes(saved.char) ? saved.char : (chars.includes('Ghost') ? 'Ghost' : chars[0]);
+    const me = () => { const v = { name: $('.mpname').value.trim().slice(0, 20) || 'Runner', char: $('.mpchar').value }; try { localStorage.setItem('nv_mp', JSON.stringify(v)); } catch (e) { } return v; };
+    let busy = false;
+    const go = async (fn, what) => { if (busy) return; busy = true; stat(what); try { await fn(); fin(true); } catch (e) { stat(e.message || String(e)); NV.Audio.sfx('hackfail'); } busy = false; };
+    $('.mphost').onclick = () => go(() => NV.Net.hostGame(me(), $('.mppvp').checked), 'Opening a session…');
+    $('.mpjoinb').onclick = () => go(() => NV.Net.joinGame($('.mpcode').value, me()), 'Connecting…');
+    $('.mpcode').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') $('.mpjoinb').onclick(); });
+    $('.mpname').addEventListener('keydown', e => e.stopPropagation());
+    $('.mpback').onclick = () => fin(false);
+    const fin = v => { UI.pop(h); m.remove(); res(v); };
+    const h = UI.push({ tick() { if (NV.In.back() && !busy) fin(false); } });
   });
   UI.vendor = () => new Promise(res => {
     const S = NV.State.get(); S.upg = S.upg || { hp: 0, dmg: 0, en: 0 };
@@ -4387,6 +4638,27 @@ NV.Story = (() => {
     const S = NV.State.get(); ['SQ45', 'SQ50', 'SQ60'].forEach(k => { if (dev.get('sq')) S.sides[k] = 'done'; });
     await NV.Story.run(Math.max(0, NV_DATA.chapters.findIndex(c => c.id === dev.get('chapter'))), 0);
   }
+  // multiplayer session: free roam <-> co-op missions until the player leaves (or the host goes away)
+  async function mpSession() {
+    const N = NV.Net;
+    NV.State.tempGame({ name: N.me.name, look: { jacket: '#2a1f3d', visor: '#19f0ff' }, voice: 1, tags: [], difficulty: 'normal' });
+    NV.UI.storyHide(true);
+    const ctx = { act: 2, palette: NV.paletteFor('NEON HEIGHTS'), chapter: 'mp', echoes: [], tactic: {} };
+    while (N.on) {
+      await NV.fade(true, 400);
+      const r = await NV.Level.start({ t: 'play', m: 'free', k: 0, mp: true, netKey: 'free', d: (N.isHost ? 'Hosting · join code ' : 'Connected · join code ') + N.code + '. Enter to chat. ' + (N.isHost ? 'Esc → Co-op Missions to start one for everyone.' : 'The host starts co-op missions.') }, ctx);
+      await NV.fade(false, 300);
+      if (!r || r.quit || !N.on) break;
+      if (r.mission) {
+        const m = r.mission; await NV.fade(true, 400);
+        const res = await NV.Level.start(Object.assign({}, m.op, { mp: true, netKey: 'm:' + m.id }), Object.assign({}, ctx, { chapter: 'mp:' + m.id }));
+        await NV.fade(false, 300);
+        if (res.quit) break;
+        if (res.won) NV.toast('CO-OP MISSION COMPLETE', m.title, '#3dffa8', 4); else if (!res.skip) NV.toast('MISSION FAILED', m.title, '#ff3355', 4);
+      }
+    }
+    N.leave();
+  }
   await NV.UI.splash();
   while (true) {
     const c = await NV.UI.title();
@@ -4394,6 +4666,7 @@ NV.Story = (() => {
     if (c.mode === 'new') { NV.State.newGame(c.profile); await NV.Story.run(0, 0); }
     else if (c.mode === 'continue') { if (NV.State.load()) { const S = NV.State.get(); await NV.Story.run(S.ci || 0, S.cp || 0); } }
     else if (c.mode === 'chapter') { if (NV.State.fromSnapshot(c.ci)) await NV.Story.run(c.ci, 0); }
+    else if (c.mode === 'mp') await mpSession();
     await NV.fade(true, 400);
     NV.Backdrop.activate();
     await NV.fade(false, 600);

@@ -66,6 +66,7 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 | Drive: throttle / reverse, steer | `W`/`S`, `A`/`D` | RT / LT, left stick |
 | Drive: handbrake, boost, horn | `Space`, `Shift`, `H` | A, LB, R3 |
 | Pause | `Esc` | Start |
+| Chat (multiplayer) | `Enter` | — |
 | Volume down / up, mute | `-` / `=`, `M` | — |
 | Jump (the void after the ending) | `Space` | A |
 | Advance dialogue | `Space` / click | A |
@@ -76,6 +77,18 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 | Journal | `J` | — |
 
 ---
+
+## Multiplayer
+
+Title → **Multiplayer**. One player hosts and gets a 6-character join code; friends type it in to join (drop-in, any time).
+
+- Peer-to-peer over WebRTC. [PeerJS](https://peerjs.com) is loaded from the jsDelivr CDN only when you open multiplayer, and its free public server is used just to connect players. After that, game traffic goes directly between players, relayed by the host.
+- No story in multiplayer: the open world plus co-op missions. The host starts missions from the pause menu (**Co-op Missions**), and everyone drops in next to the host.
+- Role-play: every player picks a character from the script, is seen by others as that character (name tag shows character · player name), and chat (**Enter**) appears in a bubble over their head and is spoken in that character's voice.
+- Shared: enemy takedowns, hacked terminals, pickups, freed civilians, boss damage, mission success/failure. Traffic and pedestrians are local to each player.
+- Friendly fire is a host option (off by default). Going down in a co-op mission respawns you at the start point.
+- Multiplayer never touches your story save.
+- Limitations: some strict networks (symmetric NAT, corporate/school firewalls) block direct peer-to-peer connections, and there is no TURN relay fallback.
 
 ## Architecture
 
