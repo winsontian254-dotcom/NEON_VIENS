@@ -2908,6 +2908,7 @@ NV.Story = (() => {
       .then(res => { w.done = true; if (res.quit) w.quit = true; started(); });
     await startedP;
     if (gate && lead && !w.done) { const r = await gate2(w); if (r) return r; }
+    NV.Level.objective('STORY · ' + sceneName.split('—')[0].trim().toUpperCase(), lead ? 'With ' + cast.map(c => c.name).slice(0, 4).join(', ') + '. Move freely while the scene plays.' : 'Move freely while the scene plays.');
     NV.UI.storyHide(false);
     return null;
   }
