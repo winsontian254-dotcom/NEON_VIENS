@@ -1,0 +1,234 @@
+================================================================================
+NEON VEINS — IMPROVEMENT SUGGESTIONS
+Generated: Monday, September 28, 2026
+Project reviewed: /workspace (index.html ~985 KB single file, README.md,
+                  tools/NEON_VEINS_script.txt, tools/build_script.py)
+All findings below were verified against the actual code in index.html.
+================================================================================
+
+--------------------------------------------------------------------------------
+1. ROBUSTNESS / BUG-RISK FIXES (highest priority)
+--------------------------------------------------------------------------------
+
+1.1 Bound the runOp() retry loop (index.html ~line 3130)
+    Status: VERIFIED — `while (true)` with `retry++` and no cap; both the
+    `res.restart` path and the death-menu "retry" path re-enter the loop.
+    Problem: A stuck or broken operation (e.g., an unreachable objective) can
+    loop forever, and each pass re-runs fades, NV.Level.start(), and UI results.
+    Suggestion: Add a max-retry guard, e.g.:
+        const MAX_RETRY = 5;
+        ...
+        if (res.restart) { if (++retry > MAX_RETRY) { offerSkipOrCheckpoint(); break; } continue; }
+    Also consider escalating help text ("Stuck? Press skip / return to chapter")
+    after 2–3 failed retries rather than only at the hard cap.
+
+1.2 Guard Cond.pick() against a null best branch (index.html ~line 521)
+    Status: VERIFIED — in the `node.br` path, `best` starts as null and is
+    returned via `[best || B[0]]`, but factScore() can legitimately return 0 for
+    every branch when the player has few recorded facts; ties plus ordering make
+    this fragile, and callers (`runNode` case 'cond') iterate branches without a
+    null check elsewhere in the codebase.
+    Suggestion: Always guarantee a deterministic fallback (explicit default
+    branch marked in the compiled data), and log/report when no branch scores
+    above threshold so script authors can catch ambiguous conditions at build
+    time instead of at runtime.
+
+1.3 Tighten fuzzy keyword-stem matching (index.html line 214, lines 510–513)
+    Status: VERIFIED — U.stems() truncates keywords to 5 characters; cond
+    thresholds are `sc >= 2 && sc >= ck.length * .34` (or score>=1 for <=2 stems).
+    Five-character stems collide easily ("rescu" matches rescue/recover;
+    "syste" matches system/systemic), so conditional dialogue can fire on
+    unrelated facts — the README itself flags this as a known risk.
+    Suggestions:
+      - Have build_script.py emit explicit named condition IDs (e.g.
+        "fact:siege_rescue") alongside stems, and prefer exact ID matches in
+        NV.Cond before falling back to fuzzy scoring.
+      - Widen stems to 6–7 chars or use a small built-in synonym table.
+      - Add a debug overlay (`#debug=cond`) that prints which fact matched which
+        branch, making manual verification of critical scenes cheap.
+
+1.4 Save mid-operation progress or checkpoint more granularly
+    Status: VERIFIED — saves occur after operations complete (NV.State.save()
+    at end of runOp); dying restarts from the chapter checkpoint.
+    Suggestion: Persist lightweight operation state (objective index, collected
+    items, elapsed time) so long boss/arena operations don't cost 10–20 minutes
+    of story replay. If full mid-op saves are too complex, at least add
+    "checkpoint objectives" inside very long operations (the README lists this
+    under known limitations).
+
+--------------------------------------------------------------------------------
+2. SECURITY & PRODUCTION HYGIENE
+--------------------------------------------------------------------------------
+
+2.1 Gate the #op= dev hash behind an explicit dev flag (README + live code)
+    Status: ACKNOWLEDGED in README — "#op=boss&scene=..." lets anyone boot
+    straight into any operation and skip story content.
+    Suggestion: Require a build-time constant (e.g. `NV.DEV = true` injected by
+    build_script.py only for dev artifacts) or a hidden input sequence
+    (Konami-style) before parsing dev hashes. Ship production HTML with dev
+    hashing disabled entirely.
+
+2.2 localStorage robustness and integrity
+    Keys nv_save_v1 / nv_meta_v1 / nv_settings_v1 hold JSON with no version
+    field or schema validation observed.
+    Suggestions:
+      - Add a `v` field to saved payloads and a migration function so future
+        format changes don't corrupt existing players' saves.
+      - Wrap JSON.parse in try/catch with a "save corrupted, start fresh?"
+        prompt instead of silently failing at boot.
+      - Consider LZ-string style compression: with 450 pushed facts plus
+        snapshots, saves may approach localStorage size limits over long runs.
+
+--------------------------------------------------------------------------------
+3. CONTENT PIPELINE (tools/build_script.py + NV_DATA)
+--------------------------------------------------------------------------------
+
+3.1 Bake the `ok` stem arrays at build time (verified in NV_DATA output)
+    Choice options carry precomputed `ok:["inspe","order","send","stall"]`
+    5-char stems. These duplicate what U.stems() would compute at runtime and
+    will silently drift if the stem algorithm ever changes.
+    Suggestion: Either (a) drop `ok` from the payload and compute stems once at
+    load, or (b) stamp the stem-algorithm version into NV_DATA and validate it
+    at boot. Option (b) also enables step 1.3's condition-ID migration.
+
+3.2 Add a validator pass to build_script.py
+    The compiler emits ~3,100 dialogue lines and ~390 choices; several issues
+    are only discoverable by playing:
+      - Choices with empty `label` but non-empty `text` (seen in chapters 70E/F
+        final selections) vs. choices with label-only — inconsistent UI paths.
+      - Options with `ok:[]` (verified: ending F's "I am." choice) — these can
+        never satisfy a stem-based condition that references them.
+      - `cond` blocks whose branch set has no eligible/default branch.
+      - Ending gates referencing SQ ids beyond those defined.
+    Suggestion: Emit warnings/errors for all of the above during build, plus a
+    `--check` mode runnable in CI.
+
+3.3 Keep ASCII-art level diagrams out of runtime narration
+    Chapter 70F embeds large box-drawing map blocks as `n` (narration) nodes
+    (verified in NV_DATA). These appear to be design documentation, not player
+    text; rendering them in the dialogue UI will look broken and inflate the
+    HTML payload.
+    Suggestion: Tag such blocks with a distinct type (e.g. `"t":"doc"`) that the
+    interpreter skips, or filter them in build_script.py unless a docs build is
+    requested.
+
+--------------------------------------------------------------------------------
+4. ARCHITECTURE & MAINTAINABILITY
+--------------------------------------------------------------------------------
+
+4.1 Split the single-file bundle for development (keep single-file for shipping)
+    index.html is one 985 KB file mixing CSS, HTML, engine modules (NV.U,
+    NV.Audio, NV.Level, NV.Story, ...) and ~900 KB of baked NV_DATA.
+    Suggestion: Restructure tools/build_script.py (or add a build.py) to
+    concatenate `src/*.js` + generated NV_DATA into the shippable index.html.
+    This preserves the "no server, no install" promise while restoring diffs,
+    linting, and per-module review. Given the git history shows direct edits to
+    the monolith, even a light split would reduce regression risk.
+
+4.2 Externalize NV_DATA as a separate cacheable asset (optional)
+    The README says size isn't a concern, but every script typo fix currently
+    invalidates the whole ~1 MB download. If you keep the single file, consider
+    a query-hash filename strategy; if you allow two files, `nv_data.js` beside
+    `index.html` keeps game-code updates tiny. Still no server needed (file://
+    works for classic scripts, just not ES modules/fetch).
+
+4.3 GPU tier detection regex maintenance (index.html ~line 582)
+    Status: VERIFIED — detection keys off UA strings and WEBGL_debug_renderer_info
+    names (Adreno [1-5], Apple M[2-9], RTX, etc.). As the README notes, new
+    hardware (Adreno 6xx/7xx, M4-era chips, Intel Core Ultra Arc iGPUs) falls
+    through to wrong tiers.
+    Suggestions:
+      - Prefer capability probes over name matching: render a short benchmark
+        scene for N frames and pick the tier from measured frame time, using
+        name matching only as the initial guess.
+      - Expose a manual quality override prominently in settings (it appears to
+        exist via NV.Settings 'g', but surfacing "why was I put on Low" in the
+        UI would reduce support burden).
+
+--------------------------------------------------------------------------------
+5. UX & GAME DESIGN
+--------------------------------------------------------------------------------
+
+5.1 Make walkable-story-scene selection predictable
+    Status: VERIFIED heuristic — `settings.walk && !chapter70 && has-ghost &&
+    theme !== space` decides whether a scene becomes a walkable level.
+    Suggestion: Show a small "TALKABLE SCENE" icon in the journal/map for every
+    NPC in walkable scenes, and list per-chapter which scenes contain side
+    content, so players who want narrative-only pacing (or vice versa) can plan.
+    Alternatively, replace the heuristic with an explicit per-chapter flag baked
+    by the compiler — this also removes the surprising chapter-70 special case.
+
+5.2 Auto-advance conflict: `A` key
+    The controls table lists Gamepad `A` = advance/auto-advance dialogue while
+    keyboard `A` is part of WASD movement. Verify there is no ambiguity in the
+    settings/help text between "Gamepad A" and "Key A"; rename the help entry
+    (e.g. "Pad A") to avoid confusion.
+
+5.3 Accessibility quick wins
+    - Dialogue: add adjustable text speed and a dyslexia-friendly font toggle
+      (Share Tech Mono is hard for some readers).
+    - Cinematics: the fade/particle/rain effects should honor
+      `prefers-reduced-motion`.
+    - Color: pink/cyan/red HUD on dark purple is vibrant but low-contrast for
+      some users; add a high-contrast palette option.
+    - Add subtitles/captions for SFX cues used gameplay-critically (patrol
+      footsteps, drone detection chirps).
+
+--------------------------------------------------------------------------------
+6. PERFORMANCE
+--------------------------------------------------------------------------------
+
+6.1 Parse cost of NV_DATA at boot
+    ~900 KB of JSON parsed synchronously in a <script> tag on first frame. On
+    low-tier devices this adds measurable startup delay.
+    Suggestion: keep it as JS object literal (already done — good), but defer
+    per-chapter deep structures until a chapter loads, or move rarely-used
+    fields (mission synopses, doc blocks per 3.3) out of the hot payload.
+
+6.2 Facts array churn
+    NV.State.fact() caps facts at 450 with shift() (verified line 471). shift()
+    on a 450-element array is fine, but factScore scanning 450 stem-arrays per
+    cond test is O(branches × facts × stems). With heavy conditional chapters
+    this could hitch on low-end hardware.
+    Suggestion: maintain an incremental stem→count Map updated on push/pop so
+    scoring becomes O(stems in condition) instead of O(all facts).
+
+--------------------------------------------------------------------------------
+7. TESTING & TOOLING
+--------------------------------------------------------------------------------
+
+7.1 Headless smoke tests
+    No automated tests exist in the repo. Suggested minimum (runnable with Node
+    + Playwright):
+      - Boot to title, create profile, complete chapter 1's first three nodes.
+      - Run each ending gate through NV.Cond with synthetic stat/flag sets and
+        assert eligibility matches the README table (A–F).
+      - Assert every `play` node's operation id exists in NV.Level.start's modes.
+
+7.2 Deterministic RNG seeding for QA
+    U.RNG exists; expose a `#seed=` dev hash (behind the same dev gate as 2.1)
+    so procedural city/portraits/music can be reproduced in bug reports.
+
+--------------------------------------------------------------------------------
+8. DOCUMENTATION
+--------------------------------------------------------------------------------
+
+8.1 README accuracy
+    - "Single HTML file, currently around 700KB" — the file is now ~985 KB;
+      update or state "approximate, grows with script rebuilds".
+    - Document the save-format versioning scheme once 2.2 is implemented.
+    - Move the "Known limitations & risks" items that get fixed (1.1, 2.1, 4.3)
+      into a CHANGELOG section so the list stays trustworthy.
+
+================================================================================
+PRIORITY SUMMARY
+================================================================================
+  P0  1.1 runOp retry cap            (unbounded loop = softlock risk)
+  P0  2.1 disable #op= in production (content skip / cheat surface)
+  P1  1.3 + 3.1 + 3.2 condition IDs, build-time stems, validator
+                                     (correctness of branching narrative)
+  P1  2.2 save versioning/migration  (long-term player data safety)
+  P2  3.3 doc-block filtering        (payload size + UI glitches)
+  P2  4.1 dev-time source split      (maintainability)
+  P2  6.2 stem-count map             (perf on low tier)
+  P3  5.x UX/accessibility, 7.x tests, 8.x docs polish
