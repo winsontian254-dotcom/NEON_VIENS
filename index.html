@@ -447,7 +447,7 @@ NV.State = (() => {
   const fresh = profile => ({
     ver: 1, profile, stats: { raven: 50, voss: 50, hope: 50, corp: 50, ai: 50 }, flags: { autonomy: 0, control: 0 },
     facts: [], journal: [], sides: {}, stars: 0, memories: [], mysteries: [], evidence: [],
-    ci: 0, cp: 0, done: [], played: 0, ops: 0, ghostOps: 0,
+    ci: 0, cp: 0, done: [], played: 0, ops: 0, ghostOps: 0, credits: 0, upg: { hp: 0, dmg: 0, en: 0 }, shards: [],
   });
   const St = {
     get: () => S,
@@ -460,7 +460,7 @@ NV.State = (() => {
     snapshot(ci) { meta.snaps[ci] = JSON.stringify({ ...S, ci, cp: 0 }); meta.unlocked = Math.max(meta.unlocked, ci); St.saveMeta(); },
     fromSnapshot(ci) { try { S = JSON.parse(meta.snaps[ci]); St.save(); return true; } catch (e) { return false; } },
     stat(k, d) {
-      const v = S.stats[k];
+      const v = S.stats[k]; d *= .45;
       const nv = d > 0 ? v + d * (1.25 - v / 100) : v + d * (0.25 + v / 100);
       S.stats[k] = U.clamp(Math.round(nv * 10) / 10, 0, 100);
       return S.stats[k] - v;
@@ -1038,6 +1038,7 @@ NV.Level = (() => {
 
   /* ---------------- map generation ---------------- */
   function gen(mode, seed) {
+    if (mode === 'free') return genCity(seed);
     const r = U.rng(seed);
     const arenaMode = mode === 'boss' || mode === 'arena' || mode === 'defend';
     let W, H, g, rooms = [];
@@ -1135,10 +1136,11 @@ NV.Level = (() => {
       fm.diffuseTexture.uScale = W / 2; fm.diffuseTexture.vScale = H / 2; fm.specularColor = new BABYLON.Color3(.55, .5, .65); fm.specularPower = 48; floor.material = fm;
     }
     // walls + neon trim (merged: two draw calls for the entire map)
-    const wallBoxes = [], trims = [], faces = [];
+    const wallBoxes = [], trims = [], faces = [], free = op.m === 'free';
+    if (free) cityMeshes(scene, statics, pal, faces);
     const trimMat = mat(scene, 'trim', '#000', pal.a);
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-      if (g[y][x] !== 1) continue;
+      if (g[y][x] !== 1 || free) continue;
       const nb = [[1, 0], [-1, 0], [0, 1], [0, -1]].filter(([dx, dy]) => { const nx = x + dx, ny = y + dy; return nx >= 0 && ny >= 0 && nx < W && ny < H && g[ny][nx] !== 1; });
       if (!nb.length) continue;
       const b = BABYLON.MeshBuilder.CreateBox('w', { width: TILE, height: WALLH, depth: TILE }, scene); b.position.set((x + .5) * TILE, WALLH / 2, (y + .5) * TILE); wallBoxes.push(b);
@@ -1148,7 +1150,7 @@ NV.Level = (() => {
         faces.push({ x, y, dx, dy });
       });
     }
-    const walls = BABYLON.Mesh.MergeMeshes(wallBoxes, true, true); statics.push(walls);
+    const walls = wallBoxes.length ? BABYLON.Mesh.MergeMeshes(wallBoxes, true, true) : BABYLON.MeshBuilder.CreateBox('nowall', { size: .01 }, scene); statics.push(walls);
     const wm = mat(scene, 'wm', '#ffffff');
     wm.diffuseTexture = NV.tex(scene, 256, 256, (c, w, h) => { c.fillStyle = cyber ? '#140a2a' : '#2c2838'; c.fillRect(0, 0, w, h); c.fillStyle = 'rgba(255,255,255,.08)'; for (let i = 0; i < 4; i++) c.fillRect(0, i * 64 + 60, w, 3); c.fillStyle = 'rgba(0,0,0,.35)'; c.fillRect(0, 0, 4, h); c.fillRect(w - 4, 0, 4, h); const rr = U.rng(11); for (let i = 0; i < 40; i++) { c.fillStyle = `rgba(255,255,255,${rr() * .05})`; c.fillRect(rr() * w, rr() * h, 20 + rr() * 60, 10 + rr() * 30); } c.fillStyle = 'rgba(0,0,0,.28)'; c.fillRect(0, h - 26, w, 26); for (let i = 0; i < 6; i++) { c.fillStyle = 'rgba(255,255,255,.06)'; c.fillRect(20 + i * 40, 30, 3, 90); } }, 'walltex');
     wm.specularColor = new BABYLON.Color3(.25, .25, .3);
@@ -1159,11 +1161,11 @@ NV.Level = (() => {
     // holo signs on walls (shared atlas, one draw call)
     if (q.signs && faces.length) {
       const atlas = NV.signAtlas(scene), planes = [];
-      for (let i = 0; i < 12; i++) {
-        const f = faces[Math.floor(r() * faces.length)]; const uv = NV.signUV(Math.floor(r() * 16));
+      for (let i = 0; i < (free ? 60 : 12); i++) {
+        const f = free ? faces[i * 7 % faces.length] : faces[Math.floor(r() * faces.length)]; const uv = NV.signUV(Math.floor(r() * 16));
         const p = BABYLON.MeshBuilder.CreatePlane('ws', { width: 3.2, height: .8, frontUVs: uv, backUVs: uv, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene);
         p.position.set((f.x + .5 + f.dx * .5) * TILE + f.dx * .08, 3.3 + r() * .8, (f.y + .5 + f.dy * .5) * TILE + f.dy * .08);
-        p.rotation.y = Math.atan2(f.dx, f.dy); planes.push(p);
+        p.rotation.y = Math.atan2(f.dx, f.dy) + Math.PI; planes.push(p);
       }
       const sgn = BABYLON.Mesh.MergeMeshes(planes, true, true); const sm = mat(scene, 'wsm', '#000', r() < .5 ? pal.a : pal.b);
       sm.emissiveTexture = atlas; sm.opacityTexture = atlas; sm.disableLighting = true; sm.backFaceCulling = false; sgn.material = sm; statics.push(sgn);
@@ -1382,6 +1384,7 @@ NV.Level = (() => {
 
   /* ---------------- populate ---------------- */
   function populate(op, ctx) {
+    if (op.m === 'free') return populateFree(op);
     const { map } = L, r = U.rng(L.seed + 99), mode = op.m, act = L.act;
     const rooms = map.rooms, st = cellC(map.start.x, map.start.y);
     L.p.x = st.x; L.p.z = st.z;
@@ -1464,7 +1467,7 @@ NV.Level = (() => {
     const end = o.add(d.scale(tHit));
     const muzzle = L.gun.node.getAbsolutePosition().add(d.scale(.5));
     tracer(muzzle, end);
-    const dmgMul = (1 + (L.implant - 1) * .1) * (L.tags.includes('engineer') ? 1.15 : 1) * (L.tactic.dmg || 1);
+    const dmgMul = L.dmgUp * (1 + (L.implant - 1) * .1) * (L.tags.includes('engineer') ? 1.15 : 1) * (L.tactic.dmg || 1);
     if (hit) {
       const dmg = 34 * dmgMul * (head ? 2 : 1);
       hurtEnemy(hit, dmg, head); spark(end, head ? '#ffffff' : '#ff5a3d', head ? 22 : 12); flashX();
@@ -1515,7 +1518,7 @@ NV.Level = (() => {
     const dm = d * NV.DIFF[L.diff].dmg * (L.tactic.armor || 1);
     L.p.hp -= dm; L.p.regenT = 4; L.stats.dmg += dm; NV.Audio.sfx('hurt'); shake(.35);
     const el = document.querySelector('#hud .dmg'); if (el) { el.style.opacity = U.clamp(dm / 30, .35, 1); clearTimeout(el._t); el._t = setTimeout(() => el.style.opacity = 0, 180); }
-    if (L.p.hp <= 0) { L.p.hp = 0; finish(false); }
+    if (L.p.hp <= 0) { L.p.hp = 0; if (L.free) freeRespawn(); else finish(false); }
   }
 
   /* ---------------- hacking mini-game ---------------- */
@@ -1618,7 +1621,7 @@ NV.Level = (() => {
     moveCircle(p, vx * dt, vz * dt, .45);
     p.moving = ml > 0; if (p.moving) { p.bob += dt * spd * 1.6; p.stepT -= dt * spd; if (p.stepT <= 0) { p.stepT = 2.6; NV.Audio.sfx('step'); if (sprint) noise(p.x, p.z, 7); } }
     p.dashCd -= dt; p.inv -= dt; p.cd -= dt;
-    p.en = Math.min(100, p.en + dt * (12 + L.implant));
+    p.en = Math.min(100, p.en + dt * (12 + L.implant) * L.enMul);
     if (p.over > 0) { p.over -= dt; if (p.over <= 0) p.heat = 0; } else p.heat = Math.max(0, p.heat - dt * (p.cd < -.25 ? 55 : 10));
     p.regenT -= dt; if (L.tags.includes('medic') && p.regenT <= 0) p.hp = Math.min(p.max, p.hp + dt * 2.5);
     // camera
@@ -1641,6 +1644,7 @@ NV.Level = (() => {
     }
     if (I.hit('KeyE') || I.hit('KeyF') || I.padHit(2) || (hacking && I.lmbHit)) interact();
     if (hacking) { if (ml > 0 && !I.pad || I.hit('Escape')) { L.hack = null; document.getElementById('hack').classList.add('hidden'); } else drawHack(dt); if (L.hack && Math.hypot(L.hack.t.x - p.x, L.hack.t.z - p.z) > 3) { L.hack = null; document.getElementById('hack').classList.add('hidden'); } }
+    if (L.free) updateFree(dt);
     updateEnemies(dt); updateBoss(dt); updateBullets(dt); updateWorld(dt); updateMode(dt); hud(dt); tutorial(dt);
   }
 
@@ -1673,6 +1677,7 @@ NV.Level = (() => {
     if (!L.flow || L.flowCell !== pc.x + ',' + pc.y) { L.flow = bfs(L.map.g, L.map.W, L.map.H, pc.x, pc.y, true); L.flowCell = pc.x + ',' + pc.y; }
     L.enemies.forEach(e => {
       const m = e.m;
+      if (L.free && e.state !== 'alert' && e.state !== 'down' && Math.abs(e.x - L.p.x) + Math.abs(e.z - L.p.z) > 90) return;
       if (e.state === 'down') {
         if (!e.drone) { m.root.rotation.x = U.lerp(m.root.rotation.x, -Math.PI / 2, dt * 6); m.root.position.y = U.lerp(m.root.position.y, .35, dt * 6); }
         else m.root.position.y = U.lerp(m.root.position.y, .35, dt * 4);
@@ -1739,7 +1744,7 @@ NV.Level = (() => {
     });
     L.alertLevel = alerted ? 2 : suspicious ? 1 : 0;
     if (!alerted) L.anyAlert = false;
-    const mood = L.boss ? 'boss' : alerted ? 'combat' : L.obj.mode === 'explore' ? 'explore' : 'stealth';
+    const mood = L.boss ? 'boss' : alerted ? 'combat' : L.free ? 'title' : L.obj.mode === 'explore' ? 'explore' : 'stealth';
     NV.Audio.setMood(mood);
   }
   function moveCircleE(o, dx, dz, fly) {
@@ -1770,6 +1775,7 @@ NV.Level = (() => {
     });
     L.terms.forEach(t => { if (!t.done) { const d = Math.hypot(t.x - p.x, t.z - p.z); if (d < 2.6) consider('hack', t, d, t.pylon ? 'OVERRIDE PYLON' : 'HACK TERMINAL'); } });
     L.civs.forEach(c => { if (!c.saved) { const d = Math.hypot(c.x - p.x, c.z - p.z); if (d < 2.4) consider('civ', c, d, 'FREE CIVILIAN'); } });
+    if (L.free) freeInteractables(consider);
     return best;
   }
   function interact() {
@@ -1777,6 +1783,7 @@ NV.Level = (() => {
     const it = nearestInteract(); if (!it) return;
     if (it.kind === 'takedown') { disable(it.o, true); shake(.2); }
     else if (it.kind === 'hack') startHack(it.o);
+    else if (it.kind.startsWith('f:')) freeInteract(it);
     else if (it.kind === 'civ') { it.o.saved = true; L.stats.rescued++; NV.Audio.sfx('pickup'); NV.toast('CIVILIAN FREED', 'They slip away through the service route.', '#ffd23d', 2.5); }
   }
 
@@ -1786,6 +1793,7 @@ NV.Level = (() => {
       k.t += dt; k.m.rotation.y += dt * 2; k.m.position.y = 1.1 + Math.sin(k.t * 2) * .12;
       if (Math.hypot(k.x - p.x, k.z - p.z) < 1.3) {
         if (k.kind === 'med') { if (p.hp >= p.max) return true; p.hp = Math.min(p.max, p.hp + (L.tags.includes('medic') ? 50 : 35)); NV.Audio.sfx('pickup'); }
+        else if (k.kind === 'lore') freeShard(k);
         else { L.obj.got++; L.stats.found++; NV.Audio.sfx('pickup'); if (k.text) showEcho(k.text); if (L.obj.got >= L.obj.total) openExit(); }
         k.m.dispose(); return false;
       }
@@ -1834,12 +1842,13 @@ NV.Level = (() => {
     hset('#hud .ht', 'cls', 'bar ht' + (p.over > 0 ? ' over' : ''));
     hset('#hud .hpv', 'text', Math.ceil(p.hp) + ' / ' + p.max);
     const st = ['UNDETECTED', 'SUSPICIOUS', 'ALERT'][L.alertLevel || 0];
-    hset('#hud .status', 'text', L.boss ? 'ENGAGED' : st); hset('#hud .status', 'cls', 'status s' + (L.boss ? 2 : L.alertLevel || 0));
+    hset('#hud .status', 'text', L.boss ? 'ENGAGED' : L.free && !L.alertLevel ? 'FREE ROAM' : st); hset('#hud .status', 'cls', 'status s' + (L.boss ? 2 : L.alertLevel || 0));
     let cnt = '';
     if (o.mode === 'hack' || o.mode === 'retrieve' || o.mode === 'explore') cnt = (o.got >= o.total ? '✓ ' : '') + o.got + ' / ' + o.total + (o.got >= o.total ? '\n▸ Reach extraction' : '');
     if (o.mode === 'arena' && L.waves) cnt = 'Wave ' + L.waves.n + ' / ' + L.waves.total;
     if (o.mode === 'defend') cnt = 'Uplinks online: ' + o.got + ' / ' + o.total;
     if (L.civs.length) cnt += (cnt ? '\n' : '') + 'Optional — civilians freed: ' + L.civs.filter(c => c.saved).length + ' / ' + L.civs.length;
+    if (L.free) cnt = freeHud();
     hset('#hud .obj .c', 'text', cnt);
     hset('#hud .timer', 'text', L.defend ? U.fmtTime(L.defend.t) : '');
     const it = L.hack ? null : nearestInteract();
@@ -1853,11 +1862,12 @@ NV.Level = (() => {
   function minimap() {
     const cv = document.querySelector('#hud .mm'); if (!cv) return; const g = cv.getContext('2d'), W = cv.width, p = L.p, S = 4.2;
     const pc = toCell(p.x, p.z);
-    for (let y = pc.y - 5; y <= pc.y + 5; y++) for (let x = pc.x - 5; x <= pc.x + 5; x++) if (y >= 0 && x >= 0 && y < L.map.H && x < L.map.W) L.seen[y * L.map.W + x] = 1;
+    const rv = L.free ? 9 : 5;
+    for (let y = pc.y - rv; y <= pc.y + rv; y++) for (let x = pc.x - rv; x <= pc.x + rv; x++) if (y >= 0 && x >= 0 && y < L.map.H && x < L.map.W) L.seen[y * L.map.W + x] = 1;
     g.clearRect(0, 0, W, W); g.save(); g.beginPath(); g.arc(W / 2, W / 2, W / 2 - 2, 0, 7); g.clip();
     g.translate(W / 2, W / 2); g.rotate(-Math.PI - p.yaw); g.scale(-1, 1);
     const sc = S / TILE;
-    for (let y = 0; y < L.map.H; y++) for (let x = 0; x < L.map.W; x++) {
+    for (let y = Math.max(0, pc.y - 22); y < Math.min(L.map.H, pc.y + 23); y++) for (let x = Math.max(0, pc.x - 22); x < Math.min(L.map.W, pc.x + 23); x++) {
       if (!L.seen[y * L.map.W + x] || L.map.g[y][x] === 1) continue;
       g.fillStyle = L.map.g[y][x] === 2 ? 'rgba(155,92,255,.35)' : 'rgba(25,240,255,.14)';
       g.fillRect((x * TILE - p.x) * sc, (y * TILE - p.z) * sc, TILE * sc + .5, TILE * sc + .5);
@@ -1870,9 +1880,11 @@ NV.Level = (() => {
     L.nodes.forEach(n => { if (!n.dead) dot(n.x, n.z, '#19f0ff', 4); });
     if (L.boss && L.boss.hp > 0) dot(L.boss.x, L.boss.z, '#ff3355', 6);
     if (L.exit && L.exit.on) dot(L.exit.x, L.exit.z, '#3dffa8', 5);
+    if (L.free) L.beacons.forEach(b => dot(b.x, b.z, b.col, 5));
     g.restore();
     g.fillStyle = '#fff'; g.beginPath(); g.moveTo(W / 2, W / 2 - 7); g.lineTo(W / 2 - 5, W / 2 + 5); g.lineTo(W / 2 + 5, W / 2 + 5); g.fill();
-    if (L.exit && L.exit.on) { const a = Math.atan2(L.exit.x - p.x, L.exit.z - p.z) - p.yaw; g.fillStyle = '#3dffa8'; g.beginPath(); const rr = W / 2 - 8; g.arc(W / 2 + Math.sin(a) * rr, W / 2 - Math.cos(a) * rr, 4, 0, 7); g.fill(); }
+    const tg = L.exit && L.exit.on ? L.exit : L.free ? (L.gig ? L.gig.tgt : L.storyB) : null;
+    if (tg) { const a = Math.atan2(tg.x - p.x, tg.z - p.z) - p.yaw; g.fillStyle = tg.col || '#3dffa8'; g.beginPath(); const rr = W / 2 - 8; g.arc(W / 2 + Math.sin(a) * rr, W / 2 - Math.cos(a) * rr, 4, 0, 7); g.fill(); }
   }
 
   const TUT = [
@@ -1889,10 +1901,215 @@ NV.Level = (() => {
     if (s.until()) L.tutI++;
   }
 
+  /* =====================================================================
+     OPEN WORLD — New Avalon free roam (streets, gigs, vendor, shards)
+     ===================================================================== */
+  const SHARD_IDS = Array.from({ length: 24 }, (_, i) => i * 2 + 1);
+  function genCity(seed) {
+    const r = U.rng(seed), W = 66, H = 66, B = 8;
+    const g = Array.from({ length: H }, (_, y) => Array.from({ length: W }, (_, x) => (x === 0 || y === 0 || x === W - 1 || y === H - 1) ? 1 : 0));
+    const buildings = [], plazas = [], inter = [];
+    for (let by = 0; by < 8; by++) for (let bx = 0; bx < 8; bx++) {
+      const x0 = 3 + bx * B, y0 = 3 + by * B;
+      inter.push({ x: 1 + bx * B, y: 1 + by * B });
+      const safe = bx === 3 && by === 3;
+      if (safe || r() < .14) { plazas.push({ x: x0, y: y0, w: 6, h: 6, cx: x0 + 3, cy: y0 + 3, safe }); continue; }
+      const sp = r();
+      const rects = sp < .3 ? [[0, 0, 6, 6]] : sp < .6 ? [[0, 0, 6, 3], [0, 3, 6, 3]] : sp < .85 ? [[0, 0, 3, 6], [3, 0, 3, 6]] : [[0, 0, 3, 3], [3, 0, 3, 3], [0, 3, 3, 3], [3, 3, 3, 3]];
+      const core = Math.abs(bx - 3.5) + Math.abs(by - 3.5) < 3;
+      rects.forEach(([rx, ry, rw, rh]) => {
+        let w = rw, h = rh;
+        if (rects.length > 1 && r() < .35) { if (rw > rh) h--; else w--; } // alleys between towers
+        const ht = 12 + Math.pow(r(), 1.7) * 70 + (core ? 30 : 0);
+        for (let yy = y0 + ry; yy < y0 + ry + h; yy++) for (let xx = x0 + rx; xx < x0 + rx + w; xx++) g[yy][xx] = 1;
+        buildings.push({ x: x0 + rx, y: y0 + ry, w, h, ht });
+      });
+    }
+    const safe = plazas.find(p => p.safe);
+    plazas.sort((a, b) => (b.safe ? 1 : 0) - (a.safe ? 1 : 0));
+    return { W, H, g, rooms: plazas, start: { x: safe.cx, y: safe.cy }, exit: { x: safe.cx, y: safe.cy }, buildings, plazas, inter, city: true };
+  }
+
+  function cityMeshes(scene, statics, pal, faces) {
+    const B = L.map.buildings;
+    [[0, 30, 3], [30, 60, 6], [60, 999, 10]].forEach(([lo, hi, v], ci) => {
+      const bs = B.filter(b => b.ht >= lo && b.ht < hi); if (!bs.length) return;
+      const m = mat(scene, 'bld' + ci, '#0a0812'); m.emissiveTexture = NV.windowTex(scene, 300 + ci, pal.a, pal.b);
+      m.emissiveTexture.vScale = v; m.emissiveTexture.uScale = 2; m.emissiveTexture.anisotropicFilteringLevel = 8; m.specularColor = new BABYLON.Color3(.25, .25, .35);
+      const box = BABYLON.MeshBuilder.CreateBox('bld' + ci, { size: 1 }, scene); box.material = m;
+      NV.thin(box, bs.map(b => NV.M(b.w * TILE - .1, b.ht, b.h * TILE - .1, (b.x + b.w / 2) * TILE, b.ht / 2, (b.y + b.h / 2) * TILE)));
+      statics.push(box);
+    });
+    // neon footprint lines at street level, rooftop antenna lights, lamp posts, road dashes
+    const trim = [], ant = [], pole = [], lamp = [], dash = [];
+    B.forEach(b => {
+      const x0 = b.x * TILE, z0 = b.y * TILE, w = b.w * TILE, d = b.h * TILE;
+      trim.push(NV.M(w, .08, .08, x0 + w / 2, .3, z0 - .06), NV.M(w, .08, .08, x0 + w / 2, .3, z0 + d + .06), NV.M(.08, .08, d, x0 - .06, .3, z0 + d / 2), NV.M(.08, .08, d, x0 + w + .06, .3, z0 + d / 2));
+      if (b.ht > 45) ant.push(NV.M(.6, .6, .6, x0 + w / 2, b.ht + 2, z0 + d / 2));
+      const side = Math.floor(Math.random() * 4), dx = [0, 0, -1, 1][side], dy = [-1, 1, 0, 0][side];
+      faces.push({ x: dx ? (dx < 0 ? b.x : b.x + b.w - 1) : b.x + Math.floor(b.w / 2), y: dy ? (dy < 0 ? b.y : b.y + b.h - 1) : b.y + Math.floor(b.h / 2), dx, dy });
+    });
+    L.map.inter.forEach(i => { const x = (i.x + 1) * TILE, z = (i.y + 1) * TILE; pole.push(NV.M(.18, 6, .18, x + 3.6, 3, z + 3.6)); lamp.push(NV.M(1.4, .15, .5, x + 3.1, 6, z + 3.6)); });
+    for (let k = 0; k < 8; k++) { const c = (2 + k * 8) * TILE; for (let t = 2; t < L.map.W * TILE - 2; t += 5) { dash.push(NV.M(.12, .03, 2, c, .02, t), NV.M(2, .03, .12, t, .02, c)); } }
+    const mk = (name, m, arr) => { if (!arr.length) return; const b = BABYLON.MeshBuilder.CreateBox(name, { size: 1 }, scene); b.material = m; NV.thin(b, arr); statics.push(b); };
+    mk('ftrim', mat(scene, 'ftm', '#000', pal.a), trim);
+    mk('ant', mat(scene, 'antm', '#000', '#ff3355'), ant);
+    mk('pole', mat(scene, 'polem', '#15131c'), pole);
+    mk('lamp', mat(scene, 'lampm', '#000', pal.b), lamp);
+    mk('dash', mat(scene, 'dashm', '#000', '#6a5a2a'), dash);
+  }
+
+  function beacon(x, z, col, kind, label) {
+    const s = L.scene; L.bmats = L.bmats || {};
+    if (!L.bmats[col]) { const m = mat(s, 'bcn' + col, '#000', col, .28); m.backFaceCulling = false; m.disableLighting = true; m.alphaMode = BABYLON.Engine.ALPHA_ADD; L.bmats[col] = m; }
+    const root = new BABYLON.TransformNode('bcn', s);
+    const beam = BABYLON.MeshBuilder.CreateCylinder('bb', { diameter: 1.8, height: 90, tessellation: 12, cap: BABYLON.Mesh.NO_CAP }, s); beam.position.y = 45; beam.parent = root; beam.material = L.bmats[col]; beam.isPickable = false;
+    const ring = BABYLON.MeshBuilder.CreateTorus('br', { diameter: 3, thickness: .12, tessellation: 24 }, s); ring.position.y = .15; ring.parent = root; ring.material = L.bmats[col]; ring.isPickable = false;
+    root.position.set(x, 0, z);
+    const b = { x, z, root, ring, beam, kind, col, label }; L.beacons.push(b); return b;
+  }
+  const interC = i => ({ x: (i.x + 1) * TILE, z: (i.y + 1) * TILE });
+
+  function populateFree(op) {
+    const map = L.map, S = NV.State.get(), r = U.rng(L.seed + (op.next ? U.hash(op.next.id) : 3));
+    S.credits = S.credits || 0; S.shards = S.shards || []; S.upg = S.upg || { hp: 0, dmg: 0, en: 0 };
+    const st = cellC(map.start.x, map.start.y); L.p.x = st.x; L.p.z = st.z; L.p.yaw = Math.PI;
+    L.home = { x: st.x, z: st.z };
+    L.obj = { mode: 'free', total: 0, got: 0, label: 'Free roam — New Avalon' };
+    L.beacons = []; L.peds = []; L.gig = null;
+    const byDist = (lo, hi) => map.inter.map(interC).filter(c => { const d = Math.hypot(c.x - st.x, c.z - st.z); return d > lo && d < hi; });
+    const sc = U.pick(byDist(60, 120)); L.storyB = beacon(sc.x, sc.z, '#ffd23d', 'story');
+    byDist(20, 150).sort(() => r() - .5).slice(0, 3).forEach(c => beacon(c.x + 3.5, c.z - 3.5, '#19f0ff', 'gig'));
+    beacon(st.x + 7, st.z + 7, '#3dffa8', 'vendor');
+    // data shards: lore from the script's mission briefs, collected once per save
+    const streets = [];
+    for (let y = 1; y < map.H - 1; y++) for (let x = 1; x < map.W - 1; x++) if (map.g[y][x] === 0) streets.push({ x, y });
+    const spot = (minD) => { for (let t = 0; t < 50; t++) { const c = streets[Math.floor(r() * streets.length)], p = cellC(c.x, c.y); if (Math.hypot(p.x - st.x, p.z - st.z) > minD) return p; } return cellC(streets[0].x, streets[0].y); };
+    SHARD_IDS.forEach((id, k) => { if (S.shards.includes(id)) return; const p = spot(15); const m = NV_DATA.missions[id]; addPickup('lore', p.x, p.z, m ? m.title : ''); L.pickups[L.pickups.length - 1].sid = id; });
+    for (let i = 0; i < 6; i++) { const p = spot(10); addPickup('med', p.x, p.z); }
+    // Helix street patrols (sleep when far away to save CPU)
+    const pts = map.inter.map(interC).filter(c => Math.hypot(c.x - st.x, c.z - st.z) > 34);
+    const nP = 10 + Math.min(8, L.act * 2);
+    for (let i = 0; i < nP; i++) {
+      const a = pts[Math.floor(r() * pts.length)], b = pts[Math.floor(r() * pts.length)];
+      const v = r(), kind = v < .12 + L.act * .03 ? 'heavy' : v < .45 ? 'drone' : 'guard';
+      addEnemy(kind, a.x, a.z, [{ x: a.x, z: a.z }, { x: b.x, z: b.z }]);
+    }
+    // pedestrians (instanced)
+    const pm = ['#4b5a78', '#6a4b78', '#78604b', '#3f6b5e'].map((c, i) => mat(L.scene, 'ped' + i, c));
+    const Pp = (mesh, m) => { mesh.material = m; mesh.position.y = -1000; mesh.isPickable = false; return mesh; };
+    const bodies = pm.map((m, i) => Pp(BABYLON.MeshBuilder.CreateCapsule('pdb' + i, { radius: .3, height: 1.6, tessellation: 10, subdivisions: 1 }, L.scene), m));
+    const head = Pp(BABYLON.MeshBuilder.CreateSphere('pdh', { diameter: .36, segments: 8 }, L.scene), mat(L.scene, 'pdhm', '#6d5548'));
+    const strip = Pp(BABYLON.MeshBuilder.CreateBox('pds', { width: .05, height: .45, depth: .05 }, L.scene), mat(L.scene, 'pdsm', '#000', L.palette.a));
+    for (let i = 0; i < 36; i++) {
+      const p = spot(4), root = new BABYLON.TransformNode('ped', L.scene);
+      inst(bodies[i % 4], root, 0, .8, 0); inst(head, root, 0, 1.72, 0); inst(strip, root, .2, 1.1, .2);
+      const pd = { root, x: p.x + (r() - .5) * 2, z: p.z + (r() - .5) * 2, sp: 1.1 + r() * .9, ph: r() * 6 };
+      pedTarget(pd); L.peds.push(pd);
+    }
+  }
+  function pedTarget(pd) {
+    const c = toCell(pd.x, pd.z), g = L.map.g, [dx, dy] = U.pick([[1, 0], [-1, 0], [0, 1], [0, -1]]);
+    let x = c.x, y = c.y; const len = 3 + Math.floor(Math.random() * 10);
+    for (let k = 0; k < len; k++) { const nx = x + dx, ny = y + dy; if (!g[ny] || g[ny][nx] !== 0) break; x = nx; y = ny; }
+    const t = cellC(x, y); pd.tx = t.x + (Math.random() - .5) * 1.6; pd.tz = t.z + (Math.random() - .5) * 1.6;
+  }
+
+  function updateFree(dt) {
+    const p = L.p, S = NV.State.get(), panic = L.alertLevel === 2;
+    L.peds.forEach(pd => {
+      const dx = pd.tx - pd.x, dz = pd.tz - pd.z, d = Math.hypot(dx, dz);
+      const far = Math.abs(pd.x - p.x) + Math.abs(pd.z - p.z) > 110;
+      if (far) return;
+      if (d < .3) pedTarget(pd);
+      else { const sp = pd.sp * (panic && Math.hypot(pd.x - p.x, pd.z - p.z) < 30 ? 2.6 : 1) * dt; pd.x += dx / d * sp; pd.z += dz / d * sp; pd.root.rotation.y = Math.atan2(dx, dz); }
+      const px = pd.x - p.x, pz = pd.z - p.z, pdist = Math.hypot(px, pz); if (pdist < .8 && pdist > .01) { pd.x += px / pdist * .05; pd.z += pz / pdist * .05; }
+      pd.root.position.set(pd.x, Math.abs(Math.sin(L.time * 7 + pd.ph)) * .04, pd.z);
+    });
+    L.beacons.forEach(b => { b.ring.rotation.y += dt; b.beam.visibility = .6 + Math.sin(L.time * 3 + b.x) * .25; });
+    const G = L.gig; if (!G) return;
+    if (G.type === 'courier') {
+      G.t -= dt;
+      if (Math.hypot(G.tgt.x - p.x, G.tgt.z - p.z) < 3) gigDone(true);
+      else if (G.t <= 0) gigDone(false, 'Delivery window missed.');
+    } else if (G.type === 'bounty') { if (G.foes.every(e => e.state === 'down')) gigDone(true); }
+    else if (G.type === 'rescue') { if (G.civ && G.civ.saved) gigDone(true); else if (G.foes.every(e => e.state === 'down') && !G.warned) { G.warned = 1; NV.toast('GIG', 'Guards down — free the hostage [E].', '#ff2bd6', 3); } }
+  }
+  function startGig() {
+    const p = L.p, type = U.pick(['courier', 'bounty', 'rescue']);
+    const cand = L.map.inter.map(interC).filter(c => { const d = Math.hypot(c.x - p.x, c.z - p.z); return d > 55 && d < 170; });
+    const t = U.pick(cand.length ? cand : L.map.inter.map(interC));
+    const G = { type, tgt: beacon(t.x, t.z, '#ff2bd6', 'gigtarget'), foes: [], reward: type === 'courier' ? 45 : type === 'bounty' ? 95 : 75 };
+    G.tgt.passive = true;
+    if (type === 'courier') { G.t = 22 + Math.hypot(t.x - p.x, t.z - p.z) / 5.5; NV.toast('GIG · COURIER RUN', 'Get the package to the magenta beam before the timer runs out.', '#ff2bd6', 4); }
+    else {
+      const n = type === 'bounty' ? 3 + (L.act > 2 ? 1 : 0) : 2;
+      for (let i = 0; i < n; i++) { const e = addEnemy(type === 'bounty' && i === 0 ? 'heavy' : 'guard', t.x + (i - n / 2) * 2.2, t.z, [{ x: t.x - 6, z: t.z }, { x: t.x + 6, z: t.z }]); e.gig = 1; G.foes.push(e); }
+      if (type === 'rescue') { addCivilian(t.x, t.z + 5); G.civ = L.civs[L.civs.length - 1]; }
+      NV.toast(type === 'bounty' ? 'GIG · HELIX BOUNTY' : 'GIG · HOSTAGE RESCUE', type === 'bounty' ? 'Disable the Helix squad at the magenta beam.' : 'Helix is holding a resident at the magenta beam. Get them out.', '#ff2bd6', 4);
+    }
+    L.gig = G; NV.Audio.sfx('unlock');
+  }
+  function gigDone(ok, why) {
+    const G = L.gig, S = NV.State.get(); L.gig = null;
+    G.tgt.root.dispose(); L.beacons = L.beacons.filter(b => b !== G.tgt);
+    if (ok) {
+      S.credits += G.reward; NV.Audio.sfx('hackok');
+      if (G.type === 'rescue') NV.State.stat('hope', 2);
+      NV.toast('GIG COMPLETE', '+' + G.reward + ' ¢ credits', '#3dffa8', 3);
+    } else NV.toast('GIG FAILED', why || '', '#ff3355', 3);
+    NV.State.save();
+  }
+  function freeShard(k) {
+    const S = NV.State.get(); if (S.shards.includes(k.sid)) return;
+    S.shards.push(k.sid); const m = NV_DATA.missions[k.sid];
+    const entry = 'Archive — Mission ' + k.sid + ': ' + (m ? m.title : '');
+    if (!S.journal.includes(entry)) S.journal.push(entry);
+    S.credits += 10; NV.Audio.sfx('pickup');
+    NV.toast('DATA SHARD ' + S.shards.length + ' / 24', entry + ' (+10 ¢)', '#ff2bd6', 4);
+    if (m) showEcho(m.syn.split('. ')[0] + '.');
+    NV.State.save();
+  }
+  function freeInteractables(consider) {
+    const p = L.p, next = L.op.next;
+    L.beacons.forEach(b => {
+      if (b.passive) return; const d = Math.hypot(b.x - p.x, b.z - p.z); if (d > 3.2) return;
+      const lab = b.kind === 'story' ? (next ? 'BEGIN CHAPTER ' + next.id + ' — ' + next.title.toUpperCase() : 'CONTINUE STORY') : b.kind === 'gig' ? (L.gig ? 'GIG ALREADY ACTIVE' : 'TAKE A GIG') : 'BLACK-MARKET VENDOR';
+      consider('f:' + b.kind, b, d, lab);
+    });
+  }
+  function freeInteract(it) {
+    if (it.kind === 'f:story') { L.over = true; if (document.pointerLockElement) document.exitPointerLock(); NV.Audio.sfx('exit'); setTimeout(() => end({ story: true }), 350); }
+    else if (it.kind === 'f:gig') { if (!L.gig) startGig(); else NV.Audio.sfx('hackfail'); }
+    else if (it.kind === 'f:vendor') {
+      L.paused = true; if (document.pointerLockElement) document.exitPointerLock();
+      NV.UI.vendor().then(() => { if (!L) return; applyUpgrades(); L.paused = false; lock(); });
+    }
+  }
+  function applyUpgrades() {
+    const u = NV.State.get().upg || {}, S = NV.State.get();
+    const max = 100 + (S.stars || 0) * 5 + (u.hp || 0) * 20; L.p.hp += max - L.p.max; L.p.max = max;
+    L.dmgUp = 1 + (u.dmg || 0) * .15; L.enMul = 1 + (u.en || 0) * .25;
+  }
+  function freeRespawn() {
+    const S = NV.State.get(), lost = Math.floor((S.credits || 0) * .15);
+    S.credits -= lost; L.p.hp = L.p.max; L.p.x = L.home.x; L.p.z = L.home.z; L.p.inv = 2;
+    L.enemies.forEach(e => { if (e.state !== 'down') { e.state = 'patrol'; e.susp = 0; e.path = []; } });
+    L.bulletPool.forEach(b => { b.on = false; b.m.isVisible = false; });
+    if (L.gig) gigDone(false, 'You went down.');
+    NV.toast('PATCHED UP', 'Back at the safehouse. Lost ' + lost + ' ¢.', '#ff3355', 4); NV.State.save();
+  }
+  function freeHud() {
+    const S = NV.State.get(), G = L.gig;
+    let s = 'Credits: ' + (S.credits || 0) + ' ¢   ·   Shards: ' + (S.shards || []).length + ' / 24';
+    if (G) s += '\n▸ ' + (G.type === 'courier' ? 'Courier run — ' + Math.ceil(G.t) + 's left' : G.type === 'bounty' ? 'Bounty — ' + G.foes.filter(e => e.state !== 'down').length + ' left' : 'Hostage rescue');
+    return s;
+  }
+
   /* ---------------- lifecycle ---------------- */
   function pause() {
     L.paused = true; if (document.pointerLockElement) document.exitPointerLock();
-    NV.UI.levelPause().then(ch => {
+    NV.UI.levelPause(L.free).then(ch => {
       if (!L) return;
       if (ch === 'resume') { L.paused = false; lock(); }
       else if (ch === 'restart') end({ restart: true });
@@ -1946,7 +2163,8 @@ NV.Level = (() => {
         stats: { time: 0, takedowns: 0, disabled: 0, alerts: 0, rescued: 0, found: 0, dmg: 0, shots: 0 },
         time: 0, shake: 0, mmT: 0, tut: !!op.tut, tutI: 0, started: false, over: false, paused: false,
       };
-      L.p.hp = L.p.max;
+      L.free = op.m === 'free'; if (L.free) L.seed = U.hash('new-avalon');
+      L.dmgUp = 1; L.enMul = 1; applyUpgrades(); L.p.hp = L.p.max;
       L.map = gen(op.m, L.seed);
       L.seen = new Uint8Array(L.map.W * L.map.H);
       const built = buildScene(op, ctx); L.scene = built.scene; L.cam = built.cam; L.plight = built.plight;
@@ -2125,7 +2343,7 @@ NV.UI = (() => {
       let h = '';
       if (tab === 0) {
         h += Object.entries(NV.STAT_NAMES).map(([k, n]) => `<div class="li"><h4 style="color:${NV.STAT_COLORS[k]}">${n}</h4><div class="meter"><i style="width:${S.stats[k]}%;background:${NV.STAT_COLORS[k]}"></i></div></div>`).join('');
-        h += `<div class="li"><h4>Courier</h4><p>Implant level ${NV.State.implant()} · Paper stars ${S.stars}/12 · Operations cleared ${S.ops} (${S.ghostOps} undetected) · Chapters complete ${S.done.length}</p></div>`;
+        h += `<div class="li"><h4>Courier</h4><p>Credits ${S.credits || 0} ¢ · Data shards ${(S.shards || []).length}/24 · Implant level ${NV.State.implant()} · Paper stars ${S.stars}/12 · Operations cleared ${S.ops} (${S.ghostOps} undetected) · Chapters complete ${S.done.length}</p></div>`;
         h += `<div class="li"><h4>Background</h4><p>${(S.profile.tags || []).map(t => NV.TAGS[t].name).join(' · ')} — ${NV.DIFF[S.profile.difficulty].name}</p></div>`;
       } else if (tab === 1) h = S.journal.length ? S.journal.slice().reverse().map(j => `<div class="li"><h4>${U.esc(j)}</h4></div>`).join('') : '<p class="muted">No entries yet.</p>';
       else if (tab === 2) { const e = Object.entries(S.sides); h = e.length ? e.sort().map(([k, v]) => `<div class="li"><h4>${U.esc(k)} ${v === 'done' ? '<span style="color:var(--green)">✓ COMPLETE</span>' : '<span style="color:var(--amber)">OPEN</span>'}</h4><p>${U.esc(S.sideNames && S.sideNames[k] || '')}</p></div>`).join('') : '<p class="muted">No side quests unlocked.</p>'; }
@@ -2295,7 +2513,7 @@ NV.UI = (() => {
 
   /* ---------------- gameplay overlays ---------------- */
   UI.opBanner = (op, label) => new Promise(res => {
-    const b = add(`<div class="k">${op.m === 'boss' ? 'BOSS ENCOUNTER' : 'OPERATION'}</div><div class="t">${U.esc(op.m === 'boss' ? (op.boss || 'Enforcer') : label)}</div><div class="d">${U.esc(op.d || '')}</div><div class="k" style="margin-top:26px;animation:blink 1.4s infinite">CLICK TO ENGAGE</div>`, 'banner');
+    const b = add(`<div class="k">${op.m === 'boss' ? 'BOSS ENCOUNTER' : op.m === 'free' ? 'OPEN WORLD · FREE ROAM' : 'OPERATION'}</div><div class="t">${U.esc(op.m === 'boss' ? (op.boss || 'Enforcer') : op.m === 'free' ? 'NEW AVALON' : label)}</div><div class="d">${U.esc(op.d || '')}</div><div class="k" style="margin-top:26px;animation:blink 1.4s infinite">CLICK TO ENGAGE</div>`, 'banner');
     b.style.pointerEvents = 'auto'; b.style.cursor = 'pointer'; b.style.inset = '0'; b.style.top = '0'; b.style.paddingTop = '34vh'; b.style.background = 'rgba(3,2,10,.55)';
     NV.fade(false, 500);
     if (op.m === 'boss') NV.Audio.sfx('boss');
@@ -2303,11 +2521,28 @@ NV.UI = (() => {
     b.onclick = go;
     const h = UI.push({ tick() { if (NV.In.confirm() || NV.In.any('KeyE')) go(); } });
   });
-  UI.levelPause = () => new Promise(res => {
-    const m = modal(`<div class="stitle">PAUSED</div><button class="btn">Resume</button><button class="btn">Settings</button><button class="btn">Restart Operation</button><button class="btn">Skip Operation<small>Continue the story without clearing this operation</small></button><button class="btn">Save &amp; Quit to Title</button>`, true);
+  UI.levelPause = free => new Promise(res => {
+    const m = free
+      ? modal(`<div class="stitle">NEW AVALON</div><button class="btn">Resume</button><button class="btn">Journal</button><button class="btn">Settings</button><button class="btn">Save &amp; Quit to Title</button>`, true)
+      : modal(`<div class="stitle">PAUSED</div><button class="btn">Resume</button><button class="btn">Settings</button><button class="btn">Restart Operation</button><button class="btn">Skip Operation<small>Continue the story without clearing this operation</small></button><button class="btn">Save &amp; Quit to Title</button>`, true);
     const b = [...m.querySelectorAll('.btn')];
     const fin = v => { UI.pop(h); m.remove(); res(v); };
-    const h = UI.push(nav(b, { select: async k => { if (k === 0) fin('resume'); if (k === 1) await UI.settings(); if (k === 2) fin('restart'); if (k === 3) fin('skip'); if (k === 4) fin('quit'); }, back: () => fin('resume') }));
+    const acts = free ? ['resume', 'journal', 'settings', 'quit'] : ['resume', 'settings', 'restart', 'skip', 'quit'];
+    const h = UI.push(nav(b, { select: async k => { const a = acts[k]; if (a === 'settings') await UI.settings(); else if (a === 'journal') await UI.journal(); else fin(a); }, back: () => fin('resume') }));
+  });
+  UI.vendor = () => new Promise(res => {
+    const S = NV.State.get(); S.upg = S.upg || { hp: 0, dmg: 0, en: 0 };
+    const items = [['hp', 'Subdermal Armor', '+20 max integrity', [120, 220, 360]], ['dmg', 'Coil Overclock', '+15% shock damage', [140, 260, 420]], ['en', 'Battery Lattice', '+25% energy recharge', [100, 200, 320]]];
+    const m = modal(`<div class="stitle">BLACK-MARKET VENDOR</div><p class="muted" style="margin-bottom:10px">“No receipts. No subscriptions. It's yours once you pay.”</p><div class="rows"></div><div class="cr" style="font-family:var(--fm);color:var(--amber);margin:12px 0"></div><button class="btn">Leave</button>`);
+    const box = m.querySelector('.rows'), cr = m.querySelector('.cr');
+    const draw = () => { box.innerHTML = ''; cr.textContent = 'CREDITS: ' + (S.credits || 0) + ' ¢'; items.forEach(([k, n, d, pr]) => { const lv = S.upg[k] || 0; const e = U.el('div', 'row', `<span>${n} <span class="muted" style="font-size:14px">— ${d}</span></span><span class="val">${lv >= 3 ? 'MAX' : pr[lv] + ' ¢'} · ${'■'.repeat(lv)}${'□'.repeat(3 - lv)}</span>`); box.appendChild(e); }); };
+    draw();
+    const rows = () => [...box.children, m.querySelector('.btn')];
+    const fin = () => { UI.pop(h); m.remove(); NV.State.save(); res(); };
+    let h;
+    const buy = k => { const [key, n, , pr] = items[k]; const lv = S.upg[key] || 0; if (lv >= 3) return; if ((S.credits || 0) < pr[lv]) { NV.Audio.sfx('hackfail'); NV.toast('VENDOR', 'Not enough credits. Run gigs to earn more.', '#ff3355'); return; } S.credits -= pr[lv]; S.upg[key] = lv + 1; NV.Audio.sfx('unlock'); NV.toast('INSTALLED', n + ' Mk ' + (lv + 1), '#3dffa8'); draw(); UI.pop(h); h = UI.push(nav(rows(), { start: k, select: sel, back: fin })); };
+    const sel = k => { if (k >= items.length) fin(); else buy(k); };
+    h = UI.push(nav(rows(), { select: sel, back: fin }));
   });
   UI.results = (st, op) => new Promise(res => {
     let score = 1000 - st.dmg * 2 - st.alerts * 90 + st.takedowns * 40 + st.rescued * 120 - Math.max(0, st.time - 90) * 1.5 + (st.undetected ? 300 : 0);
@@ -2500,12 +2735,25 @@ NV.Story = (() => {
     return 'done';
   }
 
+  async function freeRoam(ci) {
+    const next = chapters()[ci];
+    NV.UI.storyHide(true); NV.Audio.setMood('title');
+    while (true) {
+      await NV.fade(true, 450);
+      const res = await NV.Level.start({ t: 'play', m: 'free', k: 0, next, d: 'Next: Chapter ' + next.id + ' — ' + next.title + '. Walk into the gold beam when you are ready. Cyan beams offer gigs, the green beam is a vendor, and data shards are hidden around the city.' }, { act: next.act || 1, palette: NV.paletteFor('NEON HEIGHTS — STREETS'), chapter: 'free' + ci, echoes: [], tactic: {} });
+      await NV.fade(false, 350);
+      if (res.story) { NV.UI.storyHide(false); return null; }
+      if (res.quit) { NV.UI.storyHide(false); return Q; }
+    }
+  }
+
   async function run(ci, cp) {
     const S = NV.State.get();
     NV.UI.storyOpen();
     while (true) {
       const ch = chapters()[ci];
       if (!ch) break;
+      if (!cp && ci > 0 && !ch.ending) { const fr = await freeRoam(ci); if (fr === Q) { NV.State.save(); NV.UI.storyClose(); return; } }
       const r = await playChapter(ci, cp); cp = 0;
       if (r === Q) { NV.State.save(); NV.UI.storyClose(); return; }
       if (typeof r === 'string' && r.startsWith('ending:')) {
