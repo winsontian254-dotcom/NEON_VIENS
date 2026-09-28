@@ -420,7 +420,7 @@ NV.In = (() => {
    ===================================================================== */
 NV.Settings = (() => {
   const KEY = 'nv_settings_v1';
-  const DEF = { master: .8, music: .6, sfx: .8, textSpeed: 2, sens: 1, fov: 80, shake: 1, scan: 1, showStats: 1, gfx: 0, dynRes: 1, showFps: 0, invertY: 0 };
+  const DEF = { master: .8, music: .6, sfx: .8, textSpeed: 2, sens: 1, fov: 80, shake: 1, scan: 1, showStats: 1, travel: 1, gfx: 0, dynRes: 1, showFps: 0, invertY: 0 };
   let s = { ...DEF };
   try { Object.assign(s, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { }
   return {
@@ -1032,13 +1032,14 @@ NV.Level = (() => {
     L.look.dx += e.movementX; L.look.dy += e.movementY;
   });
   document.addEventListener('pointerlockchange', () => {
-    if (document.pointerLockElement === lockEl()) lockAt = performance.now(); if (L && !L.over && !L.paused && document.pointerLockElement !== lockEl() && L.started) L.wantPause = true; });
+    if (document.pointerLockElement === lockEl()) lockAt = performance.now(); if (L && !(L.map && L.map.apt) && !L.over && !L.paused && document.pointerLockElement !== lockEl() && L.started) L.wantPause = true; });
 
   const RESCUE_RE = /rescue|resident|refugee|civilian|prisoner|children|survivor|hostage|families|patients/i;
 
   /* ---------------- map generation ---------------- */
   function gen(mode, seed) {
     if (mode === 'free') return genCity(seed);
+    if (mode === 'apartment') return genApartment();
     const r = U.rng(seed);
     const arenaMode = mode === 'boss' || mode === 'arena' || mode === 'defend';
     let W, H, g, rooms = [];
@@ -1159,7 +1160,7 @@ NV.Level = (() => {
     if (trims.length) { const tm = BABYLON.Mesh.MergeMeshes(trims, true, true); tm.material = trimMat; statics.push(tm); }
     const r = U.rng(L.seed + 5);
     // holo signs on walls (shared atlas, one draw call)
-    if (q.signs && faces.length) {
+    if (q.signs && faces.length && !L.map.apt) {
       const atlas = NV.signAtlas(scene), planes = [];
       for (let i = 0; i < (free ? 60 : 12); i++) {
         const f = free ? faces[i * 7 % faces.length] : faces[Math.floor(r() * faces.length)]; const uv = NV.signUV(Math.floor(r() * 16));
@@ -1385,6 +1386,7 @@ NV.Level = (() => {
   /* ---------------- populate ---------------- */
   function populate(op, ctx) {
     if (op.m === 'free') return populateFree(op);
+    if (op.m === 'apartment') return populateApartment(op);
     const { map } = L, r = U.rng(L.seed + 99), mode = op.m, act = L.act;
     const rooms = map.rooms, st = cellC(map.start.x, map.start.y);
     L.p.x = st.x; L.p.z = st.z;
@@ -1616,7 +1618,7 @@ NV.Level = (() => {
     let spd = (crouch ? 2.6 : sprint ? 8.2 : 5.4) * (L.tags.includes('driver') ? 1.12 : 1);
     const sy = Math.sin(p.yaw), cy = Math.cos(p.yaw);
     let vx = (mx * cy + mz * sy) * spd, vz = (-mx * sy + mz * cy) * spd;
-    if ((I.hit('Space') || I.padHit(1)) && p.dashCd <= 0 && p.en >= 22 && ml > 0) { p.dash = .18; p.dashCd = L.tags.includes('driver') ? .5 : .8; p.en -= 22; p.dx = vx / spd; p.dz = vz / spd; NV.Audio.sfx('dash'); p.inv = .15; }
+    if (!L.map.apt && (I.hit('Space') || I.padHit(1)) && p.dashCd <= 0 && p.en >= 22 && ml > 0) { p.dash = .18; p.dashCd = L.tags.includes('driver') ? .5 : .8; p.en -= 22; p.dx = vx / spd; p.dz = vz / spd; NV.Audio.sfx('dash'); p.inv = .15; }
     if (p.dash > 0) { p.dash -= dt; vx = p.dx * 26; vz = p.dz * 26; }
     moveCircle(p, vx * dt, vz * dt, .45);
     p.moving = ml > 0; if (p.moving) { p.bob += dt * spd * 1.6; p.stepT -= dt * spd; if (p.stepT <= 0) { p.stepT = 2.6; NV.Audio.sfx('step'); if (sprint) noise(p.x, p.z, 7); } }
@@ -1637,7 +1639,7 @@ NV.Level = (() => {
     G.node.position.set(.3 + (p.moving ? Math.cos(p.bob * .5) * .015 : 0), -.32 + (p.moving ? Math.abs(Math.sin(p.bob * .5)) * .012 : 0) - (hacking ? .25 : 0), .62 - G.kick * .08);
     G.node.rotation.x = -G.kick * .12; G.coil.emissiveColor = p.over > 0 ? C3('#ff3355') : C3(L.palette.b).scale(1 - p.heat / 160);
     // actions
-    if (!hacking) {
+    if (!hacking && !L.map.apt) {
       const fireHeld = I.lmb || (I.pad && I.pad.buttons[7] && I.pad.buttons[7].value > .4);
       if (fireHeld) shoot();
       if (I.hit('KeyQ') || I.padHit(3)) emp();
@@ -1645,6 +1647,7 @@ NV.Level = (() => {
     if (I.hit('KeyE') || I.hit('KeyF') || I.padHit(2) || (hacking && I.lmbHit)) interact();
     if (hacking) { if (ml > 0 && !I.pad || I.hit('Escape')) { L.hack = null; document.getElementById('hack').classList.add('hidden'); } else drawHack(dt); if (L.hack && Math.hypot(L.hack.t.x - p.x, L.hack.t.z - p.z) > 3) { L.hack = null; document.getElementById('hack').classList.add('hidden'); } }
     if (L.free) updateFree(dt);
+    if (L.map.apt) updateApartment(dt);
     updateEnemies(dt); updateBoss(dt); updateBullets(dt); updateWorld(dt); updateMode(dt); hud(dt); tutorial(dt);
   }
 
@@ -1776,6 +1779,7 @@ NV.Level = (() => {
     L.terms.forEach(t => { if (!t.done) { const d = Math.hypot(t.x - p.x, t.z - p.z); if (d < 2.6) consider('hack', t, d, t.pylon ? 'OVERRIDE PYLON' : 'HACK TERMINAL'); } });
     L.civs.forEach(c => { if (!c.saved) { const d = Math.hypot(c.x - p.x, c.z - p.z); if (d < 2.4) consider('civ', c, d, 'FREE CIVILIAN'); } });
     if (L.free) freeInteractables(consider);
+    if (L.props) L.props.forEach(pr => { if (!pr.enabled || pr.done) return; const d = Math.hypot(pr.x - p.x, pr.z - p.z); if (d < 2.6) consider('prop', pr, d, pr.label); });
     return best;
   }
   function interact() {
@@ -1783,6 +1787,7 @@ NV.Level = (() => {
     const it = nearestInteract(); if (!it) return;
     if (it.kind === 'takedown') { disable(it.o, true); shake(.2); }
     else if (it.kind === 'hack') startHack(it.o);
+    else if (it.kind === 'prop') { it.o.done = true; if (L.op.onInspect) L.op.onInspect(it.o.id); }
     else if (it.kind.startsWith('f:')) freeInteract(it);
     else if (it.kind === 'civ') { it.o.saved = true; L.stats.rescued++; NV.Audio.sfx('pickup'); NV.toast('CIVILIAN FREED', 'They slip away through the service route.', '#ffd23d', 2.5); }
   }
@@ -1978,7 +1983,7 @@ NV.Level = (() => {
     L.obj = { mode: 'free', total: 0, got: 0, label: 'Free roam — New Avalon' };
     L.beacons = []; L.peds = []; L.gig = null;
     const byDist = (lo, hi) => map.inter.map(interC).filter(c => { const d = Math.hypot(c.x - st.x, c.z - st.z); return d > lo && d < hi; });
-    const sc = U.pick(byDist(60, 120)); L.storyB = beacon(sc.x, sc.z, '#ffd23d', 'story');
+    const sc = U.pick(byDist(op.travel ? 45 : 60, op.travel ? 95 : 120)); L.storyB = beacon(sc.x, sc.z, op.travel ? '#ff5a3d' : '#ffd23d', 'story');
     byDist(20, 150).sort(() => r() - .5).slice(0, 3).forEach(c => beacon(c.x + 3.5, c.z - 3.5, '#19f0ff', 'gig'));
     beacon(st.x + 7, st.z + 7, '#3dffa8', 'vendor');
     // data shards: lore from the script's mission briefs, collected once per save
@@ -2017,6 +2022,7 @@ NV.Level = (() => {
 
   function updateFree(dt) {
     const p = L.p, S = NV.State.get(), panic = L.alertLevel === 2;
+    if ((NV.In.hit('KeyT') || NV.In.padHit(8)) && L.storyB && L.alertLevel < 2) { p.x = L.storyB.x + 3.2; p.z = L.storyB.z; p.yaw = -Math.PI / 2; NV.Audio.sfx('dash'); NV.toast('FAST TRAVEL', L.op.travel ? 'Arrived at the mission location.' : 'Arrived at the story marker.', '#19f0ff', 2); }
     L.peds.forEach(pd => {
       const dx = pd.tx - pd.x, dz = pd.tz - pd.z, d = Math.hypot(dx, dz);
       const far = Math.abs(pd.x - p.x) + Math.abs(pd.z - p.z) > 110;
@@ -2074,7 +2080,7 @@ NV.Level = (() => {
     const p = L.p, next = L.op.next;
     L.beacons.forEach(b => {
       if (b.passive) return; const d = Math.hypot(b.x - p.x, b.z - p.z); if (d > 3.2) return;
-      const lab = b.kind === 'story' ? (next ? 'BEGIN CHAPTER ' + next.id + ' — ' + next.title.toUpperCase() : 'CONTINUE STORY') : b.kind === 'gig' ? (L.gig ? 'GIG ALREADY ACTIVE' : 'TAKE A GIG') : 'BLACK-MARKET VENDOR';
+      const lab = b.kind === 'story' ? (L.op.travel ? 'START MISSION — ' + L.op.travel.toUpperCase() : next ? 'BEGIN CHAPTER ' + next.id + ' — ' + next.title.toUpperCase() : 'CONTINUE STORY') : b.kind === 'gig' ? (L.gig ? 'GIG ALREADY ACTIVE' : 'TAKE A GIG') : 'BLACK-MARKET VENDOR';
       consider('f:' + b.kind, b, d, lab);
     });
   }
@@ -2106,10 +2112,111 @@ NV.Level = (() => {
     return s;
   }
 
+  /* =====================================================================
+     APARTMENT — walkable Chapter 1 prologue (Tier 93, Neon Heights)
+     ===================================================================== */
+  function genApartment() {
+    const W = 6, H = 7, g = Array.from({ length: H }, () => new Array(W).fill(1));
+    for (let y = 2; y <= 4; y++) for (let x = 2; x <= 3; x++) g[y][x] = 0;
+    const room = { x: 2, y: 2, w: 2, h: 3, cx: 2, cy: 3 };
+    return { W, H, g, rooms: [room], start: { x: 3, y: 3 }, exit: { x: 3, y: 3 }, apt: true };
+  }
+  // double-sided panel whose text reads correctly from either side
+  function panel(scene, w, h, m) {
+    const p = BABYLON.MeshBuilder.CreatePlane('pnl', { width: w, height: h, sideOrientation: BABYLON.Mesh.DOUBLESIDE, frontUVs: new BABYLON.Vector4(0, 0, 1, 1), backUVs: new BABYLON.Vector4(1, 0, 0, 1) }, scene);
+    p.material = m; p.isPickable = false; return p;
+  }
+  function screenMat(scene, name, draw, w, h) { const m = mat(scene, name, '#000', '#ffffff'); m.emissiveColor = new BABYLON.Color3(0, 0, 0); m.emissiveTexture = NV.tex(scene, w || 512, h || 256, draw, name + 't'); m.disableLighting = true; return m; }
+  function populateApartment(op) {
+    const s = L.scene, pal = L.palette;
+    L.obj = { mode: 'apartment', total: 0, got: 0, label: 'Tier 93 — your apartment' };
+    L.p.x = 12; L.p.z = 16.5; L.p.yaw = Math.PI;
+    L.gun.node.setEnabled(false);
+    L.props = [];
+    const prop = (id, x, z, label) => { const pr = { id, x, z, label, enabled: false, done: false }; L.props.push(pr); return pr; };
+    // --- window onto the neighbouring tower: night city, ads, rain ---
+    const view = screenMat(s, 'view', (g, w, h) => {
+      const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#07020f'); gr.addColorStop(1, '#2a0c3a'); g.fillStyle = gr; g.fillRect(0, 0, w, h);
+      const r = U.rng(93);
+      for (let i = 0; i < 14; i++) { const bx = r() * w, bw = 40 + r() * 90, bh = 120 + r() * 380; g.fillStyle = '#0a0612'; g.fillRect(bx, h - bh, bw, bh); for (let y = h - bh + 6; y < h; y += 9) for (let x = bx + 4; x < bx + bw - 4; x += 8) if (r() < .35) { g.fillStyle = r() < .5 ? '#ffcf80' : '#7fa8ff'; g.globalAlpha = .7; g.fillRect(x, y, 4, 4); g.globalAlpha = 1; } }
+      const ad = (x, y, w2, h2, col, lines) => { g.fillStyle = 'rgba(0,0,0,.6)'; g.fillRect(x, y, w2, h2); g.strokeStyle = col; g.lineWidth = 4; g.strokeRect(x, y, w2, h2); g.fillStyle = col; g.textAlign = 'center'; lines.forEach((l, i) => { g.font = (i ? 'bold 22px' : 'bold 34px') + ' Orbitron, sans-serif'; g.fillText(l, x + w2 / 2, y + 44 + i * 32, w2 - 16); }); };
+      ad(40, 60, 300, 120, '#19f0ff', ['OXYGEN PLANS', 'BREATHE PREMIUM · FROM 49¢/DAY']);
+      ad(380, 30, 280, 110, '#ff2bd6', ['MEMORY INSURANCE', 'NEVER LOSE YOURSELF AGAIN']);
+      g.fillStyle = 'rgba(0,0,0,.55)'; g.fillRect(700, 50, 290, 250); g.strokeStyle = '#f4e6b0'; g.lineWidth = 4; g.strokeRect(700, 50, 290, 250);
+      g.fillStyle = '#f4e6b0'; g.beginPath(); g.arc(845, 130, 48, 0, 7); g.fill(); g.fillStyle = '#0a0612'; g.fillRect(825, 118, 10, 6); g.fillRect(855, 118, 10, 6); g.beginPath(); g.arc(845, 140, 20, .2, Math.PI - .2); g.lineWidth = 4; g.strokeStyle = '#0a0612'; g.stroke();
+      g.fillStyle = '#f4e6b0'; g.textAlign = 'center'; g.font = 'bold 24px Orbitron, sans-serif'; g.fillText('TOMORROW HAS', 845, 222); g.fillText('ALREADY BEEN TESTED', 845, 252); g.font = '16px Orbitron, sans-serif'; g.fillText('— HELIX', 845, 280);
+    }, 1024, 512);
+    const win = panel(s, 7.4, 3.6, view); win.position.set(12, 2.6, 8.06);
+    const rainM = mat(s, 'wrain', '#000', '#ffffff'); rainM.emissiveColor = new BABYLON.Color3(0, 0, 0);
+    rainM.emissiveTexture = NV.tex(s, 256, 256, (g, w, h) => { g.clearRect(0, 0, w, h); const r = U.rng(7); for (let i = 0; i < 160; i++) { const x = r() * w, y = r() * h, l = 6 + r() * 26; g.strokeStyle = `rgba(200,225,255,${.15 + r() * .35})`; g.lineWidth = 1 + r(); g.beginPath(); g.moveTo(x, y); g.lineTo(x + 1, y + l); g.stroke(); } }, 'wraint');
+    rainM.opacityTexture = rainM.emissiveTexture; rainM.emissiveTexture.uScale = 3; rainM.emissiveTexture.vScale = 1.5; rainM.disableLighting = true; rainM.alphaMode = BABYLON.Engine.ALPHA_ADD;
+    const rain = panel(s, 7.4, 3.6, rainM); rain.position.set(12, 2.6, 8.12); L.aptRain = rainM.emissiveTexture;
+    const frameM = mat(s, 'wframe', '#1d1a28');
+    [[12, 4.45, 7.8, .15], [12, .75, 7.8, .15], [8.2, 2.6, .15, 3.8], [15.8, 2.6, .15, 3.8], [12, 2.6, .08, 3.6]].forEach(([x, y, w, h]) => { const b = BABYLON.MeshBuilder.CreateBox('wf', { width: w, height: h, depth: .15 }, s); b.position.set(x, y, 8.1); b.material = frameM; });
+    prop('window', 12, 9.4, 'LOOK OUTSIDE');
+    // --- furniture ---
+    const dark = mat(s, 'furn', '#1b1726'), cloth = mat(s, 'cloth', '#2b2440'), strip = mat(s, 'fstrip', '#000', pal.a);
+    const box = (w, h, d, x, y, z, m) => { const b = BABYLON.MeshBuilder.CreateBox('f', { width: w, height: h, depth: d }, s); b.position.set(x, y, z); b.material = m || dark; b.isPickable = false; return b; };
+    box(2.2, .45, 3.4, 14.7, .23, 16.6); box(2.1, .2, 3.2, 14.7, .55, 16.7, cloth); box(1.6, .22, .6, 14.7, .72, 18.0, mat(s, 'pillow', '#3b3452')); box(.06, .06, 3.3, 13.6, .5, 16.6, strip);
+    L.crates.push({ x: 14.7, z: 16.6, h: .5 });
+    box(1.1, .08, 2.4, 8.7, .9, 13.2); box(.08, .9, 2.2, 9.2, .45, 13.2); box(.5, .5, .5, 8.9, .25, 12.3, cloth);
+    // invoice display over the desk
+    const invoice = screenMat(s, 'invoice', (g, w, h) => {
+      g.fillStyle = '#0a0418'; g.fillRect(0, 0, w, h); g.strokeStyle = '#ffb238'; g.lineWidth = 6; g.strokeRect(6, 6, w - 12, h - 12);
+      g.fillStyle = '#ffb238'; g.font = 'bold 30px Orbitron, sans-serif'; g.fillText('AIRLINE UTILITIES', 28, 56); g.font = '22px monospace'; g.fillStyle = '#ffffff';
+      ['OXYGEN SUBSCRIPTION — RESIDENT: [NOT FOUND]', 'PAYMENT OVERDUE: 4 DAYS', 'REDUCED ATMOSPHERIC COMFORT', 'BEGINS AT 02:00'].forEach((l, i) => g.fillText(l, 28, 104 + i * 34));
+      g.fillStyle = '#ff3355'; g.fillRect(28, 220, 170, 6);
+    });
+    const inv = panel(s, 2.2, 1.1, invoice); inv.position.set(8.06, 2.2, 13.2); inv.rotation.y = Math.PI / 2;
+    prop('invoice', 9.4, 13.2, 'READ THE INVOICE');
+    // city map on the east wall
+    const map = screenMat(s, 'citymap', (g, w, h) => {
+      g.fillStyle = '#04101a'; g.fillRect(0, 0, w, h); g.strokeStyle = 'rgba(25,240,255,.5)'; g.lineWidth = 2;
+      for (let x = 20; x < w; x += 40) { g.beginPath(); g.moveTo(x, 10); g.lineTo(x, h - 10); g.stroke(); } for (let y = 20; y < h; y += 40) { g.beginPath(); g.moveTo(10, y); g.lineTo(w - 10, y); g.stroke(); }
+      g.fillStyle = '#19f0ff'; g.font = 'bold 20px Orbitron, sans-serif'; g.fillText('NEW AVALON — CIVIC MAP', 20, 36);
+      [[60, 70, 'NEON HEIGHTS'], [300, 90, 'HELIX ARCOLOGY'], [90, 190, 'RUST HARBOR']].forEach(([x, y, t]) => { g.fillStyle = 'rgba(25,240,255,.25)'; g.fillRect(x, y, 150, 60); g.fillStyle = '#e9e6ff'; g.font = '14px monospace'; g.fillText(t, x + 6, y + 34); });
+      g.fillStyle = '#000'; g.fillRect(270, 170, 200, 70); g.fillStyle = '#ff3355'; g.font = 'bold 16px monospace'; g.fillText('SECTOR 9 — NO DATA', 285, 210);
+    });
+    const mp = panel(s, 2.4, 1.2, map); mp.position.set(15.94, 2.3, 12); mp.rotation.y = -Math.PI / 2;
+    prop('map', 14.6, 12, 'STUDY THE CITY MAP');
+    // mirror that cannot authenticate the person in front of it
+    const mirror = screenMat(s, 'mirror', (g, w, h) => { const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, '#1a2230'); gr.addColorStop(1, '#0b0f18'); g.fillStyle = gr; g.fillRect(0, 0, w, h); g.fillStyle = 'rgba(255,255,255,.08)'; g.fillRect(40, 0, 30, h); g.fillStyle = '#ff3355'; g.font = 'bold 22px monospace'; g.textAlign = 'center'; g.fillText('AUTHENTICATION FAILED', w / 2, h - 40); }, 256, 512);
+    const mr = panel(s, .9, 1.8, mirror); mr.position.set(15.94, 1.8, 18.6); mr.rotation.y = -Math.PI / 2;
+    prop('mirror', 14.8, 18.6, 'LOOK IN THE MIRROR');
+    // courier helmet on a shelf, courier bag by the door
+    box(.9, .06, .5, 8.35, 1.35, 18.2);
+    const helm = BABYLON.MeshBuilder.CreateSphere('helm', { diameter: .42, segments: 12, slice: .75 }, s); helm.position.set(8.4, 1.55, 18.2); helm.material = mat(s, 'helmm', '#2a2638'); helm.material.specularColor = new BABYLON.Color3(.6, .6, .7);
+    box(.34, .08, .05, 8.5, 1.55, 18.02, mat(s, 'helmv', '#000', '#19f0ff'));
+    prop('helmet', 9.4, 18.2, 'EXAMINE THE HELMET');
+    box(.6, .38, .3, 10.3, .19, 19.3, mat(s, 'bagm', '#3a2a1a')); box(.62, .05, .32, 10.3, .3, 19.3, mat(s, 'bagseal', '#000', '#ffb238'));
+    prop('bag', 10.3, 18.4, 'CHECK YOUR COURIER BAG');
+    // door (south wall)
+    box(1.5, 2.7, .15, 12, 1.35, 19.9, mat(s, 'doorm', '#221e30'));
+    L.doorFrame = mat(s, 'doorf', '#000', '#ff3355');
+    [[12, 2.75, 1.7, .08], [11.2, 1.35, .08, 2.8], [12.8, 1.35, .08, 2.8]].forEach(([x, y, w, h]) => box(w, h, .1, x, y, 19.84, L.doorFrame));
+    L.doorProp = prop('door', 12, 18.6, 'GET TO THE DOOR');
+    L.screens = [invoice, map, mirror];
+  }
+  function aptEvent(ev) {
+    if (!L || !L.props) return;
+    const s = L.scene;
+    if (ev === 'voss') {
+      const tex = NV.tex(s, 512, 256, (g, w, h) => { g.fillStyle = '#05030a'; g.fillRect(0, 0, w, h); const r = U.rng(5); for (let i = 0; i < 2500; i++) { g.fillStyle = `rgba(255,255,255,${r() * .25})`; g.fillRect(r() * w, r() * h, 2, 1); } g.fillStyle = '#ffb238'; g.font = 'bold 26px monospace'; g.textAlign = 'center'; g.fillText('IF YOU CAN READ THIS,', w / 2, h / 2 - 10); g.fillText('I FAILED.', w / 2, h / 2 + 26); }, 'vosstex');
+      L.screens.forEach(m => m.emissiveTexture = tex); L.vossT = 1.5; NV.Audio.sfx('glitch'); shake(.3);
+      L.plight.intensity = .2;
+    }
+    if (ev === 'breach') { L.doorFrame.emissiveColor = C3('#ff7a2b'); L.breach = true; NV.Audio.sfx('alert'); }
+  }
+  function updateApartment(dt) {
+    if (L.aptRain) L.aptRain.vOffset -= dt * .35;
+    if (L.vossT > 0) { L.vossT -= dt; L.screens.forEach(m => m.emissiveTexture.level = Math.random() > .3 ? 1 : .2); }
+    if (L.breach) { if (Math.random() < dt * 8) spark(V3(12 + (Math.random() - .5) * .8, 1.2 + Math.random(), 19.75), '#ff7a2b', 6); L.doorFrame.emissiveColor.g = .3 + .2 * Math.sin(L.time * 12); }
+  }
+
   /* ---------------- lifecycle ---------------- */
   function pause() {
     L.paused = true; if (document.pointerLockElement) document.exitPointerLock();
-    NV.UI.levelPause(L.free).then(ch => {
+    NV.UI.levelPause(L.free || L.map.apt).then(ch => {
       if (!L) return;
       if (ch === 'resume') { L.paused = false; lock(); }
       else if (ch === 'restart') end({ restart: true });
@@ -2150,6 +2257,7 @@ NV.Level = (() => {
     h.querySelector('.obj .d').textContent = op.d || L.obj.label;
     h.querySelector('.obj .t').textContent = 'OPERATION · ' + L.obj.label.toUpperCase();
     if (L.boss) h.querySelector('.boss .nm').textContent = L.boss.name.toUpperCase();
+    if (L.map.apt) ['.mm', '.status', '.timer', '.bars'].forEach(q => h.querySelector(q).classList.add('hidden'));
   }
 
   function start(op, ctx) {
@@ -2173,12 +2281,18 @@ NV.Level = (() => {
       L.scene.onBeforeRenderObservable.add(() => update(L ? Math.min(.05, L.scene.getEngine().getDeltaTime() / 1000) : 0));
       L.scene.executeWhenReady(() => {
         NV.G.active = L.scene;
-        NV.UI.opBanner(op, L.obj.label).then(() => { if (!L) return; L.started = true; lock(); });
+        NV.UI.opBanner(op, L.obj.label).then(() => { if (!L) return; L.started = true; lock(); if (op.onStart) op.onStart(); });
       });
       NV.G.canvas.onclick = () => { if (L && L.started && !L.paused && !L.over && document.pointerLockElement !== lockEl()) lock(); };
     });
   }
-  return { start, get active() { return !!L; }, debug: () => L };
+  return {
+    start, get active() { return !!L; }, debug: () => L,
+    stop() { if (L) end({ done: true }); },
+    event: aptEvent,
+    objective(t, d) { const h = document.getElementById('hud'); if (!h) return; h.querySelector('.obj .t').textContent = t; h.querySelector('.obj .d').textContent = d; },
+    enableProps(ids) { if (L && L.props) L.props.forEach(pr => pr.enabled = ids.includes(pr.id)); },
+  };
 })();
 </script>
 <script>
@@ -2314,7 +2428,7 @@ NV.UI = (() => {
       ['master', 'Master volume', 'range', 0, 1, .1], ['music', 'Music volume', 'range', 0, 1, .1], ['sfx', 'Effects volume', 'range', 0, 1, .1],
       ['textSpeed', 'Text speed', 'enum', ['Slow', 'Normal', 'Fast', 'Instant'], 0], ['sens', 'Mouse sensitivity', 'range', .3, 3, .1],
       ['fov', 'Field of view', 'range', 65, 110, 5], ['invertY', 'Invert Y axis', 'bool'], ['shake', 'Screen shake', 'bool'],
-      ['scan', 'Scanline filter', 'bool'], ['showStats', 'Show world-state changes', 'bool'], ['gfx', 'Graphics quality', 'enum', ['Auto', 'Low', 'Medium', 'High']], ['dynRes', 'Dynamic resolution', 'bool'], ['showFps', 'Show FPS', 'bool'],
+      ['scan', 'Scanline filter', 'bool'], ['showStats', 'Show world-state changes', 'bool'], ['travel', 'Travel to missions in the city', 'bool'], ['gfx', 'Graphics quality', 'enum', ['Auto', 'Low', 'Medium', 'High']], ['dynRes', 'Dynamic resolution', 'bool'], ['showFps', 'Show FPS', 'bool'],
     ];
     const m = modal(`<div class="stitle">SETTINGS</div><div class="rows"></div><button class="btn" style="margin-top:12px">Done</button>
       <p class="muted" style="margin-top:14px;font-size:14px;line-height:1.6">Controls — <span class="kbd">WASD</span> move · <span class="kbd">Mouse</span> look · <span class="kbd">LMB</span> fire · <span class="kbd">Shift</span> sprint · <span class="kbd">C</span> sneak · <span class="kbd">Space</span> dash · <span class="kbd">E</span> interact / takedown / hack · <span class="kbd">Q</span> EMP · <span class="kbd">Esc</span> pause.<br>Story — <span class="kbd">Space</span>/<span class="kbd">Click</span> advance · <span class="kbd">1-4</span> choose · <span class="kbd">A</span> auto · <span class="kbd">Ctrl</span> hold to skip · <span class="kbd">L</span> log. Gamepads supported.</p>`);
@@ -2430,7 +2544,7 @@ NV.UI = (() => {
       async tick(dt) {
         if (finished) return;
         const I = NV.In, set = NV.Settings.get();
-        if (s.wantLog || s.wantJournal || s.wantMenu || I.pause() || I.any('KeyL') || I.any('KeyJ')) {
+        if (s.wantLog || s.wantJournal || s.wantMenu || (!NV.Level.active && I.pause()) || I.any('KeyL') || I.any('KeyJ')) {
           if (I.any('KeyL')) s.wantLog = true; if (I.any('KeyJ')) s.wantJournal = true; if (!s.wantLog && !s.wantJournal && !s.wantMenu) s.wantMenu = true;
           finished = true; const r = await storyMeta(); finished = false; if (r === 'quit') { finished = true; fin('quit'); } return;
         }
@@ -2459,7 +2573,7 @@ NV.UI = (() => {
       const c = U.el('div', 'choice', `<span class="n">${i + 1}</span>${lab ? `<span class="lab">${U.esc(lab)}</span>` : ''}${U.esc(main)}`);
       c.style.animationDelay = (i * .06) + 's'; s.ch.appendChild(c); return c;
     });
-    NV.Audio.sfx('choice');
+    NV.Audio.sfx('choice'); if (document.pointerLockElement) document.exitPointerLock();
     let busy = false;
     const fin = k => { UI.pop(h); s.ch.classList.add('hidden'); s.ch.innerHTML = ''; res(k); };
     const n = nav(items, { select: k => fin(k), extra: () => { for (let k = 0; k < items.length && k < 9; k++) if (NV.In.any('Digit' + (k + 1), 'Numpad' + (k + 1))) { NV.Audio.sfx('select'); fin(k); return; } } });
@@ -2467,7 +2581,7 @@ NV.UI = (() => {
       async tick(dt) {
         if (busy) return;
         const I = NV.In;
-        if (s.wantLog || s.wantJournal || s.wantMenu || I.pause()) { if (!s.wantLog && !s.wantJournal && !s.wantMenu) s.wantMenu = true; busy = true; const r = await storyMeta(); busy = false; if (r === 'quit') fin(-1); return; }
+        if (s.wantLog || s.wantJournal || s.wantMenu || (!NV.Level.active && I.pause())) { if (!s.wantLog && !s.wantJournal && !s.wantMenu) s.wantMenu = true; busy = true; const r = await storyMeta(); busy = false; if (r === 'quit') fin(-1); return; }
         n.tick(dt);
       },
     });
@@ -2513,7 +2627,7 @@ NV.UI = (() => {
 
   /* ---------------- gameplay overlays ---------------- */
   UI.opBanner = (op, label) => new Promise(res => {
-    const b = add(`<div class="k">${op.m === 'boss' ? 'BOSS ENCOUNTER' : op.m === 'free' ? 'OPEN WORLD · FREE ROAM' : 'OPERATION'}</div><div class="t">${U.esc(op.m === 'boss' ? (op.boss || 'Enforcer') : op.m === 'free' ? 'NEW AVALON' : label)}</div><div class="d">${U.esc(op.d || '')}</div><div class="k" style="margin-top:26px;animation:blink 1.4s infinite">CLICK TO ENGAGE</div>`, 'banner');
+    const b = add(`<div class="k">${op.m === 'boss' ? 'BOSS ENCOUNTER' : op.m === 'free' ? (op.travel ? 'TRAVEL' : 'OPEN WORLD · FREE ROAM') : op.m === 'apartment' ? 'PROLOGUE' : 'OPERATION'}</div><div class="t">${U.esc(op.m === 'boss' ? (op.boss || 'Enforcer') : op.m === 'free' ? (op.travel ? op.travel : 'NEW AVALON') : op.m === 'apartment' ? 'TIER 93' : label)}</div><div class="d">${U.esc(op.d || '')}</div><div class="k" style="margin-top:26px;animation:blink 1.4s infinite">CLICK TO ENGAGE</div>`, 'banner');
     b.style.pointerEvents = 'auto'; b.style.cursor = 'pointer'; b.style.inset = '0'; b.style.top = '0'; b.style.paddingTop = '34vh'; b.style.background = 'rgba(3,2,10,.55)';
     NV.fade(false, 500);
     if (op.m === 'boss') NV.Audio.sfx('boss');
@@ -2632,17 +2746,88 @@ NV.Story = (() => {
     }
   }
 
+
+  /* ---- Chapter 1: walkable apartment prologue ---- */
+  const APT_LINES = {
+    window: [[null, 'Artificial rain crawls down the smart-glass. On the opposite tower, advertisements sell oxygen plans, memory insurance, and a smiling Helix executive promising that tomorrow has already been tested.'], ['Ghost', 'Tomorrow’s been tested. Nobody asked how today is going.']],
+    invoice: [[null, 'An unpaid oxygen invoice glows above the desk. Four days overdue.'], ['Ghost', 'They bill you for air and call it comfort.']],
+    map: [[null, 'A civic map of New Avalon. Several districts are simply missing. Where Metro Sector 9 should be, the screen reads NO DATA.'], ['Ghost', 'Half the city erased. Makes me feel less alone.']],
+    helmet: [[null, 'Your courier helmet. The shell carries old impact damage from a crash you don’t remember.']],
+    mirror: [['Mirror', 'Authentication failed. Please remain still while your identity is recalculated.'], ['Ghost', 'I’m standing right here.']],
+    bag: [[null, 'Your courier bag. The magnetic seal still holds — it could anchor almost anything.'], ['Ghost', 'Better keep this close.']],
+  };
+  async function startApartment() {
+    const w = ctx.world = { done: false, quit: false, seen: 0, busy: false, gating: false };
+    const pal = Object.assign({}, NV.paletteFor('NEON HEIGHTS'), { th: 'interior', fog: '#0c0616' });
+    let started; const startedP = new Promise(r => started = r);
+    NV.UI.storyHide(true);
+    await NV.fade(true, 400);
+    NV.Level.start({ t: 'play', m: 'apartment', k: 0, d: 'Tier 93, Neon Heights. Your apartment.', onStart: started, onInspect: id => inspect(id) }, { act: 1, palette: pal, chapter: 'apt', echoes: [], tactic: {} })
+      .then(res => { w.done = true; if (res.quit) w.quit = true; started(); });
+    await startedP;
+    NV.UI.storyHide(false);
+  }
+  async function stopWorld() {
+    const w = ctx.world; if (!w) return; ctx.world = null;
+    if (!w.done) { NV.Level.stop(); while (!w.done) await U.sleep(50); }
+    NV.UI.storyHide(false);
+  }
+  async function inspect(id) {
+    const w = ctx.world; if (!w || w.busy) return;
+    w.busy = true;
+    if (id !== 'door') {
+      NV.UI.storyHide(false);
+      for (const [sp, t] of APT_LINES[id] || []) { if ((await NV.UI.say(sp, t)) === 'quit') break; }
+      if (id === 'bag') NV.State.fact(['couri', 'bag', 'recov', 'seal']);
+      w.seen++;
+      NV.UI.storyHide(w.gating);
+    } else w.door = true;
+    w.busy = false;
+  }
+  async function gate(title, desc, ids, cond) {
+    const w = ctx.world; if (!w || w.done) return null;
+    w.gating = true; NV.UI.storyHide(true); NV.Level.objective(title, desc); NV.Level.enableProps(ids);
+    NV.toast('OBJECTIVE', desc, '#ffb238', 4);
+    while (!cond(w) || w.busy) { if (w.quit) return Q; if (w.done) break; await U.sleep(100); }
+    w.gating = false; NV.Level.enableProps([]); NV.UI.storyHide(false);
+    return null;
+  }
+
+  /* ---- travel leg: walk through the city to the mission location ---- */
+  async function travelTo(n) {
+    const title = n.m === 'boss' ? (n.boss || 'Boss') : String(n.d || 'Mission').replace(/\.$/, '').split(/[.:—]/)[0].slice(0, 48);
+    NV.UI.storyHide(true);
+    await NV.fade(true, 400);
+    const r = await NV.Level.start({ t: 'play', m: 'free', k: 0, travel: title, d: 'Head to the red beam to start: ' + title + '. Press T to fast travel.' }, { act: ctx.act, palette: NV.paletteFor('NEON HEIGHTS — STREETS'), chapter: 'travel', echoes: [], tactic: {} });
+    return r.quit ? Q : null;
+  }
+
   async function runNodes(arr) { for (const n of arr) { const r = await runNode(n); if (r) return r; } return null; }
 
   async function runNode(n) {
     const S = NV.State.get();
+    if (ctx.world && ctx.world.quit) return Q;
     switch (n.t) {
       case 'scene':
+        if (ctx.world) await stopWorld();
+        if (ctx.id === '1' && /^NEON HEIGHTS, RESIDENTIAL TIER 93/.test(n.v)) { ctx.scene = n.v; ctx.echoes = []; NV.Backdrop.setScene(n.v); await startApartment(); NV.UI.location(n.v, 'NEON HEIGHTS'); return null; }
         ctx.scene = n.v; ctx.echoes = []; NV.Backdrop.setScene(n.v); NV.UI.location(n.v, NV.Backdrop.palette.d);
         NV.Audio.setMood(/interlude|helix|control/i.test(n.v) ? 'tense' : 'story');
         await U.sleep(250); return null;
-      case 'n': ctx.echoes.push(n.v); return (await NV.UI.say(null, n.v)) === 'quit' ? Q : null;
-      case 'l': ctx.echoes.push(n.s + ': ' + n.v); return (await NV.UI.say(n.s, n.v)) === 'quit' ? Q : null;
+      case 'n': {
+        ctx.echoes.push(n.v);
+        if (ctx.world && /^The lights flicker\. Every screen/.test(n.v)) NV.Level.event('voss');
+        if (ctx.world && /^The lock begins to melt/.test(n.v)) NV.Level.event('breach');
+        if ((await NV.UI.say(null, n.v)) === 'quit') return Q;
+        if (ctx.world && /^The lock begins to melt/.test(n.v)) return await gate('BREACH', 'Rip the power cell out and get to the door.', ['door'], w => w.door);
+        return null;
+      }
+      case 'l': {
+        ctx.echoes.push(n.s + ': ' + n.v);
+        if ((await NV.UI.say(n.s, n.v)) === 'quit') return Q;
+        if (ctx.world && n.s === 'Ghost' && n.v === 'That makes two of us.') return await gate('LOOK AROUND', 'Look around your apartment — inspect at least three things [E].', ['window', 'invoice', 'map', 'helmet', 'mirror', 'bag'], w => w.seen >= 3);
+        return null;
+      }
       case 'sys': await sys(n); return null;
       case 'choice': {
         const k = await NV.UI.choose(n.p, n.o); if (k < 0) return Q;
@@ -2664,6 +2849,8 @@ NV.Story = (() => {
   async function runOp(n) {
     const S = NV.State.get();
     let retry = 0;
+    if (ctx.world) await stopWorld();
+    if (NV.Settings.get().travel && !n.tut && ['city', 'water', 'tunnel', 'interior'].includes(NV.paletteFor(ctx.scene || '').th)) { if ((await travelTo(n)) === Q) { NV.UI.storyHide(false); return Q; } }
     NV.UI.storyHide(true);
     while (true) {
       await NV.fade(true, 450);
@@ -2732,6 +2919,7 @@ NV.Story = (() => {
       const r = await runNode(n);
       if (r) return r;
     }
+    if (ctx.world) await stopWorld();
     return 'done';
   }
 
@@ -2755,7 +2943,7 @@ NV.Story = (() => {
       if (!ch) break;
       if (!cp && ci > 0 && !ch.ending) { const fr = await freeRoam(ci); if (fr === Q) { NV.State.save(); NV.UI.storyClose(); return; } }
       const r = await playChapter(ci, cp); cp = 0;
-      if (r === Q) { NV.State.save(); NV.UI.storyClose(); return; }
+      if (r === Q) { if (ctx.world || NV.Level.active) { NV.Level.stop(); ctx.world = null; } NV.State.save(); NV.UI.storyClose(); return; }
       if (typeof r === 'string' && r.startsWith('ending:')) {
         const L = r.split(':')[1]; const ei = chapters().findIndex(c => c.id === '70' + L);
         if (!S.done.includes(ch.id)) S.done.push(ch.id);
