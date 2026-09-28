@@ -162,6 +162,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#05030b;color:var(--
 .credits .roll{position:absolute;left:0;right:0;text-align:center;top:100%}
 .credits h2{font-family:var(--fh);letter-spacing:.3em;font-size:14px;color:var(--pink);margin:44px 0 10px}
 .credits p{font-size:20px;margin:4px 0}
+body.inlevel #story .topbar{display:none}
+body.inlevel #story{background:none}
+body.inlevel #story .loc{top:auto;bottom:calc(4vh + 180px)}
 #fps{position:fixed;left:8px;bottom:6px;z-index:70;font-family:var(--fm);font-size:11px;letter-spacing:.1em;color:#3dffa8;background:rgba(0,0,0,.55);padding:2px 7px;pointer-events:none;display:none}
 body.lowfx .panel{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(10,6,24,.94)}
 body.lowfx .logo{animation:none}
@@ -2234,7 +2237,7 @@ NV.Level = (() => {
   }
   function end(res) {
     const done = L.resolve; const sc = L.scene; L = null; hudCache = {};
-    const hudEl = document.getElementById('hud'); if (hudEl) hudEl.remove();
+    const hudEl = document.getElementById('hud'); if (hudEl) hudEl.remove(); document.body.classList.remove('inlevel');
     NV.G.active = NV.Backdrop.scene;
     setTimeout(() => sc.dispose(), 50);
     done(res);
@@ -2257,7 +2260,8 @@ NV.Level = (() => {
     h.querySelector('.obj .d').textContent = op.d || L.obj.label;
     h.querySelector('.obj .t').textContent = 'OPERATION · ' + L.obj.label.toUpperCase();
     if (L.boss) h.querySelector('.boss .nm').textContent = L.boss.name.toUpperCase();
-    if (L.map.apt) ['.mm', '.status', '.timer', '.bars'].forEach(q => h.querySelector(q).classList.add('hidden'));
+    if (L.map.apt) { ['.mm', '.status', '.timer', '.bars'].forEach(q => h.querySelector(q).style.display = 'none'); h.querySelector('.obj .t').textContent = 'PROLOGUE · TIER 93'; }
+    document.body.classList.add('inlevel');
   }
 
   function start(op, ctx) {
