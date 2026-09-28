@@ -153,6 +153,7 @@ body.cine #story{bottom:11vh;inset:0 0 11vh 0;z-index:5}
 #hud .loc{position:absolute;right:20px;top:198px;width:220px;font-family:var(--fh);font-size:12px;letter-spacing:.25em;color:var(--ink);text-align:right;text-shadow:0 0 8px #000;opacity:.85}#hud .loc small{display:block;font-size:11px;letter-spacing:.12em;color:var(--amber);margin-top:3px}#hud.cine .loc{opacity:0}
 #hud .chatlog{position:absolute;left:20px;bottom:230px;width:min(460px,60vw);font-size:15px;line-height:1.45;text-shadow:0 0 6px #000}#hud .chatlog div{transition:opacity 1.2s}#hud .chatlog div.old{opacity:0}
 #hud .chatin{position:absolute;left:20px;bottom:196px;width:min(460px,60vw);padding:7px 10px;background:rgba(5,3,12,.85);border:1px solid var(--cyan);color:var(--ink);font:15px var(--fb,sans-serif);outline:none;pointer-events:auto}
+#hud .wp{position:absolute;left:0;top:0;z-index:20;pointer-events:none;display:none}#hud .wp i{position:absolute;left:-11px;top:-11px;width:22px;height:22px;border:3px solid #ffd23d;transform:rotate(45deg);box-shadow:0 0 12px #ffd23d;background:rgba(255,210,61,.25)}#hud .wp span{position:absolute;left:50%;top:18px;transform:translateX(-50%);white-space:nowrap;font-family:var(--fh);font-size:11px;letter-spacing:.2em;color:#ffd23d;text-shadow:0 0 6px #000,0 0 2px #000}#hud .wp.edge i{animation:wpp 1s infinite}@keyframes wpp{50%{opacity:.4}}
 #hud .speedo{position:absolute;right:20px;bottom:24px;font-family:var(--fm);font-size:44px;color:var(--cyan);text-shadow:0 0 12px var(--cyan);text-align:right;line-height:1}
 #hud .speedo small{display:block;font-size:12px;letter-spacing:.3em;color:var(--ink)}
 #hud .timer{position:absolute;right:20px;top:210px;font-family:var(--fm);font-size:22px;color:var(--amber);width:180px;text-align:center}
@@ -2821,6 +2822,33 @@ NV.Level = (() => {
     }
     hset('#hud .loc', 'html', U.esc(NV.REGIONS[d][0].toUpperCase()) + (near ? '<small>' + U.esc(near.name) + '</small>' : ''));
   }
+  // yellow objective marker drawn over everything, pinned to the screen edge when off-screen or behind you
+  function wpTarget() {
+    const p = L.p, near = arr => arr.reduce((b, o) => !b || Math.hypot(o.x - p.x, o.z - p.z) < Math.hypot(b.x - p.x, b.z - p.z) ? o : b, null);
+    if (L.exit && L.exit.on) return { x: L.exit.x, z: L.exit.z, y: 2.5, label: 'EXTRACT' };
+    if (L.boss && L.boss.hp > 0) { const t = near(L.terms.filter(t => t.pylon && !t.done)); return t && L.boss.shieldOn ? { x: t.x, z: t.z, y: 2, label: 'PYLON' } : { x: L.boss.x, z: L.boss.z, y: 4, label: 'TARGET' }; }
+    const t = near(L.terms.filter(t => !t.done)); if (t) return { x: t.x, z: t.z, y: 2, label: 'HACK' };
+    const k = near(L.pickups.filter(k => k.kind !== 'med' && k.kind !== 'lore')); if (k) return { x: k.x, z: k.z, y: 1.6, label: 'RETRIEVE' };
+    const c = near(L.civs.filter(c => !c.saved)); if (c) return { x: c.x, z: c.z, y: 2, label: 'FREE CIVILIAN' };
+    if (L.defend) { const n = near(L.nodes.filter(n => !n.dead)); if (n) return { x: n.x, z: n.z, y: 2, label: 'DEFEND' }; }
+    if (L.waves && L.enemies.length) { const e = near(L.enemies.filter(e => e.state !== 'down')); if (e) return { x: e.x, z: e.z, y: 2, label: 'HOSTILE' }; }
+    if (L.free) { const g = L.gig ? L.gig.tgt : L.storyB; return g ? { x: g.x, z: g.z, y: 3, label: L.gig ? 'GIG' : 'STORY' } : null; }
+    return L.guide ? { x: L.guide.x, z: L.guide.z, y: 2.5, label: 'GO' } : null;
+  }
+  function waypoint() {
+    const el = document.querySelector('#hud .wp'); if (!el) return;
+    const t = !L.cine && !L.map.apt && wpTarget();
+    if (!t) { el.style.display = 'none'; return; }
+    const eng = L.scene.getEngine(), W = eng.getRenderWidth(), H = eng.getRenderHeight();
+    const v = BABYLON.Vector3.Project(V3(t.x, t.y, t.z), BABYLON.Matrix.Identity(), L.scene.getTransformMatrix(), L.cam.viewport.toGlobal(W, H));
+    const cw = innerWidth, ch = innerHeight; let x = v.x / W * cw, y = v.y / H * ch;
+    const behind = v.z > 1 || v.z < 0, m = 40;
+    if (behind) { x = cw - x; y = ch - m; }
+    const off = behind || x < m || x > cw - m || y < m || y > ch - m;
+    x = U.clamp(x, m, cw - m); y = U.clamp(y, m, ch - m);
+    el.style.display = 'block'; el.style.transform = `translate(${x}px,${y}px)`; el.classList.toggle('edge', off);
+    hset('#hud .wp span', 'text', t.label + ' · ' + Math.round(Math.hypot(t.x - L.p.x, t.z - L.p.z)) + 'M');
+  }
   function hud(dt) {
     const p = L.p, o = L.obj;
     hset('#hud .hp i', 'w', (p.hp / p.max * 100).toFixed(1) + '%');
@@ -2838,6 +2866,7 @@ NV.Level = (() => {
     if (L.free) cnt = freeHud();
     hset('#hud .obj .c', 'text', cnt);
     if (L.map.city) locHud(dt);
+    waypoint();
     hset('#hud .timer', 'text', L.defend ? U.fmtTime(L.defend.t) : '');
     const it = L.hack ? null : nearestInteract();
     const car = !it && L.city && !L.drive && !L.pRag && nearestCar();
@@ -3577,7 +3606,7 @@ NV.Level = (() => {
 
   function buildHud(op) {
     const h = U.el('div', '', `
-      <div class="xh"></div><div class="dmg"></div><div class="lb lbt"></div><div class="lb lbb"></div><div class="loc"></div><div class="chatlog"></div><input class="chatin hidden" maxlength="140" placeholder="Say something in character — Enter to send, Esc to cancel">
+      <div class="xh"></div><div class="dmg"></div><div class="lb lbt"></div><div class="lb lbb"></div><div class="loc"></div><div class="wp"><i></i><span></span></div><div class="chatlog"></div><input class="chatin hidden" maxlength="140" placeholder="Say something in character — Enter to send, Esc to cancel">
       <div class="obj"><div class="t">OPERATION</div><div class="d"></div><div class="c"></div></div>
       <div class="status s0">UNDETECTED</div>
       <canvas class="mm" width="180" height="180"></canvas><div class="timer"></div><div class="speedo hidden"></div>
