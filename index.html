@@ -423,7 +423,7 @@ NV.In = (() => {
    ===================================================================== */
 NV.Settings = (() => {
   const KEY = 'nv_settings_v1';
-  const DEF = { master: .8, music: .6, sfx: .8, textSpeed: 2, sens: 1, fov: 80, shake: 1, scan: 1, showStats: 1, walk: 1, travel: 1, gfx: 0, dynRes: 1, showFps: 0, invertY: 0 };
+  const DEF = { master: .8, music: .6, sfx: .8, textSpeed: 2, sens: 1, fov: 80, shake: 1, scan: 1, showStats: 1, walk: 1, travel: 1, g: null, showFps: 0, invertY: 0 };
   let s = { ...DEF };
   try { Object.assign(s, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { }
   return {
@@ -559,52 +559,94 @@ const V3 = (x, y, z) => new BABYLON.Vector3(x, y, z);
    Quality tiers — auto-detects weak hardware (Chromebooks, iGPUs, phones)
    ===================================================================== */
 NV.Quality = (() => {
-  const dpr = Math.min(1.5, devicePixelRatio || 1);
-  const P = {
-    low: { key: 'low', name: 'Low', scale: 1.6, min: 1.3, max: 2.6, glow: 0, fx: 0, aa: false, rain: 450, lrain: 260, sparks: 120, beams: 0, cones: 0, signs: 1, detail: 0 },
-    medium: { key: 'medium', name: 'Medium', scale: 1.15, min: 1, max: 2.2, glow: 1, glowRatio: .25, kernel: 16, fx: 1, aa: false, rain: 1500, lrain: 800, sparks: 300, beams: 1, cones: 1, signs: 1, detail: 1 },
-    high: { key: 'high', name: 'High', scale: 1 / dpr, min: 1 / dpr, max: 1.7, glow: 1, glowRatio: .5, kernel: 32, fx: 2, aa: true, rain: 3600, lrain: 1800, sparks: 600, beams: 1, cones: 1, signs: 1, detail: 2 },
+  const dpr = () => Math.min(2, devicePixelRatio || 1);
+  // every individual graphics option, in menu order
+  const KEYS = ['scale', 'upscaler', 'sharpen', 'dynRes', 'target', 'aa', 'glow', 'glowRes', 'glowBlur', 'glowInt', 'bloom', 'bloomW', 'chroma', 'chromaAmt', 'grain', 'vignette', 'tonemap', 'contrast', 'exposure', 'dof', 'shadows', 'lights', 'fog', 'draw', 'aniso', 'rain', 'particles', 'beams', 'cones', 'signs', 'peds'];
+  //                  scale  upsc        shp  dyn tgt aa      glow gRes gBlur gInt bloom bW  chr cAmt grain vig tone con   exp  dof shad lights fog draw aniso rain part beams cones signs peds
+  const T = {
+    ultra:    [1.0,  'bilinear', .25, 0, 60, 'msaa', 1, .5,  48, 1,   1, .35, 1, 6, 1, 1, 1, 1.25, 1.1, 1, 4096, 1, 1, 1000, 16, 2,   2,   1, 1, 1, 60],
+    veryhigh: [1.0,  'bilinear', .25, 0, 60, 'msaa', 1, .5,  32, 1,   1, .3,  1, 5, 1, 1, 1, 1.25, 1.1, 1, 2048, 1, 1, 850,  16, 1.5, 1.5, 1, 1, 1, 48],
+    high:     [1.0,  'sharpen',  .25, 1, 60, 'fxaa', 1, .5,  32, 1,   0, .3,  1, 5, 1, 1, 1, 1.25, 1.1, 0, 1024, 1, 1, 700,  8,  1.2, 1,   1, 1, 1, 40],
+    medhigh:  [.9,   'sharpen',  .3,  1, 60, 'fxaa', 1, .25, 24, 1.1, 0, .3,  1, 4, 0, 1, 1, 1.25, 1.1, 0, 1024, 1, 1, 600,  8,  1,   1,   1, 1, 1, 32],
+    medium:   [.8,   'sharpen',  .35, 1, 60, 'fxaa', 1, .25, 16, 1.1, 0, .3,  0, 4, 0, 1, 0, 1.25, 1.1, 0, 0,    1, 1, 520,  4,  .8,  .8,  1, 1, 1, 26],
+    medlow:   [.72,  'sharpen',  .4,  1, 60, 'fxaa', 1, .125,12, 1.2, 0, .3,  0, 4, 0, 1, 0, 1.25, 1.1, 0, 0,    0, 1, 450,  4,  .6,  .6,  1, 0, 1, 20],
+    low:      [.62,  'sharpen',  .45, 1, 60, 'off',  0, .125,8,  1,   0, .3,  0, 4, 0, 1, 0, 1.25, 1.1, 0, 0,    0, 1, 380,  2,  .4,  .4,  0, 0, 1, 14],
+    verylow:  [.5,   'bilinear', .3,  1, 45, 'off',  0, .125,8,  1,   0, .3,  0, 4, 0, 0, 0, 1.2,  1.1, 0, 0,    0, 1, 300,  1,  .2,  .25, 0, 0, 0, 8],
+    potato:   [.38,  'bilinear', 0,   1, 30, 'off',  0, .125,8,  1,   0, .3,  0, 4, 0, 0, 0, 1.15, 1.1, 0, 0,    0, 1, 200,  1,  .05, .12, 0, 0, 0, 3],
+    howtf:    [.25,  'nearest',  0,   0, 30, 'off',  0, .125,4,  1,   0, .3,  0, 4, 0, 0, 0, 1.1,  1.15,0, 0,    0, 0, 120,  1,  0,   0,   0, 0, 0, 0],
   };
-  let tier = null, gpu = '';
+  const NAMES = { ultra: 'Ultra', veryhigh: 'Very High', high: 'High', medhigh: 'Medium High', medium: 'Medium', medlow: 'Medium Low', low: 'Low', verylow: 'Very Low', potato: 'Potato', howtf: 'How the hell is your PC running WebGPU', custom: 'Custom' };
+  const ORDER = ['ultra', 'veryhigh', 'high', 'medhigh', 'medium', 'medlow', 'low', 'verylow', 'potato', 'howtf'];
+  const preset = k => { const o = { preset: k }; KEYS.forEach((key, i) => o[key] = T[k][i]); return o; };
+  let gpu = '', cache = null;
   function detect() {
     const ua = navigator.userAgent;
-    let weak = /CrOS|Android|iPhone|iPad|Mobile/i.test(ua) || (navigator.hardwareConcurrency || 4) <= 4 || (navigator.deviceMemory || 8) <= 4;
+    let tier = 'medium';
+    const weak = /CrOS|Android|iPhone|iPad|Mobile/i.test(ua) || (navigator.hardwareConcurrency || 4) <= 4 || (navigator.deviceMemory || 8) <= 4;
     try {
-      const gl = document.createElement('canvas').getContext('webgl');
-      const ext = gl && gl.getExtension('WEBGL_debug_renderer_info');
+      const gl = document.createElement('canvas').getContext('webgl'), ext = gl && gl.getExtension('WEBGL_debug_renderer_info');
       gpu = ext ? String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)) : '';
-      if (/SwiftShader|llvmpipe|Software|Mali|PowerVR|Adreno [1-5]|HD Graphics|UHD Graphics [0-9]{3}\b/i.test(gpu)) weak = true;
-      if (/RTX|GTX|Radeon RX|Apple M[1-9]|Arc/i.test(gpu)) weak = false;
     } catch (e) { }
-    return weak ? 'low' : 'medium';
+    if (weak || /SwiftShader|llvmpipe|Mali|PowerVR|Adreno [1-5]|HD Graphics|UHD Graphics/i.test(gpu)) tier = 'low';
+    if (/RTX|Radeon RX [5-9]|Apple M[2-9]|Arc A7/i.test(gpu)) tier = 'high';
+    if (/RTX [34]0[789]0|RX 7[89]00/i.test(gpu)) tier = 'veryhigh';
+    return tier;
   }
   const Q = {
-    get() { if (!tier) { const g = NV.Settings.get().gfx | 0; tier = g === 1 ? 'low' : g === 2 ? 'medium' : g === 3 ? 'high' : detect(); document.body.classList.toggle('lowfx', tier === 'low'); } return P[tier]; },
-    reset() { tier = null; return Q.get(); },
+    KEYS, NAMES, ORDER, preset,
+    raw() {
+      let g = NV.Settings.get().g;
+      if (!g || !g.preset) { g = preset(detect()); NV.Settings.set('g', g); }
+      else if (KEYS.some(k => g[k] === undefined)) { g = Object.assign(preset(T[g.preset] ? g.preset : 'high'), g); NV.Settings.set('g', g); }
+      return g;
+    },
+    get() {
+      if (cache) return cache;
+      const g = Q.raw(), base = 1 / (g.scale * dpr());
+      document.body.classList.toggle('lowfx', g.scale < .65 || !g.glow);
+      return cache = Object.assign({}, g, {
+        key: g.preset, name: NAMES[g.preset] || 'Custom', scale: base, min: base, max: Math.max(base * 2.4, 1.5),
+        glowRatio: g.glowRes, kernel: g.glowBlur, rain: Math.round(1800 * g.rain), lrain: Math.round(900 * g.rain),
+        sparks: Math.round(400 * g.particles), detail: g.lights ? 1 : 0,
+      });
+    },
+    reset() { cache = null; return Q.get(); },
+    setAll(g) { NV.Settings.set('g', g); cache = null; Q.apply(); },
+    // live-apply resolution + upscaler
+    apply() {
+      const q = Q.reset(); if (!NV.G.engine) return q;
+      NV.G.scale = q.scale; NV.G.engine.setHardwareScalingLevel(q.scale);
+      NV.G.canvas.style.imageRendering = q.upscaler === 'nearest' ? 'pixelated' : 'auto';
+      return q;
+    },
     get gpu() { return gpu; },
-    /* per-scene setup: cheap in-shader colour grading + optional glow/post */
-    setup(scene, cam) {
-      const q = Q.get();
+    /* per-scene setup: colour grading in shaders + optional glow / post chain */
+    setup(scene, cam, opts) {
+      const q = Q.get(); opts = opts || {};
       scene.skipPointerMovePicking = true; scene.skipPointerDownPicking = true; scene.skipPointerUpPicking = true;
       scene.constantlyUpdateMeshUnderPointer = false;
+      scene.fogEnabled = !!q.fog;
       const ip = scene.imageProcessingConfiguration;
-      ip.contrast = 1.25; ip.exposure = 1.1; ip.vignetteEnabled = true; ip.vignetteWeight = 2.2; ip.vignetteStretch = .3; ip.vignetteColor = new BABYLON.Color4(0, 0, 0, 0);
-      ip.toneMappingEnabled = q.detail >= 2; ip.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
+      ip.contrast = q.contrast; ip.exposure = q.exposure; ip.vignetteEnabled = !!q.vignette; ip.vignetteWeight = 2.2; ip.vignetteStretch = .3; ip.vignetteColor = new BABYLON.Color4(0, 0, 0, 0);
+      ip.toneMappingEnabled = !!q.tonemap; ip.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
       const out = { glow: null, post: null };
-      if (q.glow) { out.glow = new BABYLON.GlowLayer('glow', scene, { mainTextureRatio: q.glowRatio, blurKernelSize: q.kernel, mainTextureSamples: 1 }); out.glow.intensity = q.detail >= 2 ? .9 : 1.1; }
-      try {
-        if (q.fx === 1) out.post = new BABYLON.FxaaPostProcess('fxaa', 1, cam);
-        if (q.fx === 2) {
-          const pp = new BABYLON.DefaultRenderingPipeline('pp', false, scene, [cam]);
-          pp.imageProcessingEnabled = false; pp.fxaaEnabled = true;
-          pp.chromaticAberrationEnabled = true; pp.chromaticAberration.aberrationAmount = 5;
-          pp.grainEnabled = true; pp.grain.intensity = 5; pp.grain.animated = true;
-          out.post = pp;
-        }
+      if (q.glow) { out.glow = new BABYLON.GlowLayer('glow', scene, { mainTextureRatio: q.glowRatio, blurKernelSize: q.kernel, mainTextureSamples: 1 }); out.glow.intensity = q.glowInt; }
+      const wantPost = q.aa === 'fxaa' || q.chroma || q.grain || q.bloom || (q.dof && opts.cinematic) || (q.upscaler === 'sharpen' && q.sharpen > 0);
+      if (wantPost) try {
+        const pp = new BABYLON.DefaultRenderingPipeline('pp', false, scene, [cam]);
+        pp.imageProcessingEnabled = false;
+        pp.fxaaEnabled = q.aa === 'fxaa';
+        pp.chromaticAberrationEnabled = !!q.chroma; if (q.chroma) pp.chromaticAberration.aberrationAmount = q.chromaAmt;
+        pp.grainEnabled = !!q.grain; if (q.grain) { pp.grain.intensity = 5; pp.grain.animated = true; }
+        pp.bloomEnabled = !!q.bloom; if (q.bloom) { pp.bloomThreshold = .7; pp.bloomWeight = q.bloomW; pp.bloomKernel = 48; pp.bloomScale = .5; }
+        pp.sharpenEnabled = q.upscaler === 'sharpen' && q.sharpen > 0; if (pp.sharpenEnabled) { pp.sharpen.edgeAmount = q.sharpen; pp.sharpen.colorAmount = 1; }
+        if (q.dof && opts.cinematic) { pp.depthOfFieldEnabled = true; pp.depthOfFieldBlurLevel = BABYLON.DepthOfFieldEffectBlurLevel.Low; pp.depthOfField.focalLength = 50; pp.depthOfField.fStop = 2; pp.depthOfField.focusDistance = 220000; }
+        out.post = pp;
       } catch (e) { console.warn('post-processing unavailable', e); }
       return out;
     },
     teardown(fx) { if (!fx) return; if (fx.glow) fx.glow.dispose(); if (fx.post) fx.post.dispose(); },
+    textures(scene) { const a = Q.get().aniso; scene.textures.forEach(t => { if ('anisotropicFilteringLevel' in t) t.anisotropicFilteringLevel = a; }); },
   };
   return Q;
 })();
@@ -625,16 +667,20 @@ NV.bootEngine = async () => {
   NV.G.canvas = canvas;
   const q = NV.Quality.get();
   let engine = null;
-  try {
-    if (await BABYLON.WebGPUEngine.IsSupportedAsync) {
-      engine = new BABYLON.WebGPUEngine(canvas, { antialias: q.aa, stencil: true, powerPreference: 'high-performance' });
-      await engine.initAsync();
-    }
-  } catch (e) { console.warn('WebGPU init failed, falling back to WebGL', e); engine = null; }
-  if (!engine) engine = new BABYLON.Engine(canvas, q.aa, { stencil: true, powerPreference: 'high-performance', preserveDrawingBuffer: false, doNotHandleContextLost: false }, false);
+  const allowGL = /allowgl/.test(location.hash); // developer/test escape hatch only
+  let gpuOk = false;
+  try { gpuOk = !!navigator.gpu && await BABYLON.WebGPUEngine.IsSupportedAsync; } catch (e) { gpuOk = false; }
+  if (gpuOk) {
+    try { engine = new BABYLON.WebGPUEngine(canvas, { antialias: q.aa === 'msaa', stencil: true, powerPreference: 'high-performance' }); await engine.initAsync(); }
+    catch (e) { console.warn('WebGPU init failed', e); engine = null; }
+  }
+  if (!engine) {
+    if (!allowGL) throw new Error('WEBGPU_REQUIRED');
+    engine = new BABYLON.Engine(canvas, q.aa === 'msaa', { stencil: true, powerPreference: 'high-performance' }, false);
+  }
   NV.G.engine = engine;
   engine.enableOfflineSupport = false;
-  NV.G.scale = q.scale; engine.setHardwareScalingLevel(NV.G.scale);
+  NV.Quality.apply();
   addEventListener('resize', () => engine.resize());
   const fpsEl = U.el('div', '', ''); fpsEl.id = 'fps'; document.body.appendChild(fpsEl);
   let last = performance.now(), acc = 0, frames = 0, settle = 0;
@@ -648,9 +694,9 @@ NV.bootEngine = async () => {
     acc += raw; frames++;
     if (acc >= 1.2) {
       const fps = frames / acc, S = NV.Settings.get(), Q = NV.Quality.get(); acc = 0; frames = 0;
-      if (S.dynRes && --settle < 0) {
+      if (Q.dynRes && --settle < 0) {
         let s = NV.G.scale;
-        if (fps < 30) s += .3; else if (fps < 47) s += .12; else if (fps > 58 && s > Q.min) s -= .06;
+        if (fps < Q.target * .5) s += .3; else if (fps < Q.target * .8) s += .12; else if (fps > Q.target * .97 && s > Q.min) s -= .06;
         s = U.clamp(s, Q.min, Q.max);
         if (Math.abs(s - NV.G.scale) > .01) { NV.G.scale = s; engine.setHardwareScalingLevel(s); settle = 1; }
       }
@@ -741,10 +787,10 @@ NV.Backdrop = (() => {
 
   function applyQuality() {
     const q = NV.Quality.get();
-    NV.Quality.teardown(fx); fx = NV.Quality.setup(scene, cam);
+    NV.Quality.teardown(fx); fx = NV.Quality.setup(scene, cam, { cinematic: true });
     if (fx.glow) { fx.glow.addExcludedMesh(sky); beams.forEach(b => fx.glow.addExcludedMesh(b)); }
     if (rain) rain.dispose();
-    buildRain(q.rain);
+    buildRain(Math.max(1, q.rain)); NV.Quality.textures(scene);
     beams.forEach(b => b.setEnabled(!!q.beams && (theme === 'city' || theme === 'water')));
     if (pal) setRainFor(theme);
   }
@@ -1125,7 +1171,7 @@ NV.Level = (() => {
     const cyber = th === 'cyber', outdoor = th === 'city' || th === 'water' || th === 'space';
     scene.clearColor = BABYLON.Color4.FromColor3(C3(pal.fog).scale(.6), 1);
     scene.fogMode = BABYLON.Scene.FOGMODE_EXP2; scene.fogColor = C3(pal.fog); scene.fogDensity = cyber ? .012 : outdoor ? .014 : .03;
-    const cam = new BABYLON.UniversalCamera('fp', V3(0, EYE, 0), scene); cam.minZ = .05; cam.maxZ = 600; cam.fov = NV.Settings.get().fov * Math.PI / 180 * .75; cam.inputs.clear();
+    const cam = new BABYLON.UniversalCamera('fp', V3(0, EYE, 0), scene); cam.minZ = .05; cam.maxZ = q.draw; cam.fov = NV.Settings.get().fov * Math.PI / 180 * .75; cam.inputs.clear();
     const hemi = new BABYLON.HemisphericLight('h', V3(.2, 1, .1), scene); hemi.intensity = outdoor ? .75 : .6; hemi.diffuse = C3('#b8b0ff'); hemi.groundColor = C3(pal.fog);
     const plight = new BABYLON.PointLight('pl', V3(0, 2, 0), scene); plight.range = 16; plight.intensity = .7; plight.diffuse = C3(pal.b);
     const fx = NV.Quality.setup(scene, cam), glow = fx.glow || { addExcludedMesh() { } };
@@ -1202,7 +1248,7 @@ NV.Level = (() => {
       NV.thin(sk, arr); statics.push(sk);
       const dome = BABYLON.MeshBuilder.CreateSphere('dome', { diameter: 1100, segments: 10, sideOrientation: BABYLON.Mesh.BACKSIDE }, scene);
       const dm = mat(scene, 'domem', '#000'); dm.emissiveTexture = NV.skyTex(scene, pal, 'lsky'); dm.disableLighting = true; dm.fogEnabled = false; dome.material = dm; dome.applyFog = false; dome.infiniteDistance = true; glow.addExcludedMesh(dome); statics.push(dome);
-      if (th !== 'space' && !cyber) {
+      if (th !== 'space' && !cyber && q.lrain > 0) {
         const rain = new BABYLON.ParticleSystem('rain', q.lrain, scene);
         rain.particleTexture = NV.tex(scene, 8, 64, (c, w, h) => { const gr = c.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(1, 'rgba(200,230,255,.9)'); c.fillStyle = gr; c.fillRect(3, 0, 2, h); }, 'rt');
         rain.emitter = V3(0, 0, 0); rain.createBoxEmitter(V3(0, -1, 0), V3(0, -1, 0), V3(-22, 14, -22), V3(22, 16, 22));
@@ -1229,6 +1275,16 @@ NV.Level = (() => {
     });
     if (crateMeshes.length) { const cm = BABYLON.Mesh.MergeMeshes(crateMeshes, true, true); cm.material = crateMat; statics.push(cm); }
     L.crates = crates;
+    // dynamic shadows (directional 'city light' that follows the player)
+    L.sg = null; L.sun = null;
+    if (q.shadows) {
+      const sun = new BABYLON.DirectionalLight('sun', V3(-.35, -1, -.25), scene); sun.intensity = outdoor ? .55 : .3; sun.diffuse = C3(pal.b).scale(.35).add(new BABYLON.Color3(.4, .38, .5)); sun.specular = new BABYLON.Color3(.1, .1, .1);
+      sun.autoUpdateExtends = false; sun.shadowFrustumSize = 56; sun.shadowMinZ = 1; sun.shadowMaxZ = 140;
+      const sg = new BABYLON.ShadowGenerator(q.shadows, sun); sg.usePercentageCloserFiltering = true; sg.filteringQuality = q.shadows >= 2048 ? BABYLON.ShadowGenerator.QUALITY_HIGH : BABYLON.ShadowGenerator.QUALITY_MEDIUM; sg.bias = .0015; sg.normalBias = .02;
+      statics.forEach(m => { m.receiveShadows = true; });
+      if (crateMeshes.length) sg.addShadowCaster(statics[statics.length - 1], false);
+      L.sg = sg; L.sun = sun;
+    }
     NV.freeze(statics);
     // viewmodel gun
     const gun = new BABYLON.TransformNode('gun', scene); gun.parent = cam; gun.position.set(.3, -.32, .62); gun.rotation.y = -.04;
@@ -1262,18 +1318,17 @@ NV.Level = (() => {
     // instancing prototypes: every enemy shares these meshes -> one draw call per part type
     const P = (mesh, m) => { mesh.material = m; mesh.position.y = -1000; mesh.isPickable = false; return mesh; };
     L.proto = {
-      body: P(BABYLON.MeshBuilder.CreateCapsule('pb', { radius: .38, height: 1.55, tessellation: 12, subdivisions: 2 }, scene), L.mats.enemy),
-      head: P(BABYLON.MeshBuilder.CreateSphere('ph', { diameter: .42, segments: 10 }, scene), L.mats.enemy),
-      pack: P(BABYLON.MeshBuilder.CreateBox('pp', { width: .5, height: .6, depth: .25 }, scene), L.mats.armor),
-      gun: P(BABYLON.MeshBuilder.CreateBox('pg', { width: .1, height: .12, depth: .6 }, scene), L.mats.enemy),
-      pad: P(BABYLON.MeshBuilder.CreateBox('ppad', { width: .26, height: .12, depth: .36 }, scene), L.mats.armor),
+      leg: P(limbShape('leg', scene), L.mats.enemy), foot: P(limbShape('foot', scene), L.mats.armor), torso: P(limbShape('torso', scene), L.mats.enemy),
+      head: P(limbShape('head', scene), L.mats.enemy), arm: P(limbShape('arm', scene), L.mats.enemy), hand: P(limbShape('hand', scene), L.mats.armor),
+      pad: P(limbShape('pad', scene), L.mats.armor), pack: P(limbShape('pack', scene), L.mats.armor),
+      gun: P(BABYLON.MeshBuilder.CreateBox('pg', { width: .09, height: .12, depth: .6 }, scene), L.mats.armor),
       dbody: P(BABYLON.MeshBuilder.CreateSphere('pdb', { diameter: .7, segments: 10 }, scene), L.mats.drone),
-      arm: P(BABYLON.MeshBuilder.CreateBox('parm', { width: 1.3, height: .05, depth: .08 }, scene), L.mats.drone),
+      darm: P(BABYLON.MeshBuilder.CreateBox('parm', { width: 1.3, height: .05, depth: .08 }, scene), L.mats.drone),
       ring: P(BABYLON.MeshBuilder.CreateTorus('pr', { diameter: 1.1, thickness: .06, tessellation: 20 }, scene), L.mats.visor),
       ice: P(BABYLON.MeshBuilder.CreatePolyhedron('pice', { type: 1, size: .55 }, scene), L.mats.ice),
     };
     // sparks
-    const sp = new BABYLON.ParticleSystem('sparks', q.sparks, scene);
+    const sp = new BABYLON.ParticleSystem('sparks', Math.max(8, q.sparks), scene);
     sp.particleTexture = NV.tex(scene, 32, 32, (c, w, h) => { const gr = c.createRadialGradient(16, 16, 0, 16, 16, 16); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = gr; c.fillRect(0, 0, w, h); }, 'spk');
     sp.emitter = V3(0, 0, 0); sp.minSize = .04; sp.maxSize = .14; sp.minLifeTime = .15; sp.maxLifeTime = .45; sp.emitRate = 0; sp.minEmitPower = 3; sp.maxEmitPower = 9; sp.gravity = V3(0, -12, 0);
     sp.createSphereEmitter(.1); sp.color1 = BABYLON.Color4.FromColor3(C3(pal.b)); sp.color2 = new BABYLON.Color4(1, 1, 1, 1); sp.colorDead = new BABYLON.Color4(0, 0, 0, 0); sp.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD; sp.manualEmitCount = 0; sp.start();
@@ -1281,6 +1336,7 @@ NV.Level = (() => {
     L.tracers = [];
     for (let i = 0; i < 10; i++) { const t = BABYLON.MeshBuilder.CreateBox('tr', { width: .03, height: .03, depth: 1 }, scene); t.material = L.mats.tracer; t.isVisible = false; t.isPickable = false; L.tracers.push({ m: t, life: 0 }); }
     L.bulletPool = [];
+    NV.Quality.textures(scene);
     return { scene, cam, plight };
   }
 
@@ -1290,25 +1346,69 @@ NV.Level = (() => {
     const mid = a.add(b).scale(.5); t.m.position.copyFrom(mid); t.m.scaling.z = BABYLON.Vector3.Distance(a, b); t.m.lookAt(b); t.m.isVisible = true; t.life = .06;
   }
 
+  /* ---------------- humanoid skeleton (limbs) ---------------- */
+  // one shape library for every humanoid; enemies/pedestrians instance it, story NPCs get unique copies
+  function limbShape(k, s) {
+    switch (k) {
+      case 'leg': return BABYLON.MeshBuilder.CreateCapsule('leg', { radius: .085, height: .9, tessellation: 8, subdivisions: 1 }, s);
+      case 'foot': return BABYLON.MeshBuilder.CreateBox('foot', { width: .14, height: .08, depth: .27 }, s);
+      case 'torso': return BABYLON.MeshBuilder.CreateCapsule('torso', { radius: .25, height: .82, tessellation: 10, subdivisions: 1 }, s);
+      case 'head': return BABYLON.MeshBuilder.CreateSphere('head', { diameter: .36, segments: 10 }, s);
+      case 'arm': return BABYLON.MeshBuilder.CreateCapsule('arm', { radius: .065, height: .7, tessellation: 8, subdivisions: 1 }, s);
+      case 'hand': return BABYLON.MeshBuilder.CreateSphere('hand', { diameter: .12, segments: 6 }, s);
+      case 'pad': return BABYLON.MeshBuilder.CreateBox('pad', { width: .2, height: .1, depth: .3 }, s);
+      case 'pack': return BABYLON.MeshBuilder.CreateBox('pack', { width: .44, height: .52, depth: .2 }, s);
+    }
+  }
+  function rigBuild(root, mk, armor) {
+    const s = L.scene;
+    const piv = (x, y, z) => { const t = new BABYLON.TransformNode('pv', s); t.parent = root; t.position.set(x, y, z); return t; };
+    const put = (m, par, x, y, z) => { m.parent = par; m.position.set(x, y, z); m.isPickable = false; if (L.sg) L.sg.addShadowCaster(m, false); return m; };
+    const R = { legL: piv(-.12, .92, 0), legR: piv(.12, .92, 0), armL: piv(-.33, 1.5, 0), armR: piv(.33, 1.5, 0), walk: Math.random() * 6, amp: 0 };
+    put(mk('leg'), R.legL, 0, -.44, 0); put(mk('leg'), R.legR, 0, -.44, 0);
+    put(mk('foot'), R.legL, 0, -.87, .06); put(mk('foot'), R.legR, 0, -.87, .06);
+    put(mk('torso'), root, 0, 1.26, 0); put(mk('head'), root, 0, 1.8, 0);
+    put(mk('arm'), R.armL, 0, -.31, 0); put(mk('arm'), R.armR, 0, -.31, 0);
+    put(mk('hand'), R.armL, 0, -.66, 0); put(mk('hand'), R.armR, 0, -.66, 0);
+    if (armor) { put(mk('pad'), R.armL, -.03, .03, 0); put(mk('pad'), R.armR, .03, .03, 0); put(mk('pack'), root, 0, 1.3, -.3); }
+    R.armL.rotation.z = -.07; R.armR.rotation.z = .07;
+    return R;
+  }
+  // procedural animation: walk cycle scaled by speed + poses
+  function animRig(R, dt, moving, speed, pose) {
+    const k = Math.min(1, dt * 9);
+    R.amp = U.lerp(R.amp, moving ? Math.min(.75, .25 + speed * .12) : 0, k);
+    R.walk += dt * (2.2 + speed * 2.4);
+    const sw = Math.sin(R.walk) * R.amp;
+    R.legL.rotation.x = sw; R.legR.rotation.x = -sw;
+    let aL = -sw * .8, aR = sw * .8;
+    if (pose === 'aim') { aR = -1.5; aL = -1.3; }
+    else if (pose === 'ready') { aR = -.75 + sw * .15; }
+    else if (pose === 'talk') { aR = -.55 + Math.sin(L.time * 5.2) * .35; aL = -.15 + Math.sin(L.time * 3.1) * .18; }
+    else if (pose === 'hands') { aL = aR = -2.9; }
+    else if (!moving) { aL = Math.sin(L.time * 1.3 + R.walk) * .04; aR = -aL; }
+    R.armL.rotation.x = U.lerp(R.armL.rotation.x, aL, k); R.armR.rotation.x = U.lerp(R.armR.rotation.x, aR, k);
+  }
+
   /* ---------------- entities ---------------- */
   function inst(proto, root, x, y, z, rx, ry, rz) { const i = proto.createInstance('i'); i.parent = root; i.position.set(x, y, z); if (rx || ry || rz) i.rotation.set(rx || 0, ry || 0, rz || 0); i.isPickable = false; return i; }
   function makeHuman(kind) {
     const s = L.scene, root = new BABYLON.TransformNode('e', s), P = L.proto;
     const big = kind === 'heavy', sc = big ? 1.25 : 1;
     root.scaling.setAll(sc);
-    inst(P.body, root, 0, .8, 0); inst(P.head, root, 0, 1.72, 0); inst(P.pack, root, 0, 1.1, -.35); inst(P.gun, root, .32, 1.05, .35);
-    inst(P.pad, root, -.36, 1.42, 0, 0, 0, .35); inst(P.pad, root, .36, 1.42, 0, 0, 0, -.35);
+    const rig = rigBuild(root, k => P[k].createInstance('i'), true);
+    inst(P.gun, rig.armR, 0, -.68, .14, Math.PI / 2, 0, 0);
     // per-enemy emissive bits (swap to "off" material when disabled)
-    const visor = BABYLON.MeshBuilder.CreateBox('v', { width: .36, height: .08, depth: .1 }, s); visor.position.set(0, 1.74, .17); visor.material = L.mats.visor; visor.parent = root; visor.isPickable = false;
-    const chest = BABYLON.MeshBuilder.CreateBox('c', { width: .05, height: .05, depth: .04 }, s); chest.position.set(-.12, 1.25, .37); chest.material = L.mats.visor; chest.parent = root; chest.isPickable = false;
+    const visor = BABYLON.MeshBuilder.CreateBox('v', { width: .3, height: .07, depth: .08 }, s); visor.position.set(0, 1.82, .15); visor.material = L.mats.visor; visor.parent = root; visor.isPickable = false;
+    const chest = BABYLON.MeshBuilder.CreateBox('c', { width: .05, height: .05, depth: .04 }, s); chest.position.set(-.1, 1.36, .25); chest.material = L.mats.visor; chest.parent = root; chest.isPickable = false;
     const mark = BABYLON.MeshBuilder.CreateSphere('mk', { diameter: .18, segments: 6 }, s); mark.position.y = 2.25; mark.material = L.mats.mS; mark.parent = root; mark.isVisible = false; mark.isPickable = false;
-    return { root, visor, extra: [chest], mark, hy: 1.72 * sc, r: .45 * sc };
+    return { root, visor, extra: [chest], mark, rig, hy: 1.8 * sc, r: .45 * sc };
   }
   function makeDrone(ice) {
     const s = L.scene, root = new BABYLON.TransformNode('d', s), P = L.proto;
     const body = inst(ice ? P.ice : P.dbody, root, 0, 0, 0);
     const ring = inst(P.ring, root, 0, 0, 0);
-    if (!ice) { inst(P.arm, root, 0, .25, 0, 0, Math.PI / 4, 0); inst(P.arm, root, 0, .25, 0, 0, -Math.PI / 4, 0); }
+    if (!ice) { inst(P.darm, root, 0, .25, 0, 0, Math.PI / 4, 0); inst(P.darm, root, 0, .25, 0, 0, -Math.PI / 4, 0); }
     const eye = BABYLON.MeshBuilder.CreateSphere('de', { diameter: .2, segments: 6 }, s); eye.position.z = .32; eye.parent = root; eye.material = L.mats.visor; eye.isPickable = false;
     const mark = BABYLON.MeshBuilder.CreateSphere('mk', { diameter: .16, segments: 6 }, s); mark.position.y = .7; mark.material = L.mats.mS; mark.parent = root; mark.isVisible = false; mark.isPickable = false;
     root.position.y = 2.2;
@@ -1343,11 +1443,12 @@ NV.Level = (() => {
   }
   function addCivilian(x, z) {
     const s = L.scene, root = new BABYLON.TransformNode('civ', s);
-    const b = BABYLON.MeshBuilder.CreateCapsule('cb', { radius: .33, height: 1.5 }, s); b.position.y = .75; b.material = L.mats.civ; b.parent = root;
-    const h = BABYLON.MeshBuilder.CreateSphere('ch', { diameter: .38 }, s); h.position.y = 1.62; h.material = L.mats.civ; h.parent = root;
+    const civSkin = mat(s, 'civs', '#6d5548');
+    const rig = rigBuild(root, k => { const m = limbShape(k, s); m.material = k === 'head' || k === 'hand' ? civSkin : L.mats.civ; return m; }, false);
+    rig.armL.rotation.x = rig.armR.rotation.x = -2.9;
     const mk = BABYLON.MeshBuilder.CreatePolyhedron('cmk', { type: 1, size: .15 }, s); mk.position.y = 2.2; mk.material = L.mats.civMark; mk.parent = root;
-    root.position.set(x, 0, z); root.scaling.y = .75; // crouched, scared
-    L.civs.push({ x, z, root, mk, saved: false, t: 0 });
+    root.position.set(x, 0, z); root.scaling.y = .85; // crouched, scared
+    L.civs.push({ x, z, root, mk, rig, saved: false, t: 0 });
   }
   function addNode(x, z) {
     const s = L.scene, root = new BABYLON.TransformNode('node', s);
@@ -1636,6 +1737,7 @@ NV.Level = (() => {
     let sx = 0, szz = 0; if (L.shake > 0) { L.shake -= dt * 1.8; sx = (Math.random() - .5) * L.shake * .05; szz = (Math.random() - .5) * L.shake * .05; }
     L.cam.rotation.set(p.pitch + sx, p.yaw + szz, 0);
     L.plight.position.set(p.x, eyeH + .4, p.z);
+    if (L.sun) L.sun.position.set(p.x + 17, 50, p.z + 12);
     if (L.rain) L.rain.emitter = V3(p.x, 0, p.z);
     L.cam.fov = U.lerp(L.cam.fov, set.fov * Math.PI / 180 * .75 * (sprint ? 1.08 : 1) * (p.dash > 0 ? 1.15 : 1), dt * 8);
     // gun
@@ -1747,7 +1849,7 @@ NV.Level = (() => {
       if (face != null) e.yaw += U.angDiff(e.yaw, face) * Math.min(1, dt * (e.state === 'alert' ? 8 : 3));
       m.root.position.x = e.x; m.root.position.z = e.z; m.root.rotation.y = e.yaw;
       if (e.drone) { m.root.position.y = 2.2 + Math.sin(L.time * 2 + e.bob) * .15; if (m.ring) m.ring.rotation.y += dt * 6; }
-      else if (tx != null) { m.root.position.y = Math.abs(Math.sin(L.time * 9 + e.bob)) * .05; }
+      else if (m.rig) { animRig(m.rig, dt, tx != null, spd, e.state === 'alert' ? 'aim' : 'ready'); m.root.position.y = tx != null ? Math.abs(Math.sin(m.rig.walk)) * .04 : 0; }
       m.mark.isVisible = e.state !== 'patrol' || e.susp > .1; m.mark.material = e.state === 'alert' ? L.mats.mA : L.mats.mS; m.mark.scaling.setAll(.6 + e.susp * .8);
     });
     L.alertLevel = alerted ? 2 : suspicious ? 1 : 0;
@@ -2009,13 +2111,15 @@ NV.Level = (() => {
     // pedestrians (instanced)
     const pm = ['#4b5a78', '#6a4b78', '#78604b', '#3f6b5e'].map((c, i) => mat(L.scene, 'ped' + i, c));
     const Pp = (mesh, m) => { mesh.material = m; mesh.position.y = -1000; mesh.isPickable = false; return mesh; };
-    const bodies = pm.map((m, i) => Pp(BABYLON.MeshBuilder.CreateCapsule('pdb' + i, { radius: .3, height: 1.6, tessellation: 10, subdivisions: 1 }, L.scene), m));
-    const head = Pp(BABYLON.MeshBuilder.CreateSphere('pdh', { diameter: .36, segments: 8 }, L.scene), mat(L.scene, 'pdhm', '#6d5548'));
-    const strip = Pp(BABYLON.MeshBuilder.CreateBox('pds', { width: .05, height: .45, depth: .05 }, L.scene), mat(L.scene, 'pdsm', '#000', L.palette.a));
-    for (let i = 0; i < 36; i++) {
+    const torsos = pm.map(m => Pp(limbShape('torso', L.scene), m)), arms = pm.map(m => Pp(limbShape('arm', L.scene), m));
+    const skin = mat(L.scene, 'pdhm', '#6d5548'), pants = mat(L.scene, 'pdpm', '#17141f');
+    const shared = { head: Pp(limbShape('head', L.scene), skin), hand: Pp(limbShape('hand', L.scene), skin), leg: Pp(limbShape('leg', L.scene), pants), foot: Pp(limbShape('foot', L.scene), pants) };
+    const strip = Pp(BABYLON.MeshBuilder.CreateBox('pds', { width: .05, height: .4, depth: .05 }, L.scene), mat(L.scene, 'pdsm', '#000', L.palette.a));
+    for (let i = 0; i < NV.Quality.get().peds; i++) {
       const p = spot(4), root = new BABYLON.TransformNode('ped', L.scene);
-      inst(bodies[i % 4], root, 0, .8, 0); inst(head, root, 0, 1.72, 0); inst(strip, root, .2, 1.1, .2);
-      const pd = { root, x: p.x + (r() - .5) * 2, z: p.z + (r() - .5) * 2, sp: 1.1 + r() * .9, ph: r() * 6 };
+      const rig = rigBuild(root, k => (k === 'torso' ? torsos[i % 4] : k === 'arm' ? arms[i % 4] : shared[k]).createInstance('i'), false);
+      inst(strip, root, .16, 1.3, .22);
+      const pd = { root, rig, x: p.x + (r() - .5) * 2, z: p.z + (r() - .5) * 2, sp: 1.1 + r() * .9, ph: r() * 6 };
       pedTarget(pd); L.peds.push(pd);
     }
   }
@@ -2033,10 +2137,12 @@ NV.Level = (() => {
       const dx = pd.tx - pd.x, dz = pd.tz - pd.z, d = Math.hypot(dx, dz);
       const far = Math.abs(pd.x - p.x) + Math.abs(pd.z - p.z) > 110;
       if (far) return;
+      const scared = panic && Math.hypot(pd.x - p.x, pd.z - p.z) < 30;
       if (d < .3) pedTarget(pd);
-      else { const sp = pd.sp * (panic && Math.hypot(pd.x - p.x, pd.z - p.z) < 30 ? 2.6 : 1) * dt; pd.x += dx / d * sp; pd.z += dz / d * sp; pd.root.rotation.y = Math.atan2(dx, dz); }
+      else { const sp = pd.sp * (scared ? 2.6 : 1) * dt; pd.x += dx / d * sp; pd.z += dz / d * sp; pd.root.rotation.y = Math.atan2(dx, dz); }
+      animRig(pd.rig, dt, d >= .3, pd.sp * (scared ? 2.6 : 1), scared ? 'hands' : null);
       const px = pd.x - p.x, pz = pd.z - p.z, pdist = Math.hypot(px, pz); if (pdist < .8 && pdist > .01) { pd.x += px / pdist * .05; pd.z += pz / pdist * .05; }
-      pd.root.position.set(pd.x, Math.abs(Math.sin(L.time * 7 + pd.ph)) * .04, pd.z);
+      pd.root.position.set(pd.x, Math.abs(Math.sin(pd.rig.walk)) * .03, pd.z);
     });
     L.beacons.forEach(b => { b.ring.rotation.y += dt; b.beam.visibility = .6 + Math.sin(L.time * 3 + b.x) * .25; });
     const G = L.gig; if (!G) return;
@@ -2239,14 +2345,15 @@ NV.Level = (() => {
       const ring = BABYLON.MeshBuilder.CreateTorus('hr', { diameter: 1.4, thickness: .04, tessellation: 24 }, s); ring.position.y = .1; ring.material = mat(s, 'hrm' + sp.name, '#000', col); ring.parent = root;
       root.spin = core;
     } else {
-      const body = mat(s, 'npcb' + sp.name, info.hair || '#2a2638'), accent = mat(s, 'npca' + sp.name, '#000', col);
+      const body = mat(s, 'npcb' + sp.name, info.hair || '#2a2638'), accent = mat(s, 'npca' + sp.name, '#000', col), skin = mat(s, 'npch' + sp.name, '#6d5548'), pants = mat(s, 'npcp' + sp.name, '#15121e');
       body.specularColor = new BABYLON.Color3(.3, .3, .35);
+      const matFor = k => k === 'head' || k === 'hand' ? skin : k === 'leg' || k === 'foot' ? pants : body;
+      root.rig = rigBuild(root, k => { const m = limbShape(k, s); m.material = matFor(k); return m; }, false);
       const P = (mesh, m, y, z2) => { mesh.material = m; mesh.parent = root; mesh.position.y = y; if (z2) mesh.position.z = z2; mesh.isPickable = false; return mesh; };
-      P(BABYLON.MeshBuilder.CreateCapsule('nb', { radius: info.f ? .32 : .36, height: 1.6, tessellation: 10, subdivisions: 1 }, s), body, .8);
-      P(BABYLON.MeshBuilder.CreateSphere('nh', { diameter: .38, segments: 10 }, s), mat(s, 'npch' + sp.name, '#6d5548'), 1.72);
-      P(BABYLON.MeshBuilder.CreateBox('ne', { width: info.kind === 'mask' || info.kind === 'shadow' ? .34 : .26, height: .05, depth: .05 }, s), accent, 1.75, .18);
-      P(BABYLON.MeshBuilder.CreateBox('nc', { width: .06, height: .5, depth: .04 }, s), accent, 1.15, .34);
-      if (info.f) P(BABYLON.MeshBuilder.CreateBox('nhair', { width: .42, height: .5, depth: .2 }, s), body, 1.62, -.12);
+      P(BABYLON.MeshBuilder.CreateBox('ne', { width: info.kind === 'mask' || info.kind === 'shadow' ? .3 : .22, height: .045, depth: .05 }, s), accent, 1.82, .16);
+      P(BABYLON.MeshBuilder.CreateBox('nc', { width: .05, height: .45, depth: .04 }, s), accent, 1.3, .25);
+      if (info.f) P(BABYLON.MeshBuilder.CreateBox('nhair', { width: .38, height: .45, depth: .18 }, s), body, 1.72, -.1);
+      if (L.sg) root.getChildMeshes().forEach(m => L.sg.addShadowCaster(m, false));
     }
     const tag = nameTag(sp.name, col); tag.parent = root; tag.position.y = tagY;
     root.position.set(x, 0, z); root.rotation.y = Math.random() * 6;
@@ -2282,6 +2389,7 @@ NV.Level = (() => {
       if (d < 9) n.root.rotation.y += U.angDiff(n.root.rotation.y, Math.atan2(p.x - n.x, p.z - n.z)) * Math.min(1, dt * 3);
       if (n.root.spin) { n.root.spin.rotation.y += dt; n.root.position.y = .2 + Math.sin(L.time * 2 + n.ph) * .08; }
       const talking = L.speaker && n.name === L.speaker;
+      if (n.root.rig) animRig(n.root.rig, dt, false, 0, talking ? 'talk' : null);
       n.tag.scaling.setAll(U.lerp(n.tag.scaling.x, talking ? 1.25 : 1, dt * 8));
       n.tag.visibility = talking || d < 14 ? 1 : .45;
     });
@@ -2369,6 +2477,7 @@ NV.Level = (() => {
     start, get active() { return !!L; }, debug: () => L,
     stop() { if (L) end({ done: true }); },
     event: aptEvent,
+    applyQuality() { if (!L) return; NV.Quality.teardown(L.fx); L.fx = NV.Quality.setup(L.scene, L.cam); const q = NV.Quality.get(); L.cam.maxZ = q.draw; },
     speaking(name) { if (L) L.speaker = name ? String(name).replace(/\s*\([^)]*\)\s*/g, ' ').trim() : null; },
     objective(t, d) { const h = document.getElementById('hud'); if (!h) return; h.querySelector('.obj .t').textContent = t; h.querySelector('.obj .d').textContent = d; },
     enableProps(ids) { if (L && L.props) L.props.forEach(pr => pr.enabled = ids.includes(pr.id)); },
@@ -2508,19 +2617,71 @@ NV.UI = (() => {
       ['master', 'Master volume', 'range', 0, 1, .1], ['music', 'Music volume', 'range', 0, 1, .1], ['sfx', 'Effects volume', 'range', 0, 1, .1],
       ['textSpeed', 'Text speed', 'enum', ['Slow', 'Normal', 'Fast', 'Instant'], 0], ['sens', 'Mouse sensitivity', 'range', .3, 3, .1],
       ['fov', 'Field of view', 'range', 65, 110, 5], ['invertY', 'Invert Y axis', 'bool'], ['shake', 'Screen shake', 'bool'],
-      ['scan', 'Scanline filter', 'bool'], ['showStats', 'Show world-state changes', 'bool'], ['walk', 'Walkable story scenes', 'bool'], ['travel', 'Travel to missions in the city', 'bool'], ['gfx', 'Graphics quality', 'enum', ['Auto', 'Low', 'Medium', 'High']], ['dynRes', 'Dynamic resolution', 'bool'], ['showFps', 'Show FPS', 'bool'],
+      ['scan', 'Scanline filter', 'bool'], ['showStats', 'Show world-state changes', 'bool'], ['walk', 'Walkable story scenes', 'bool'], ['travel', 'Travel to missions in the city', 'bool'], ['showFps', 'Show FPS', 'bool'], ['gfxmenu', 'Graphics settings', 'open'],
     ];
     const m = modal(`<div class="stitle">SETTINGS</div><div class="rows"></div><button class="btn" style="margin-top:12px">Done</button>
       <p class="muted" style="margin-top:14px;font-size:14px;line-height:1.6">Controls — <span class="kbd">WASD</span> move · <span class="kbd">Mouse</span> look · <span class="kbd">LMB</span> fire · <span class="kbd">Shift</span> sprint · <span class="kbd">C</span> sneak · <span class="kbd">Space</span> dash · <span class="kbd">E</span> interact / takedown / hack · <span class="kbd">Q</span> EMP · <span class="kbd">Esc</span> pause.<br>Story — <span class="kbd">Space</span>/<span class="kbd">Click</span> advance · <span class="kbd">1-4</span> choose · <span class="kbd">A</span> auto · <span class="kbd">Ctrl</span> hold to skip · <span class="kbd">L</span> log. Gamepads supported.</p>`);
     const box = m.querySelector('.rows');
-    const fmt = r => { const v = S.get()[r[0]]; if (r[2] === 'bool') return v ? 'ON' : 'OFF'; if (r[2] === 'enum') return '◂ ' + r[3][v] + ' ▸'; if (r[0] === 'fov') return v + '°'; if (r[0] === 'sens') return v.toFixed(1) + '×'; return Math.round(v * 100) + '%'; };
+    const fmt = r => { if (r[2] === 'open') return (NV.Quality.get().name) + ' ▸'; const v = S.get()[r[0]]; if (r[2] === 'bool') return v ? 'ON' : 'OFF'; if (r[2] === 'enum') return '◂ ' + r[3][v] + ' ▸'; if (r[0] === 'fov') return v + '°'; if (r[0] === 'sens') return v.toFixed(1) + '×'; return Math.round(v * 100) + '%'; };
     const els = rows.map(r => { const e = U.el('div', 'row', `<span>${r[1]}</span><span class="val">${fmt(r)}</span>`); box.appendChild(e); return e; });
     const done = m.querySelector('.btn'); els.push(done);
     const change = (k, d) => {
-      const r = rows[k]; if (!r) return; const cur = S.get()[r[0]]; let v;
+      const r = rows[k]; if (!r) return; if (r[2] === 'open') { UI.graphics().then(() => els[k].querySelector('.val').textContent = fmt(r)); return; } const cur = S.get()[r[0]]; let v;
       if (r[2] === 'bool') v = cur ? 0 : 1; else if (r[2] === 'enum') v = (cur + d + r[3].length) % r[3].length; else v = Math.round(U.clamp(cur + d * r[5], r[3], r[4]) * 100) / 100;
       S.set(r[0], v); els[k].querySelector('.val').textContent = fmt(r); NV.Audio.sfx('ui');
-      if (r[0] === 'gfx') { const q = NV.Quality.reset(); NV.G.scale = q.scale; NV.G.engine.setHardwareScalingLevel(q.scale); NV.Backdrop.applyQuality(); NV.toast('GRAPHICS', q.name + ' — anti-aliasing changes apply after a reload.', '#19f0ff'); }
+    };
+    const fin = () => { UI.pop(h); m.remove(); res(); };
+    const h = UI.push(nav(els, { select: k => { if (k === els.length - 1) fin(); else change(k, 1); }, left: k => change(k, -1), right: k => change(k, 1), back: fin }));
+  });
+
+  /* ---------------- graphics settings (every option + 10 presets) ---------------- */
+  UI.graphics = () => new Promise(res => {
+    const Q = NV.Quality, pct = v => Math.round(v * 100) + '%', x2 = v => (+v).toFixed(2) + '×';
+    const ROWS = [
+      ['preset', 'Preset', 'preset'],
+      ['scale', 'Render scale', 'range', .25, 2, .05, pct], ['upscaler', 'Upscaler', 'enum', [['bilinear', 'Bilinear'], ['sharpen', 'Sharpened (FSR-style CAS)'], ['nearest', 'Nearest (pixel)']]],
+      ['sharpen', 'Sharpen strength', 'range', 0, 1, .05, pct], ['dynRes', 'Dynamic resolution', 'bool'], ['target', 'Target frame rate', 'enum', [[30, '30 FPS'], [45, '45 FPS'], [60, '60 FPS'], [75, '75 FPS'], [90, '90 FPS'], [120, '120 FPS'], [144, '144 FPS']]],
+      ['aa', 'Anti-aliasing', 'enum', [['off', 'Off'], ['fxaa', 'FXAA'], ['msaa', 'MSAA 4× (reload)']]],
+      ['glow', 'Neon glow', 'bool'], ['glowRes', 'Glow resolution', 'enum', [[.125, '1/8'], [.25, '1/4'], [.5, '1/2'], [1, 'Full']]], ['glowBlur', 'Glow blur radius', 'range', 4, 64, 4, v => v + ' px'], ['glowInt', 'Glow intensity', 'range', 0, 2, .1, x2],
+      ['bloom', 'Bloom', 'bool'], ['bloomW', 'Bloom strength', 'range', 0, 1, .05, pct],
+      ['chroma', 'Chromatic aberration', 'bool'], ['chromaAmt', 'Aberration amount', 'range', 0, 30, 1, v => String(v)],
+      ['grain', 'Film grain', 'bool'], ['vignette', 'Vignette', 'bool'], ['tonemap', 'ACES tone mapping', 'bool'],
+      ['contrast', 'Contrast', 'range', .8, 1.8, .05, x2], ['exposure', 'Exposure', 'range', .6, 1.8, .05, x2],
+      ['dof', 'Depth of field (cinematics)', 'bool'],
+      ['shadows', 'Dynamic shadows', 'enum', [[0, 'Off'], [512, 'Low (512)'], [1024, 'Medium (1024)'], [2048, 'High (2048)'], [4096, 'Ultra (4096)']]],
+      ['lights', 'Dynamic muzzle lights', 'bool'], ['fog', 'Fog', 'bool'], ['draw', 'Draw distance', 'range', 100, 1000, 20, v => v + ' m'],
+      ['aniso', 'Texture filtering', 'enum', [[1, 'Bilinear'], [2, 'Anisotropic 2×'], [4, 'Anisotropic 4×'], [8, 'Anisotropic 8×'], [16, 'Anisotropic 16×']]],
+      ['rain', 'Rain density', 'range', 0, 2, .05, pct], ['particles', 'Particle density', 'range', 0, 2, .05, pct],
+      ['beams', 'Searchlight beams', 'bool'], ['cones', 'Light shafts', 'bool'], ['signs', 'Holo signs', 'bool'], ['peds', 'Pedestrians', 'range', 0, 60, 1, v => String(v)],
+    ];
+    const m = modal(`<div class="stitle">GRAPHICS</div><p class="muted" style="font-size:14px;margin:-6px 0 10px">WebGPU · ${U.esc(NV.G.engine.description || 'Babylon.js')}. Changes apply instantly to post-processing and resolution; shadows, rain, pedestrians and signs apply to the next scene you load.</p><div class="rows"></div><button class="btn" style="margin-top:12px">Done</button>`);
+    const box = m.querySelector('.rows');
+    let g = Object.assign({}, Q.raw());
+    const fmt = r => {
+      const v = g[r[0]];
+      if (r[2] === 'preset') return '◂ ' + (Q.NAMES[g.preset] || 'Custom') + ' ▸';
+      if (r[2] === 'bool') return v ? 'ON' : 'OFF';
+      if (r[2] === 'enum') { const o = r[3].find(o => o[0] === v); return '◂ ' + (o ? o[1] : v) + ' ▸'; }
+      return r[6](v);
+    };
+    const els = ROWS.map(r => { const e = U.el('div', 'row', `<span>${r[1]}</span><span class="val">${fmt(r)}</span>`); box.appendChild(e); return e; });
+    const done = m.querySelector('.btn'); els.push(done);
+    const redraw = () => ROWS.forEach((r, i) => els[i].querySelector('.val').textContent = fmt(r));
+    const commit = (msaaChanged) => {
+      Q.setAll(g); NV.Backdrop.applyQuality(); if (NV.Level.applyQuality) NV.Level.applyQuality();
+      if (msaaChanged) UI.confirm('MSAA changes need a reload. Reload now? (Progress is saved at checkpoints.)').then(ok => { if (ok) location.reload(); });
+    };
+    const change = (k, d) => {
+      const r = ROWS[k]; if (!r) return; NV.Audio.sfx('ui');
+      const before = g.aa;
+      if (r[2] === 'preset') { const O = Q.ORDER; let i = O.indexOf(g.preset); i = i < 0 ? 0 : (i + d + O.length) % O.length; g = Q.preset(O[i]); }
+      else {
+        if (r[2] === 'bool') g[r[0]] = g[r[0]] ? 0 : 1;
+        else if (r[2] === 'enum') { const o = r[3]; let i = o.findIndex(x => x[0] === g[r[0]]); i = (i + d + o.length) % o.length; g[r[0]] = o[i][0]; }
+        else g[r[0]] = Math.round(U.clamp(g[r[0]] + d * r[5], r[3], r[4]) * 1000) / 1000;
+        g.preset = 'custom';
+      }
+      redraw(); commit((before === 'msaa') !== (g.aa === 'msaa'));
     };
     const fin = () => { UI.pop(h); m.remove(); res(); };
     const h = UI.push(nav(els, { select: k => { if (k === els.length - 1) fin(); else change(k, 1); }, left: k => change(k, -1), right: k => change(k, 1), back: fin }));
@@ -3110,7 +3271,12 @@ NV.Story = (() => {
     document.getElementById('scan').classList.toggle('hidden', !NV.Settings.get().scan);
     NV.tick = dt => NV.UI.tick(dt);
     await new Promise(r => NV.Backdrop.scene.executeWhenReady(r));
-  } catch (e) { console.error(e); fail('Graphics start-up failed: ' + U.esc(e.message || e)); return; }
+  } catch (e) {
+    console.error(e);
+    if (e && e.message === 'WEBGPU_REQUIRED') fail('<b>NEON VEINS requires WebGPU.</b><br><br>Use an up-to-date Chrome, Edge or Opera (version 113+), or Safari 18+/Firefox with WebGPU enabled. On Linux, enable <b>chrome://flags/#enable-unsafe-webgpu</b>. Make sure hardware acceleration is turned on in your browser settings.');
+    else fail('Graphics start-up failed: ' + U.esc(e.message || e));
+    return;
+  }
   const ld = document.getElementById('loading'); ld.style.opacity = 0; setTimeout(() => ld.remove(), 700);
   // developer hook: index.html#op=boss|infiltrate|hack|defend|arena|explore|retrieve[&scene=NAME] boots straight into an operation
   const dev = new URLSearchParams(location.hash.slice(1));
