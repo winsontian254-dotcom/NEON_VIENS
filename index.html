@@ -2842,13 +2842,13 @@ NV.Level = (() => {
   // yellow objective marker drawn over everything, pinned to the screen edge when off-screen or behind you
   function wpTarget() {
     const p = L.p, near = arr => arr.reduce((b, o) => !b || Math.hypot(o.x - p.x, o.z - p.z) < Math.hypot(b.x - p.x, b.z - p.z) ? o : b, null);
-    if (L.exit && L.exit.on) return { x: L.exit.x, z: L.exit.z, y: 2.5, label: 'EXTRACT' };
+    if (L.exit && (L.exit.on || L.exitReady)) return { x: L.exit.x, z: L.exit.z, y: 2.5, label: 'EXTRACT' };
     if (L.boss && L.boss.hp > 0) { const t = near(L.terms.filter(t => t.pylon && !t.done)); return t && L.boss.shieldOn ? { x: t.x, z: t.z, y: 2, label: 'PYLON' } : { x: L.boss.x, z: L.boss.z, y: 4, label: 'TARGET' }; }
     const t = near(L.terms.filter(t => !t.done)); if (t) return { x: t.x, z: t.z, y: 2, label: 'HACK' };
     const k = near(L.pickups.filter(k => k.kind !== 'med' && k.kind !== 'lore')); if (k) return { x: k.x, z: k.z, y: 1.6, label: 'RETRIEVE' };
-    const c = near(L.civs.filter(c => !c.saved)); if (c) return { x: c.x, z: c.z, y: 2, label: 'FREE CIVILIAN' };
     if (L.defend) { const n = near(L.nodes.filter(n => !n.dead)); if (n) return { x: n.x, z: n.z, y: 2, label: 'DEFEND' }; }
     if (L.waves && L.enemies.length) { const e = near(L.enemies.filter(e => e.state !== 'down')); if (e) return { x: e.x, z: e.z, y: 2, label: 'HOSTILE' }; }
+    const c = near(L.civs.filter(c => !c.saved)); if (c && !L.exit) return { x: c.x, z: c.z, y: 2, label: 'FREE CIVILIAN' };
     if (L.free) { const g = L.gig ? L.gig.tgt : L.storyB; return g ? { x: g.x, z: g.z, y: 3, label: L.gig ? 'GIG' : 'STORY' } : null; }
     return L.guide ? { x: L.guide.x, z: L.guide.z, y: 2.5, label: 'GO' } : null;
   }
