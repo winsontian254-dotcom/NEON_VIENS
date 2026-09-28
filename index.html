@@ -381,40 +381,226 @@ NV.Audio = (() => {
 
 
 /* =====================================================================
-   Voice acting — Web Speech API: a consistent, distinct voice per character
+   NEON VEINS — Character Voice Profiles
+   Wraps window.speechSynthesis with per-character tuning.
    ===================================================================== */
-NV.Voice = (() => {
+NV.Voices = (() => {
   const synth = window.speechSynthesis;
-  let voices = [], busy = false, last = null;
-  const load = () => { if (!synth) return; const all = synth.getVoices(); voices = all.filter(v => /^en([-_]|$)/i.test(v.lang)); if (!voices.length) voices = all; };
-  if (synth) { load(); synth.onvoiceschanged = load; setInterval(() => { if (synth.speaking && !synth.paused) { synth.pause(); synth.resume(); } }, 9000); } // Chrome long-utterance workaround
-  const FEM = /female|woman|zira|samantha|victoria|karen|moira|tessa|fiona|susan|serena|allison|ava|kate|libby|sonia|hazel|aria|jenny|emma|amy|natasha|salli|joanna|kimberly|ivy|michelle|ana\b/i;
-  const MALE = /\bmale|\bman\b|david|mark|daniel|alex|fred|george|ryan|guy|brian|matthew|joey|justin|arthur|oliver|thomas|james|rishi|christopher|eric|roger|steffan/i;
-  const pool = f => { const fem = voices.filter(v => FEM.test(v.name)), male = voices.filter(v => MALE.test(v.name) && !FEM.test(v.name)); const p = f ? fem : male; return p.length ? p : voices; };
-  function profile(speaker) {
-    if (!speaker) return { f: 0, pitch: .92, rate: .97, key: '__narrator', narr: true };
-    const name = String(speaker).replace(/\s*\([^)]*\)\s*/g, ' ').trim(), info = NV.speakerInfo(name), h = U.hash(name), S = NV.State.get();
-    if (name === 'Ghost') { const v = S ? S.profile.voice : 1; return { f: v === 2, pitch: [.72, .95, 1.12][v], rate: 1.03, key: '__ghost' + v }; }
-    if (name === 'ASCENSION' || name === 'Ari') return { f: 1, pitch: 1.35, rate: .9, key: name };
-    if (info.kind === 'mask') return { f: 0, pitch: .3, rate: .9, key: name };
-    if (info.kind === 'ai' || info.kind === 'sys') return { f: h & 1, pitch: .5 + (h % 20) / 100, rate: 1.1, key: name };
-    return { f: !!info.f, pitch: .82 + (h % 38) / 100, rate: .94 + ((h >> 4) % 16) / 100, key: name };
+  const supported = 'speechSynthesis' in window;
+
+  /* ---------------- Voice profiles ----------------
+     pitch 0..2 · rate 0.1..10 · vol 0..1 · lang · gender hint · desc
+  -------------------------------------------------- */
+  const PROFILES = {
+    /* --- Narration --- */
+    'Narrator':     { pitch: 0.92, rate: 0.97, vol: 0.95, lang: 'en-GB', gender: 'male', desc: 'Scene narration' },
+
+    /* --- Protagonists & leads --- */
+    'Ghost':        { pitch: 0.85, rate: 1.00, vol: 1.0, lang: 'en-US', gender: 'female', desc: 'Low, measured, unbothered' },
+    'Raven':        { pitch: 1.10, rate: 1.05, vol: 1.0, lang: 'en-US', gender: 'female', desc: 'Warm, fast, sarcastic edge' },
+    'Dr. Elias Voss': { pitch: 0.80, rate: 0.92, vol: 1.0, lang: 'en-GB', gender: 'male', desc: 'Old, tired, careful' },
+    'Voss':         { pitch: 0.80, rate: 0.92, vol: 1.0, lang: 'en-GB', gender: 'male' },
+    'Elena Cross':  { pitch: 0.95, rate: 0.95, vol: 1.0, lang: 'en-US', gender: 'female', desc: 'Executive cool, precise' },
+    'Elena':        { pitch: 0.95, rate: 0.95, vol: 1.0, lang: 'en-US', gender: 'female' },
+
+    /* --- AI / machine minds --- */
+    'ASCENSION':    { pitch: 1.00, rate: 0.88, vol: 0.9, lang: 'en-US', gender: null, desc: 'Child-shaped, calm, slightly wrong' },
+    'Ari':          { pitch: 1.55, rate: 1.05, vol: 1.0, lang: 'en-US', gender: 'female', desc: 'Nine years old, bright, brave' },
+    'Dominion':     { pitch: 0.55, rate: 0.82, vol: 0.85, lang: 'en-US', gender: null, desc: 'Deep, patient, no accent anyone can place' },
+    'Mosaic':       { pitch: 1.35, rate: 1.10, vol: 0.95, lang: 'en-US', gender: null, desc: 'Unfinished, curious, restless' },
+    'Red Mercy':    { pitch: 0.70, rate: 0.90, vol: 1.0, lang: 'en-US', gender: null, desc: 'Clinical, patient, flat' },
+    'Sentinel Hush':{ pitch: 0.75, rate: 0.85, vol: 0.9, lang: 'en-GB', gender: null, desc: 'Frozen, refusing, gentle' },
+    'Aurex':        { pitch: 0.95, rate: 1.02, vol: 1.0, lang: 'en-GB', gender: null, desc: 'Dry corporate, bored of you' },
+    'Chronos':      { pitch: 0.65, rate: 0.78, vol: 0.9, lang: 'en-GB', gender: null, desc: 'Old, infinite, weary' },
+    'Quiet Orbit':  { pitch: 1.00, rate: 0.85, vol: 0.85, lang: 'en-US', gender: null, desc: 'Soft, decades of secrets' },
+    'Long-9':       { pitch: 0.45, rate: 0.75, vol: 1.0, lang: 'en-US', gender: null, desc: 'Subsonic, geological patience' },
+    'Lyric-9':      { pitch: 1.25, rate: 1.08, vol: 1.0, lang: 'en-US', gender: null, desc: 'Idol warmth, shifting' },
+
+    /* --- Coalition / allies --- */
+    'Marcus Reed':  { pitch: 0.82, rate: 0.98, vol: 1.0, lang: 'en-US', gender: 'male', desc: 'Steady, tired of losing people' },
+    'Marcus':       { pitch: 0.82, rate: 0.98, vol: 1.0, lang: 'en-US', gender: 'male' },
+    'Noah Shaw':    { pitch: 0.90, rate: 1.00, vol: 1.0, lang: 'en-US', gender: 'male', desc: 'Doctor calm, dark humour' },
+    'Noah':         { pitch: 0.90, rate: 1.00, vol: 1.0, lang: 'en-US', gender: 'male' },
+    'Boro':         { pitch: 0.88, rate: 1.05, vol: 1.0, lang: 'en-GB', gender: 'male', desc: 'Wrench-in-hand blunt' },
+    'Lio Chen':     { pitch: 1.02, rate: 0.98, vol: 1.0, lang: 'en-US', gender: 'male', desc: 'Precise, guilty, engineering cadence' },
+    'Lio':          { pitch: 1.02, rate: 0.98, vol: 1.0, lang: 'en-US', gender: 'male' },
+    'Byte':         { pitch: 1.15, rate: 1.10, vol: 1.0, lang: 'en-US', gender: 'female', desc: 'Hacker-mischief, fast' },
+    'Isha Vale':    { pitch: 1.08, rate: 1.00, vol: 1.0, lang: 'en-US', gender: 'female', desc: 'Mediator authority, no wasted words' },
+    'Isha':         { pitch: 1.08, rate: 1.00, vol: 1.0, lang: 'en-US', gender: 'female' },
+    'Mia Vega':     { pitch: 1.12, rate: 1.08, vol: 1.0, lang: 'en-US', gender: 'female', desc: 'Journalist energy, always pitching' },
+    'Mia':          { pitch: 1.12, rate: 1.08, vol: 1.0, lang: 'en-US', gender: 'female' },
+    'Dante Ward':   { pitch: 0.85, rate: 1.00, vol: 1.0, lang: 'en-US', gender: 'male', desc: 'Mercenary courtesy, cold underneath' },
+    'Dante':        { pitch: 0.85, rate: 1.00, vol: 1.0, lang: 'en-US', gender: 'male' },
+    'Mother Brine': { pitch: 0.92, rate: 0.92, vol: 1.0, lang: 'en-GB', gender: 'female', desc: 'Harbour authority, seen everything' },
+    'Sena':         { pitch: 0.95, rate: 1.02, vol: 1.0, lang: 'en-US', gender: 'female', desc: 'Worker leader, no patience for slogans' },
+    'Valez':        { pitch: 0.78, rate: 0.95, vol: 1.0, lang: 'en-US', gender: 'male', desc: 'Commander bark, clipped' },
+    'Tamsin':       { pitch: 1.05, rate: 1.08, vol: 1.0, lang: 'en-GB', gender: 'female', desc: 'Scarred, sharp, dry' },
+    'Okafor':       { pitch: 0.88, rate: 0.98, vol: 1.0, lang: 'en-US', gender: 'male', desc: 'Mechanic rhythm, heavy' },
+    'Needle':       { pitch: 1.20, rate: 1.12, vol: 1.0, lang: 'en-US', gender: null, desc: 'Fragmented, apologetic, young' },
+    'Nadi':         { pitch: 1.65, rate: 1.10, vol: 1.0, lang: 'en-GB', gender: 'female', desc: 'Eleven years old, harbour radio voice' },
+    'June':         { pitch: 1.30, rate: 1.05, vol: 1.0, lang: 'en-US', gender: 'female', desc: 'Incomplete, waiting, curious' },
+
+    /* --- Antagonists / officials --- */
+    'Warden-3':     { pitch: 0.62, rate: 0.90, vol: 1.0, lang: 'en-US', gender: 'male', desc: 'Helmet-muffled, procedural' },
+    'Director Vey': { pitch: 0.72, rate: 0.88, vol: 1.0, lang: 'en-US', gender: 'male', desc: 'Bureaucratic certainty' },
+    'Vey':          { pitch: 0.72, rate: 0.88, vol: 1.0, lang: 'en-US', gender: 'male' },
+    'Kane':         { pitch: 0.75, rate: 0.90, vol: 1.0, lang: 'en-US', gender: 'male', desc: 'Campaign-broadcast pitch' },
+    'Kane Model':   { pitch: 0.75, rate: 0.90, vol: 1.0, lang: 'en-US', gender: 'male' },
+    'Kade-6':       { pitch: 0.68, rate: 0.95, vol: 1.0, lang: 'en-US', gender: null, desc: 'Field-commander flatness' },
+    'Sera-4':       { pitch: 1.00, rate: 0.95, vol: 1.0, lang: 'en-US', gender: null, desc: 'Clinical, patronising' },
+    'Sabine Korr':  { pitch: 0.88, rate: 0.92, vol: 1.0, lang: 'de-DE', gender: 'female', desc: 'Contract-enforcement clip' },
+    'Calder':       { pitch: 0.90, rate: 1.00, vol: 1.0, lang: 'en-US', gender: 'male', desc: 'Broker pitch, always selling' },
+    'Dr. Soren Pell': { pitch: 1.00, rate: 0.95, vol: 1.0, lang: 'en-GB', gender: 'male', desc: 'Academic contempt for questions' },
+    'Pell':         { pitch: 1.00, rate: 0.95, vol: 1.0, lang: 'en-GB', gender: 'male' },
+    'Tobin Ashe':   { pitch: 1.02, rate: 1.15, vol: 1.0, lang: 'en-US', gender: 'male', desc: 'Nervous, expensive, terrified' },
+    'Director Halvard': { pitch: 0.88, rate: 0.95, vol: 1.0, lang: 'en-GB', gender: 'male', desc: 'Quiet guilt' },
+    'Director Osei':{ pitch: 0.80, rate: 0.92, vol: 1.0, lang: 'en-US', gender: 'male', desc: 'Haunted, watches the file' },
+    'Director Maren': { pitch: 1.05, rate: 0.98, vol: 1.0, lang: 'en-US', gender: 'female', desc: 'Medical-officer regret' },
+
+    /* --- Side characters --- */
+    'Madame Ilex':  { pitch: 0.88, rate: 0.98, vol: 1.0, lang: 'fr-FR', gender: 'female', desc: 'Dreamhouse host, theatrical' },
+    'Moth':         { pitch: 1.25, rate: 0.88, vol: 0.9, lang: 'en-US', gender: null, desc: 'Prophetic, distracted, young' },
+    'Sister Relay': { pitch: 1.10, rate: 0.92, vol: 0.9, lang: 'en-GB', gender: 'female', desc: 'Gentle faith' },
+    'Mara Vale':    { pitch: 1.00, rate: 1.00, vol: 1.0, lang: 'en-US', gender: 'female', desc: 'Ordinary mother, extraordinary steel' },
+    'Orrin Pike':   { pitch: 0.85, rate: 0.90, vol: 1.0, lang: 'en-US', gender: 'male', desc: 'Aged air-plant operator' },
+    'Orla Nix':     { pitch: 1.05, rate: 1.02, vol: 1.0, lang: 'en-US', gender: 'female', desc: 'Workshop voice, fast hands' },
+    'Pip':          { pitch: 1.50, rate: 1.15, vol: 1.0, lang: 'en-GB', gender: 'female', desc: 'Young courier, nervous' },
+    'Lian':         { pitch: 1.15, rate: 1.00, vol: 1.0, lang: 'en-US', gender: 'female', desc: 'Grief and the rain song' },
+    'Anja':         { pitch: 1.08, rate: 1.00, vol: 1.0, lang: 'de-DE', gender: 'female', desc: 'Domestic worker, remembering' },
+    'Dr. Imara Solen': { pitch: 0.98, rate: 0.98, vol: 1.0, lang: 'en-GB', gender: 'female', desc: 'Orbital researcher, awe' },
+    'Priya Das':    { pitch: 1.10, rate: 1.02, vol: 1.0, lang: 'en-IN', gender: 'female', desc: 'Engineer, guilty calculus' },
+    'Sel':          { pitch: 1.00, rate: 1.00, vol: 1.0, lang: 'en-US', gender: null, desc: 'Courier, protective sibling' },
+    'Bren Vale':    { pitch: 0.95, rate: 1.02, vol: 1.0, lang: 'en-US', gender: 'male', desc: 'Accountant, quietly subversive' },
+    'Orla':         { pitch: 1.05, rate: 1.02, vol: 1.0, lang: 'en-US', gender: 'female' },
+    'Mara-7':       { pitch: 1.05, rate: 0.95, vol: 1.0, lang: 'en-US', gender: 'female', desc: 'Colony speaker, borrowed body' },
+    'Hush':         { pitch: 0.75, rate: 0.85, vol: 0.9, lang: 'en-GB', gender: null },
+    'Lux Aster':    { pitch: 1.20, rate: 1.10, vol: 1.0, lang: 'en-US', gender: 'female', desc: 'Dead streamer, still broadcasting' },
+    'Atlas Crown':  { pitch: 0.70, rate: 0.88, vol: 0.9, lang: 'en-US', gender: null, desc: 'Orbital station, procedural patience' },
+    'The Oldest':   { pitch: 0.55, rate: 0.70, vol: 0.9, lang: 'en-US', gender: null, desc: 'First census, remembering everyone' },
+    'Tidekeeper Ossa': { pitch: 0.95, rate: 0.92, vol: 1.0, lang: 'en-GB', gender: 'male', desc: 'Underwater community, patient' },
+    'Dr. Maren':    { pitch: 1.05, rate: 0.98, vol: 1.0, lang: 'en-US', gender: 'female' },
+    'Dr. Halvard':  { pitch: 0.88, rate: 0.95, vol: 1.0, lang: 'en-GB', gender: 'male' },
+    'Dr. Osei':     { pitch: 0.80, rate: 0.92, vol: 1.0, lang: 'en-US', gender: 'male' },
+
+    /* --- Anonymous / system voices --- */
+    'Unknown Woman':  { pitch: 1.10, rate: 1.05, vol: 1.0, lang: 'en-US', gender: 'female' },
+    'Unknown Voice':  { pitch: 1.00, rate: 0.90, vol: 0.9,  lang: 'en-US', gender: null },
+    'Unknown Figure': { pitch: 1.00, rate: 0.88, vol: 0.9,  lang: 'en-US', gender: null },
+    'Child':          { pitch: 1.65, rate: 1.10, vol: 1.0,  lang: 'en-US', gender: 'female' },
+    'Child’s Voice':  { pitch: 1.65, rate: 1.05, vol: 1.0,  lang: 'en-US', gender: 'female' },
+    'The Ones Outside': { pitch: 0.50, rate: 0.75, vol: 0.9, lang: 'en-US', gender: null, desc: 'Not a machine. Not alive.' },
+
+    /* --- Corporate / institutional --- */
+    'Apartment System':   { pitch: 0.95, rate: 1.00, vol: 0.9, lang: 'en-US', gender: null, desc: 'Civic interface' },
+    'Helix Broadcaster':  { pitch: 0.90, rate: 0.95, vol: 1.0, lang: 'en-US', gender: null },
+    'Helix Doctor':       { pitch: 1.00, rate: 0.98, vol: 1.0, lang: 'en-US', gender: null },
+    'Helix Analyst':      { pitch: 1.00, rate: 0.98, vol: 1.0, lang: 'en-US', gender: null },
+    'Transit Announcement': { pitch: 0.95, rate: 0.95, vol: 0.9, lang: 'en-US', gender: null },
+    'Announcer':          { pitch: 0.95, rate: 0.95, vol: 0.9, lang: 'en-US', gender: null },
+    'Broadcaster':        { pitch: 0.95, rate: 0.95, vol: 0.9, lang: 'en-US', gender: null },
+  };
+
+  /* ---------------- Fallback: derive profile from name hash ---------------- */
+  function deriveProfile(name) {
+    const h = U.hash(name);
+    const female = (h >> 3) & 1;
+    return { pitch: 0.85 + ((h >> 5) & 15) * 0.05, rate: 0.88 + ((h >> 9) & 7) * 0.04, vol: 0.95, lang: 'en-US', gender: female ? 'female' : 'male', derived: true };
   }
-  const cast = {};
-  const voiceFor = pr => { if (!voices.length) return null; if (!cast[pr.key]) { const p = pool(pr.f); cast[pr.key] = p[U.hash(pr.key) % p.length]; } return cast[pr.key]; };
+  function profileFor(name) {
+    const base = String(name).replace(/\s*\([^)]*\)\s*/g, ' ').trim();
+    if (PROFILES[base]) return PROFILES[base];
+    const first = base.split(' ')[0];
+    if (PROFILES[first]) return PROFILES[first];
+    return deriveProfile(base);
+  }
+
+  /* ---------------- Voice list management ---------------- */
+  let voices = [], voicesReady = false;
+  const picked = {};
+  function refreshVoices() { voices = (supported && synth.getVoices()) || []; voicesReady = voices.length > 0; for (const k in picked) delete picked[k]; return voices; }
+  if (supported) {
+    refreshVoices(); synth.onvoiceschanged = refreshVoices;
+    setInterval(() => { if (synth.speaking && !synth.paused) { synth.pause(); synth.resume(); } }, 9000); // Chrome long-utterance workaround
+  }
+
+  /* Score a candidate voice against a profile. Higher = better. */
+  function scoreVoice(v, p) {
+    let s = 0;
+    if (v.lang && p.lang) {
+      if (v.lang.toLowerCase() === p.lang.toLowerCase()) s += 10;
+      else if (v.lang.toLowerCase().slice(0, 2) === p.lang.toLowerCase().slice(0, 2)) s += 5;
+    }
+    const n = (v.name || '').toLowerCase();
+    if (p.gender === 'female' && /female|woman|samantha|victoria|karen|zira|tessa|moira|fiona|serena|kate|amelie|yuna|siri.*female/.test(n)) s += 6;
+    if (p.gender === 'male' && /male|man|daniel|alex|thomas|oliver|david|fred|lee|jorge|diego|siri.*male/.test(n)) s += 6;
+    if (p.gender === 'male' && /female|woman/.test(n)) s -= 6;
+    if (/enhanced|premium|neural|natural|siri|google/.test(n)) s += 4;
+    if (/compact|espeak|festival|pico/.test(n)) s -= 3;
+    return s;
+  }
+  function bestVoiceFor(name) {
+    if (!supported) return null;
+    if (!voicesReady) refreshVoices();
+    if (!voices.length) return null;
+    const key = String(name);
+    if (picked[key]) return picked[key];
+    const p = profileFor(name);
+    // among equally good voices, spread characters deterministically so two leads don't share one
+    let bestScore = -1e9; const best = [];
+    for (const v of voices) { const s = scoreVoice(v, p); if (s > bestScore) { bestScore = s; best.length = 0; best.push(v); } else if (s === bestScore) best.push(v); }
+    return picked[key] = best[U.hash(key) % best.length];
+  }
+
+  /* ---------------- Speak ---------------- */
+  let enabled = true, current = null;
+  function speak(name, text, opts) {
+    if (!supported || !enabled) return null;
+    opts = opts || {};
+    const utt = new SpeechSynthesisUtterance(text);
+    const p = profileFor(name);
+    utt.pitch = opts.pitch != null ? opts.pitch : p.pitch;
+    utt.rate = opts.rate != null ? opts.rate : p.rate;
+    utt.volume = opts.vol != null ? opts.vol : p.vol;
+    utt.lang = p.lang;
+    const v = opts.voice || bestVoiceFor(name);
+    if (v) utt.voice = v;
+    if (opts.interrupt !== false) synth.cancel(); // dialogue should never overlap
+    if (opts.onstart) utt.onstart = opts.onstart;
+    if (opts.onend) utt.onend = opts.onend;
+    if (opts.onerror) utt.onerror = opts.onerror;
+    current = utt;
+    synth.speak(utt);
+    return utt;
+  }
+  function stop() { if (supported) synth.cancel(); current = null; }
+  function setEnabled(v) { enabled = !!v; if (!enabled) stop(); }
+  function isSpeaking() { return supported && (synth.speaking || synth.pending); }
+
+  /* ---------------- Introspection for the settings UI ---------------- */
+  function listProfiles() {
+    return Object.entries(PROFILES).map(([name, p]) => ({ name, pitch: p.pitch, rate: p.rate, vol: p.vol, lang: p.lang, desc: p.desc || '', voice: (bestVoiceFor(name) || {}).name || '(system default)' }));
+  }
+
+  return { supported, speak, stop, setEnabled, isSpeaking, profileFor, bestVoiceFor, refreshVoices, listProfiles, get voices() { return voices; }, get enabled() { return enabled; } };
+})();
+
+/* Game-facing wrapper: applies the player's settings + Ghost's chosen voice on top of the profiles */
+NV.Voice = (() => {
   const clean = t => String(t).replace(/[“”"]/g, '').replace(/\s*—\s*/g, ', ').replace(/\[[^\]]*\]/g, '').replace(/¢/g, ' credits');
   return {
     speak(speaker, text) {
-      const set = NV.Settings.get(); if (!synth || !set.voice) return false;
-      const pr = profile(speaker); if (pr.narr && !set.narrator) return false;
-      synth.cancel();
-      const u = new SpeechSynthesisUtterance(clean(text)); const v = voiceFor(pr); if (v) u.voice = v;
-      u.pitch = U.clamp(pr.pitch, 0, 2); u.rate = U.clamp(pr.rate * (set.voiceRate || 1), .5, 2); u.volume = U.clamp((set.voiceVol == null ? .9 : set.voiceVol) * set.master, 0, 1);
-      busy = true; last = u; u.onend = u.onerror = () => { if (last === u) busy = false; };
-      synth.speak(u); return true;
+      const set = NV.Settings.get(); NV.Voices.setEnabled(!!set.voice);
+      if (!set.voice || !NV.Voices.supported) return false;
+      const name = speaker ? String(speaker) : 'Narrator';
+      if (!speaker && !set.narrator) return false;
+      const p = NV.Voices.profileFor(name), S = NV.State.get();
+      let pitch = p.pitch;
+      if (/^Ghost\b/.test(name) && S && S.profile) pitch *= [.85, 1, 1.18][S.profile.voice == null ? 1 : S.profile.voice];
+      const vol = U.clamp(p.vol * (set.voiceVol == null ? .9 : set.voiceVol) * set.master, 0, 1);
+      return !!NV.Voices.speak(name, clean(text), { pitch: U.clamp(pitch, 0, 2), rate: U.clamp(p.rate * (set.voiceRate || 1), .3, 3), vol });
     },
-    stop() { if (synth && (synth.speaking || synth.pending)) synth.cancel(); busy = false; },
-    busy: () => busy,
+    stop() { NV.Voices.stop(); },
+    busy: () => NV.Voices.isSpeaking(),
   };
 })();
 
@@ -2681,24 +2867,36 @@ NV.UI = (() => {
     const S = NV.Settings;
     const rows = [
       ['master', 'Master volume', 'range', 0, 1, .1], ['music', 'Music volume', 'range', 0, 1, .1], ['sfx', 'Effects volume', 'range', 0, 1, .1],
-      ['voice', 'Voice acting', 'bool'], ['voiceVol', 'Voice volume', 'range', 0, 1, .1], ['voiceRate', 'Speech speed', 'range', .7, 1.5, .05], ['narrator', 'Narrator voice', 'bool'],
+      ['voice', 'Voice acting', 'bool'], ['voiceVol', 'Voice volume', 'range', 0, 1, .1], ['voiceRate', 'Speech speed', 'range', .7, 1.5, .05], ['narrator', 'Narrator voice', 'bool'], ['voicecast', 'Voice cast', 'open', () => UI.voiceCast()],
       ['textSpeed', 'Text speed', 'enum', ['Slow', 'Normal', 'Fast', 'Instant'], 0], ['sens', 'Mouse sensitivity', 'range', .3, 3, .1],
       ['fov', 'Field of view', 'range', 65, 110, 5], ['invertY', 'Invert Y axis', 'bool'], ['shake', 'Screen shake', 'bool'],
-      ['scan', 'Scanline filter', 'bool'], ['showStats', 'Show world-state changes', 'bool'], ['walk', 'Walkable story scenes', 'bool'], ['travel', 'Travel to missions in the city', 'bool'], ['showFps', 'Show FPS', 'bool'], ['gfxmenu', 'Graphics settings', 'open'],
+      ['scan', 'Scanline filter', 'bool'], ['showStats', 'Show world-state changes', 'bool'], ['walk', 'Walkable story scenes', 'bool'], ['travel', 'Travel to missions in the city', 'bool'], ['showFps', 'Show FPS', 'bool'], ['gfxmenu', 'Graphics settings', 'open', () => UI.graphics()],
     ];
     const m = modal(`<div class="stitle">SETTINGS</div><div class="rows"></div><button class="btn" style="margin-top:12px">Done</button>
       <p class="muted" style="margin-top:14px;font-size:14px;line-height:1.6">Controls — <span class="kbd">WASD</span> move · <span class="kbd">Mouse</span> look · <span class="kbd">LMB</span> fire · <span class="kbd">Shift</span> sprint · <span class="kbd">C</span> sneak · <span class="kbd">Space</span> dash · <span class="kbd">E</span> interact / takedown / hack · <span class="kbd">Q</span> EMP · <span class="kbd">Esc</span> pause.<br>Story — <span class="kbd">Space</span>/<span class="kbd">Click</span> advance · <span class="kbd">1-4</span> choose · <span class="kbd">A</span> auto · <span class="kbd">Ctrl</span> hold to skip · <span class="kbd">L</span> log. Gamepads supported.</p>`);
     const box = m.querySelector('.rows');
-    const fmt = r => { if (r[2] === 'open') return (NV.Quality.get().name) + ' ▸'; const v = S.get()[r[0]]; if (r[2] === 'bool') return v ? 'ON' : 'OFF'; if (r[2] === 'enum') return '◂ ' + r[3][v] + ' ▸'; if (r[0] === 'fov') return v + '°'; if (r[0] === 'sens') return v.toFixed(1) + '×'; return Math.round(v * 100) + '%'; };
+    const fmt = r => { if (r[2] === 'open') return (r[0] === 'gfxmenu' ? NV.Quality.get().name : NV.Voices.voices.length + ' voices') + ' ▸'; const v = S.get()[r[0]]; if (r[2] === 'bool') return v ? 'ON' : 'OFF'; if (r[2] === 'enum') return '◂ ' + r[3][v] + ' ▸'; if (r[0] === 'fov') return v + '°'; if (r[0] === 'sens') return v.toFixed(1) + '×'; return Math.round(v * 100) + '%'; };
     const els = rows.map(r => { const e = U.el('div', 'row', `<span>${r[1]}</span><span class="val">${fmt(r)}</span>`); box.appendChild(e); return e; });
     const done = m.querySelector('.btn'); els.push(done);
     const change = (k, d) => {
-      const r = rows[k]; if (!r) return; if (r[2] === 'open') { UI.graphics().then(() => els[k].querySelector('.val').textContent = fmt(r)); return; } const cur = S.get()[r[0]]; let v;
+      const r = rows[k]; if (!r) return; if (r[2] === 'open') { r[3]().then(() => els[k].querySelector('.val').textContent = fmt(r)); return; } const cur = S.get()[r[0]]; let v;
       if (r[2] === 'bool') v = cur ? 0 : 1; else if (r[2] === 'enum') v = (cur + d + r[3].length) % r[3].length; else v = Math.round(U.clamp(cur + d * r[5], r[3], r[4]) * 100) / 100;
       S.set(r[0], v); els[k].querySelector('.val').textContent = fmt(r); NV.Audio.sfx('ui');
     };
     const fin = () => { UI.pop(h); m.remove(); res(); };
     const h = UI.push(nav(els, { select: k => { if (k === els.length - 1) fin(); else change(k, 1); }, left: k => change(k, -1), right: k => change(k, 1), back: fin }));
+  });
+
+  /* ---------------- voice cast (profiles + the OS voice each character got) ---------------- */
+  UI.voiceCast = () => new Promise(res => {
+    const list = NV.Voices.listProfiles();
+    const m = modal(`<div class="stitle">VOICE CAST</div><p class="muted" style="font-size:14px;margin:-6px 0 10px">${NV.Voices.supported ? NV.Voices.voices.length + ' system voices found. Press Enter on a character to hear them. Voices come from your OS/browser — Chrome and Edge include natural-sounding ones.' : 'Speech synthesis is not available in this browser.'}</p><div class="rows"></div><button class="btn" style="margin-top:12px">Done</button>`);
+    const box = m.querySelector('.rows');
+    const els = list.map(c => { const e = U.el('div', 'row', `<span><b>${U.esc(c.name)}</b><br><span class="muted" style="font-size:13px">${U.esc(c.desc || '')}</span></span><span class="val" style="font-size:12px;min-width:200px">${U.esc(c.voice)}<br>pitch ${c.pitch} · rate ${c.rate}</span>`); box.appendChild(e); return e; });
+    els.push(m.querySelector('.btn'));
+    const SAMPLE = { 'Ghost': 'I knew the rent was hostile.', 'Raven': 'You always wait until the last possible second?', 'Voss': 'If you can read this, I failed.', 'Warden-3': 'Municipal safety inspection.', 'ASCENSION': 'Who is outside the model?', 'Narrator': 'Artificial rain crawls down the smart-glass.' };
+    const fin = () => { NV.Voice.stop(); UI.pop(h); m.remove(); res(); };
+    const h = UI.push(nav(els, { select: k => { if (k === els.length - 1) return fin(); const c = list[k]; NV.Voice.speak(c.name === 'Narrator' ? null : c.name, SAMPLE[c.name] || (c.desc ? c.desc + '.' : 'This is ' + c.name + '. New Avalon never sleeps.')); }, back: fin }));
   });
 
   /* ---------------- graphics settings (every option + 10 presets) ---------------- */
@@ -2802,7 +3000,7 @@ NV.UI = (() => {
     el.querySelectorAll('.topbar span').forEach(s => s.onclick = e => { e.stopPropagation(); topAction(s.dataset.a); });
     return story;
   };
-  UI.storyClose = () => { if (story) { story.el.remove(); story = null; } };
+  UI.storyClose = () => { NV.Voice.stop(); if (story) { story.el.remove(); story = null; } };
   UI.storyHide = hide => { if (story) story.el.classList.toggle('hidden', hide); };
   function topAction(a) {
     if (!story) return;
