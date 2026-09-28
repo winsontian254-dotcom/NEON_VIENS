@@ -748,7 +748,7 @@ def main():
     endings = {}
     for i, l in enumerate(lines):
         m = re.match(r"^Ending ([A-F]) — (.+)$", l.strip())
-        if m and i + 1 < len(lines) and lines[i + 1].startswith("Choice:"):
+        if m and i + 1 < len(lines) and re.match(r"^(Secret )?[Cc]hoice:", lines[i + 1]):
             endings[m.group(1)] = {"title": m.group(2), "desc": clean(lines[i + 1])}
     missions = {}
     for i, l in enumerate(lines[:1270]):
