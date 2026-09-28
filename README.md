@@ -65,7 +65,9 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 | Enter / exit vehicle (free roam) | `F` | X |
 | Drive: throttle / reverse, steer | `W`/`S`, `A`/`D` | RT / LT, left stick |
 | Drive: handbrake, boost, horn | `Space`, `Shift`, `H` | A, LB, R3 |
-| Pause | `Esc` | Start |
+| Pause · Black Market | `Esc` | Start |
+| Hotbar slot / cycle | `1`–`9` / wheel | RB |
+| Zoom (precision rifles) | RMB | — |
 | Chat (multiplayer) | `Enter` | — |
 | Volume down / up, mute | `-` / `=`, `M` | — |
 | Jump (the void after the ending) | `Space` | A |
@@ -77,6 +79,16 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 | Journal | `J` | — |
 
 ---
+
+## Arsenal & Black Market
+
+Pause (**Esc**) → **Black Market** to buy from the arsenal: 267 weapons, tools, drones, cyberattacks, environmental triggers, boss gear, strategic strikes and legendaries from the script. Pick a hotbar slot and equip; right-click a slot to clear it.
+
+- Hotbar: **1–9** or mouse wheel (RB on gamepad). **LMB** uses the selected item, **RMB** zooms precision rifles.
+- Each item's behaviour comes from what it is: smart/predictive guns home in, rail/phase guns pierce, Echo guns repeat their shot, Null/EMP gear stuns and fries drones, nonlethal gear takes enemies down alive, melee is silent and one-shots unaware guards.
+- Grenades, rockets and mines have area effects: frag, EMP, sleep gas, coolant freeze, decoys and gravity. Hacks can stun, turn guards against their squad, overload them, blind a squad, mark every hostile, or cloak you. Drones attack, heal, jam sensors or shield you. Environmental and strategic weapons call in crane drops, floods, coolant, kinetic rods, solar beams and barrages at the point you aim at.
+- Every item has its own procedural 3D viewmodel (pistol, SMG, rifle, shotgun, sniper, rotary, laser, launcher, grenade, blade, hammer, baton, wrist rig, drone remote, strike designator), coloured by faction.
+- Credits: 9 ¢ per kill, 14 ¢ per nonlethal takedown, 150 ¢ or more per completed operation, plus gigs and data shards. Multiplayer sessions start with 3000 ¢.
 
 ## Multiplayer
 

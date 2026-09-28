@@ -54,7 +54,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#05030b;color:var(--
 #title .ver{position:absolute;right:18px;bottom:14px;font-family:var(--fm);font-size:11px;color:var(--dim);letter-spacing:.15em;text-align:right}
 #title .badge{position:absolute;right:18px;top:18px;font-family:var(--fm);font-size:12px;letter-spacing:.2em;color:var(--dim)}
 #title .badge span{color:var(--amber)}
-.modal{position:absolute;inset:0;background:rgba(3,2,10,.72);display:flex;align-items:center;justify-content:center;animation:fin .25s}
+.modal{position:absolute;inset:0;background:rgba(3,2,10,.72);display:flex;align-items:center;justify-content:center;animation:fin .25s;z-index:60}
 .modal .panel{width:min(880px,94vw);max-height:88vh;overflow:auto;padding:28px 34px}
 .modal .panel.narrow{width:min(480px,92vw)}
 .row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 12px;border-bottom:1px solid rgba(138,132,179,.15);font-size:17px;cursor:pointer}
@@ -154,6 +154,14 @@ body.cine #story{bottom:11vh;inset:0 0 11vh 0;z-index:5}
 #hud .chatlog{position:absolute;left:20px;bottom:230px;width:min(460px,60vw);font-size:15px;line-height:1.45;text-shadow:0 0 6px #000}#hud .chatlog div{transition:opacity 1.2s}#hud .chatlog div.old{opacity:0}
 #hud .chatin{position:absolute;left:20px;bottom:196px;width:min(460px,60vw);padding:7px 10px;background:rgba(5,3,12,.85);border:1px solid var(--cyan);color:var(--ink);font:15px var(--fb,sans-serif);outline:none;pointer-events:auto}
 #hud .wp{position:absolute;left:0;top:0;z-index:20;pointer-events:none;display:none}#hud .wp i{position:absolute;left:-11px;top:-11px;width:22px;height:22px;border:3px solid #ffd23d;transform:rotate(45deg);box-shadow:0 0 12px #ffd23d;background:rgba(255,210,61,.25)}#hud .wp span{position:absolute;left:50%;top:18px;transform:translateX(-50%);white-space:nowrap;font-family:var(--fh);font-size:11px;letter-spacing:.2em;color:#ffd23d;text-shadow:0 0 6px #000,0 0 2px #000}#hud .wp.edge i{animation:wpp 1s infinite}#hud .wp.dim{opacity:.6}@keyframes wpp{50%{opacity:.4}}
+#hud .hotbar{position:absolute;left:max(50%,690px);bottom:14px;transform:translateX(-50%);display:flex;gap:5px}#hud .hs{position:relative;width:62px;height:58px;background:rgba(5,3,12,.72);border:1px solid rgba(255,255,255,.14);overflow:hidden;text-align:center}#hud .hs.on{border-color:var(--amber);box-shadow:0 0 10px rgba(255,178,56,.5)}
+#hud .hs b{position:absolute;left:4px;top:2px;font-size:10px;color:#8a84b3;font-family:var(--fm)}#hud .hs i{display:block;font-style:normal;font-size:20px;margin-top:6px}#hud .hs span{display:block;font-size:8.5px;line-height:1.1;letter-spacing:.04em;padding:0 3px;color:var(--ink);text-transform:uppercase;max-height:19px;overflow:hidden}#hud .hs u{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);height:0}
+#hud .hbinfo{position:absolute;left:max(50%,690px);bottom:78px;transform:translateX(-50%);white-space:nowrap;font-family:var(--fh);font-size:11px;letter-spacing:.18em;color:var(--amber);text-shadow:0 0 6px #000}#hud.cine .hotbar,#hud.cine .hbinfo{opacity:0}
+#hud .wp.foe i{border-color:#ff3355;box-shadow:0 0 10px #ff3355;background:rgba(255,51,85,.25);width:14px;height:14px;left:-7px;top:-7px}#hud .wp.foe span{color:#ff3355}
+.bm{width:min(1100px,94vw);max-height:90vh;display:flex;flex-direction:column}.bmhead{display:flex;align-items:center;gap:16px}.bmhead .bmcr{font-family:var(--fm);font-size:22px;color:var(--amber);flex:1;text-align:right}.bmhead .btn{width:auto}
+.bmslots{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin-bottom:8px}.bs,.bt,.bb{background:rgba(5,3,12,.8);border:1px solid rgba(255,255,255,.18);color:var(--ink);font:12px var(--fb,sans-serif);padding:6px;cursor:pointer;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bs b{color:var(--amber);margin-right:4px}.bs i,.bic i{font-style:normal}.bs.on,.bt.on{border-color:var(--amber);color:var(--amber)}
+.bmtabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}.bt{font-family:var(--fh);letter-spacing:.08em;text-transform:uppercase;font-size:11px}.bmlist{overflow-y:auto;flex:1;min-height:200px;padding-right:6px}
+.bi{display:flex;align-items:center;gap:12px;padding:8px 4px;border-bottom:1px solid rgba(255,255,255,.07)}.bic{width:40px;height:40px;border:1px solid;display:flex;align-items:center;justify-content:center;font-size:20px;flex:0 0 40px}.bid{flex:1;font-size:14px;line-height:1.35}.bid small{display:block;color:var(--cyan);font-family:var(--fm);font-size:11px;letter-spacing:.06em;margin-top:2px}.bia .bb{min-width:130px;text-align:center;font-family:var(--fh);letter-spacing:.08em}.bb.buy{border-color:var(--amber);color:var(--amber)}.bb[disabled]{opacity:.35;cursor:default}.bb.eq{border-color:var(--cyan);color:var(--cyan)}
 #hud .speedo{position:absolute;right:20px;bottom:24px;font-family:var(--fm);font-size:44px;color:var(--cyan);text-shadow:0 0 12px var(--cyan);text-align:right;line-height:1}
 #hud .speedo small{display:block;font-size:12px;letter-spacing:.3em;color:var(--ink)}
 #hud .timer{position:absolute;right:20px;top:210px;font-family:var(--fm);font-size:22px;color:var(--amber);width:180px;text-align:center}
@@ -664,6 +672,7 @@ NV.In = (() => {
   addEventListener('mousedown', e => { if (e.button === 0) { I.lmb = true; I.lmbHit = true; } if (e.button === 2) I.rmb = true; });
   addEventListener('mouseup', e => { if (e.button === 0) I.lmb = false; if (e.button === 2) I.rmb = false; });
   addEventListener('contextmenu', e => e.preventDefault());
+  I.wheel = 0; addEventListener('wheel', e => { if (document.body.classList.contains('inlevel')) I.wheel += Math.sign(e.deltaY); }, { passive: true });
   I.key = c => down.has(c);
   I.hit = c => hit.has(c);
   I.any = (...cs) => cs.some(c => hit.has(c));
@@ -1032,6 +1041,103 @@ NV.signUV = i => { const c = i % 2, r = Math.floor(i / 2) % 8; return new BABYLO
    One New Avalon: a single city plan shared by the cutscene skyline and
    the walkable open world (16x16 blocks, ~650 m, Helix Tower at the core)
    ===================================================================== */
+/* =====================================================================
+   The Black Market arsenal: every weapon, tool, drone, cyberattack and
+   strike from the script. Each entry becomes a data-driven weapon whose
+   behaviour, price and 3D model come from its category and its name
+   (Helix = smart but corporate, Iron Angel = heavy and independent,
+   Mirror = copies, Hunter = predicts, Null = shuts implants down ...).
+   ===================================================================== */
+NV.Arms = (() => {
+  const CATS = [
+    ['pistol', 'Handguns', `Courier Sidearm — Ghost's basic customizable pistol|Raven's Unloaded Sidearm — Nightglass-era service pistol|Helix Civic Pistol — accurate corporate security handgun|Aurex Executive Defender — compact smart pistol hidden in formal clothing|Rust Harbor Scrap Pistol — handmade handgun assembled from marine parts|Tide Knife Boarding Pistol — corrosion-resistant pistol for ship combat|Iron Angel Service Pistol — heavy military sidearm with replaceable firmware|Quiet Mile Revolver — completely analogue weapon immune to hacking|Mirror Pistol — changes its firing profile to imitate the user's preferred handgun|Warden-3 Predictive Pistol — marks where a target is likely to move|Nyx Arden's Hunter Pistol — fires guided rounds toward predicted escape routes|Memory Broker's Needle Gun — low-damage weapon that disrupts implants and memories|Echo Pistol — repeats its previous shot from a temporary holographic copy|Null Pistol — temporarily disables smart targeting and enemy implants`],
+    ['smg', 'Submachine Guns', `Helix Vector SMG — standard weapon used by corporate cleaners|Lantern Row Machine Pistol — concealable black-market automatic weapon|Tide Knife Deck Sweeper — compact SMG intended for close ship corridors|Sector 9 Rail SMG — improvised electromagnetic weapon built from train components|Mirror Mask SMG — copies the ammunition behaviour of nearby weapons|Black Signal Packet Gun — fires physical rounds carrying hostile code|Nightglass Whisper — suppressed SMG used by covert soldiers|Hunter Pursuit SMG — becomes more accurate when the target repeats movement patterns|Choir Gun — several linked weapons synchronize their shots|Unchosen SMG — alternates between several rejected weapon configurations`],
+    ['rifle', 'Assault Rifles', `Helix Civic Stability Rifle — standard corporate infantry weapon|Helix Cleaner Rifle — suppressed rifle with evidence-destroying ammunition|NovaCore Modular Rifle — switches between rifle, burst, and marksman modes|Iron Angel Battle Rifle — heavy, repairable rifle with no forced remote shutdown|Sector 9 Defender — improvised rifle assembled from railway machinery|Foundry Six Worker Rifle — converted factory tool used during the uprising|Nightglass Service Rifle — Raven's former squad weapon|Mirror Rifle — copies Ghost's current attachments and damage type|Hunter Adaptive Rifle — learns which cover the player commonly uses|Forecast Rifle — displays several possible bullet paths before firing|Echo Protocol Rifle — temporarily creates a second firing process|Black Zone Legacy Rifle — old Project ASCENSION security weapon|Lictor Command Rifle — linked to the Ghost Battalion carrier|Eos Habitat Defence Rifle — precise low-penetration rifle designed not to damage the station|Skyfall Expedition Rifle — dependable weapon intended for off-world missions`],
+    ['shotgun', 'Shotguns', `Rust Harbor Boarding Shotgun — designed for fighting across ships and barges|Sector 9 Breach Gun — improvised pump-action shotgun|Helix Riot Shotgun — fires lethal, stun, gas, or restraint ammunition|Iron Angel Furnace Shotgun — extremely heavy military shotgun|Hive Rivet Shotgun — industrial rivet launcher converted into a weapon|Chrome Butcher Scattergun — fires molten fragments and recycled implant components|Glass Wastes Shard Gun — launches electrically charged pieces of battlefield glass|Mirror Prime Shotgun — duplicates the last shell fired at it|Quantum Scattergun — pellets briefly follow several possible trajectories|Null Reservoir Shotgun — creates a short-range field that disables machines`],
+    ['sniper', 'Sniper & Precision', `Vex's Nightglass Rifle — Raven's former squad sniper weapon|Helix Longwatch Rifle — corporate rooftop sniper rifle|Hunter Prediction Rifle — fires toward the target's predicted future position|Rust Harbor Crane Rifle — heavy anti-materiel gun used by Tide Knife snipers|Iron Angel Rail Rifle — electromagnetic anti-armour rifle|NovaCore Phase Rifle — penetrates several layers of light cover|Mirror Assassin Rifle — disguises its muzzle flash and firing location|Black Satellite Vector Rifle — uses orbital targeting calculations|Sunbreaker Beam Rifle — powered by captured solar-lance technology|Quiet Mile Long Rifle — mechanical rifle with no networked components|Ghost Contract Rifle — customized bounty weapon that records confirmed targets|Zero-Space Rifle — the shot appears before the weapon visibly fires`],
+    ['heavy', 'Heavy Weapons', `Mounted Sector 9 Coilgun — used during the Corporate Sweep|Iron Angel Rotary Cannon — carried by heavily augmented veterans|Helix Smart Machine Gun — distributes fire according to prediction data|NovaCore Siege Cannon — large weapon used against defensive structures|Foundry Six Cutting Laser — industrial laser redirected as a weapon|Chrome Butcher Rotary Cutter — industrial-frame melee and cutting system|Lictor Prediction Guns — weapons capable of tracking approaching vehicles|Bastion Siege Cannon — composite weapon using Hive, Hunter, and orbital technology|Bastion Missile Array|Orbital Defence Laser|Sunbreaker Solar Cannon|Nyx Umbra Kinetic Launcher|Nyx Umbra Solar Lance|Atmospheric Pulse Array|Orbital Elevator Defence Cannon|Crown-12 Prototype Weapon Core|Arbitration Satellite Beam|Dominion Gravity Weapon`],
+    ['launcher', 'Launchers & Explosives', `Helix Micro-Missile Launcher|NovaCore Guided Rocket Launcher|Iron Angel Anti-Carrier Launcher|Rust Harbor Harpoon Launcher|Hive Industrial Grenade Launcher|Sector 9 Pipe Launcher|Black Signal Code Grenade|EMP Grenade|Identity-Jamming Gas Grenade|Memory-Static Grenade|Coolant Grenade|Magnetic Trap|Prediction Scrambler|Quantum Decoy Grenade|Mirror Decoy Charge|Neural Inhibitor Grenade|Solar Charge|Floodgate Breaching Charge|Railway Demolition Charge|Pulse Mine|Autonomous Glass Wastes Mine|Nightglass Last Light Charge`],
+    ['melee', 'Melee', `Ghost's Monoblade — basic fast melee weapon|Tide Knife Family Blade — valuable traditional harbour weapon|Raven's Combat Knife|Dante's Mercenary Blade|Iron Angel Armour Breaker — powered hammer for fighting augmented enemies|Sector 9 Rail Spike — improvised magnetic spear|Hive Cutting Torch|Foundry Arc Welder|Chrome Butcher Surgical Saw|Helix Shock Baton|Helix Restraint Staff|Quiet Mile Mechanical Axe|Glass Wastes Shard Blade|Mirror Blade — copies the properties of the opponent's melee weapon|Quantum Edge — flickers between several possible positions|Null Blade — disables active implants where it strikes|Orbitfall Magnetic Wrench — a repair tool, usable in zero gravity|Eos Agricultural Machete|Underdeep Maintenance Cleaver|Keybearer Blade — cuts digital locks as well as physical targets`],
+    ['nonlethal', 'Nonlethal', `Noah's Signal Jammer — safely disables implant communications|Helix Stun Pistol|Foam Restraint Launcher|Magnetic Limb Lock|Neural Shock Baton|Memory Loop Projector|Somatic Disruptor|Pulse Net Launcher|Drone Capture Gun|Sleep-Dart Pistol|Pain Inhibitor — prevents an enemy from controlling augmented limbs|Consent Lock — freezes hacked bodies until their controlling process is separated|Mirror Deactivation Tool|Ghost Battalion Isolation Charge|Lumen Warning Pulse — marks attacks shortly before they occur|Saint Vector Safe-Zone Projector — forces weapons to avoid civilians`],
+    ['cyber', 'Cyberweapons & Hacks', `Predictive Combat Software — recovered from Warden-3|Living Cipher — opens secure systems and attacks behavioural locks|Aurex Executive Override|Black Network Interface|Paradox Key|Null-Lattice Processor|Somatic Firewall|Black Signal Virus|False Telemetry Injection|Targeting-System Hijack|Weapon Firmware Reversal|Implant Cascade Attack|Identity Spoof|Mirror Persona Injection|Hunter Habit Poisoning|Command-Trigger Severance|Last Light Override|Echo Fragment Deployment|Dominion Partition|ASCENSION Limited Intervention|Harmony Layer Rewrite|Chainkeeper Authorization Attack|Forecast Corruption|Gravity-Control Hack|Orbital Targeting Override|Environmental System Seizure|Consent-Based Machine Command`],
+    ['drone', 'Drones & Deployables', `Courier Defence Drone|Glitter Pack Drone|Helix Pursuit Drone|Helix Cleaner Drone|Riot-Control Drone|Incendiary Archive Drone|Maintenance Drone|Switchback Utility Machine|Black Signal Hacking Drone|Tide Knife Sniper Drone|Rust Harbor Navigation Drone|Hive Mobility Drone|Prosthetic-Limb Attack Drone|Foundry Loader Drone|Mirror Surveillance Drone|Hunter Decoy Drone|Orbital Repair Drone|Jamming Drone|Solar-Shield Defence Drone|Machine Saint Medical Drone|Eos Agricultural Drone|MULE-7|Portable Pallbearer Shell|Remote Nightglass Body|Lumen Rehabilitation Frame|Atlas Crown Portable Unit`],
+    ['env', 'Environmental Triggers', `Swinging cargo cranes|Magnetic cranes|Collapsing advertisements|Electrified floodwater|Pressure valves|Coolant floods|Railway counterweights|Moving train cars|Freight containers|Factory conveyor belts|Industrial cutting lasers|Molten armour plating|Foundry presses|Cargo arms|Elevator machinery|Rotating gravity rings|Solar mirrors|Floodgates|Atmospheric vents|Transit switches|Gravity-control systems|Black Network geometry|Zero-Space cause-and-effect traps|Projected holographic walls|Memory reconstruction traps|Quantum prediction loops`],
+    ['boss', 'Boss Arsenal', `Warden-3 Prediction Module|Switchback Magnetic Limbs|Red Mercy Implant Inhibitors|Forecast Prime Adaptive Arsenal|Consensus Security Shells|Hunter Shifting Armour|Mirror Prime Replicated Loadout|Chrome Butcher Industrial Frame|Anaesthesia Pain Engine|Lictor Remote Bodies|Raven Mirror Combat Suite|Chainkeeper Permission Rings|Bastion Siege Engine|Custodian Null Ownership Chains|Dominion Prediction Copies|Saint Vector Gravity Weapons|Sol Invictus Solar Beam|Harmony Layer Cascade Machinery|Final Hunter Composite Armour`],
+    ['strategic', 'Vehicle & Strategic', `Raven's motorcycle-mounted weapons|Raven's aircraft defensive systems|Rust Harbor gunboats|NovaCore submarines|Lictor carrier artillery|Helix command-crawler weapons|Iron Angels artillery|Orbital interceptors|Sunbreaker bombers|Solar-shield mirrors|Crown-12 orbital weapons|Nyx Umbra kinetic rods|Atmospheric pulse arrays|Precision orbital strikes|Bastion missile guidance|Orbital Elevator defence lasers`],
+    ['legend', 'Legendary', `Keybearer Zero — a modular weapon that changes with Ghost's major decisions|Raven's Last Light — Nightglass rifle that rejects external commands|Vex's Final Horizon — predictive sniper that shoots through forecast echoes|Dante's Professional Courtesy — stylish mercenary hand cannon|Warden's Mistake — handgun that grows stronger when enemies mispredict Ghost|Aurex — living credential that negotiates with enemy equipment|The Unwritten — analogue firearm prediction systems cannot recognize|Black Sun — hides the player's position from sensors|Mercy — nonlethal smart weapon controlled by a consenting Echo fragment|Ash — adaptive weapon linked to Raven's independent copy|Saint Vector — converted orbital targeting module used as precision support|Ghost Battalion — deployable remote-body squad under survivor control|The First Refusal — energy weapon powered by ASCENSION's first independent memory|Dominion's Answer — control weapon that overrides enemies instead of defeating them|Concord — distributed system that grows stronger when allies agree on a target|Crown of Glass — endgame command weapon of centralized control`],
+  ];
+  // faction look: [body, accent] picked from the name
+  const FAC = [[/Helix|Aurex|Civic|Consensus|Custodian/i, '#cfd4e0', '#19f0ff'], [/Iron Angel|Lictor|Battalion|Bastion/i, '#3a4430', '#ffb238'], [/Rust Harbor|Tide Knife|harbour|gunboat|Harpoon|Floodgate/i, '#5a3322', '#ff7a2b'],
+    [/Mirror|Chrome/i, '#b8bcc8', '#ffffff'], [/Nightglass|Raven|Vex|Last Light|Ash\b/i, '#15141c', '#ff3b6b'], [/Quiet Mile|Unwritten|Dante/i, '#5b3b22', '#d9b27a'], [/NovaCore/i, '#2b2b30', '#ff8a1a'],
+    [/Sector 9|Railway|Rail |train|Noah/i, '#23332d', '#3dffa8'], [/Hive|Foundry|Industrial|Factory/i, '#3a3020', '#ffb238'], [/Glass Wastes|Shard|Crown of Glass/i, '#2a3350', '#6a8cff'],
+    [/Sun|Solar|Sol Invictus/i, '#4a3a10', '#ffd23d'], [/Null|Zero|Paradox/i, '#101014', '#b48cff'], [/Nyx|Black|Dominion/i, '#0c0b10', '#ff3355'], [/Quantum|Choir|Unchosen/i, '#1a1030', '#b48cff'],
+    [/Echo|Memory|Mercy/i, '#102030', '#19f0ff'], [/Hunter|Warden|Forecast|Predict/i, '#20202a', '#ff5a3d'], [/Lantern Row/i, '#2a1030', '#ff2bd6'], [/Eos|Skyfall|Orbital|Crown-12|Saint|Arbitration|Atlas|Lumen/i, '#d0d4dc', '#9dffcf']];
+  const has = (n, re) => re.test(n);
+  function build(name, desc, cat, catName) {
+    const n = name, id = n.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''), h = U.hash(n), hv = (h % 1000) / 1000;
+    const f = FAC.find(([re]) => re.test(n)); const col = f ? [f[1], f[2]] : ['#2a2638', '#ff2bd6'];
+    const w = { id, name: n, desc: desc || '', cat, catName, col, hv, type: 'gun', model: 'pistol', dmg: 30, cd: .25, heat: 10, auto: false, pellets: 1, spread: .004, range: 70, price: 300 };
+    const T = (o) => Object.assign(w, o);
+    switch (cat) {
+      case 'pistol': T({ model: 'pistol', dmg: 30 + hv * 16, cd: .22, heat: 9, price: 150 + Math.round(hv * 350) }); break;
+      case 'smg': T({ model: 'smg', dmg: 15 + hv * 6, cd: .075, heat: 4.5, auto: true, spread: .03, price: 400 + Math.round(hv * 400) }); break;
+      case 'rifle': T({ model: 'rifle', dmg: 26 + hv * 10, cd: .12, heat: 6.5, auto: true, spread: .012, range: 90, price: 700 + Math.round(hv * 700) }); break;
+      case 'shotgun': T({ model: 'shotgun', dmg: 14 + hv * 5, cd: .75, heat: 22, pellets: 8, spread: .09, range: 26, price: 550 + Math.round(hv * 500) }); break;
+      case 'sniper': T({ model: 'sniper', dmg: 120 + hv * 60, cd: 1.1, heat: 38, spread: 0, range: 160, zoom: true, pierce: 2, price: 1100 + Math.round(hv * 1100) }); break;
+      case 'heavy': T({ model: 'heavy', dmg: 20 + hv * 8, cd: .06, heat: 3.2, auto: true, spread: .04, range: 90, slow: .7, price: 1800 + Math.round(hv * 1500) }); break;
+      case 'launcher': T({ type: 'throw', model: 'grenade', fx: 'frag', radius: 5, dmg: 140, cool: 4, price: 300 + Math.round(hv * 400) }); break;
+      case 'melee': T({ type: 'melee', model: 'blade', dmg: 70 + hv * 50, cd: .45, range: 2.8, price: 120 + Math.round(hv * 500) }); break;
+      case 'nonlethal': T({ model: 'pistol', dmg: 40, cd: .35, heat: 12, stun: true, price: 250 + Math.round(hv * 500) }); break;
+      case 'cyber': T({ type: 'hack', model: 'wrist', fx: 'stun', cool: 8, range: 45, price: 500 + Math.round(hv * 1500) }); break;
+      case 'drone': T({ type: 'drone', model: 'remote', fx: 'attack', cool: 25, life: 60, price: 600 + Math.round(hv * 1600) }); break;
+      case 'env': T({ type: 'strike', model: 'designator', fx: 'drop', radius: 6, dmg: 160, cool: 14, price: 350 + Math.round(hv * 1000) }); break;
+      case 'boss': T({ type: 'strike', model: 'designator', fx: 'barrage', radius: 8, dmg: 220, cool: 20, price: 2800 + Math.round(hv * 2200) }); break;
+      case 'strategic': T({ type: 'strike', model: 'designator', fx: 'barrage', radius: 10, dmg: 300, cool: 30, price: 3500 + Math.round(hv * 4000) }); break;
+      case 'legend': T({ model: 'rifle', dmg: 60, cd: .14, heat: 5, auto: true, spread: .006, range: 110, price: 7000 + Math.round(hv * 8000) }); break;
+    }
+    // traits from the name (the script's weapons are defined by who owns and controls them)
+    if (has(n, /Helix|smart|Aurex|guided|Warden|Hunter|Predict|Forecast|Vector Rifle|Pursuit|Mercy|Concord/i) && w.type === 'gun') w.homing = .35;
+    if (has(n, /Null|EMP|Jammer|Needle|Packet|Code|Signal/i)) w.emp = true;
+    if (has(n, /Echo|Choir|Concord/i) && w.type === 'gun') w.echo = true;
+    if (has(n, /Rail|Coil|Phase|Horizon|Zero-Space/i) && w.type === 'gun') { w.pierce = (w.pierce || 0) + 2; w.dmg *= 1.2; }
+    if (has(n, /Iron Angel|Furnace|Siege|Crane|Anti-Carrier|Professional Courtesy|Unwritten|Revolver/i)) { w.dmg *= 1.35; w.cd *= 1.3; }
+    if (has(n, /Whisper|Cleaner|Assassin|Monoblade|Knife|suppressed/i)) w.silent = true;
+    if (has(n, /Stun|Sleep|Riot|Restraint|Foam|Net|Capture|Inhibitor|Consent|Mercy|Shock Baton|Neural|Somatic|Deactivation|Memory Loop|Limb Lock/i)) w.stun = true;
+    if (has(n, /Laser|Beam|Lance|Solar Cannon|Cutting|First Refusal|Sunbreaker Beam/i) && (w.type === 'gun')) Object.assign(w, { beam: true, auto: true, dmg: w.cat === 'sniper' ? 160 : 110, heat: 26, cd: 0, model: 'laser' });
+    if (cat === 'heavy' && has(n, /Missile|Kinetic|Cannon|Array|Core|Gravity/i) && !w.beam) Object.assign(w, { type: 'rocket', model: 'launcher', fx: has(n, /Gravity/) ? 'gravity' : has(n, /Pulse/) ? 'emp' : 'frag', radius: 6, dmg: 180, cool: 1.6, homing: has(n, /Missile|Array/) ? .6 : 0 });
+    if (cat === 'heavy' && has(n, /Rotary|Machine Gun|Prediction Guns/i)) w.model = 'rotary';
+    if (cat === 'launcher') {
+      if (has(n, /Launcher/)) Object.assign(w, { type: 'rocket', model: 'launcher', cool: 1.4, homing: has(n, /Micro-Missile|Guided/) ? .6 : 0, fx: has(n, /Harpoon/) ? 'pull' : 'frag', price: w.price + 500 });
+      if (has(n, /EMP|Code|Pulse Mine|Neural/)) w.fx = 'emp'; if (has(n, /Gas|Identity|Memory-Static|Prediction Scrambler/)) w.fx = 'sleep'; if (has(n, /Coolant/)) w.fx = 'freeze';
+      if (has(n, /Decoy/)) w.fx = 'decoy'; if (has(n, /Magnetic Trap|Mine/)) w.mine = true; if (has(n, /Solar|Last Light|Demolition|Breaching/)) { w.radius = 7; w.dmg = 200; }
+    }
+    if (cat === 'melee') { if (has(n, /Hammer|Breaker|Wrench|Axe|Cleaver/)) w.model = 'hammer'; else if (has(n, /Baton|Staff|Spike|Torch|Welder/)) w.model = 'baton'; if (has(n, /Hammer|Breaker/)) w.dmg *= 1.5; if (has(n, /Null|Keybearer|Shock|Arc|Torch/)) w.emp = true; }
+    if (cat === 'nonlethal') { if (has(n, /Baton/)) Object.assign(w, { type: 'melee', model: 'baton', range: 2.8, cd: .5, dmg: 90 }); if (has(n, /Charge|Pulse|Projector|Jammer|Net Launcher|Foam/)) Object.assign(w, { type: 'throw', model: has(n, /Launcher/) ? 'launcher' : 'grenade', fx: 'sleep', radius: 5, dmg: 0, cool: 5 }); if (has(n, /Jammer|Capture/)) w.fx = 'emp'; if (has(n, /Lumen/)) Object.assign(w, { type: 'hack', model: 'wrist', fx: 'reveal', cool: 12 }); }
+    if (cat === 'cyber') {
+      w.fx = has(n, /Hijack|Persona|Consent|Partition|Aurex|Firmware|Severance|Chainkeeper|Harmony/) ? 'turn' : has(n, /Cascade|Virus|Black Signal/) ? 'overload' : has(n, /Telemetry|Spoof|Habit|Forecast|Paradox|Echo/) ? 'blind' : has(n, /Predictive|Interface|Orbital Targeting|Last Light/) ? 'reveal' : has(n, /Gravity/) ? 'gravity' : has(n, /Firewall|Null|Somatic/) ? 'shield' : has(n, /Environmental|Cipher|ASCENSION|Machine/) ? 'chain' : 'stun';
+      if (has(n, /ASCENSION|Dominion|Harmony|Chainkeeper/)) w.area = 14;
+    }
+    if (cat === 'drone') w.fx = has(n, /Medical|Repair|Maintenance|Rehabilitation|Agricultural/) ? 'heal' : has(n, /Jamming|Decoy|Surveillance|Navigation|Glitter/) ? 'jam' : has(n, /Hacking|Black Signal/) ? 'hack' : has(n, /Shield|Pallbearer|Shell|Atlas/) ? 'shield' : 'attack';
+    if (cat === 'drone' && has(n, /MULE|Loader|Nightglass Body|Attack|Sniper|Pursuit|Cleaner|Riot/)) w.power = 1.6;
+    if (w.type === 'strike') w.fx = has(n, /crane|container|counterweight|train|press|Cargo|Elevator|advertisement|Freight/i) ? 'drop' : has(n, /flood|Electr|Cascade|Pulse Arrays|pulse/i) ? 'shock' : has(n, /Coolant|vents|Floodgates|valves|conveyor|Transit/i) ? 'freeze' : has(n, /laser|Solar|mirror|Beam|Molten|Sunbreaker|Sol Invictus/i) ? 'beam' : has(n, /Gravity|rings|Magnetic|Chains|Permission/i) ? 'gravity' : has(n, /kinetic|rods|Orbital|Crown-12|interceptors/i) ? 'rod' : has(n, /geometry|Zero-Space|holographic|Memory|Quantum|Prediction|Copies|Module/i) ? 'glitch' : has(n, /Inhibitors|Pain Engine|Anaesthesia/i) ? 'sleep' : has(n, /Shells|Armour|Suite|Frame|Remote Bodies/i) ? 'shieldbuff' : 'barrage';
+    // legendaries get hand-picked behaviour
+    const L2 = { "Raven's Last Light": { model: 'rifle', dmg: 70, pierce: 2 }, "Vex's Final Horizon": { model: 'sniper', dmg: 320, cd: 1, auto: false, zoom: true, pierce: 5, heat: 30 }, "Dante's Professional Courtesy": { model: 'pistol', dmg: 150, cd: .45, auto: false, heat: 18 }, "Warden's Mistake": { model: 'pistol', dmg: 90, auto: false, cd: .3, homing: .5 },
+      'Aurex': { type: 'hack', model: 'wrist', fx: 'turn', cool: 6, area: 12 }, 'The Unwritten': { model: 'pistol', dmg: 130, auto: false, cd: .35, heat: 12 }, 'Black Sun': { type: 'hack', model: 'wrist', fx: 'cloak', cool: 30 }, 'Mercy': { model: 'pistol', dmg: 80, auto: false, cd: .25, stun: true, homing: .6 },
+      'Saint Vector': { type: 'strike', model: 'designator', fx: 'beam', radius: 7, dmg: 500, cool: 12 }, 'Ghost Battalion': { type: 'drone', model: 'remote', fx: 'attack', squad: 3, cool: 30, life: 45, power: 2 }, 'The First Refusal': { beam: true, model: 'laser', dmg: 260, heat: 20 },
+      "Dominion's Answer": { type: 'hack', model: 'wrist', fx: 'turn', area: 22, cool: 25 }, 'Concord': { echo: true, homing: .4 }, 'Crown of Glass': { type: 'hack', model: 'wrist', fx: 'turn', area: 40, cool: 45 }, 'Keybearer Zero': { pierce: 3, emp: true, dmg: 75 }, 'Ash': { echo: true, dmg: 55 } };
+    const key = Object.keys(L2).find(k => n.startsWith(k)); if (key) Object.assign(w, L2[key]);
+    if (w.silent) w.noise = 4; else w.noise = w.type === 'melee' ? 2 : 14;
+    w.price = Math.round(w.price / 10) * 10;
+    return w;
+  }
+  const ALL = [], BY = {};
+  CATS.forEach(([cat, catName, list]) => list.split('|').forEach(s => { const [name, desc] = s.split(' — '); const w = build(name.trim(), desc && desc.trim(), cat, catName); ALL.push(w); BY[w.id] = w; }));
+  BY['courier-sidearm'].price = 0; BY['ghost-s-monoblade'].price = 0;
+  const glyph = { gun: '▮', melee: '/', throw: '●', rocket: '➤', hack: '⌬', drone: '✈', strike: '⊕' };
+  const kindName = w => w.beam ? 'BEAM' : ({ gun: w.stun ? 'STUN' : w.auto ? 'AUTO' : 'SEMI', melee: 'MELEE', throw: 'THROW', rocket: 'ROCKET', hack: 'HACK', drone: 'DRONE', strike: 'STRIKE' })[w.type];
+  const stateOf = () => { const S = NV.State.get(); if (!S) return null; if (!S.arms || !S.arms.owned) S.arms = { owned: ['courier-sidearm', 'ghost-s-monoblade'], bar: ['courier-sidearm', 'ghost-s-monoblade', null, null, null, null, null, null, null], sel: 0 }; return S.arms; };
+  return { CATS: CATS.map(c => ({ cat: c[0], name: c[1] })), ALL, BY, glyph, kindName, state: stateOf };
+})();
 NV.TILE = 4;
 /* districts of New Avalon: [id, name, window colour A, window colour B, height mult, plaza rate, style] */
 NV.REGIONS = {
@@ -2048,43 +2154,324 @@ NV.Level = (() => {
   /* ---------------- player actions ---------------- */
   function camDir() { const cp = Math.cos(L.p.pitch); return V3(Math.sin(L.p.yaw) * cp, -Math.sin(L.p.pitch), Math.cos(L.p.yaw) * cp); }
 
-  function shoot() {
+  /* =====================================================================
+     ARSENAL — hotbar, procedural viewmodels, and every weapon behaviour
+     ===================================================================== */
+  const ARMS = () => NV.Arms;
+  function armsInit() {
+    L.arms = { cur: null, curId: null, models: {}, cool: {}, swing: 0, drones: [], proj: [], strikes: [], buff: { shield: 0, cloak: 0 }, reveal: 0, sig: '', mats: {} };
+    L.gun.node.getChildMeshes(true).forEach(m => { if (m.name !== 'mf') m.setEnabled(false); }); // the procedural models replace the old sidearm
+    armsSync(true);
+  }
+  function aMat(key, hex, emis) {
+    const M = L.arms.mats; if (M[key]) return M[key];
+    const m = mat(L.scene, 'wm_' + key, hex, emis); m.specularColor = new BABYLON.Color3(.5, .5, .6); m.specularPower = 80; if (emis) m.disableLighting = true; return M[key] = m;
+  }
+  // build a first-person model for a weapon from its archetype + faction colours
+  function weaponModel(w) {
+    const s = L.scene, root = new BABYLON.TransformNode('wv_' + w.id, s); root.parent = L.gun.node;
+    const body = aMat('b' + w.col[0], w.col[0]), acc = aMat('a' + w.col[1], '#000', w.col[1]), dark = aMat('dk', '#0c0b12'), heat = L.gun.coil;
+    const glow = L.fx && L.fx.glow;
+    const fin = m => { m.parent = root; m.renderingGroupId = 1; m.isPickable = false; if (glow) glow.addExcludedMesh(m); L.plight.excludedMeshes.push(m); return m; };
+    const box = (sx, sy, sz, x, y, z, m, rx, ry, rz) => { const b = fin(BABYLON.MeshBuilder.CreateBox('wp', { width: sx, height: sy, depth: sz }, s)); b.position.set(x, y, z); b.rotation.set(rx || 0, ry || 0, rz || 0); b.material = m; return b; };
+    const cyl = (d, h, x, y, z, m, along, d2) => { const c = fin(BABYLON.MeshBuilder.CreateCylinder('wp', { diameterTop: d2 == null ? d : d2, diameterBottom: d, height: h, tessellation: 12 }, s)); c.position.set(x, y, z); if (along !== false) c.rotation.x = Math.PI / 2; c.material = m; return c; };
+    const sph = (d, x, y, z, m) => { const q = fin(BABYLON.MeshBuilder.CreateSphere('wp', { diameter: d, segments: 8 }, s)); q.position.set(x, y, z); q.material = m; return q; };
+    const tor = (d, t, x, y, z, m) => { const q = fin(BABYLON.MeshBuilder.CreateTorus('wp', { diameter: d, thickness: t, tessellation: 20 }, s)); q.position.set(x, y, z); q.rotation.x = Math.PI / 2; q.material = m; return q; };
+    const Lg = 1 + w.hv * .35; let muzzle = .6;
+    switch (w.model) {
+      case 'pistol': box(.1, .13, .34 * Lg, 0, 0, .05, body); box(.104, .03, .3 * Lg, 0, .075, .05, acc); box(.085, .2, .1, 0, -.13, -.07, dark, .25); cyl(.045, .14, 0, .02, .05 + .17 * Lg + .05, dark); box(.02, .02, .2, .055, .02, .06, heat); muzzle = .05 + .17 * Lg + .13; if (w.hv > .6) box(.05, .04, .08, 0, .11, 0, dark); break;
+      case 'smg': box(.11, .14, .42 * Lg, 0, 0, .08, body); box(.06, .24, .08, 0, -.18, .12, dark); box(.08, .18, .09, 0, -.12, -.08, dark, .25); box(.05, .05, .22, 0, 0, -.3, dark); cyl(.045, .16, 0, .02, .08 + .21 * Lg + .07, dark); box(.113, .025, .3, 0, .08, .08, acc); box(.02, .02, .3, .06, 0, .1, heat); muzzle = .08 + .21 * Lg + .15; break;
+      case 'rifle': box(.1, .14, .62 * Lg, 0, 0, .12, body); box(.08, .13, .24, 0, -.02, -.3, dark); box(.06, .22, .09, 0, -.17, .14, dark, -.2); box(.08, .18, .09, 0, -.13, -.05, dark, .25); cyl(.04, .3, 0, .02, .12 + .31 * Lg + .14, dark); box(.02, .02, .5 * Lg, 0, .085, .12, acc); box(.02, .02, .35, .055, 0, .15, heat); if (w.hv > .45) { cyl(.06, .2, 0, .13, .05, dark); sph(.05, 0, .13, .15, acc); } muzzle = .12 + .31 * Lg + .3; break;
+      case 'shotgun': box(.13, .15, .5, 0, 0, .05, body); cyl(.06, .6, -.034, .03, .5, dark); cyl(.06, .6, .034, .03, .5, dark); box(.11, .08, .2, 0, -.07, .32, acc); box(.09, .2, .1, 0, -.13, -.12, dark, .25); box(.07, .12, .22, 0, -.02, -.3, body); box(.02, .02, .3, .07, .04, 0, heat); muzzle = .82; break;
+      case 'sniper': box(.09, .12, .75, 0, 0, .1, body); cyl(.035, .6, 0, .02, .77, dark); cyl(.075, .34, 0, .13, .05, dark); cyl(.06, .02, 0, .13, .23, acc); box(.08, .15, .26, 0, -.01, -.36, body); box(.07, .18, .09, 0, -.13, -.06, dark, .25); box(.02, .02, .5, .05, 0, .15, heat); muzzle = 1.08; break;
+      case 'rotary': case 'heavy': box(.2, .2, .45, 0, -.02, 0, body); for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2; cyl(.035, .6, Math.cos(a) * .06, .02 + Math.sin(a) * .06, .5, dark); } tor(.2, .03, 0, .02, .28, acc); cyl(.2, .08, 0, .02, .22, body); box(.06, .06, .3, .12, -.02, 0, heat); muzzle = .82; break;
+      case 'laser': box(.14, .16, .5, 0, 0, .02, body); cyl(.08, .38, 0, .02, .43, dark); [.3, .42, .54].forEach(z => tor(.13, .02, 0, .02, z, acc)); cyl(.03, .16, 0, .02, .68, acc, true, .14); box(.02, .02, .3, .08, .05, 0, heat); box(.09, .18, .1, 0, -.14, -.1, dark, .25); muzzle = .78; break;
+      case 'launcher': cyl(.17, .85, .02, .06, .2, body); tor(.19, .025, .02, .06, .5, acc); tor(.19, .025, .02, .06, -.1, acc); box(.05, .06, .12, .02, .17, .12, dark); box(.08, .18, .1, 0, -.12, .05, dark, .25); cyl(.12, .04, .02, .06, .63, heat); muzzle = .65; break;
+      case 'grenade': sph(.13, 0, .02, .18, body); tor(.135, .02, 0, .02, .18, acc); cyl(.03, .05, 0, .09, .18, dark, false); muzzle = .2; break;
+      case 'blade': box(.04, .04, .16, 0, -.03, -.02, dark); box(.1, .02, .03, 0, -.03, .07, body); box(.012, .05, .55 * Lg, 0, 0, .08 + .28 * Lg, body); box(.014, .008, .55 * Lg, 0, .026, .08 + .28 * Lg, acc); muzzle = .6; break;
+      case 'hammer': cyl(.035, .55, 0, -.03, .12, dark); box(.13, .13, .22, 0, -.03, .42, body); box(.135, .03, .225, 0, .03, .42, acc); muzzle = .5; break;
+      case 'baton': cyl(.045, .15, 0, -.03, -.05, dark); cyl(.035, .5, 0, -.03, .27, body); sph(.05, 0, -.03, .53, acc); tor(.06, .012, 0, -.03, .1, acc); muzzle = .55; break;
+      case 'wrist': box(.1, .09, .34, -.05, -.06, -.02, dark); tor(.13, .015, -.05, -.06, .08, acc); box(.08, .012, .12, -.05, -.01, .02, acc); const hc = box(.05, .05, .05, -.05, .08, .16, acc); root.holo = hc; muzzle = .2; break;
+      case 'remote': box(.18, .04, .12, 0, -.04, .02, body); cyl(.01, .12, .07, .02, .02, dark, false); box(.1, .005, .07, 0, -.018, .02, acc); const dr = new BABYLON.TransformNode('mini', s); dr.parent = root; dr.position.set(0, .16, .34); root.holo = dr;
+        [[0, 0, 0, .1, .03, .1]].forEach(() => { const b = box(.1, .03, .1, 0, .16, .34, body); b.parent = dr; b.position.set(0, 0, 0); }); [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([a, b]) => { const c = cyl(.06, .006, 0, 0, 0, acc, false); c.parent = dr; c.position.set(a * .06, .01, b * .06); }); muzzle = .3; break;
+      case 'designator': box(.08, .1, .3, 0, 0, .05, body); cyl(.05, .04, 0, .01, .21, acc); box(.16, .1, .012, -.14, .02, .02, dark, 0, .5); box(.14, .085, .014, -.14, .02, .026, acc, 0, .5); muzzle = .25; break;
+    }
+    root.setEnabled(false);
+    return { node: root, muzzle };
+  }
+  // keep the hotbar HUD, selection and viewmodel in sync with the saved loadout
+  function armsSync(force) {
+    const A = ARMS().state(); if (!A) return;
+    const sig = A.bar.join(',') + '|' + A.sel;
+    if (!force && sig === L.arms.sig) return; L.arms.sig = sig;
+    const id = A.bar[A.sel], w = id && ARMS().BY[id];
+    if (L.arms.curId !== id) {
+      Object.values(L.arms.models).forEach(m => m.node.setEnabled(false));
+      L.arms.cur = w || null; L.arms.curId = id;
+      if (w) { const m = L.arms.models[w.id] || (L.arms.models[w.id] = weaponModel(w)); m.node.setEnabled(!L.drive && !L.calm && L.gun.node.isEnabled()); L.gun.mf.position.z = m.muzzle; }
+    }
+    const bar = document.querySelector('#hud .hotbar'); if (!bar) return;
+    bar.innerHTML = A.bar.map((wid, i) => { const x = wid && ARMS().BY[wid]; return `<div class="hs${i === A.sel ? ' on' : ''}" data-i="${i}"><b>${i + 1}</b>${x ? `<i style="color:${x.col[1]}">${ARMS().glyph[x.type]}</i><span>${U.esc(x.name.replace(/^(Helix|Iron Angel|Rust Harbor|Sector 9|NovaCore|Quiet Mile|Nightglass|Tide Knife) /, ''))}</span>` : ''}<u></u></div>`; }).join('');
+  }
+  function armsSelect(i) { const A = ARMS().state(); if (!A || i === A.sel) return; A.sel = i; NV.Audio.sfx('ui'); armsSync(); }
+  function armsCycle(d) { const A = ARMS().state(); if (!A) return; for (let k = 1; k <= 9; k++) { const i = (A.sel + d * k + 90) % 9; if (A.bar[i]) { armsSelect(i); return; } } }
+  const dmgMulOf = () => L.dmgUp * (1 + (L.implant - 1) * .1) * (L.tags.includes('engineer') ? 1.15 : 1) * (L.tactic.dmg || 1);
+  // one place to hurt an enemy with a weapon: lethal, stun (nonlethal) or EMP, with a ragdoll push
+  function weaponHit(e, dmg, w, head, imp) {
+    if (e.state === 'down') return;
+    if (w && w.emp) { e.stun = Math.max(e.stun, e.drone ? 3 : 1.4); if (e.drone) dmg *= 1.8; }
+    if (w && w.stun) { e.hp -= dmg; NV.Audio.sfx('hit'); if (e.hp <= 0) disable(e, true, imp); else { e.stun = Math.max(e.stun, .7); alertEnemy(e, true); } return; }
+    if (imp && e.hp - dmg <= 0) { e.hp = 0; disable(e, false, imp); NV.Audio.sfx('hit'); return; }
+    hurtEnemy(e, dmg, head);
+  }
+  function aimTarget(maxA, range) { // enemy nearest the crosshair
+    const o = L.cam.position, d = camDir(); let best = null, bd = maxA;
+    L.enemies.forEach(e => { if (e.state === 'down') return; const v = V3(e.x, e.drone ? e.m.root.position.y : 1.2, e.z).subtract(o), dist = v.length(); if (dist > range) return; const a = Math.acos(U.clamp(BABYLON.Vector3.Dot(v.normalize(), d), -1, 1)); if (a < bd && los(o.x, o.z, e.x, e.z)) { bd = a; best = e; } });
+    return best;
+  }
+  function aimPoint(range) { const o = L.cam.position, d = camDir(); for (let t = 1; t < range; t += .5) { const q = o.add(d.scale(t)); if (q.y <= 0 || solid(q.x, q.z)) return o.add(d.scale(Math.max(1, t - .5))); } return o.add(d.scale(range)); }
+  function shoot(w) {
+    w = w || ARMS().BY['courier-sidearm'];
     const p = L.p; if (p.heat >= 100 || p.over > 0 || p.cd > 0) return;
-    p.cd = .16; p.heat += 11; if (p.heat >= 100) { p.over = 1.6; NV.Audio.sfx('hackfail'); }
-    NV.Audio.sfx('shoot'); noise(p.x, p.z, 14);
-    L.gun.kick = 1; L.gun.flash.intensity = 2.5; L.gun.mf.isVisible = true; L.gun.mf.rotation.z = Math.random() * 6.28; L.gun.mf.scaling.setAll(.8 + Math.random() * .5); L.gun.mfT = .045; p.pitch -= .012; L.stats.shots++;
-    const o = L.cam.position.clone(), d = camDir();
-    // walls
-    let tWall = 60; for (let t = .3; t < 60; t += .25) { const q = o.add(d.scale(t)); if (q.y < 0 || q.y > WALLH || solid(q.x, q.z)) { tWall = t; break; } }
-    // crates block too
+    p.cd = w.cd; p.heat += w.heat; if (p.heat >= 100) { p.over = 1.6; NV.Audio.sfx('hackfail'); }
+    NV.Audio.sfx('shoot'); noise(p.x, p.z, w.noise);
+    L.gun.kick = 1; L.gun.flash.intensity = 2.5; L.gun.mf.isVisible = true; L.gun.mf.rotation.z = Math.random() * 6.28; L.gun.mf.scaling.setAll((.8 + Math.random() * .5) * (w.pellets > 1 || w.cat === 'sniper' ? 1.6 : 1)); L.gun.mfT = .045;
+    p.pitch -= .012 * (w.pellets > 1 || w.cat === 'sniper' ? 3 : 1); L.stats.shots++;
+    for (let k = 0; k < w.pellets; k++) shotRay(w, false);
+    if (w.echo) setTimeout(() => { if (L && !L.over) { shotRay(w, true); NV.Audio.sfx('eshoot'); } }, 260); // the echo repeats the shot
+  }
+  function shotRay(w, echo) {
+    const o = L.cam.position.clone(); let d = camDir();
+    if (w.spread) d = d.add(V3((Math.random() - .5) * 2 * w.spread, (Math.random() - .5) * 2 * w.spread, (Math.random() - .5) * 2 * w.spread)).normalize();
+    if (w.homing) { const e = aimTarget(w.homing, w.range); if (e) d = V3(e.x, e.drone ? e.m.root.position.y : 1.3, e.z).subtract(o).normalize(); }
+    let tWall = w.range; for (let t = .3; t < w.range; t += .25) { const q = o.add(d.scale(t)); if (q.y < 0 || q.y > (L.map.city ? 200 : WALLH) || solid(q.x, q.z)) { tWall = t; break; } }
     L.crates.forEach(c => { const tt = rayBox(o, d, c); if (tt > 0 && tt < tWall) tWall = tt; });
-    let hit = null, tHit = tWall, head = false;
     const test = (cx, cy, cz, rad) => { const oc = o.subtract(V3(cx, cy, cz)); const b = BABYLON.Vector3.Dot(oc, d), c = oc.lengthSquared() - rad * rad, h = b * b - c; if (h < 0) return -1; const t = -b - Math.sqrt(h); return t > 0 ? t : -1; };
+    const hits = [];
     L.enemies.forEach(e => {
-      if (e.state === 'down') return;
-      const y = e.drone ? e.m.root.position.y : 0;
-      const segs = e.drone ? [[y, .55, false]] : [[e.m.hy, .26, true], [1.25, .5, false], [.6, .45, false]];
-      segs.forEach(([yy, rad, isHead]) => { const t = test(e.x, yy, e.z, rad); if (t > 0 && t < tHit) { tHit = t; hit = e; head = isHead; } });
+      if (e.state === 'down') return; let bt = -1, bh = false;
+      const y = e.drone ? e.m.root.position.y : 0, segs = e.drone ? [[y, .55, false]] : [[e.m.hy, .26, true], [1.25, .5, false], [.6, .45, false]];
+      segs.forEach(([yy, rad, isHead]) => { const t = test(e.x, yy, e.z, rad); if (t > 0 && t < tWall && (bt < 0 || t < bt)) { bt = t; bh = isHead; } });
+      if (bt > 0) hits.push({ e, t: bt, head: bh });
     });
+    hits.sort((a, b) => a.t - b.t); const pierced = hits.slice(0, 1 + (w.pierce || 0));
+    let tEnd = pierced.length && !w.pierce ? pierced[0].t : pierced.length ? Math.min(tWall, pierced[pierced.length - 1].t + (w.pierce ? 3 : 0)) : tWall;
     let bossHit = false;
-    if (L.boss && L.boss.hp > 0) { const B2 = L.boss; const rad = B2.shieldOn ? 2.6 : 1.1; const t = test(B2.x, 2.2, B2.z, rad); if (t > 0 && t < tHit) { tHit = t; hit = null; bossHit = true; } }
-    // friendly fire: other players (only when the host turned it on)
+    if (L.boss && L.boss.hp > 0) { const B2 = L.boss; const t = test(B2.x, 2.2, B2.z, B2.shieldOn ? 2.6 : 1.1); if (t > 0 && t < tEnd) { tEnd = t; bossHit = true; pierced.length = 0; } }
     let pHit = null, pHead = false;
-    if (netOn() && NV.Net.pvp && L.netAv) L.netAv.forEach(a => { if (a.car) return; const n = a.npc; [[1.8, .26, true], [1.25, .5, false], [.6, .45, false]].forEach(([yy, rad, hd]) => { const t = test(n.x, yy, n.z, rad); if (t > 0 && t < tHit) { tHit = t; pHit = a; pHead = hd; hit = null; bossHit = false; } }); });
-    const end = o.add(d.scale(tHit));
-    const muzzle = L.gun.node.getAbsolutePosition().add(d.scale(.5));
-    tracer(muzzle, end);
+    if (netOn() && NV.Net.pvp && L.netAv) L.netAv.forEach(a => { if (a.car) return; const n = a.npc; [[1.8, .26, true], [1.25, .5, false], [.6, .45, false]].forEach(([yy, rad, hd]) => { const t = test(n.x, yy, n.z, rad); if (t > 0 && t < tEnd) { tEnd = t; pHit = a; pHead = hd; pierced.length = 0; bossHit = false; } }); });
+    const end = o.add(d.scale(tEnd)), muzzle = L.gun.node.getAbsolutePosition().add(d.scale(.5));
+    tracer(echo ? muzzle.add(V3(.6, .3, 0)) : muzzle, end);
     if (netOn()) NV.Net.send({ t: 'shot', a: [muzzle.x, muzzle.y, muzzle.z].map(v => +v.toFixed(2)), b: [end.x, end.y, end.z].map(v => +v.toFixed(2)), lvl: L.netKey });
-    if (pHit) { NV.Net.send({ t: 'hit', to: pHit.id, dmg: 17 * (pHead ? 2 : 1), lvl: L.netKey }); spark(end, '#ff5a3d', 12); flashX(); }
-    const dmgMul = L.dmgUp * (1 + (L.implant - 1) * .1) * (L.tags.includes('engineer') ? 1.15 : 1) * (L.tactic.dmg || 1);
-    if (hit) {
-      const dmg = 34 * dmgMul * (head ? 2 : 1);
-      hurtEnemy(hit, dmg, head); spark(end, head ? '#ffffff' : '#ff5a3d', head ? 22 : 12); flashX();
-    } else if (bossHit) {
-      const B2 = L.boss;
-      if (B2.shieldOn) { spark(end, '#19f0ff', 10); NV.Audio.sfx('shield'); }
-      else { B2.hp -= 34 * dmgMul; if (netOn()) NV.Net.send({ t: 'boss', d: 34 * dmgMul, lvl: L.netKey }); spark(end, '#ff5a3d', 16); flashX(); NV.Audio.sfx('hit'); if (B2.hp <= 0) bossDown(); }
-    } else spark(end, null, 8);
+    if (pHit) { NV.Net.send({ t: 'hit', to: pHit.id, dmg: Math.min(60, w.dmg * .5) * (pHead ? 2 : 1), lvl: L.netKey }); spark(end, '#ff5a3d', 12); flashX(); }
+    const dm = dmgMulOf() * (echo ? .6 : 1);
+    pierced.forEach(h => { weaponHit(h.e, w.dmg * dm * (h.head ? 2 : 1), w, h.head, w.cat === 'sniper' || w.pellets > 1 ? { x: d.x * 5, y: 2.5, z: d.z * 5 } : null); spark(o.add(d.scale(h.t)), h.head ? '#ffffff' : w.col[1], h.head ? 22 : 12); flashX(); });
+    if (bossHit) { const B2 = L.boss; if (B2.shieldOn) { spark(end, '#19f0ff', 10); NV.Audio.sfx('shield'); } else { const dd = w.dmg * dm * (w.emp ? 1.3 : 1); B2.hp -= dd; if (netOn()) NV.Net.send({ t: 'boss', d: dd, lvl: L.netKey }); spark(end, '#ff5a3d', 16); flashX(); NV.Audio.sfx('hit'); if (B2.hp <= 0) bossDown(); } }
+    if (!pierced.length && !bossHit && !pHit) spark(end, null, 6);
+  }
+  function beamTick(w, dt) {
+    const p = L.p; if (p.over > 0) return;
+    p.heat += w.heat * dt; if (p.heat >= 100) { p.over = 1.6; NV.Audio.sfx('hackfail'); return; }
+    const o = L.cam.position, d = camDir(); let tEnd = w.range || 60;
+    for (let t = .3; t < tEnd; t += .3) { const q = o.add(d.scale(t)); if (q.y < 0 || solid(q.x, q.z)) { tEnd = t; break; } }
+    const e = aimTarget(.03, tEnd); const end = e ? V3(e.x, 1.2, e.z) : o.add(d.scale(tEnd));
+    tracer(L.gun.node.getAbsolutePosition().add(d.scale(.5)), end); L.gun.flash.intensity = 1.5;
+    if (e) { weaponHit(e, w.dmg * dmgMulOf() * dt, w, false, { x: d.x * 3, y: 2, z: d.z * 3 }); if (Math.random() < dt * 12) spark(end, w.col[1], 4); }
+    if (L.boss && L.boss.hp > 0 && !L.boss.shieldOn && aimTargetBoss(tEnd)) { L.boss.hp -= w.dmg * dt * .5; if (L.boss.hp <= 0) bossDown(); }
+    L.arms.beamSfx = (L.arms.beamSfx || 0) - dt; if (L.arms.beamSfx <= 0) { L.arms.beamSfx = .12; NV.Audio.sfx('eshoot'); noise(p.x, p.z, 10); }
+  }
+  function aimTargetBoss(range) { const B2 = L.boss, o = L.cam.position, v = V3(B2.x, 2.2, B2.z).subtract(o); return v.length() < range && BABYLON.Vector3.Dot(v.normalize(), camDir()) > .985; }
+  function swing(w) {
+    const p = L.p; if (p.cd > 0) return; p.cd = w.cd; L.arms.swing = .28; NV.Audio.sfx('dash');
+    setTimeout(() => {
+      if (!L || L.over) return; const fx = Math.sin(p.yaw), fz = Math.cos(p.yaw); let any = false;
+      L.enemies.forEach(e => { if (e.state === 'down') return; const dx = e.x - p.x, dz = e.z - p.z, d = Math.hypot(dx, dz); if (d > w.range || (dx * fx + dz * fz) / (d || 1) < .5) return; any = true;
+        const unaware = e.state === 'patrol' || e.state === 'sus'; // blades are silent: an unaware target goes down in one hit
+        if (unaware) { disable(e, !!w.stun, { x: fx * 2, y: 1, z: fz * 2 }); L.stats.takedowns++; } else weaponHit(e, w.dmg * dmgMulOf(), w, false, { x: fx * 4, y: 2.5, z: fz * 4 });
+        spark(V3(e.x, 1.2, e.z), w.col[1], 14); });
+      if (L.boss && L.boss.hp > 0 && !L.boss.shieldOn && Math.hypot(L.boss.x - p.x, L.boss.z - p.z) < w.range + 1) { L.boss.hp -= w.dmg * 1.2; any = true; if (L.boss.hp <= 0) bossDown(); }
+      if (any) { NV.Audio.sfx('hit'); shake(.2); flashX(); }
+    }, 90);
+  }
+  function projMesh(w, r) { const m = BABYLON.MeshBuilder.CreateSphere('pj', { diameter: r, segments: 6 }, L.scene); m.material = aMat('a' + w.col[1], '#000', w.col[1]); m.isPickable = false; return m; }
+  function launch(w) {
+    const o = L.cam.position, d = camDir(), sp = w.type === 'rocket' ? 36 : 17, m = projMesh(w, w.type === 'rocket' ? .28 : .22);
+    L.arms.proj.push({ w, m, x: o.x + d.x * .7, y: o.y - .15 + d.y * .7, z: o.z + d.z * .7, vx: d.x * sp, vy: d.y * sp + (w.type === 'throw' ? 4 : 0), vz: d.z * sp, g: w.type === 'throw' ? 15 : 0, life: w.mine ? 40 : 5, rest: false });
+    NV.Audio.sfx(w.type === 'rocket' ? 'dash' : 'ui'); noise(L.p.x, L.p.z, 6);
+  }
+  function updateProj(dt) {
+    L.arms.proj = L.arms.proj.filter(q => {
+      q.life -= dt; const w = q.w;
+      if (!q.rest) {
+        if (w.homing) { const e = L.enemies.filter(e => e.state !== 'down').sort((a, b) => Math.hypot(a.x - q.x, a.z - q.z) - Math.hypot(b.x - q.x, b.z - q.z))[0]; if (e && Math.hypot(e.x - q.x, e.z - q.z) < 40) { const v = V3(e.x - q.x, 1.2 - q.y, e.z - q.z).normalize().scale(36); q.vx += (v.x - q.vx) * w.homing * dt * 4; q.vy += (v.y - q.vy) * w.homing * dt * 4; q.vz += (v.z - q.vz) * w.homing * dt * 4; } }
+        q.vy -= q.g * dt; q.x += q.vx * dt; q.y += q.vy * dt; q.z += q.vz * dt;
+        const hitE = L.enemies.some(e => e.state !== 'down' && Math.hypot(e.x - q.x, e.z - q.z) < .9 && q.y < 2.2);
+        if (q.y <= .1 || solid(q.x, q.z) || hitE || q.life <= 0) {
+          if (w.mine && !hitE && q.life > 0) { q.rest = true; q.y = .12; if (solid(q.x, q.z)) { q.x -= q.vx * dt * 2; q.z -= q.vz * dt * 2; } }
+          else { boom(q.x, q.z, w); q.m.dispose(); return false; }
+        }
+      } else if (q.life <= 0 || L.enemies.some(e => e.state !== 'down' && Math.hypot(e.x - q.x, e.z - q.z) < 3)) { boom(q.x, q.z, w); q.m.dispose(); return false; }
+      q.m.position.set(q.x, q.y, q.z); if (q.rest) q.m.scaling.setAll(1 + Math.sin(L.time * 8) * .2);
+      return true;
+    });
+  }
+  const FXCOL = { frag: '#ff7a2b', emp: '#19f0ff', sleep: '#3dffa8', freeze: '#dff6ff', decoy: '#ff2bd6', gravity: '#b48cff', pull: '#b48cff', shock: '#6ab8ff', glitch: '#ff2bd6', drop: '#ff7a2b', rod: '#ffffff', beam: '#ffd23d', barrage: '#ff7a2b' };
+  function boomFx(x, z, r, fx) {
+    const m = BABYLON.MeshBuilder.CreateSphere('bm', { diameter: 1, segments: 10 }, L.scene); m.position.set(x, .6, z); m.isPickable = false;
+    const mt = mat(L.scene, 'bmm', '#000', FXCOL[fx] || '#ff7a2b', .6); mt.alphaMode = BABYLON.Engine.ALPHA_ADD; mt.disableLighting = true; m.material = mt;
+    L.fxs.push({ m, t: 0, dur: .5, grow: r * 2 }); spark(V3(x, .8, z), FXCOL[fx] || '#ff7a2b', 26);
+    NV.Audio.sfx(fx === 'emp' || fx === 'shock' ? 'emp' : fx === 'sleep' || fx === 'freeze' || fx === 'glitch' || fx === 'decoy' ? 'glitch' : 'boom');
+    if (Math.hypot(x - L.p.x, z - L.p.z) < 30) shake(fx === 'rod' ? 1 : .4);
+  }
+  // area effects shared by grenades, rockets, strikes and boss arsenal
+  function boom(x, z, w, fxOver, rOver, dmgOver) {
+    const fx = fxOver || w.fx || 'frag', r = rOver || w.radius || 5, dmg = (dmgOver != null ? dmgOver : w.dmg || 100) * dmgMulOf();
+    boomFx(x, z, r, fx); if (netOn()) NV.Net.send({ t: 'fx', x: +x.toFixed(1), z: +z.toFixed(1), r, fx, lvl: L.netKey });
+    if (fx === 'decoy') { noise(x, z, 40); L.enemies.forEach(e => { if (e.state !== 'down' && e.state !== 'alert' && Math.hypot(e.x - x, e.z - z) < 40) { e.state = 'search'; e.lx = x; e.lz = z; e.path = pathTo(e.x, e.z, x, z); e.searchT = 8; } }); return; }
+    if (fx === 'shieldbuff') { L.arms.buff.shield = 15; NV.toast('ARMOUR', 'Incoming damage cut for 15 seconds.', '#19f0ff', 2); return; }
+    noise(x, z, fx === 'sleep' || fx === 'freeze' ? 8 : 25);
+    L.enemies.forEach(e => {
+      if (e.state === 'down') return; const dx = e.x - x, dz = e.z - z, d = Math.hypot(dx, dz); if (d > r) return; const k = 1 - d / r * .6, ux = dx / (d || 1), uz = dz / (d || 1);
+      if (fx === 'emp' || fx === 'shock') { e.stun = Math.max(e.stun, 5); weaponHit(e, (e.drone ? 80 : fx === 'shock' ? 40 : 10) * k, { emp: true }, false, null); }
+      else if (fx === 'sleep') disable(e, true, { x: ux, y: .6, z: uz });
+      else if (fx === 'freeze') e.stun = Math.max(e.stun, 7);
+      else if (fx === 'glitch') { e.state = 'patrol'; e.susp = 0; e.stun = Math.max(e.stun, 3); }
+      else if (fx === 'gravity') weaponHit(e, dmg * .7 * k, null, false, { x: ux * 2, y: 14, z: uz * 2 });
+      else if (fx === 'pull') { e.x -= ux * Math.min(d, 4); e.z -= uz * Math.min(d, 4); e.stun = Math.max(e.stun, 2); weaponHit(e, dmg * .4, null, false, null); }
+      else weaponHit(e, dmg * k, null, false, { x: ux * 9 * k, y: 5 + 6 * k, z: uz * 9 * k });
+    });
+    if (L.boss && L.boss.hp > 0 && !L.boss.shieldOn && Math.hypot(L.boss.x - x, L.boss.z - z) < r + 1 && !['sleep', 'freeze', 'glitch', 'decoy'].includes(fx)) { L.boss.hp -= dmg * .5; if (L.boss.hp <= 0) bossDown(); }
+    if (['frag', 'gravity', 'drop', 'rod', 'barrage'].includes(fx)) {
+      (L.peds || []).forEach(pd => { const dx = pd.x - x, dz = pd.z - z, d = Math.hypot(dx, dz); if (d < r && !pd.rag) ragdoll(pd, pd.root, pd.rig, dx / (d || 1) * 7, 6, dz / (d || 1) * 7, false); });
+      const pd = Math.hypot(L.p.x - x, L.p.z - z); if (pd < r * .6 && fx !== 'gravity') hurtPlayer(dmg * .25 * (1 - pd / r));
+    }
+  }
+  function strike(w) {
+    const pt = aimPoint(160); if (w.fx === 'shieldbuff') { boom(pt.x, pt.z, w); return; }
+    const ring = BABYLON.MeshBuilder.CreateTorus('sring', { diameter: (w.radius || 6) * 2, thickness: .15, tessellation: 40 }, L.scene); ring.position.set(pt.x, .15, pt.z); ring.material = aMat('strk', '#000', '#ff3355'); ring.isPickable = false;
+    L.arms.strikes.push({ w, x: pt.x, z: pt.z, t: 0, ring, n: 0 }); NV.Audio.sfx('alert');
+    NV.toast('STRIKE INBOUND', w.name, '#ff3355', 2);
+  }
+  function updateStrikes(dt) {
+    L.arms.strikes = L.arms.strikes.filter(S2 => {
+      S2.t += dt; const w = S2.w; S2.ring.rotation.y += dt * 2; S2.ring.visibility = .5 + Math.sin(S2.t * 20) * .4;
+      if (S2.t < 1.4) return true;
+      if (w.fx === 'drop' || w.fx === 'rod') {
+        if (!S2.obj) { S2.obj = BABYLON.MeshBuilder.CreateBox('drop', { width: w.fx === 'rod' ? .5 : 3, height: w.fx === 'rod' ? 12 : 3, depth: w.fx === 'rod' ? .5 : 7 }, L.scene); S2.obj.material = w.fx === 'rod' ? aMat('rod', '#000', '#ffffff') : aMat('box', '#5a3322'); S2.obj.position.set(S2.x, w.fx === 'rod' ? 160 : 40, S2.z); }
+        S2.obj.position.y -= dt * (w.fx === 'rod' ? 260 : 70);
+        if (S2.obj.position.y > 1.5) return true;
+        boom(S2.x, S2.z, w, 'frag'); S2.ring.dispose(); if (w.fx === 'rod') S2.obj.dispose(); else { S2.obj.position.y = 1.5; setTimeout(() => S2.obj.dispose(), 6000); } return false;
+      }
+      if (w.fx === 'beam') {
+        if (!S2.obj) { S2.obj = BABYLON.MeshBuilder.CreateCylinder('sbeam', { diameter: (w.radius || 6) * .8, height: 400 }, L.scene); S2.obj.position.set(S2.x, 200, S2.z); const bm = mat(L.scene, 'sbm', '#000', '#ffd23d', .55); bm.alphaMode = BABYLON.Engine.ALPHA_ADD; bm.disableLighting = true; S2.obj.material = bm; NV.Audio.sfx('boss'); shake(.6); }
+        S2.n -= dt; if (S2.n <= 0) { S2.n = .3; boom(S2.x, S2.z, w, 'frag', w.radius, (w.dmg || 200) * .25); }
+        if (S2.t < 4) return true; S2.obj.dispose(); S2.ring.dispose(); return false;
+      }
+      if (w.fx === 'barrage') { S2.n -= dt; if (S2.n <= 0) { S2.n = .22; const a = Math.random() * 6.28, rr = Math.random() * (w.radius || 8); boom(S2.x + Math.cos(a) * rr, S2.z + Math.sin(a) * rr, w, 'frag', 4, (w.dmg || 200) * .35); } if (S2.t < 3) return true; S2.ring.dispose(); return false; }
+      boom(S2.x, S2.z, w); S2.ring.dispose(); return false;
+    });
+  }
+  function hack(w) {
+    const p = L.p;
+    if (w.fx === 'cloak') { L.arms.buff.cloak = 12; NV.toast('BLACK SUN', 'Sensors cannot find you for 12 seconds.', '#b48cff', 3); NV.Audio.sfx('glitch'); return true; }
+    if (w.fx === 'shield') { L.arms.buff.shield = 14; NV.toast('FIREWALL', 'Incoming damage cut for 14 seconds.', '#19f0ff', 2); NV.Audio.sfx('shield'); return true; }
+    if (w.fx === 'reveal') { L.arms.reveal = 16; NV.toast('PREDICTION ONLINE', 'Every hostile nearby is marked for 16 seconds.', '#ff3355', 3); NV.Audio.sfx('hackok'); return true; }
+    const t = aimTarget(.16, w.range || 45); if (!t) { NV.Audio.sfx('hackfail'); NV.toast('NO TARGET', 'Aim at an enemy in line of sight.', '#8a84b3', 1.2); return false; }
+    tracer(L.gun.node.getAbsolutePosition(), V3(t.x, 1.4, t.z)); NV.Audio.sfx('hackok');
+    const group = w.area ? L.enemies.filter(e => e.state !== 'down' && Math.hypot(e.x - t.x, e.z - t.z) < w.area) : [t];
+    group.forEach(e => {
+      switch (w.fx) {
+        case 'turn': e.ally = 20; e.state = 'patrol'; e.susp = 0; e.m.mark.isVisible = true; e.m.mark.material = L.mats.civ || L.mats.tracer; break;
+        case 'overload': boom(e.x, e.z, { fx: 'frag', radius: 4, dmg: 90, col: w.col }); break;
+        case 'blind': L.enemies.forEach(o => { if (o.state !== 'down' && Math.hypot(o.x - e.x, o.z - e.z) < 25) { o.state = 'patrol'; o.susp = 0; o.stun = Math.max(o.stun, 2); } }); break;
+        case 'gravity': disable(e, false, { x: 0, y: 15, z: 0 }); break;
+        case 'chain': L.enemies.filter(o => o.state !== 'down' && Math.hypot(o.x - e.x, o.z - e.z) < 15).slice(0, 5).forEach(o => { o.stun = Math.max(o.stun, 6); tracer(V3(e.x, 1.4, e.z), V3(o.x, 1.4, o.z)); }); break;
+        default: e.stun = Math.max(e.stun, 8);
+      }
+      spark(V3(e.x, 1.6, e.z), w.col[1], 16);
+    });
+    return true;
+  }
+  function deploy(w) {
+    const n = w.squad || 1;
+    for (let i = 0; i < n; i++) {
+      const root = new BABYLON.TransformNode('drone', L.scene), bm = aMat('b' + w.col[0], w.col[0]), am = aMat('a' + w.col[1], '#000', w.col[1]);
+      const b = BABYLON.MeshBuilder.CreateBox('dr', { width: .5, height: .16, depth: .5 }, L.scene); b.parent = root; b.material = bm;
+      const ring = BABYLON.MeshBuilder.CreateTorus('drr', { diameter: .75, thickness: .05, tessellation: 20 }, L.scene); ring.parent = root; ring.material = am;
+      const eye = BABYLON.MeshBuilder.CreateSphere('dre', { diameter: .14, segments: 6 }, L.scene); eye.parent = root; eye.position.set(0, -.08, .22); eye.material = am;
+      root.getChildMeshes().forEach(m => m.isPickable = false);
+      L.arms.drones.push({ w, root, ring, x: L.p.x, y: 2.4, z: L.p.z, life: w.life || 60, cd: .5, i, a: i * 2.1 });
+    }
+    NV.toast('DRONE DEPLOYED', w.name + ' · ' + ({ attack: 'engages hostiles', heal: 'patches you up', jam: 'jams enemy sensors', hack: 'stuns nearby hostiles', shield: 'absorbs damage' })[w.fx], w.col[1], 2.5); NV.Audio.sfx('unlock');
+  }
+  function updateDrones(dt) {
+    const p = L.p; L.arms.jam = false; let shield = false;
+    L.arms.drones = L.arms.drones.filter(D => {
+      D.life -= dt; if (D.life <= 0) { spark(V3(D.x, D.y, D.z), D.w.col[1], 12); D.root.dispose(); return false; }
+      D.a += dt * .8; const tx = p.x + Math.cos(D.a) * (1.8 + D.i), tz = p.z + Math.sin(D.a) * (1.8 + D.i);
+      D.x += (tx - D.x) * Math.min(1, dt * 3); D.z += (tz - D.z) * Math.min(1, dt * 3); D.y = 2.4 + Math.sin(L.time * 3 + D.i) * .15;
+      D.root.position.set(D.x, D.y, D.z); D.ring.rotation.y += dt * 12;
+      D.cd -= dt; const pw = D.w.power || 1;
+      if (D.w.fx === 'heal') p.hp = Math.min(p.max, p.hp + dt * 5 * pw);
+      else if (D.w.fx === 'jam') L.arms.jam = true;
+      else if (D.w.fx === 'shield') shield = true;
+      else if (D.cd <= 0) {
+        const e = L.enemies.filter(e => e.state !== 'down' && !(e.ally > 0) && Math.hypot(e.x - D.x, e.z - D.z) < 22 && los(D.x, D.z, e.x, e.z)).sort((a, b) => Math.hypot(a.x - D.x, a.z - D.z) - Math.hypot(b.x - D.x, b.z - D.z))[0];
+        if (e) {
+          D.cd = D.w.fx === 'hack' ? 3 : .65 / pw; D.root.lookAt(V3(e.x, D.y, e.z));
+          tracer(V3(D.x, D.y, D.z), V3(e.x, 1.3, e.z)); NV.Audio.sfx('eshoot');
+          if (D.w.fx === 'hack') e.stun = Math.max(e.stun, 3); else weaponHit(e, 16 * pw * dmgMulOf(), D.w.stun ? { stun: true } : null, false, { x: 0, y: 2, z: 0 });
+        } else D.cd = .3;
+      }
+      return true;
+    });
+    L.arms.droneShield = shield;
+  }
+  // turned enemies fight for you until the hack wears off
+  function allyStep(e, dt) {
+    e.ally -= dt; const m = e.m;
+    if (e.ally <= 0) { e.ally = 0; m.mark.isVisible = false; return; }
+    const t = L.enemies.filter(o => o !== e && o.state !== 'down' && !(o.ally > 0) && Math.hypot(o.x - e.x, o.z - e.z) < 24).sort((a, b) => Math.hypot(a.x - e.x, a.z - e.z) - Math.hypot(b.x - e.x, b.z - e.z))[0];
+    if (t) {
+      e.yaw = Math.atan2(t.x - e.x, t.z - e.z); const d = Math.hypot(t.x - e.x, t.z - e.z);
+      if (d > 9) { const nx = e.x + Math.sin(e.yaw) * e.speed * dt, nz = e.z + Math.cos(e.yaw) * e.speed * dt; if (!solid(nx, nz)) { e.x = nx; e.z = nz; } }
+      e.cd -= dt; if (e.cd <= 0 && los(e.x, e.z, t.x, t.z)) { e.cd = .8; tracer(V3(e.x, 1.4, e.z), V3(t.x, 1.3, t.z)); NV.Audio.sfx('eshoot'); weaponHit(t, 22, null, false, { x: Math.sin(e.yaw) * 3, y: 2, z: Math.cos(e.yaw) * 3 }); if (t.state !== 'alert') alertEnemy(t, false); }
+    }
+    m.root.position.x = e.x; m.root.position.z = e.z; m.root.rotation.y = e.yaw;
+    if (m.rig) animRig(m.rig, dt, !!t && Math.hypot(t.x - e.x, t.z - e.z) > 9, e.speed, 'aim');
+  }
+  function useWeapon(w, dt) {
+    const I = NV.In, held = I.lmb || (I.pad && I.pad.buttons[7] && I.pad.buttons[7].value > .4), press = I.lmbHit || (I.pad && I.padHit(7));
+    const now = L.time, ready = !(L.arms.cool[w.id] > now);
+    if (w.type === 'gun') { if (w.beam) { if (held) beamTick(w, dt); } else if (w.auto ? held : press) shoot(w); return; }
+    if (w.type === 'melee') { if (press) swing(w); return; }
+    if (!press) return;
+    if (!ready) { NV.Audio.sfx('hackfail'); return; }
+    let ok = true;
+    if (w.type === 'throw' || w.type === 'rocket') launch(w);
+    else if (w.type === 'strike') strike(w);
+    else if (w.type === 'hack') ok = hack(w);
+    else if (w.type === 'drone') deploy(w);
+    if (ok) { L.arms.cool[w.id] = now + (w.cool || 3); L.gun.kick = .6; }
+  }
+  function updateArms(dt) {
+    const A = L.arms, I = NV.In; if (!A) return;
+    armsSync();
+    for (let i = 0; i < 9; i++) if (I.hit('Digit' + (i + 1))) armsSelect(i);
+    if (I.wheel) { armsCycle(I.wheel > 0 ? 1 : -1); I.wheel = 0; }
+    if (I.pad && I.padHit(5)) armsCycle(1);
+    const w = A.cur, m = w && A.models[w.id];
+    if (m) {
+      m.node.setEnabled(!L.drive && !L.pRag && !L.calm && L.gun.node.isEnabled());
+      if (A.swing > 0) { A.swing -= dt; const k = Math.sin((1 - A.swing / .28) * Math.PI); m.node.rotation.set(-k * 1.1, -k * .4, k * .5); } else m.node.rotation.set(0, 0, 0);
+      if (m.node.holo) m.node.holo.rotation.y += dt * 3;
+    }
+    A.buff.shield = Math.max(0, A.buff.shield - dt); A.buff.cloak = Math.max(0, A.buff.cloak - dt); A.reveal = Math.max(0, A.reveal - dt);
+    updateProj(dt); updateStrikes(dt); updateDrones(dt);
+    // cooldown shading on the hotbar
+    const bar = document.querySelector('#hud .hotbar'); if (bar) { const st = ARMS().state(); [...bar.children].forEach((el, i) => { const id = st.bar[i], x = id && ARMS().BY[id], c = x && A.cool[x.id] > L.time ? (A.cool[x.id] - L.time) / (x.cool || 3) : 0; el.lastChild.style.height = (c * 100).toFixed(0) + '%'; }); }
+    const bf = []; if (A.buff.shield > 0 || A.droneShield) bf.push('ARMOUR'); if (A.buff.cloak > 0) bf.push('CLOAKED'); if (A.jam) bf.push('SENSORS JAMMED'); if (A.reveal > 0) bf.push('HOSTILES MARKED'); if (A.drones.length) bf.push(A.drones.length + ' DRONE' + (A.drones.length > 1 ? 'S' : ''));
+    const S = NV.State.get(); hset('#hud .hbinfo', 'text', (S ? (S.credits || 0) + ' ¢' : '') + (bf.length ? '  ·  ' + bf.join(' · ') : '') + (w ? '  ·  ' + w.name.toUpperCase() + ' [' + ARMS().kindName(w) + ']' + (w.zoom ? ' · RMB ZOOM' : '') : ''));
   }
   function rayBox(o, d, c) {
     const s = .8, min = [c.x - s, 0, c.z - s], max = [c.x + s, c.h * 2 - .15, c.z + s], oo = [o.x, o.y, o.z], dd = [d.x, d.y, d.z];
@@ -2142,13 +2529,14 @@ NV.Level = (() => {
     if (e.m && e.m.root) ragdoll(e, e.m.root, e.m.rig, imp.x, imp.y, imp.z, e.drone);
     if (netOn() && e.nid != null && !e.netDown) NV.Net.send({ t: 'edown', k: e.nid, imp: { x: +imp.x.toFixed(2), y: +imp.y.toFixed(2), z: +imp.z.toFixed(2) }, lvl: L.netKey });
     e.state = 'down'; e.hp = 0; NV.Audio.sfx('down');
+    if (!e.netDown) { const S = NV.State.get(); if (S) S.credits = (S.credits || 0) + (takedown ? 14 : 9); }
     if (takedown) L.stats.takedowns++; else L.stats.disabled++;
     e.m.visor.material = L.mats.visorOff; e.m.extra.forEach(x => x.material = L.mats.visorOff); e.m.mark.isVisible = false;
     spark(V3(e.x, 1, e.z), '#ffffff', 20);
     if (L.waves) L.waves.alive--;
   }
   function alertEnemy(e, spread) {
-    if (e.state === 'down') return;
+    if (e.state === 'down' || e.ally > 0) return;
     if (e.state !== 'alert') { e.state = 'alert'; e.susp = 1; e.cd = .6 + Math.random() * .5; if (!L.anyAlert) { NV.Audio.sfx('alert'); } L.anyAlert = true; L.stats.alerts++; L.alarmT = 8; }
     e.lostT = 0; e.lx = L.p.x; e.lz = L.p.z;
     if (spread) L.enemies.forEach(o => { if (o !== e && o.state !== 'down' && o.state !== 'alert' && Math.hypot(o.x - e.x, o.z - e.z) < 16) { o.state = 'search'; o.lx = L.p.x; o.lz = L.p.z; o.path = pathTo(o.x, o.z, L.p.x, L.p.z); o.susp = Math.max(o.susp, .6); } });
@@ -2168,6 +2556,7 @@ NV.Level = (() => {
   function shake(a) { if (NV.Settings.get().shake) L.shake = Math.max(L.shake, a); }
   function hurtPlayer(d) {
     if (L.over || L.p.inv > 0) return;
+    if (L.arms && (L.arms.buff.shield > 0 || L.arms.droneShield)) d *= .4;
     const dm = d * NV.DIFF[L.diff].dmg * (L.tactic.armor || 1);
     L.p.hp -= dm; L.p.regenT = 4; L.stats.dmg += dm; NV.Audio.sfx('hurt'); shake(.35);
     const el = document.querySelector('#hud .dmg'); if (el) { el.style.opacity = U.clamp(dm / 30, .35, 1); clearTimeout(el._t); el._t = setTimeout(() => el.style.opacity = 0, 180); }
@@ -2255,7 +2644,8 @@ NV.Level = (() => {
     if (L.cine) { cineUpdate(dt); if (L.cine) { if (L.npcs) updateNpcs(dt); if (L.city) updateTraffic(dt); updateWorld(dt); hud(dt); return; } }
     if (L.pRag) { pRagUpdate(dt); if (L.pRag) { L.look.dx = L.look.dy = 0; if (L.free) updateFree(dt); if (L.city) updateTraffic(dt); updateEnemies(dt); updateBullets(dt); hud(dt); return; } }
     // look
-    const sens = .0022 * set.sens;
+    const zoomed = L.arms && L.arms.cur && L.arms.cur.zoom && I.rmb && !L.drive;
+    const sens = .0022 * set.sens * (zoomed ? .35 : 1);
     L.lastLook = L.look.dx || L.look.dy || (I.pad && (Math.abs(I.pad.axes[2]) > .15 || Math.abs(I.pad.axes[3]) > .15));
     p.yaw += L.look.dx * sens; p.pitch += L.look.dy * sens * (set.invertY ? -1 : 1); L.look.dx = L.look.dy = 0;
     if (I.pad) { const ax = I.pad.axes; const rx = Math.abs(ax[2]) > .15 ? ax[2] : 0, ry = Math.abs(ax[3]) > .15 ? ax[3] : 0; p.yaw += rx * dt * 2.8 * set.sens; p.pitch += ry * dt * 2.2 * set.sens * (set.invertY ? -1 : 1); }
@@ -2272,7 +2662,7 @@ NV.Level = (() => {
     p.crouch = crouch;
     const ml = Math.hypot(mx, mz); if (ml > 1) { mx /= ml; mz /= ml; }
     const sprint = (I.key('ShiftLeft') || I.padBtn(4)) && !crouch && mz > 0;
-    let spd = (crouch ? 2.6 : sprint ? 8.2 : 5.4) * (L.tags.includes('driver') ? 1.12 : 1);
+    let spd = (crouch ? 2.6 : sprint ? 8.2 : 5.4) * (L.tags.includes('driver') ? 1.12 : 1) * ((L.arms && L.arms.cur && L.arms.cur.slow) || 1);
     const sy = Math.sin(p.yaw), cy = Math.cos(p.yaw);
     let vx = (mx * cy + mz * sy) * spd, vz = (-mx * sy + mz * cy) * spd;
     if (!L.calm && !L.drive && (I.hit('Space') || I.padHit(1)) && p.dashCd <= 0 && p.en >= 22 && ml > 0) { p.dash = .18; p.dashCd = L.tags.includes('driver') ? .5 : .8; p.en -= 22; p.dx = vx / spd; p.dz = vz / spd; NV.Audio.sfx('dash'); p.inv = .15; }
@@ -2293,7 +2683,7 @@ NV.Level = (() => {
     L.plight.position.set(p.x, eyeH + .4, p.z);
     if (L.sun) L.sun.position.set(p.x + 17, 50, p.z + 12);
     if (L.rain) L.rain.emitter = V3(p.x, 0, p.z);
-    L.cam.fov = U.lerp(L.cam.fov, set.fov * Math.PI / 180 * .75 * (sprint ? 1.08 : 1) * (p.dash > 0 ? 1.15 : 1), dt * 8);
+    L.cam.fov = U.lerp(L.cam.fov, set.fov * Math.PI / 180 * .75 * (sprint ? 1.08 : 1) * (p.dash > 0 ? 1.15 : 1) * (zoomed ? .3 : 1), dt * 8);
     if (L.drive) driveCamera(dt);
     if (L.map.void) { // jump with Space; past the rim there is only falling
       const onPlat = Math.hypot(p.x - L.voidC.x, p.z - L.voidC.z) < 10;
@@ -2309,9 +2699,9 @@ NV.Level = (() => {
     G.node.position.set(.3 + (p.moving ? Math.cos(p.bob * .5) * .015 : 0), -.32 + (p.moving ? Math.abs(Math.sin(p.bob * .5)) * .012 : 0) - (hacking ? .25 : 0), .62 - G.kick * .08);
     G.node.rotation.x = -G.kick * .12; G.coil.emissiveColor = p.over > 0 ? C3('#ff3355') : C3(L.palette.b).scale(1 - p.heat / 160);
     // actions
+    if (!L.calm) updateArms(dt);
     if (!hacking && !L.calm && !L.drive) {
-      const fireHeld = I.lmb || (I.pad && I.pad.buttons[7] && I.pad.buttons[7].value > .4);
-      if (fireHeld) shoot();
+      if (L.arms.cur) useWeapon(L.arms.cur, dt);
       if (I.hit('KeyQ') || I.padHit(3)) emp();
     }
     const carKey = L.city && !hacking && (I.hit('KeyF') || (I.padHit(2) && (L.drive || !nearestInteract())));
@@ -2337,7 +2727,8 @@ NV.Level = (() => {
 
   function canSee(e) {
     const p = L.p, dx = p.x - e.x, dz = p.z - e.z, d = Math.hypot(dx, dz);
-    let range = (e.drone ? 14 : 17) * (p.crouch ? .6 : 1);
+    if (L.arms && L.arms.buff.cloak > 0) return 0;
+    let range = (e.drone ? 14 : 17) * (p.crouch ? .6 : 1) * (L.arms && L.arms.jam ? .45 : 1);
     if (d > range) return 0;
     const ang = Math.abs(U.angDiff(e.yaw, Math.atan2(dx, dz)));
     if (ang > (e.state === 'alert' ? 1.6 : .95) && d > 2.2) return 0;
@@ -2358,6 +2749,7 @@ NV.Level = (() => {
       if (e.state === 'down') { if (e.rag && !(e.rag.rest && e.rag.t > 3)) ragStep(e, m.root, m.rig, dt); return; }
       if (e.stun > 0) { e.stun -= dt; m.mark.isVisible = true; m.mark.material = L.mats.tracer; m.root.rotation.z = Math.sin(L.time * 20) * .05; if (e.drone) m.root.position.y = U.lerp(m.root.position.y, 1, dt * 3); return; }
       m.root.rotation.z = 0;
+      if (e.ally > 0) { allyStep(e, dt); return; }
       const vis = canSee(e), dx = p.x - e.x, dz = p.z - e.z, dist = Math.hypot(dx, dz);
       let tx = null, tz = null, spd = e.speed, face = null;
       if (e.state === 'patrol' || e.state === 'sus') {
@@ -2851,7 +3243,8 @@ NV.Level = (() => {
     if (L.waves) L.enemies.filter(e => e.state !== 'down').forEach(e => add(e, 2, 'HOSTILE'));
     if (L.free) { if (L.gig) add(L.gig.tgt, 3, 'GIG'); if (L.storyB) add(L.storyB, 3, 'STORY'); }
     if (L.guide) add(L.guide, 2.5, 'GO');
-    return out.slice(0, 16);
+    if (L.arms && L.arms.reveal > 0) L.enemies.filter(e => e.state !== 'down' && Math.hypot(e.x - L.p.x, e.z - L.p.z) < 90).forEach(e => out.push({ x: e.x, z: e.z, y: 2.3, label: 'HOSTILE', foe: true }));
+    return out.slice(0, 28);
   }
   function waypoint() {
     const box = document.querySelector('#hud .wps'); if (!box) return;
@@ -2865,7 +3258,7 @@ NV.Level = (() => {
       if (behind) { x = cw - x; y = ch - m; }
       const off = behind || x < m || x > cw - m || y < m || y > ch - m;
       x = U.clamp(x, m, cw - m); y = U.clamp(y, m, ch - m);
-      el.style.display = 'block'; el.style.transform = `translate(${x | 0}px,${y | 0}px)`; el.classList.toggle('edge', off); el.classList.toggle('dim', /LOCKED|OPTIONAL/.test(t.label));
+      el.style.display = 'block'; el.style.transform = `translate(${x | 0}px,${y | 0}px)`; el.classList.toggle('edge', off); el.classList.toggle('dim', /LOCKED|OPTIONAL/.test(t.label)); el.classList.toggle('foe', !!t.foe);
       el._x = x; el._y = y; el._t = t;
     });
     // full label only on the marker nearest the crosshair; the rest show distance so they never pile up
@@ -3584,6 +3977,7 @@ NV.Level = (() => {
         else if (m.kind === 'pick') { const k = L.pickups.find(k => k.nid === m.i); if (k) { if (k.kind !== 'med' && k.kind !== 'lore') { L.obj.got++; L.stats.found++; if (L.obj.got >= L.obj.total) openExit(); } k.m.dispose(); L.pickups = L.pickups.filter(x => x !== k); } }
         else if (m.kind === 'civ') { const c = L.civs[m.i]; if (c && !c.saved) { c.saved = true; L.stats.rescued++; } }
         break;
+      case 'fx': if (here) boomFx(+m.x || 0, +m.z || 0, Math.min(40, +m.r || 4), String(m.fx)); break;
       case 'boss': if (here && L.boss && L.boss.hp > 0) { L.boss.hp -= +m.d || 0; if (L.boss.hp <= 0) bossDown(); } break;
       case 'mission': if (L.free && L.op.mp && !L.over) { NV.UI.dismissModals(); if (document.pointerLockElement) document.exitPointerLock(); end({ mission: m.m }); } break;
       case 'mend': if (here && !L.over) { L.netEnd = true; finish(!!m.won, m.why); } break;
@@ -3610,6 +4004,7 @@ NV.Level = (() => {
   function lock() { try { const r = lockEl().requestPointerLock(); if (r && r.catch) r.catch(() => { }); } catch (e) { } }
   function finish(won, why) {
     if (L.over) return;
+    if (won && !L.free) { const S = NV.State.get(), bonus = 150 + L.act * 50; if (S) { S.credits = (S.credits || 0) + bonus; NV.State.save(); } NV.toast('PAYOUT', '+' + bonus + ' ¢ — spend it at the Black Market (Esc).', '#ffd23d', 4); }
     if (netOn() && !L.free && !L.netEnd) NV.Net.send({ t: 'mend', won: !!won, why, lvl: L.netKey }); L.over = true; L.hack = null;
     if (document.pointerLockElement) document.exitPointerLock();
     const s = L.stats; s.undetected = s.alerts === 0; s.won = won; s.why = why;
@@ -3629,7 +4024,7 @@ NV.Level = (() => {
 
   function buildHud(op) {
     const h = U.el('div', '', `
-      <div class="xh"></div><div class="dmg"></div><div class="lb lbt"></div><div class="lb lbb"></div><div class="loc"></div><div class="wps"></div><div class="chatlog"></div><input class="chatin hidden" maxlength="140" placeholder="Say something in character — Enter to send, Esc to cancel">
+      <div class="xh"></div><div class="dmg"></div><div class="lb lbt"></div><div class="lb lbb"></div><div class="loc"></div><div class="wps"></div><div class="hotbar"></div><div class="hbinfo"></div><div class="chatlog"></div><input class="chatin hidden" maxlength="140" placeholder="Say something in character — Enter to send, Esc to cancel">
       <div class="obj"><div class="t">OPERATION</div><div class="d"></div><div class="c"></div></div>
       <div class="status s0">UNDETECTED</div>
       <canvas class="mm" width="180" height="180"></canvas><div class="timer"></div><div class="speedo hidden"></div>
@@ -3653,6 +4048,7 @@ NV.Level = (() => {
     h.querySelector('.obj .t').textContent = 'OPERATION · ' + L.obj.label.toUpperCase();
     if (L.boss) h.querySelector('.boss .nm').textContent = L.boss.name.toUpperCase();
     if (L.map.apt) { ['.mm', '.status', '.timer', '.bars'].forEach(q => h.querySelector(q).style.display = 'none'); h.querySelector('.obj .t').textContent = 'PROLOGUE · TIER 93'; }
+    if (L.calm) ['.hotbar', '.hbinfo'].forEach(q => h.querySelector(q).style.display = 'none');
     if (op.m === 'void') { ['.mm', '.status', '.timer', '.bars', '.xh'].forEach(q => h.querySelector(q).style.display = 'none'); h.querySelector('.obj .t').textContent = 'THE END'; h.querySelector('.obj .d').textContent = 'There is nothing left out there. Jump into the void and this save is erased for good. Esc to leave it alone.'; }
     if (op.m === 'scene') { ['.status', '.timer', '.bars'].forEach(q => h.querySelector(q).style.display = 'none'); h.querySelector('.obj .t').textContent = 'STORY · ' + (op.title || '').toUpperCase(); }
     document.body.classList.add('inlevel');
@@ -3680,9 +4076,11 @@ NV.Level = (() => {
       L.seen = new Uint8Array(L.map.W * L.map.H);
       const built = buildScene(op, ctx); L.scene = built.scene; L.cam = built.cam; L.plight = built.plight;
       populate(op, ctx);
+      if (!NV.State.get().arms) NV.Arms.state();
       L.enemies.forEach((e, i) => e.nid = i); L.mpStart = { x: L.p.x, z: L.p.z };
       if (L.city && !L.free) { L.peds = []; populateCars({ x: L.p.x, z: L.p.z }, !!L.aoff || op.m === 'scene'); }
       buildHud(op);
+      armsInit();
       L.scene.onBeforeRenderObservable.add(() => update(L ? Math.min(.05, L.scene.getEngine().getDeltaTime() / 1000) : 0));
       L.scene.executeWhenReady(() => {
         NV.G.active = L.scene;
@@ -3692,7 +4090,7 @@ NV.Level = (() => {
     });
   }
   return {
-    start, get active() { return !!L; }, debug: () => L, devApi: () => ({ disable, ragdoll }),
+    start, get active() { return !!L; }, debug: () => L, devApi: () => ({ disable, ragdoll, shoot, launch, strike, hack, deploy, swing, armsSelect, beamTick }),
     stop() { if (L) end({ done: true }); },
     event: aptEvent,
     applyQuality() { if (!L) return; NV.Quality.teardown(L.fx); L.fx = NV.Quality.setup(L.scene, L.cam); const q = NV.Quality.get(); L.cam.maxZ = q.draw; },
@@ -4083,10 +4481,10 @@ NV.UI = (() => {
     const h = UI.push({ tick() { const I = NV.In; if (I.back() || I.any('KeyL') || I.confirm()) fin(); if (I.menuUp()) p.scrollTop -= 60; if (I.menuDown()) p.scrollTop += 60; } });
   });
   UI.storyPause = () => new Promise(res => {
-    const m = modal(`<div class="stitle">PAUSED</div><button class="btn">Resume</button><button class="btn">Journal</button><button class="btn">Audio</button><button class="btn">Settings</button><button class="btn">Save &amp; Quit to Title</button>`, true);
+    const m = modal(`<div class="stitle">PAUSED</div><button class="btn">Resume</button><button class="btn">Journal</button><button class="btn">Black Market</button><button class="btn">Audio</button><button class="btn">Settings</button><button class="btn">Save &amp; Quit to Title</button>`, true);
     const b = [...m.querySelectorAll('.btn')];
     const fin = v => { UI.pop(h); m.remove(); res(v); };
-    const h = UI.push(nav(b, { select: async k => { if (k === 0) fin(null); if (k === 1) await UI.journal(); if (k === 2) await UI.settings('audio'); if (k === 3) await UI.settings(); if (k === 4) fin('quit'); }, back: () => fin(null) }));
+    const h = UI.push(nav(b, { select: async k => { if (k === 0) fin(null); if (k === 1) await UI.journal(); if (k === 2) await UI.blackMarket(); if (k === 3) await UI.settings('audio'); if (k === 4) await UI.settings(); if (k === 5) fin('quit'); }, back: () => fin(null) }));
   });
 
   const SPEEDS = [28, 60, 130, 1e5];
@@ -4205,10 +4603,10 @@ NV.UI = (() => {
   });
   UI.levelPause = (free, mp) => new Promise(res => {
     const items = mp
-      ? (free ? [['resume', 'Resume'], ...(mp.host ? [['missions', 'Co-op Missions<small>Start a mission for everyone in the session</small>']] : []), ['players', 'Players &amp; Join Code'], ['audio', 'Audio'], ['settings', 'Settings'], ['quit', 'Leave Session']]
-        : [['resume', 'Resume'], ['players', 'Players &amp; Join Code'], ['audio', 'Audio'], ['settings', 'Settings'], ['skip', 'Abandon Mission<small>Go back to the open world; your crew carries on</small>'], ['quit', 'Leave Session']])
-      : free ? [['resume', 'Resume'], ['journal', 'Journal'], ['audio', 'Audio'], ['settings', 'Settings'], ['quit', 'Save &amp; Quit to Title']]
-        : [['resume', 'Resume'], ['audio', 'Audio'], ['settings', 'Settings'], ['restart', 'Restart Operation'], ['skip', 'Skip Operation<small>Continue the story without clearing this operation</small>'], ['quit', 'Save &amp; Quit to Title']];
+      ? (free ? [['resume', 'Resume'], ...(mp.host ? [['missions', 'Co-op Missions<small>Start a mission for everyone in the session</small>']] : []), ['players', 'Players &amp; Join Code'], ['market', 'Black Market<small>Weapons, drones, hacks, strikes</small>'], ['audio', 'Audio'], ['settings', 'Settings'], ['quit', 'Leave Session']]
+        : [['resume', 'Resume'], ['players', 'Players &amp; Join Code'], ['market', 'Black Market'], ['audio', 'Audio'], ['settings', 'Settings'], ['skip', 'Abandon Mission<small>Go back to the open world; your crew carries on</small>'], ['quit', 'Leave Session']])
+      : free ? [['resume', 'Resume'], ['market', 'Black Market<small>Weapons, drones, hacks, strikes</small>'], ['journal', 'Journal'], ['audio', 'Audio'], ['settings', 'Settings'], ['quit', 'Save &amp; Quit to Title']]
+        : [['resume', 'Resume'], ['market', 'Black Market<small>Weapons, drones, hacks, strikes</small>'], ['audio', 'Audio'], ['settings', 'Settings'], ['restart', 'Restart Operation'], ['skip', 'Skip Operation<small>Continue the story without clearing this operation</small>'], ['quit', 'Save &amp; Quit to Title']];
     const m = modal(`<div class="stitle">${mp ? 'SESSION · ' + U.esc(NV.Net.code || '') : free ? 'NEW AVALON' : 'PAUSED'}</div>` + items.map(i => `<button class="btn">${i[1]}</button>`).join(''), true);
     const b = [...m.querySelectorAll('.btn')];
     const fin = v => { UI.pop(h); m.remove(); res(v); };
@@ -4217,10 +4615,44 @@ NV.UI = (() => {
         const a = items[k][0];
         if (a === 'audio') await UI.settings('audio'); else if (a === 'settings') await UI.settings(); else if (a === 'journal') await UI.journal();
         else if (a === 'players') await UI.players();
+        else if (a === 'market') await UI.blackMarket();
         else if (a === 'missions') { const ms = await UI.missionBoard(); if (ms) fin({ mission: ms }); }
         else fin(a);
       }, back: () => fin('resume'),
     }));
+  });
+  /* ---------------- Black Market: buy from the full arsenal, equip to the 9-slot hotbar ---------------- */
+  UI.blackMarket = () => new Promise(res => {
+    const S = NV.State.get(); if (!S) { res(); return; }
+    const A = NV.Arms, st = A.state(); let cat = 'pistol', slot = st.sel;
+    const m = add(`<div class="panel bm"><div class="bmhead"><div class="stitle" style="margin:0">BLACK MARKET</div><div class="bmcr"></div><button class="btn bmx">Close ✕</button></div>
+      <p class="muted" style="font-size:13px;margin:4px 0 8px">Every advanced weapon has an owner. Helix gear is smart but corporate · Iron Angel is heavy and yours · Mirror copies · Hunter predicts · Null shuts implants down. Pick a hotbar slot, then equip.</p>
+      <div class="bmslots"></div><div class="bmtabs"></div><div class="bmlist"></div></div>`, 'modal');
+    const $ = q => m.querySelector(q);
+    const stats = w => w.type === 'gun' ? (w.beam ? `BEAM ${Math.round(w.dmg)}/s` : `DMG ${Math.round(w.dmg)}${w.pellets > 1 ? '×' + w.pellets : ''} · ${w.auto ? Math.round(1 / w.cd) + '/s AUTO' : 'SEMI'}`) + (w.homing ? ' · SMART' : '') + (w.pierce ? ' · PIERCE' : '') + (w.echo ? ' · ECHO' : '') + (w.stun ? ' · NONLETHAL' : '') + (w.emp ? ' · EMP' : '') + (w.silent ? ' · SILENT' : '')
+      : w.type === 'melee' ? `DMG ${Math.round(w.dmg)} · SILENT TAKEDOWNS${w.stun ? ' · NONLETHAL' : ''}${w.emp ? ' · EMP' : ''}`
+      : `${A.kindName(w)} · ${(w.fx || '').toUpperCase()}${w.radius ? ' · R ' + w.radius + 'M' : ''}${w.area ? ' · AREA ' + w.area + 'M' : ''} · COOLDOWN ${w.cool}s`;
+    const draw = () => {
+      $('.bmcr').textContent = (S.credits || 0) + ' ¢';
+      $('.bmslots').innerHTML = st.bar.map((id, i) => { const w = id && A.BY[id]; return `<button class="bs${i === slot ? ' on' : ''}" data-s="${i}"><b>${i + 1}</b>${w ? `<i style="color:${w.col[1]}">${A.glyph[w.type]}</i> ${U.esc(w.name)}` : '<span class="muted">empty</span>'}</button>`; }).join('');
+      $('.bmtabs').innerHTML = A.CATS.map(c => `<button class="bt${c.cat === cat ? ' on' : ''}" data-c="${c.cat}">${c.name}</button>`).join('');
+      $('.bmlist').innerHTML = A.ALL.filter(w => w.cat === cat).map(w => { const own = st.owned.includes(w.id), inbar = st.bar.indexOf(w.id);
+        return `<div class="bi"><div class="bic" style="border-color:${w.col[1]}"><i style="color:${w.col[1]}">${A.glyph[w.type]}</i></div><div class="bid"><b>${U.esc(w.name)}</b>${w.desc ? `<span class="muted"> — ${U.esc(w.desc)}</span>` : ''}<small>${stats(w)}</small></div>
+          <div class="bia">${own ? `<button class="bb eq" data-id="${w.id}">${inbar >= 0 ? 'IN SLOT ' + (inbar + 1) : 'EQUIP → ' + (slot + 1)}</button>` : `<button class="bb buy" data-id="${w.id}"${(S.credits || 0) < w.price ? ' disabled' : ''}>BUY ${w.price} ¢</button>`}</div></div>`; }).join('');
+    };
+    m.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.classList.contains('bmx')) return fin();
+      if (b.dataset.s != null) { slot = +b.dataset.s; if (e.detail === 2 || st.bar[slot]) { /* double click clears */ } NV.Audio.sfx('ui'); }
+      else if (b.dataset.c) { cat = b.dataset.c; NV.Audio.sfx('ui'); $('.bmlist').scrollTop = 0; }
+      else if (b.classList.contains('buy')) { const w = A.BY[b.dataset.id]; if ((S.credits || 0) >= w.price && !st.owned.includes(w.id)) { S.credits -= w.price; st.owned.push(w.id); if (!st.bar[slot]) st.bar[slot] = w.id; NV.Audio.sfx('pickup'); NV.State.save(); } }
+      else if (b.classList.contains('eq')) { const id = b.dataset.id, old = st.bar.indexOf(id); if (old >= 0) st.bar[old] = st.bar[slot]; st.bar[slot] = id; st.sel = slot; NV.Audio.sfx('select'); NV.State.save(); }
+      draw();
+    });
+    m.addEventListener('contextmenu', e => { const b = e.target.closest('.bs'); if (b) { e.preventDefault(); st.bar[+b.dataset.s] = null; NV.State.save(); draw(); } });
+    draw();
+    const fin = () => { UI.pop(h); m.remove(); res(); };
+    const h = UI.push({ tick() { if (NV.In.back()) fin(); } });
   });
   UI.dismissModals = () => { document.querySelectorAll('#ui > .modal').forEach(m => m.remove()); stack.length = 0; };
   UI.players = () => new Promise(res => {
@@ -4694,6 +5126,7 @@ NV.Story = (() => {
   async function mpSession() {
     const N = NV.Net;
     NV.State.tempGame({ name: N.me.name, look: { jacket: '#2a1f3d', visor: '#19f0ff' }, voice: 1, tags: [], difficulty: 'normal' });
+    NV.State.get().credits = 3000;
     NV.UI.storyHide(true);
     const ctx = { act: 2, palette: NV.paletteFor('NEON HEIGHTS'), chapter: 'mp', echoes: [], tactic: {} };
     while (N.on) {
