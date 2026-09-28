@@ -2627,7 +2627,7 @@ NV.Level = (() => {
     L.map.plazas.slice().sort((a, b) => Math.hypot(a.cx * TILE - st.x, a.cy * TILE - st.z) - Math.hypot(b.cx * TILE - st.x, b.cy * TILE - st.z)).slice(0, L.free ? 6 : 3).forEach((pz, pi) => {
       for (let k = 0; k < (pi ? 2 : 3); k++) {
         const x = (pz.x + 1.5 + k * 2.5) * TILE, z = (pz.y + 1) * TILE;
-        if (!solid(x, z)) { const c = makeCar(x, z, 0, 'parked'); c.vh = c.yaw; } // side by side, noses into the plaza
+        if (!solid(x, z) && !L.cars.some(o => Math.hypot(o.x - x, o.z - z) < 5)) { const c = makeCar(x, z, 0, 'parked'); c.vh = c.yaw; } // side by side, noses into the plaza
       }
     });
   }
@@ -2637,7 +2637,7 @@ NV.Level = (() => {
     if (L.drive && test(p.x, p.z, 2.4)) return true;
     if (c.reckless) { for (const o of L.cars) if (o !== c && test(o.x, o.z, 1.8)) return true; return false; } // reckless drivers stop for nothing but cars
     if (!L.drive && test(p.x, p.z, 1.6)) return true;
-    if (c.stopT < 4) for (const o of L.cars) if (o !== c && test(o.x, o.z, 1.8)) return true; // creep through gridlock
+    for (const o of L.cars) if (o !== c && test(o.x, o.z, 2.2)) return true;
     for (const pd of L.peds) if (test(pd.x, pd.z, 1.4)) return true;
     for (const cv of L.civs) if (test(cv.x, cv.z, 1.4)) return true;
     for (const e of L.enemies) if (e.state !== 'down' && !e.drone && test(e.x, e.z, 1.4)) return true;
@@ -2660,14 +2660,31 @@ NV.Level = (() => {
         const toStop = (interAlong(c.next) - c.dir * 10.5 - c.along) * c.dir;
         if (si > 0 && toStop > -.4 && toStop < 8 + c.speed * 1.4 && !(si === 1 && toStop < c.speed * .7)) c.speed = Math.min(c.speed, Math.max(0, toStop - .2) * 1.3);
       }
+      // don't enter a junction another car is still crossing on the other street
+      if (c.next >= 0) {
+        const into = (interAlong(c.next) - c.dir * 5 - c.along) * c.dir;
+        if (into > -.3 && into < 1.5 + c.speed * dt * 2) {
+          const k2 = streetOf(c.axis === 'z' ? c.x : c.z), jx = c.axis === 'z' ? (2 + k2 * L.map.B) * TILE : interAlong(c.next), jz = c.axis === 'z' ? interAlong(c.next) : (2 + k2 * L.map.B) * TILE;
+          if (L.cars.some(o => o !== c && o.kind !== 'parked' && o.axis !== c.axis && Math.abs(o.x - jx) < 5.5 && Math.abs(o.z - jz) < 5.5)) { c.speed = 0; c.stopT += dt; }
+        }
+      }
+      // hopelessly stuck (deadlock): quietly respawn somewhere out of sight instead of driving through other cars
+      if (c.stopT > 14 && d > 45) { if (spawnTraffic(c, 90, 220)) { c.root.position.set(c.x, 0, c.z); c.stopT = 0; } return; }
       c.along += c.dir * c.speed * dt;
       if ((c.along - interAlong(c.next)) * c.dir >= 0) routeAt(c, c.next);
       placeCar(c);
+      // hard separation: never overlap the car in front
+      for (const o of L.cars) { if (o === c) continue; const dx = o.x - c.x, dz = o.z - c.z, dd = Math.hypot(dx, dz); if (dd < 4.6 && dx * Math.sin(c.yaw) + dz * Math.cos(c.yaw) > 0) { c.along -= c.dir * (4.6 - dd); c.speed = 0; placeCar(c); break; } }
       const k = Math.min(1, dt * 5); c.rx += (c.x - c.rx) * k; c.rz += (c.z - c.rz) * k; // ease lane changes at turns
       c.vh += U.angDiff(c.vh, c.yaw) * Math.min(1, dt * 6);
       c.root.position.set(c.rx, 0, c.rz); c.root.rotation.y = c.vh;
       // being hit by a car: people fly
       if (c.speed > 4 && d < 40) {
+        // people see it coming and step aside (the reckless ones still catch the unlucky)
+        const fx2 = Math.sin(c.vh), fz2 = Math.cos(c.vh);
+        const dodge = o => { const dx = o.x - c.x, dz = o.z - c.z, ah = dx * fx2 + dz * fz2, sd = dx * fz2 - dz * fx2; if (ah > 2 && ah < 4 + c.speed * .6 && Math.abs(sd) < 2.2) { const dir = sd >= 0 ? 1 : -1, st = Math.min(2.5, 6 * dt); const nx = o.x + fz2 * dir * st, nz = o.z - fx2 * dir * st; if (!solid(nx, nz)) { o.x = nx; o.z = nz; } } };
+        L.peds.forEach(pd => { if (!pd.rag && Math.random() < .9) dodge(pd); });
+        L.enemies.forEach(e => { if (e.state !== 'down' && !e.drone) dodge(e); });
         if (!L.drive && !L.pRag && !L.cine && Math.hypot(c.x - p.x, c.z - p.z) < 2.1) launchPlayer(Math.sin(c.vh) * c.speed * .85, 4 + c.speed * .45, Math.cos(c.vh) * c.speed * .85, 8 + c.speed * 1.1, c);
         for (const pd of L.peds) if (!pd.rag && Math.hypot(c.x - pd.x, c.z - pd.z) < 2) { ragdoll(pd, pd.root, pd.rig, Math.sin(c.vh) * c.speed * .85, 3 + c.speed * .4, Math.cos(c.vh) * c.speed * .85, false); NV.Audio.sfx('hit'); c.speed *= .8; }
       }
@@ -2713,7 +2730,7 @@ NV.Level = (() => {
   /* ---- player driving ---- */
   function nearestCar() {
     if (!L.cars) return null; const p = L.p; let best = null, bd = 3.8;
-    L.cars.forEach(c => { if (c.kind === 'remote') return; const d = Math.hypot(c.x - p.x, c.z - p.z); if (d < bd) { bd = d; best = c; } });
+    L.cars.forEach(c => { if (c.kind === 'remote' || (c.kind === 'traffic' && c.speed > .5)) return; const d = Math.hypot(c.x - p.x, c.z - p.z); if (d < bd) { bd = d; best = c; } });
     return best;
   }
   function carCollides(x, z, yaw) {
@@ -3082,7 +3099,7 @@ NV.Level = (() => {
     SHARD_IDS.forEach((id, k) => { if (S.shards.includes(id)) return; const p = spot(15); const m = NV_DATA.missions[id]; addPickup('lore', p.x, p.z, m ? m.title : ''); L.pickups[L.pickups.length - 1].sid = id; });
     for (let i = 0; i < 6; i++) { const p = spot(10); addPickup('med', p.x, p.z); }
     // Helix street patrols (sleep when far away to save CPU)
-    const pts = map.inter.map(interC).filter(c => Math.hypot(c.x - st.x, c.z - st.z) > 34);
+    const pts = map.inter.map(interC).map((c, i) => ({ x: c.x + (i % 2 ? 6 : -6), z: c.z + (i % 3 ? 6 : -6) })).filter(c => !solid(c.x, c.z) && Math.hypot(c.x - st.x, c.z - st.z) > 34);
     const nP = 34 + Math.min(12, L.act * 2);
     for (let i = 0; i < nP; i++) {
       const a = pts[Math.floor(r() * pts.length)], b = pts[Math.floor(r() * pts.length)];
