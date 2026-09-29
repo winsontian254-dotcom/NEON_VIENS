@@ -210,7 +210,7 @@ body.mobile .bm{max-height:96vh}body.mobile .bmslots{grid-template-columns:repea
 body.mobile #hud .bars{transform:scale(.7);transform-origin:left bottom}
 /* touch controls */
 #touch{position:fixed;inset:0;z-index:40;pointer-events:none;display:none;touch-action:none;user-select:none;-webkit-user-select:none}
-body.touch.inlevel #touch{display:block}body.touch.storyup #touch,body.cine #touch{display:none!important}
+body.touch.inlevel.playing #touch{display:block}body.touch.storyup #touch,body.cine #touch{display:none!important}
 #touch .tjoy{position:absolute;left:3vw;bottom:5vh;width:150px;height:150px;border-radius:50%;border:2px solid rgba(25,240,255,.35);background:rgba(5,3,12,.25);pointer-events:auto;touch-action:none}
 #touch .tjoy i{position:absolute;left:45px;top:45px;width:60px;height:60px;border-radius:50%;background:rgba(25,240,255,.35);box-shadow:0 0 14px rgba(25,240,255,.6)}
 #touch .tjoy.on{border-color:rgba(25,240,255,.8)}
@@ -743,6 +743,8 @@ NV.In = (() => {
   addEventListener('keyup', e => down.delete(e.code));
   addEventListener('blur', () => { down.clear(); I.lmb = false; });
   addEventListener('mousedown', e => { if (e.button === 0) { I.lmb = true; I.lmbHit = true; } if (e.button === 2) I.rmb = true; });
+  // a tap anywhere (outside the on-screen controls) counts as 'continue' on touch screens
+  addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse' && !(e.target.closest && e.target.closest('#touch .tb, #touch .tjoy, #touch .tlook'))) I.tapHit = true; }, true);
   addEventListener('mouseup', e => { if (e.button === 0) I.lmb = false; if (e.button === 2) I.rmb = false; });
   addEventListener('contextmenu', e => e.preventDefault());
   I.wheel = 0; addEventListener('wheel', e => { if (document.body.classList.contains('inlevel')) I.wheel += Math.sign(e.deltaY); }, { passive: true });
@@ -763,7 +765,7 @@ NV.In = (() => {
   I.usingPad = () => I.lastPad && performance.now() - I.lastPad < 8000;
   I.rumble = (strong, weak, ms) => { try { const v = I.pad && I.pad.vibrationActuator; if (v && I.usingPad()) v.playEffect('dual-rumble', { duration: ms || 80, strongMagnitude: strong, weakMagnitude: weak }); } catch (e) { } };
   I.endFrame = () => {
-    hit.clear(); I.lmbHit = false;
+    hit.clear(); I.lmbHit = false; I.tapHit = false;
     if (I.pad) { I.padPrev = {}; I.pad.buttons.forEach((b, i) => I.padPrev[i] = b.pressed); }
   };
   // semantic menu actions
@@ -771,7 +773,7 @@ NV.In = (() => {
   I.menuDown = () => I.any('ArrowDown', 'KeyS') || I.padHit(13) || I.flick === 'd';
   I.menuLeft = () => I.any('ArrowLeft', 'KeyA') || I.padHit(14) || I.flick === 'l';
   I.menuRight = () => I.any('ArrowRight', 'KeyD') || I.padHit(15) || I.flick === 'r';
-  I.confirm = () => I.any('Enter', 'Space', 'NumpadEnter') || I.padHit(0);
+  I.confirm = () => I.any('Enter', 'Space', 'NumpadEnter') || I.padHit(0) || I.tapHit;
   I.back = () => I.any('Escape', 'Backspace') || I.padHit(1);
   I.pause = () => I.any('Escape', 'KeyP') || I.padHit(9);
   return I;
@@ -4467,7 +4469,7 @@ NV.Touch = (() => {
   addEventListener('touchstart', () => {
     if (T.active) return; T.active = true; document.body.classList.add('touch'); build();
     // step aside while dialogue/choices are up so taps reach them; show chat only in multiplayer
-    setInterval(() => { const st = document.getElementById('story'); document.body.classList.toggle('storyup', !!(st && !st.classList.contains('hidden') && st.offsetParent)); const c = ui.querySelector('.tchat'); c.style.display = NV.Net && NV.Net.on ? 'block' : 'none'; }, 200);
+    setInterval(() => { const Lv = NV.Level.active && NV.Level.debug(); document.body.classList.toggle('playing', !!(Lv && Lv.started && !Lv.paused && !Lv.over && !document.querySelector('#ui > .modal, #ui > .banner, #ui > .card, #ui > .results'))); const st = document.getElementById('story'); document.body.classList.toggle('storyup', !!(st && !st.classList.contains('hidden') && st.offsetParent)); const c = ui.querySelector('.tchat'); c.style.display = NV.Net && NV.Net.on ? 'block' : 'none'; }, 200);
   }, { passive: true });
   // tap a hotbar slot to select it
   addEventListener('pointerdown', e => { const hs = e.target.closest && e.target.closest('#hud .hs'); if (hs) tap('Digit' + (+hs.dataset.i + 1)); });
