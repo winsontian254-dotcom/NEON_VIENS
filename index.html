@@ -2132,7 +2132,7 @@ NV.Level = (() => {
     if (mode === 'hack') { const n = Math.min(k, 4, shuffled.length); for (let i = 0; i < n; i++) { const c = cellC(shuffled[i].cx, shuffled[i].cy); addTerminal(c.x, c.z); } L.obj.total = n; L.obj.label = 'Hack the terminals'; }
     else if (mode === 'retrieve' || mode === 'explore') { const n = Math.min(k, 5, shuffled.length); for (let i = 0; i < n; i++) { const c = freeCell(shuffled[i], false); addPickup(mode === 'explore' ? 'memory' : 'shard', c.x, c.z, ctx.echoes && ctx.echoes[i % Math.max(1, ctx.echoes.length)]); } L.obj.total = n; L.obj.label = mode === 'explore' ? 'Recover the memory fragments' : 'Recover the data shards'; }
     else { L.obj.label = 'Reach the extraction point'; L.obj.total = 0; }
-    if (L.obj.total === 0) L.exitReady = true;
+    if (L.obj.total === 0) { L.exitReady = true; L.exit.on = true; L.exit.beam.material = L.mats.exit; L.exit.ring.material = L.mats.exit; }
     // civilians
     if (op.tut || RESCUE_RE.test(op.d || '')) { const n = op.tut ? 2 : 2 + (r() < .5 ? 1 : 0); shuffled.slice(-n).forEach(rm => { const c = freeCell(rm, true); addCivilian(c.x, c.z); }); }
     // enemies
@@ -2868,7 +2868,7 @@ NV.Level = (() => {
       return true;
     });
     L.civs.forEach(c => { if (c.saved) { c.t += dt; c.root.position.y = c.t * 3; c.root.getChildMeshes().forEach(m => m.visibility = Math.max(0, 1 - c.t)); if (c.t > 1 && c.root.isEnabled()) c.root.setEnabled(false); } else { c.mk.rotation.y += dt * 3; } });
-    if (L.exit) { L.exit.ring.rotation.y += dt; L.exit.beam.visibility = L.exit.on ? .5 + Math.sin(L.time * 4) * .2 : .4; if (L.exit.on && Math.hypot(L.exit.x - p.x, L.exit.z - p.z) < 1.8) { NV.Audio.sfx('exit'); finish(true); } }
+    if (L.exit) { L.exit.ring.rotation.y += dt; L.exit.beam.visibility = L.exit.on ? .5 + Math.sin(L.time * 4) * .2 : .4; const xd = Math.hypot(L.exit.x - p.x, L.exit.z - p.z); if ((L.exit.on || L.exitReady) && (xd < 3.2 || (xd < 5 && (NV.In.hit('KeyE') || NV.In.padHit(2))))) { NV.Audio.sfx('exit'); finish(true); } }
     L.terms.forEach(t => { t.beam.visibility = t.done ? .3 : .6 + Math.sin(L.time * 5) * .3; });
     L.nodes.forEach(n => { if (!n.dead) { n.rg.rotation.y += dt * 2; if (n.hp <= 0) { n.dead = true; n.root.getChildMeshes().forEach(m => m.visibility = .25); NV.Audio.sfx('boom'); NV.toast('UPLINK LOST', 'One uplink has gone dark.', '#ff3355', 3); } } });
   }
@@ -3286,6 +3286,8 @@ NV.Level = (() => {
     hset('#hud .timer', 'text', L.defend ? U.fmtTime(L.defend.t) : '');
     const it = L.hack ? null : nearestInteract();
     const car = !it && L.city && !L.drive && !L.pRag && nearestCar();
+    const xd = L.exit && !it ? Math.hypot(L.exit.x - p.x, L.exit.z - p.z) : 99;
+    if (xd < 6) { hset('#hud .prompt', 'show', true); hset('#hud .prompt', 'html', L.exit.on || L.exitReady ? '<span class="kbd">E</span> EXTRACT — or step into the beam' : 'EXTRACTION LOCKED — ' + Math.max(0, L.obj.total - L.obj.got) + ' objective(s) left'); } else
     hset('#hud .prompt', 'show', !!(it || car)); if (it) hset('#hud .prompt', 'html', '<span class="kbd">E</span> ' + it.label); else if (car) hset('#hud .prompt', 'html', '<span class="kbd">F</span> ' + (car.kind === 'traffic' ? 'COMMANDEER VEHICLE' : 'ENTER VEHICLE'));
     hset('#hud .speedo', 'show', !!L.drive); hset('#hud .xh', 'show', !L.drive); if (L.drive) hset('#hud .speedo', 'html', Math.round(Math.abs(L.drive.car.speed) * 3.6) + '<small>KM/H' + (L.drive.car.speed < -.5 ? ' · R' : '') + '</small>');
     if (L.boss) {
