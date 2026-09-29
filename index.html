@@ -702,7 +702,7 @@ NV.In = (() => {
    ===================================================================== */
 NV.Settings = (() => {
   const KEY = 'nv_settings_v1';
-  const DEF = { master: .8, music: .6, sfx: .8, textSpeed: 2, sens: 1, fov: 80, shake: 1, scan: 1, showStats: 1, voice: 1, voiceVol: 1, narrVol: .5, duck: 1, voiceRate: 1, narrator: 1, walk: 1, travel: 1, g: null, showFps: 0, invertY: 0 };
+  const DEF = { master: .8, music: .6, sfx: .8, textSpeed: 2, sens: 1, fov: 80, shake: 1, scan: 1, showStats: 1, voice: 1, voiceVol: 1, narrVol: .5, duck: 1, voiceRate: 1, narrator: 1, walk: 1, travel: 1, g: null, showFps: 0, vr: 0, invertY: 0 };
   let s = { ...DEF };
   if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) { s.shake = 0; s.scan = 0; }
   try { Object.assign(s, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { }
@@ -965,13 +965,14 @@ NV.bootEngine = async () => {
   const allowGL = /allowgl/.test(location.hash); // developer/test escape hatch only
   let gpuOk = false;
   try { gpuOk = !!navigator.gpu && await BABYLON.WebGPUEngine.IsSupportedAsync; } catch (e) { gpuOk = false; }
-  if (gpuOk) {
+  const vrMode = NV.Settings.get().vr && !!navigator.xr;
+  if (gpuOk && !vrMode) {
     try { engine = new BABYLON.WebGPUEngine(canvas, { antialias: q.aa === 'msaa', stencil: true, powerPreference: 'high-performance' }); await engine.initAsync(); }
     catch (e) { console.warn('WebGPU init failed', e); engine = null; }
   }
   if (!engine) {
-    if (!allowGL) throw new Error('WEBGPU_REQUIRED');
-    engine = new BABYLON.Engine(canvas, q.aa === 'msaa', { stencil: true, powerPreference: 'high-performance' }, false);
+    if (!allowGL && !vrMode) throw new Error('WEBGPU_REQUIRED');
+    engine = new BABYLON.Engine(canvas, q.aa === 'msaa', { stencil: true, powerPreference: 'high-performance', xrCompatible: vrMode }, false);
   }
   NV.G.engine = engine;
   engine.enableOfflineSupport = false;
@@ -2152,11 +2153,12 @@ NV.Level = (() => {
   }
 
   /* ---------------- player actions ---------------- */
-  function camDir() { const cp = Math.cos(L.p.pitch); return V3(Math.sin(L.p.yaw) * cp, -Math.sin(L.p.pitch), Math.cos(L.p.yaw) * cp); }
+  function camDir() { if (L.vr && L.vr.on && L.vr.ray) return L.vr.ray.direction.clone(); const cp = Math.cos(L.p.pitch); return V3(Math.sin(L.p.yaw) * cp, -Math.sin(L.p.pitch), Math.cos(L.p.yaw) * cp); }
 
   /* =====================================================================
      ARSENAL — hotbar, procedural viewmodels, and every weapon behaviour
      ===================================================================== */
+  const aimO = () => L.vr && L.vr.on && L.vr.ray ? L.vr.ray.origin.clone() : L.cam.position.clone();
   const ARMS = () => NV.Arms;
   function armsInit() {
     L.arms = { cur: null, curId: null, models: {}, cool: {}, swing: 0, drones: [], proj: [], strikes: [], buff: { shield: 0, cloak: 0 }, reveal: 0, sig: '', mats: {} };
@@ -2225,11 +2227,11 @@ NV.Level = (() => {
     hurtEnemy(e, dmg, head);
   }
   function aimTarget(maxA, range) { // enemy nearest the crosshair
-    const o = L.cam.position, d = camDir(); let best = null, bd = maxA;
+    const o = aimO(), d = camDir(); let best = null, bd = maxA;
     L.enemies.forEach(e => { if (e.state === 'down') return; const v = V3(e.x, e.drone ? e.m.root.position.y : 1.2, e.z).subtract(o), dist = v.length(); if (dist > range) return; const a = Math.acos(U.clamp(BABYLON.Vector3.Dot(v.normalize(), d), -1, 1)); if (a < bd && los(o.x, o.z, e.x, e.z)) { bd = a; best = e; } });
     return best;
   }
-  function aimPoint(range) { const o = L.cam.position, d = camDir(); for (let t = 1; t < range; t += .5) { const q = o.add(d.scale(t)); if (q.y <= 0 || solid(q.x, q.z)) return o.add(d.scale(Math.max(1, t - .5))); } return o.add(d.scale(range)); }
+  function aimPoint(range) { const o = aimO(), d = camDir(); for (let t = 1; t < range; t += .5) { const q = o.add(d.scale(t)); if (q.y <= 0 || solid(q.x, q.z)) return o.add(d.scale(Math.max(1, t - .5))); } return o.add(d.scale(range)); }
   function shoot(w) {
     w = w || ARMS().BY['courier-sidearm'];
     const p = L.p; if (p.heat >= 100 || p.over > 0 || p.cd > 0) return;
@@ -2241,7 +2243,7 @@ NV.Level = (() => {
     if (w.echo) setTimeout(() => { if (L && !L.over) { shotRay(w, true); NV.Audio.sfx('eshoot'); } }, 260); // the echo repeats the shot
   }
   function shotRay(w, echo) {
-    const o = L.cam.position.clone(); let d = camDir();
+    const o = aimO(); let d = camDir();
     if (w.spread) d = d.add(V3((Math.random() - .5) * 2 * w.spread, (Math.random() - .5) * 2 * w.spread, (Math.random() - .5) * 2 * w.spread)).normalize();
     if (w.homing) { const e = aimTarget(w.homing, w.range); if (e) d = V3(e.x, e.drone ? e.m.root.position.y : 1.3, e.z).subtract(o).normalize(); }
     let tWall = w.range; for (let t = .3; t < w.range; t += .25) { const q = o.add(d.scale(t)); if (q.y < 0 || q.y > (L.map.city ? 200 : WALLH) || solid(q.x, q.z)) { tWall = t; break; } }
@@ -2272,7 +2274,7 @@ NV.Level = (() => {
   function beamTick(w, dt) {
     const p = L.p; if (p.over > 0) return;
     p.heat += w.heat * dt; if (p.heat >= 100) { p.over = 1.6; NV.Audio.sfx('hackfail'); return; }
-    const o = L.cam.position, d = camDir(); let tEnd = w.range || 60;
+    const o = aimO(), d = camDir(); let tEnd = w.range || 60;
     for (let t = .3; t < tEnd; t += .3) { const q = o.add(d.scale(t)); if (q.y < 0 || solid(q.x, q.z)) { tEnd = t; break; } }
     const e = aimTarget(.03, tEnd); const end = e ? V3(e.x, 1.2, e.z) : o.add(d.scale(tEnd));
     tracer(L.gun.node.getAbsolutePosition().add(d.scale(.5)), end); L.gun.flash.intensity = 1.5;
@@ -2295,7 +2297,7 @@ NV.Level = (() => {
   }
   function projMesh(w, r) { const m = BABYLON.MeshBuilder.CreateSphere('pj', { diameter: r, segments: 6 }, L.scene); m.material = aMat('a' + w.col[1], '#000', w.col[1]); m.isPickable = false; return m; }
   function launch(w) {
-    const o = L.cam.position, d = camDir(), sp = w.type === 'rocket' ? 36 : 17, m = projMesh(w, w.type === 'rocket' ? .28 : .22);
+    const o = aimO(), d = camDir(), sp = w.type === 'rocket' ? 36 : 17, m = projMesh(w, w.type === 'rocket' ? .28 : .22);
     L.arms.proj.push({ w, m, x: o.x + d.x * .7, y: o.y - .15 + d.y * .7, z: o.z + d.z * .7, vx: d.x * sp, vy: d.y * sp + (w.type === 'throw' ? 4 : 0), vz: d.z * sp, g: w.type === 'throw' ? 15 : 0, life: w.mine ? 40 : 5, rest: false });
     NV.Audio.sfx(w.type === 'rocket' ? 'dash' : 'ui'); noise(L.p.x, L.p.z, 6);
   }
@@ -2441,7 +2443,7 @@ NV.Level = (() => {
     if (m.rig) animRig(m.rig, dt, !!t && Math.hypot(t.x - e.x, t.z - e.z) > 9, e.speed, 'aim');
   }
   function useWeapon(w, dt) {
-    const I = NV.In, held = I.lmb || (I.pad && I.pad.buttons[7] && I.pad.buttons[7].value > .4), press = I.lmbHit || (I.pad && I.padHit(7));
+    const I = NV.In, V = L.vr || {}, held = I.lmb || V.trig || (I.pad && I.pad.buttons[7] && I.pad.buttons[7].value > .4), press = I.lmbHit || V.trigHit || (I.pad && I.padHit(7));
     const now = L.time, ready = !(L.arms.cool[w.id] > now);
     if (w.type === 'gun') { if (w.beam) { if (held) beamTick(w, dt); } else if (w.auto ? held : press) shoot(w); return; }
     if (w.type === 'melee') { if (press) swing(w); return; }
@@ -2641,6 +2643,7 @@ NV.Level = (() => {
     if (L.wantPause || I.pause()) { L.wantPause = false; if (!L.paused) pause(); return; }
     if (L.paused) return;
     L.time += dt; L.stats.time += dt;
+    vrPoll();
     if (L.cine) { cineUpdate(dt); if (L.cine) { if (L.npcs) updateNpcs(dt); if (L.city) updateTraffic(dt); updateWorld(dt); hud(dt); return; } }
     if (L.pRag) { pRagUpdate(dt); if (L.pRag) { L.look.dx = L.look.dy = 0; if (L.free) updateFree(dt); if (L.city) updateTraffic(dt); updateEnemies(dt); updateBullets(dt); hud(dt); return; } }
     // look
@@ -2657,6 +2660,7 @@ NV.Level = (() => {
       if (I.key('KeyW') || I.key('ArrowUp')) mz += 1; if (I.key('KeyS') || I.key('ArrowDown')) mz -= 1;
       if (I.key('KeyA') || I.key('ArrowLeft')) mx -= 1; if (I.key('KeyD') || I.key('ArrowRight')) mx += 1;
       if (I.pad) { const ax = I.pad.axes; if (Math.abs(ax[0]) > .2) mx += ax[0]; if (Math.abs(ax[1]) > .2) mz -= ax[1]; }
+      if (L.vr && L.vr.on) { if (Math.abs(L.vr.lx) > .15) mx += L.vr.lx; if (Math.abs(L.vr.ly) > .15) mz -= L.vr.ly; }
     }
     const crouch = I.key('KeyC') || I.key('ControlLeft') || I.padBtn(10);
     p.crouch = crouch;
@@ -2685,6 +2689,7 @@ NV.Level = (() => {
     if (L.rain) L.rain.emitter = V3(p.x, 0, p.z);
     L.cam.fov = U.lerp(L.cam.fov, set.fov * Math.PI / 180 * .75 * (sprint ? 1.08 : 1) * (p.dash > 0 ? 1.15 : 1) * (zoomed ? .3 : 1), dt * 8);
     if (L.drive) driveCamera(dt);
+    if (L.vr && L.vr.on) vrCamera();
     if (L.map.void) { // jump with Space; past the rim there is only falling
       const onPlat = Math.hypot(p.x - L.voidC.x, p.z - L.voidC.z) < 10;
       if (onPlat && p.y <= 0 && !L.fall && (I.hit('Space') || I.padHit(0))) p.vy = 5.5;
@@ -3160,6 +3165,7 @@ NV.Level = (() => {
     let thr = 0, steer = 0;
     if (I.key('KeyW') || I.key('ArrowUp')) thr += 1; if (I.key('KeyS') || I.key('ArrowDown')) thr -= 1;
     if (I.key('KeyA') || I.key('ArrowLeft')) steer -= 1; if (I.key('KeyD') || I.key('ArrowRight')) steer += 1;
+    if (L.vr && L.vr.on) { steer += Math.abs(L.vr.lx) > .15 ? L.vr.lx : 0; thr += Math.abs(L.vr.ly) > .15 ? -L.vr.ly : 0; }
     if (I.pad) { const ax = I.pad.axes, b = I.pad.buttons; if (Math.abs(ax[0]) > .15) steer += ax[0]; if (b[7] && b[7].value > .05) thr += b[7].value; if (b[6] && b[6].value > .05) thr -= b[6].value; }
     const boost = (I.key('ShiftLeft') || I.padBtn(4)) && thr > 0 && p.en > 1;
     const hand = I.key('Space') || I.padBtn(0);
@@ -3990,6 +3996,87 @@ NV.Level = (() => {
     p.hp = p.max; p.x = L.mpStart.x; p.z = L.mpStart.z; p.inv = 2;
     NV.toast('PATCHED UP', 'Your crew dragged you back to the start point.', '#ff3355', 3);
   }
+  /* ---------------- WebXR (VR headsets) ----------------
+     Head tracking + controllers. Left stick moves, right stick snap-turns, right trigger uses the hotbar item,
+     grip = interact (E), A = confirm/advance dialogue, B = cycle hotbar, left X = vehicle (F), left Y = dash.
+     A floating panel mirrors the HUD, prompts and dialogue, because HTML overlays can't be drawn inside a headset. */
+  const vrWanted = () => NV.Settings.get().vr && navigator.xr && !(NV.G.engine && NV.G.engine.isWebGPU);
+  async function vrSetup(floor) {
+    L.vr = { on: false, lx: 0, ly: 0, rx: 0, trig: false, trigHit: false, turnReady: true, btn: {}, prev: {}, ray: null };
+    if (!vrWanted()) return;
+    try {
+      const xr = await L.scene.createDefaultXRExperienceAsync({ floorMeshes: floor ? [floor] : [], disableTeleportation: true, uiOptions: { sessionMode: 'immersive-vr', referenceSpaceType: 'local-floor' }, optionalFeatures: true });
+      if (!L || !xr.baseExperience) return;
+      L.xr = xr; const V = L.vr, bx = xr.baseExperience;
+      try { xr.pointerSelection && xr.pointerSelection.detach(); } catch (e) { }
+      bx.onStateChangedObservable.add(st => {
+        V.on = st === BABYLON.WebXRState.IN_XR;
+        if (V.on) { bx.camera.position.set(L.p.x, bx.camera.position.y, L.p.z); vrPanel(true); NV.toast('VR', 'Left stick move · right stick turn · trigger fire · grip interact · A advance · B next item', '#19f0ff', 5); }
+        else { L.gun.node.parent = L.cam; L.gun.node.position.set(.3, -.32, .62); L.gun.node.rotation.set(0, -.04, 0); vrPanel(false); }
+      });
+      xr.input.onControllerAddedObservable.add(src => {
+        src.onMotionControllerInitObservable.add(mc => {
+          const hand = mc.handedness; V[hand] = { src, mc };
+          if (hand === 'right') { const g = src.grip || src.pointer; L.gun.node.parent = g; L.gun.node.position.set(0, -.02, .06); L.gun.node.rotation.set(0, 0, 0); }
+        });
+      });
+      xr.input.onControllerRemovedObservable.add(src => { ['left', 'right'].forEach(h => { if (V[h] && V[h].src === src) V[h] = null; }); });
+    } catch (e) { console.warn('WebXR unavailable', e); }
+  }
+  function vrPoll() {
+    const V = L.vr; if (!V || !V.on) return;
+    const comp = (h, id) => V[h] && V[h].mc.getComponent(id);
+    const pressed = (h, id) => { const c = comp(h, id); return !!(c && c.pressed); };
+    const ls = comp('left', 'xr-standard-thumbstick'), rs = comp('right', 'xr-standard-thumbstick');
+    V.lx = ls ? ls.axes.x : 0; V.ly = ls ? ls.axes.y : 0; V.rx = rs ? rs.axes.x : 0;
+    const now = { trig: pressed('right', 'xr-standard-trigger'), grip: pressed('right', 'xr-standard-squeeze') || pressed('left', 'xr-standard-squeeze'), a: pressed('right', 'a-button'), b: pressed('right', 'b-button'), x: pressed('left', 'x-button'), y: pressed('left', 'y-button'), lt: pressed('left', 'xr-standard-trigger') };
+    V.hit = {}; Object.keys(now).forEach(k => { V.hit[k] = now[k] && !V.prev[k]; }); V.prev = now; V.trig = now.trig; V.trigHit = V.hit.trig;
+    // buttons that drive the regular keyboard paths
+    const tap = code => { dispatchEvent(new KeyboardEvent('keydown', { code })); setTimeout(() => dispatchEvent(new KeyboardEvent('keyup', { code })), 60); };
+    if (V.hit.grip) tap('KeyE'); if (V.hit.a) tap('Space'); if (V.hit.x) tap('KeyF'); if (V.hit.y) tap('ShiftLeft');
+    if (V.hit.b) armsCycle(1);
+    // snap turn: rotate the reference space so the world turns around the player
+    if (Math.abs(V.rx) > .7 && V.turnReady) {
+      V.turnReady = false; const sm = L.xr.baseExperience.sessionManager, a = (V.rx > 0 ? -1 : 1) * Math.PI / 6;
+      try { sm.referenceSpace = sm.referenceSpace.getOffsetReferenceSpace(new XRRigidTransform({ x: 0, y: 0, z: 0 }, { x: 0, y: Math.sin(a / 2), z: 0, w: Math.cos(a / 2) })); } catch (e) { }
+    } else if (Math.abs(V.rx) < .3) V.turnReady = true;
+    // aim ray from the right controller
+    const r = V.right && V.right.src; if (r) { V.ray = V.ray || new BABYLON.Ray(V3(0, 0, 0), V3(0, 0, 1), 100); r.getWorldPointerRayToRef(V.ray); } else V.ray = null;
+  }
+  function vrCamera() {
+    const cam = L.xr.baseExperience.camera, p = L.p;
+    const e = cam.rotationQuaternion ? cam.rotationQuaternion.toEulerAngles() : cam.rotation; p.yaw = e.y; p.pitch = 0;
+    cam.position.x = L.drive ? L.drive.car.x : p.x; cam.position.z = L.drive ? L.drive.car.z : p.z;
+    L.plight.position.set(p.x, 2, p.z);
+    vrPanelUpdate();
+  }
+  // floating HUD/dialogue panel that follows the head
+  function vrPanel(on) {
+    if (!on) { if (L.vrp) { L.vrp.mesh.dispose(); L.vrp.tex.dispose(); L.vrp = null; } return; }
+    const tex = new BABYLON.DynamicTexture('vrhud', { width: 1024, height: 512 }, L.scene, true); tex.hasAlpha = true;
+    const m = mat(L.scene, 'vrhm', '#000', '#ffffff'); m.emissiveColor = new BABYLON.Color3(0, 0, 0); m.emissiveTexture = tex; m.opacityTexture = tex; m.disableLighting = true; m.backFaceCulling = false;
+    const mesh = BABYLON.MeshBuilder.CreatePlane('vrhud', { width: 1.2, height: .6 }, L.scene); mesh.material = m; mesh.isPickable = false; mesh.renderingGroupId = 1;
+    L.vrp = { mesh, tex, t: 0, yaw: L.p.yaw };
+  }
+  function vrPanelUpdate() {
+    const P = L.vrp; if (!P) return; const cam = L.xr.baseExperience.camera, p = L.p;
+    P.yaw += U.angDiff(P.yaw, p.yaw) * .06;
+    P.mesh.position.set(cam.position.x + Math.sin(P.yaw) * 1.4, cam.position.y - .45, cam.position.z + Math.cos(P.yaw) * 1.4); P.mesh.rotation.set(.35, P.yaw, 0);
+    P.t -= 1 / 30; if (P.t > 0) return; P.t = .2;
+    const g = P.tex.getContext(), W = 1024, txt = q => { const e = document.querySelector(q); return e && e.offsetParent !== null ? e.innerText.trim() : ''; };
+    g.clearRect(0, 0, W, 512); g.fillStyle = 'rgba(5,3,12,.72)'; g.fillRect(0, 0, W, 512);
+    g.fillStyle = '#ff2bd6'; g.fillRect(24, 24, 440 * p.hp / p.max, 16); g.fillStyle = '#19f0ff'; g.fillRect(24, 48, 440 * p.en / 100, 10);
+    g.font = 'bold 26px sans-serif'; g.fillStyle = '#ffb238'; g.fillText((txt('#hud .obj .t') || '').slice(0, 60), 490, 44);
+    g.font = '24px sans-serif'; g.fillStyle = '#e6e0ff';
+    const wrap = (s, x, y, max, lh, lines) => { const ws = String(s).split(/\s+/); let line = '', n = 0; for (const w of ws) { if (g.measureText(line + w).width > max) { g.fillText(line, x, y + n * lh); line = ''; if (++n >= lines) return; } line += w + ' '; } g.fillText(line, x, y + n * lh); };
+    wrap(txt('#hud .obj .d') + ' ' + txt('#hud .obj .c'), 24, 96, 976, 30, 3);
+    const pr = txt('#hud .prompt'); if (pr) { g.fillStyle = '#3dffa8'; g.font = 'bold 28px sans-serif'; g.fillText(pr.replace(/\s+/g, ' ').slice(0, 60), 24, 210); }
+    const story = document.querySelector('#story'), say = story && !story.classList.contains('hidden') ? story.innerText.trim() : '';
+    if (say) { g.fillStyle = '#ffffff'; g.font = '26px sans-serif'; wrap(say.replace(/\s+/g, ' '), 24, 262, 976, 32, 6); }
+    const toast = document.querySelector('.toast:last-child'); if (toast && !say) { g.fillStyle = '#ffd23d'; g.font = '24px sans-serif'; wrap(toast.innerText.replace(/\s+/g, ' '), 24, 262, 976, 30, 3); }
+    g.fillStyle = '#ffb238'; g.font = '22px sans-serif'; g.fillText((txt('#hud .hbinfo') || '').slice(0, 80), 24, 490);
+    P.tex.update();
+  }
 
   /* ---------------- lifecycle ---------------- */
   function pause() {
@@ -4014,6 +4101,7 @@ NV.Level = (() => {
     setTimeout(() => end(won ? { won: true, stats: s } : { died: true, stats: s }), won ? 400 : 900);
   }
   function end(res) {
+    if (L.xr) { try { if (L.vr && L.vr.on) L.xr.baseExperience.exitXRAsync(); L.xr.dispose(); } catch (e) { } }
     document.body.classList.remove('cine');
     NV.Audio.engine(0);
     if (L.city && L.map && L.map.city) { const c = toCell(L.p.x, L.p.z); if (L.map.g[c.y] && L.map.g[c.y][c.x] === 0) zone = c; }
@@ -4083,6 +4171,7 @@ NV.Level = (() => {
       if (L.city && !L.free) { L.peds = []; populateCars({ x: L.p.x, z: L.p.z }, !!L.aoff || op.m === 'scene'); }
       buildHud(op);
       armsInit();
+      vrSetup(L.scene.getMeshByName('floor'));
       L.scene.onBeforeRenderObservable.add(() => update(L ? Math.min(.05, L.scene.getEngine().getDeltaTime() / 1000) : 0));
       L.scene.executeWhenReady(() => {
         NV.G.active = L.scene;
@@ -4327,7 +4416,7 @@ NV.UI = (() => {
       ['voice', 'Voice acting', 'bool'], ['voiceVol', 'Character voice volume', 'range', 0, 1, .1], ['narrVol', 'Narrator volume', 'range', 0, 1, .1], ['duck', 'Lower music during dialogue', 'bool'], ['voiceRate', 'Speech speed', 'range', .7, 1.5, .05], ['narrator', 'Narrator voice', 'bool'], ['voicecast', 'Voice cast', 'open', () => UI.voiceCast()],
       ['textSpeed', 'Text speed', 'enum', ['Slow', 'Normal', 'Fast', 'Instant'], 0], ['sens', 'Mouse sensitivity', 'range', .3, 3, .1],
       ['fov', 'Field of view', 'range', 65, 110, 5], ['invertY', 'Invert Y axis', 'bool'], ['shake', 'Screen shake', 'bool'],
-      ['scan', 'Scanline filter', 'bool'], ['showStats', 'Show world-state changes', 'bool'], ['walk', 'Walkable story scenes', 'bool'], ['travel', 'Travel to missions in the city', 'bool'], ['showFps', 'Show FPS', 'bool'], ['gfxmenu', 'Graphics settings', 'open', () => UI.graphics()],
+      ['scan', 'Scanline filter', 'bool'], ['showStats', 'Show world-state changes', 'bool'], ['walk', 'Walkable story scenes', 'bool'], ['travel', 'Travel to missions in the city', 'bool'], ['showFps', 'Show FPS', 'bool'], ['vr', 'VR headset mode (WebXR · WebGL2 · reloads)', 'bool'], ['gfxmenu', 'Graphics settings', 'open', () => UI.graphics()],
     ];
     if (only === 'audio') rows = rows.filter(r => ['master', 'music', 'sfx', 'voice', 'voiceVol', 'narrVol', 'duck', 'narrator', 'voiceRate'].includes(r[0]));
     const m = modal(`<div class="stitle">${only === 'audio' ? 'AUDIO' : 'SETTINGS'}</div><div class="rows"></div><button class="btn" style="margin-top:12px">Done</button>
@@ -4340,6 +4429,7 @@ NV.UI = (() => {
       const r = rows[k]; if (!r) return; if (r[2] === 'open') { r[3]().then(() => els[k].querySelector('.val').textContent = fmt(r)); return; } const cur = S.get()[r[0]]; let v;
       if (r[2] === 'bool') v = cur ? 0 : 1; else if (r[2] === 'enum') v = (cur + d + r[3].length) % r[3].length; else v = Math.round(U.clamp(cur + d * r[5], r[3], r[4]) * 100) / 100;
       S.set(r[0], v); els[k].querySelector('.val').textContent = fmt(r); NV.Audio.sfx('ui');
+      if (r[0] === 'vr') { if (v && !navigator.xr) NV.toast('VR', 'This browser has no WebXR. Try a headset browser (Quest Browser) or desktop Chrome with a PC VR headset.', '#ff3355', 5); else setTimeout(() => location.reload(), 400); }
       if (r[0] === 'voiceVol' || r[0] === 'narrVol' || r[0] === 'voiceRate') { NV.Voice.stop(); NV.Voice.speak(r[0] === 'narrVol' ? null : 'Ghost', r[0] === 'narrVol' ? 'Artificial rain crawls down the smart-glass.' : 'Rent is due. So is Helix.'); }
     };
     const fin = () => { UI.pop(h); m.remove(); res(); };

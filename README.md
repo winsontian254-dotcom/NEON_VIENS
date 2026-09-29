@@ -90,6 +90,23 @@ Pause (**Esc**) → **Black Market** to buy from the arsenal: 267 weapons, tools
 - Every item has its own procedural 3D viewmodel (pistol, SMG, rifle, shotgun, sniper, rotary, laser, launcher, grenade, blade, hammer, baton, wrist rig, drone remote, strike designator), coloured by faction.
 - Credits: 9 ¢ per kill, 14 ¢ per nonlethal takedown, 150 ¢ or more per completed operation, plus gigs and data shards. Multiplayer sessions start with 3000 ¢.
 
+## VR (WebXR)
+
+Settings → **VR headset mode** (the page reloads). WebXR can't run on WebGPU, so VR mode uses Babylon's WebGL2 renderer. Then press the headset button in the bottom-right corner to enter VR. Works in the Quest Browser, or desktop Chrome/Edge with a PC VR headset. The page must be served over https or from localhost.
+
+| Action | Controller |
+|---|---|
+| Move / drive | Left stick |
+| Snap turn (30°) | Right stick |
+| Fire / use hotbar item | Right trigger (the weapon sits in your right hand and aims where it points) |
+| Interact (E) | Grip |
+| Advance dialogue / confirm | A |
+| Next hotbar item | B |
+| Vehicle (F) | X |
+| Sprint | Y |
+
+A floating panel in front of you mirrors health, energy, the objective, prompts, dialogue and toasts, because HTML overlays can't be shown inside a headset. Menus (pause, Black Market, settings) still need you to take the headset off.
+
 ## Multiplayer
 
 Title → **Multiplayer**. One player hosts and gets a 6-character join code; friends type it in to join (drop-in, any time).
