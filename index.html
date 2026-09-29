@@ -208,19 +208,25 @@ body.mobile #title .menu{position:absolute;right:4vw;left:auto;top:auto;bottom:5
 body.mobile #title .logo{position:absolute;left:4vw;top:8vh;font-size:clamp(30px,10vh,64px)}body.mobile #title .tagline{position:absolute;left:4vw;top:calc(8vh + 12vh + 14px);font-size:11px}body.mobile #title .ver{display:none}body.mobile #title .badge{left:4vw;right:auto;bottom:5vh;top:auto}
 body.mobile .bm{max-height:96vh}body.mobile .bmslots{grid-template-columns:repeat(5,1fr)}
 body.mobile #hud .bars{transform:scale(.7);transform-origin:left bottom}
+/* finger-friendly menus */
+body.touch .btn{min-height:48px;padding:12px 18px;margin:3px 0}body.touch .btn small{font-size:12px}
+body.touch .modal .panel{padding:18px 22px}body.touch .row{min-height:44px}
+body.touch .bs,body.touch .bt,body.touch .bb{min-height:40px;font-size:13px}
+body.touch #hud .bars{left:50%!important;right:auto;bottom:6px;transform:translateX(-50%) scale(.62)!important;transform-origin:center bottom!important}
 /* touch controls */
 #touch{position:fixed;inset:0;z-index:40;pointer-events:none;display:none;touch-action:none;user-select:none;-webkit-user-select:none}
 body.touch.inlevel.playing #touch{display:block}body.touch.storyup #touch,body.cine #touch{display:none!important}
-#touch .tjoy{position:absolute;left:3vw;bottom:5vh;width:150px;height:150px;border-radius:50%;border:2px solid rgba(25,240,255,.35);background:rgba(5,3,12,.25);pointer-events:auto;touch-action:none}
+#touch .tjoy{position:absolute;left:calc(28px + env(safe-area-inset-left));bottom:28px;width:150px;height:150px;border-radius:50%;border:2px solid rgba(25,240,255,.35);background:rgba(5,3,12,.25);pointer-events:auto;touch-action:none}
 #touch .tjoy i{position:absolute;left:45px;top:45px;width:60px;height:60px;border-radius:50%;background:rgba(25,240,255,.35);box-shadow:0 0 14px rgba(25,240,255,.6)}
 #touch .tjoy.on{border-color:rgba(25,240,255,.8)}
 #touch .tlook{position:absolute;left:38vw;right:0;top:0;bottom:0;pointer-events:auto;touch-action:none}
 #touch .tb{position:absolute;pointer-events:auto;touch-action:none;border-radius:50%;border:2px solid rgba(255,255,255,.3);background:rgba(5,3,12,.45);color:var(--ink);font:700 11px var(--fh,sans-serif);letter-spacing:.08em;width:62px;height:62px;padding:0}
 #touch .tb.on,#touch .tb.lit{background:rgba(255,178,56,.45);border-color:var(--amber)}
-#touch .tfire{right:4vw;bottom:14vh;width:92px;height:92px;border-color:rgba(255,51,85,.7);font-size:13px}
-#touch .tuse{right:calc(4vw + 104px);bottom:9vh}#touch .tdash{right:calc(4vw + 12px);bottom:calc(14vh + 104px)}#touch .temp{right:calc(4vw + 90px);bottom:calc(14vh + 84px)}
-#touch .tcar{right:calc(4vw + 176px);bottom:6vh}#touch .tcrouch{right:calc(4vw + 176px);bottom:calc(6vh + 72px)}#touch .tzoom{right:calc(4vw + 104px);bottom:calc(9vh + 150px)}
-#touch .tpause{left:50%;top:10px;width:46px;height:46px;transform:translateX(-50%);border-radius:10px}#touch .tchat{left:3vw;bottom:calc(5vh + 170px);width:54px;height:40px;border-radius:10px;display:none}
+#touch .tfire{right:calc(22px + env(safe-area-inset-right));bottom:26px;width:96px;height:96px;border-color:rgba(255,51,85,.7);font-size:13px}
+#touch .tuse{right:calc(134px + env(safe-area-inset-right));bottom:26px}#touch .tdash{right:calc(38px + env(safe-area-inset-right));bottom:136px}
+#touch .temp{right:calc(134px + env(safe-area-inset-right));bottom:106px}#touch .tzoom{right:calc(134px + env(safe-area-inset-right));bottom:186px}
+#touch .tcrouch{right:calc(214px + env(safe-area-inset-right));bottom:26px}#touch .tcar{right:calc(214px + env(safe-area-inset-right));bottom:106px}
+#touch .tpause{right:calc(240px + env(safe-area-inset-right));top:12px;width:46px;height:46px;border-radius:10px}#touch .tchat{left:3vw;bottom:calc(5vh + 170px);width:54px;height:40px;border-radius:10px;display:none}
 body.touch #hud .hotbar{pointer-events:auto;bottom:auto;top:96px;left:20px;transform:none}body.touch #hud .hs{width:48px;height:48px}body.touch #hud .hs span{display:none}body.touch #hud .hbinfo{bottom:auto;top:150px;left:20px;transform:none}
 body.touch .banner{z-index:70;pointer-events:auto}
 body.touch #hud .bars{transform:scale(.8);transform-origin:left bottom}
@@ -744,7 +750,7 @@ NV.In = (() => {
   addEventListener('blur', () => { down.clear(); I.lmb = false; });
   addEventListener('mousedown', e => { if (e.button === 0) { I.lmb = true; I.lmbHit = true; } if (e.button === 2) I.rmb = true; });
   // a tap anywhere (outside the on-screen controls) counts as 'continue' on touch screens
-  addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse' && !(e.target.closest && e.target.closest('#touch .tb, #touch .tjoy, #touch .tlook'))) I.tapHit = true; }, true);
+  addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse' && !(e.target.closest && e.target.closest('#touch .tb, #touch .tjoy, #touch .tlook, button, .btn, input, select, .menu, .panel, .choice, .row, .tab'))) I.tapHit = true; }, true);
   addEventListener('mouseup', e => { if (e.button === 0) I.lmb = false; if (e.button === 2) I.rmb = false; });
   addEventListener('contextmenu', e => e.preventDefault());
   I.wheel = 0; addEventListener('wheel', e => { if (document.body.classList.contains('inlevel')) I.wheel += Math.sign(e.deltaY); }, { passive: true });
@@ -4232,7 +4238,7 @@ NV.Level = (() => {
       else if (ch === 'quit') end({ quit: true });
     });
   }
-  function lock() { try { const r = lockEl().requestPointerLock(); if (r && r.catch) r.catch(() => { }); } catch (e) { } }
+  function lock() { if ((NV.Touch && NV.Touch.active) || (NV.Mobile && NV.Mobile.on)) return; try { const r = lockEl().requestPointerLock(); if (r && r.catch) r.catch(() => { }); } catch (e) { } }
   function finish(won, why) {
     if (L.over) return;
     if (won && !L.free) { const S = NV.State.get(), bonus = 150 + L.act * 50; if (S) { S.credits = (S.credits || 0) + bonus; NV.State.save(); } NV.toast('PAYOUT', '+' + bonus + ' ¢ — spend it at the Black Market (Esc).', '#ffd23d', 4); }
@@ -4468,6 +4474,7 @@ NV.Touch = (() => {
   }
   addEventListener('touchstart', () => {
     if (T.active) return; T.active = true; document.body.classList.add('touch'); build();
+    try { if (document.pointerLockElement) document.exitPointerLock(); } catch (e) { }
     // step aside while dialogue/choices are up so taps reach them; show chat only in multiplayer
     setInterval(() => { const Lv = NV.Level.active && NV.Level.debug(); document.body.classList.toggle('playing', !!(Lv && Lv.started && !Lv.paused && !Lv.over && !document.querySelector('#ui > .modal, #ui > .banner, #ui > .card, #ui > .results'))); const st = document.getElementById('story'); document.body.classList.toggle('storyup', !!(st && !st.classList.contains('hidden') && st.offsetParent)); const c = ui.querySelector('.tchat'); c.style.display = NV.Net && NV.Net.on ? 'block' : 'none'; }, 200);
   }, { passive: true });
