@@ -1626,7 +1626,7 @@ NV.Level = (() => {
     m.zone = true;
     if (mode === 'boss' || mode === 'arena' || mode === 'defend') {
       // the fight happens on the nearest open plaza and the streets around it
-      const pl = m.plazas.filter(p => !p.safe).sort((a, b) => dist({ x: a.cx, y: a.cy }, z) - dist({ x: b.cx, y: b.cy }, z))[0];
+      const pl = m.plazas.filter(p => !p.safe && !p.lm).sort((a, b) => dist({ x: a.cx, y: a.cy }, z) - dist({ x: b.cx, y: b.cy }, z))[0];
       const ox = pl.x - 4, oy = pl.y - 4;
       m.aoff = { x: ox, y: oy }; m.rooms = [{ x: pl.x - 2, y: pl.y - 2, w: 12, h: 12, cx: pl.x + 4, cy: pl.y + 4 }];
       m.start = { x: 8 + ox, y: 13 + oy }; m.exit = { x: 8 + ox, y: 3 + oy };
@@ -1643,7 +1643,7 @@ NV.Level = (() => {
     const cand = inter.filter(i => { const d = dist(i, home); return d > B * .9 && d < B * 2.2; });
     const hub = cand.length ? cand[Math.floor(r() * cand.length)] : near[1];
     const rooms = inter.filter(i => i !== home && dist(i, hub) < B * 1.6).map(ir)
-      .concat(m.plazas.filter(p => !p.safe && dist({ x: p.cx, y: p.cy }, hub) < B * 2).map(p => ({ ...p })));
+      .concat(m.plazas.filter(p => !p.safe && !p.lm && dist({ x: p.cx, y: p.cy }, hub) < B * 2).map(p => ({ ...p })));
     const order = [ir(home)], left = rooms.slice(0, 12);
     while (left.length) { const last = order[order.length - 1]; left.sort((a, b) => dist({ x: a.cx, y: a.cy }, { x: last.cx, y: last.cy }) - dist({ x: b.cx, y: b.cy }, { x: last.cx, y: last.cy })); order.push(left.shift()); }
     let far = order[order.length - 1]; order.forEach(o => { if (dist({ x: o.cx, y: o.cy }, home) > dist({ x: far.cx, y: far.cy }, home)) far = o; });
@@ -2127,7 +2127,7 @@ NV.Level = (() => {
       }
       return;
     }
-    makeExit(ex.x, ex.z);
+    { const q = solid(ex.x, ex.z) ? nearestFree(ex.x, ex.z) : ex; makeExit(q.x, q.z); }
     const mid = rooms.filter(rm => !(rm.cx === map.start.x && rm.cy === map.start.y) && !(rm.cx === map.exit.x && rm.cy === map.exit.y));
     const shuffled = mid.slice().sort(() => r() - .5);
     if (mode === 'hack') { const n = Math.min(k, 4, shuffled.length); for (let i = 0; i < n; i++) { const c = cellC(shuffled[i].cx, shuffled[i].cy); addTerminal(c.x, c.z); } L.obj.total = n; L.obj.label = 'Hack the terminals'; }
@@ -2873,7 +2873,7 @@ NV.Level = (() => {
       return true;
     });
     L.civs.forEach(c => { if (c.saved) { c.t += dt; c.root.position.y = c.t * 3; c.root.getChildMeshes().forEach(m => m.visibility = Math.max(0, 1 - c.t)); if (c.t > 1 && c.root.isEnabled()) c.root.setEnabled(false); } else { c.mk.rotation.y += dt * 3; } });
-    if (L.exit) { L.exit.ring.rotation.y += dt; L.exit.beam.visibility = L.exit.on ? .5 + Math.sin(L.time * 4) * .2 : .4; const xd = Math.hypot(L.exit.x - p.x, L.exit.z - p.z); if ((L.exit.on || L.exitReady) && (xd < 3.2 || (xd < 5 && (NV.In.hit('KeyE') || NV.In.padHit(2))))) { NV.Audio.sfx('exit'); finish(true); } }
+    if (L.exit) { L.exit.ring.rotation.y += dt; L.exit.beam.visibility = L.exit.on ? .5 + Math.sin(L.time * 4) * .2 : .4; const xd = Math.hypot(L.exit.x - p.x, L.exit.z - p.z); if ((L.exit.on || L.exitReady) && (xd < 3.5 || (xd < 6 && (NV.In.hit('KeyE') || NV.In.padHit(2))))) { NV.Audio.sfx('exit'); finish(true); } }
     L.terms.forEach(t => { t.beam.visibility = t.done ? .3 : .6 + Math.sin(L.time * 5) * .3; });
     L.nodes.forEach(n => { if (!n.dead) { n.rg.rotation.y += dt * 2; if (n.hp <= 0) { n.dead = true; n.root.getChildMeshes().forEach(m => m.visibility = .25); NV.Audio.sfx('boom'); NV.toast('UPLINK LOST', 'One uplink has gone dark.', '#ff3355', 3); } } });
   }
@@ -3292,7 +3292,7 @@ NV.Level = (() => {
     hset('#hud .timer', 'text', L.defend ? U.fmtTime(L.defend.t) : '');
     const it = L.hack ? null : nearestInteract();
     const car = !it && L.city && !L.drive && !L.pRag && nearestCar();
-    const xd = L.exit && !it ? Math.hypot(L.exit.x - p.x, L.exit.z - p.z) : 99;
+    const xd = L.exit ? Math.hypot(L.exit.x - p.x, L.exit.z - p.z) : 99;
     if (xd < 6) { hset('#hud .prompt', 'show', true); hset('#hud .prompt', 'html', L.exit.on || L.exitReady ? '<span class="kbd">E</span> EXTRACT — or step into the beam' : 'EXTRACTION LOCKED — ' + Math.max(0, L.obj.total - L.obj.got) + ' objective(s) left'); } else
     hset('#hud .prompt', 'show', !!(it || car)); if (it) hset('#hud .prompt', 'html', '<span class="kbd">E</span> ' + it.label); else if (car) hset('#hud .prompt', 'html', '<span class="kbd">F</span> ' + (car.kind === 'traffic' ? 'COMMANDEER VEHICLE' : 'ENTER VEHICLE'));
     hset('#hud .speedo', 'show', !!L.drive); hset('#hud .xh', 'show', !L.drive); if (L.drive) hset('#hud .speedo', 'html', Math.round(Math.abs(L.drive.car.speed) * 3.6) + '<small>KM/H' + (L.drive.car.speed < -.5 ? ' · R' : '') + '</small>');
@@ -3585,6 +3585,7 @@ NV.Level = (() => {
       const px = pd.x - p.x, pz = pd.z - p.z, pdist = Math.hypot(px, pz); if (pdist < .8 && pdist > .01) { pd.x += px / pdist * .05; pd.z += pz / pdist * .05; }
       pd.root.position.set(pd.x, Math.abs(Math.sin(pd.rig.walk)) * .03, pd.z);
     });
+    if (L.storyB && !L.over) { L.storyT = Math.hypot(L.storyB.x - p.x, L.storyB.z - p.z) < 2.4 ? (L.storyT || 0) + dt : 0; if (L.storyT > 1.2) { L.storyT = 0; freeInteract({ kind: 'f:story' }); return; } } // standing in the beam starts it
     L.beacons.forEach(b => { b.ring.rotation.y += dt; b.beam.visibility = .6 + Math.sin(L.time * 3 + b.x) * .25; });
     const G = L.gig; if (!G) return;
     if (G.type === 'courier') {
@@ -3632,7 +3633,7 @@ NV.Level = (() => {
   function freeInteractables(consider) {
     const p = L.p, next = L.op.next;
     L.beacons.forEach(b => {
-      if (b.passive) return; const d = Math.hypot(b.x - p.x, b.z - p.z); if (d > 3.2) return;
+      if (b.passive) return; const d = Math.hypot(b.x - p.x, b.z - p.z); if (d > 5) return;
       const lab = b.kind === 'story' ? (L.op.travel ? 'START MISSION — ' + L.op.travel.toUpperCase() : next ? 'BEGIN CHAPTER ' + next.id + ' — ' + next.title.toUpperCase() : 'CONTINUE STORY') : b.kind === 'gig' ? (L.gig ? 'GIG ALREADY ACTIVE' : 'TAKE A GIG') : 'BLACK-MARKET VENDOR';
       consider('f:' + b.kind, b, d, lab);
     });
