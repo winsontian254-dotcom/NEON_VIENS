@@ -181,6 +181,27 @@ body.cine #story{bottom:11vh;inset:0 0 11vh 0;z-index:5}
 .credits .roll{position:absolute;left:0;right:0;text-align:center;top:100%}
 .credits h2{font-family:var(--fh);letter-spacing:.3em;font-size:14px;color:var(--pink);margin:44px 0 10px}
 .credits p{font-size:20px;margin:4px 0}
+
+/* ---- glitch effects (menus, transitions, logo, HUD hits) ---- */
+@keyframes glIn{0%{opacity:0;clip-path:inset(40% 0 45% 0);transform:translate(-14px,0) skewX(8deg);filter:hue-rotate(90deg) saturate(3)}
+12%{opacity:1;clip-path:inset(10% 0 70% 0);transform:translate(10px,0)}24%{clip-path:inset(62% 0 8% 0);transform:translate(-6px,0) skewX(-5deg)}
+36%{clip-path:inset(0 0 0 0);transform:translate(4px,0);filter:hue-rotate(-40deg) saturate(2)}48%{clip-path:inset(30% 0 52% 0);transform:translate(-3px,0)}
+60%{clip-path:inset(0 0 0 0);transform:none;filter:none}72%{transform:translate(2px,0)}100%{transform:none;filter:none;clip-path:inset(0 0 0 0)}}
+@keyframes glRgb{0%,100%{text-shadow:none}20%{text-shadow:-3px 0 #ff2bd6,3px 0 #19f0ff}40%{text-shadow:2px 0 #ff2bd6,-2px 0 #19f0ff}60%{text-shadow:-1px 0 #ff2bd6,1px 0 #19f0ff}}
+@keyframes glJit{0%,100%{transform:none}20%{transform:translate(-3px,1px) skewX(6deg)}40%{transform:translate(3px,-1px)}60%{transform:translate(-1px,0) skewX(-4deg)}80%{transform:translate(1px,0)}}
+@keyframes glBars{0%{background-position:0 0;opacity:.9}50%{background-position:0 -37px;opacity:.5}100%{background-position:0 -91px;opacity:0}}
+.gl-in{animation:glIn .42s steps(1,end) both}
+.gl-in .panel,.gl-in.panel{animation:glRgb .5s steps(2,end)}
+.btn.focus,.btn:hover{animation:glRgb .28s steps(2,end),glJit .22s steps(2,end)}
+.logo.gl{animation:glRgb .35s steps(2,end),glJit .3s steps(3,end)!important;clip-path:polygon(0 0,100% 0,100% 38%,0 38%,0 44%,100% 44%,100% 100%,0 100%)}
+.toast{animation:glIn .38s steps(1,end) both,tout .5s ease-in forwards;animation-delay:0s,var(--life,4.2s)}
+#glfx{position:fixed;inset:0;pointer-events:none;z-index:99;opacity:0;mix-blend-mode:screen;background:repeating-linear-gradient(0deg,rgba(255,43,214,.0) 0,rgba(255,43,214,.0) 11px,rgba(255,43,214,.35) 12px,rgba(25,240,255,.25) 14px,rgba(0,0,0,0) 15px,rgba(0,0,0,0) 29px)}
+#glfx.on{animation:glBars .3s steps(3,end)}
+body.glitching #ui{animation:glJit .25s steps(2,end)}
+body.glitching canvas#rc{filter:hue-rotate(40deg) saturate(1.6)}
+body.noglitch .toast{animation:tin .35s ease-out,tout .5s ease-in forwards!important;animation-delay:0s,var(--life,4.2s)!important;clip-path:none!important}body.noglitch .gl-in,body.noglitch .btn.focus,body.noglitch .btn:hover,body.noglitch .logo.gl{animation:none!important;clip-path:none!important}
+body.noglitch #glfx{display:none}
+@media (prefers-reduced-motion: reduce){.gl-in,.btn.focus,.btn:hover,.logo.gl{animation:none!important;clip-path:none!important}#glfx{display:none}}
 @media (prefers-reduced-motion: reduce){.logo,.press,.loc,.toast,.choice,.card,.modal,.banner{animation:none!important}#scan{display:none}}
 body.inlevel #story .topbar{display:none}
 body.inlevel #story{background:none}
@@ -242,7 +263,17 @@ NV.toast = (head, text, color, life) => {
   while (box.children.length > 5) box.firstChild.remove();
   setTimeout(() => t.remove(), ((life || 4.2) + .6) * 1000);
 };
-NV.fade = (on, ms) => new Promise(r => { const f = document.getElementById('fade'); f.style.transitionDuration = (ms || 600) + 'ms'; f.classList.toggle('on', on); setTimeout(r, (ms || 600) + 30); });
+setInterval(() => { const l = document.querySelector('.logo'); if (!l || Math.random() < .35) return; l.classList.remove('gl'); void l.offsetWidth; l.classList.add('gl'); setTimeout(() => l.classList.remove('gl'), 380); if (Math.random() < .3) NV.glitch(150); }, 2600);
+addEventListener('load', () => document.body.classList.toggle('noglitch', NV.Settings.get().glitch === 0));
+/* short screen glitch: RGB bars over everything + a jolt of the UI */
+NV.glitch = (ms, sfx) => {
+  if (NV.Settings.get().glitch === 0 || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+  let f = document.getElementById('glfx'); if (!f) { f = document.createElement('div'); f.id = 'glfx'; document.body.appendChild(f); }
+  f.classList.remove('on'); void f.offsetWidth; f.style.backgroundPositionY = Math.floor(Math.random() * 40) + 'px'; f.classList.add('on');
+  document.body.classList.add('glitching'); clearTimeout(NV.glitch._t); NV.glitch._t = setTimeout(() => document.body.classList.remove('glitching'), ms || 220);
+  if (sfx && NV.Audio) NV.Audio.sfx('glitch');
+};
+NV.fade = (on, ms) => new Promise(r => { if (on) NV.glitch(260); const f = document.getElementById('fade'); f.style.transitionDuration = (ms || 600) + 'ms'; f.classList.toggle('on', on); setTimeout(r, (ms || 600) + 30); });
 
 NV.SPEAKERS = {
   'Ghost': { c: '#19f0ff', kind: 'ghost' }, 'Raven': { c: '#ff3b6b', hair: '#101018', kind: 'human', f: 1 },
@@ -702,13 +733,13 @@ NV.In = (() => {
    ===================================================================== */
 NV.Settings = (() => {
   const KEY = 'nv_settings_v1';
-  const DEF = { master: .8, music: .6, sfx: .8, textSpeed: 2, sens: 1, fov: 80, shake: 1, scan: 1, showStats: 1, voice: 1, voiceVol: 1, narrVol: .5, duck: 1, voiceRate: 1, narrator: 1, walk: 1, travel: 1, g: null, showFps: 0, vr: 0, invertY: 0 };
+  const DEF = { master: .8, music: .6, sfx: .8, textSpeed: 2, sens: 1, fov: 80, shake: 1, scan: 1, showStats: 1, voice: 1, voiceVol: 1, narrVol: .5, duck: 1, voiceRate: 1, narrator: 1, walk: 1, travel: 1, g: null, showFps: 0, vr: 0, glitch: 1, invertY: 0 };
   let s = { ...DEF };
   if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) { s.shake = 0; s.scan = 0; }
   try { Object.assign(s, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { }
   return {
     get: () => s,
-    set(k, v) { s[k] = v; try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) { } NV.Audio.applyVolumes(); document.getElementById('scan').classList.toggle('hidden', !s.scan); if (NV.onSettings) NV.onSettings(); },
+    set(k, v) { s[k] = v; try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) { } NV.Audio.applyVolumes(); document.getElementById('scan').classList.toggle('hidden', !s.scan); if (NV.onSettings) NV.onSettings(); document.body.classList.toggle('noglitch', s.glitch === 0); },
   };
 })();
 
@@ -2614,7 +2645,7 @@ NV.Level = (() => {
     if (L.over || L.p.inv > 0) return;
     if (L.arms && (L.arms.buff.shield > 0 || L.arms.droneShield)) d *= .4;
     const dm = d * NV.DIFF[L.diff].dmg * (L.tactic.armor || 1);
-    L.p.hp -= dm; L.p.regenT = 4; L.stats.dmg += dm; NV.Audio.sfx('hurt'); shake(.35);
+    L.p.hp -= dm; L.p.regenT = 4; if (dm > 12) NV.glitch(140); L.stats.dmg += dm; NV.Audio.sfx('hurt'); shake(.35);
     const el = document.querySelector('#hud .dmg'); if (el) { el.style.opacity = U.clamp(dm / 30, .35, 1); clearTimeout(el._t); el._t = setTimeout(() => el.style.opacity = 0, 180); }
     if (L.p.hp <= 0) { L.p.hp = 0; if (L.free) freeRespawn(); else if (netOn()) mpRespawn(); else finish(false); }
   }
@@ -4348,12 +4379,12 @@ NV.UI = (() => {
   UI.push = h => { stack.push(h); return h; };
   UI.pop = h => { const i = stack.lastIndexOf(h); if (i >= 0) stack.splice(i, 1); };
   UI.tick = dt => { const h = stack[stack.length - 1]; if (!h || !h.tick) return; if (!h._age) { h._age = 1; return; } h.tick(dt); };
-  const add = (html, cls, id) => { const e = U.el('div', cls || '', html); if (id) e.id = id; root().appendChild(e); return e; };
+  const add = (html, cls, id) => { const e = U.el('div', cls || '', html); if (id) e.id = id; root().appendChild(e); if (/modal|banner|card/.test(cls || '') || id === 'title') { e.classList.add('gl-in'); NV.glitch(180, /modal/.test(cls || '')); } return e; };
 
   /* generic vertical list navigation */
   function nav(items, o) {
     let i = o.start || 0; while (items[i] && items[i].hasAttribute('disabled')) i++;
-    const focus = k => { items.forEach(x => x.classList.remove('focus')); if (items[k]) { items[k].classList.add('focus'); if (items[k].scrollIntoView) items[k].scrollIntoView({ block: 'nearest' }); } i = k; };
+    const focus = k => { if (items[k] && items[k] !== items[i]) { items[k].classList.remove('focus'); void items[k].offsetWidth; } items.forEach(x => x.classList.remove('focus')); if (items[k]) { items[k].classList.add('focus'); if (items[k].scrollIntoView) items[k].scrollIntoView({ block: 'nearest' }); } i = k; };
     items.forEach((it, k) => { it.addEventListener('mouseenter', () => { if (!it.hasAttribute('disabled')) { if (i !== k) NV.Audio.sfx('ui'); focus(k); } }); it.addEventListener('click', e => { if (it.hasAttribute('disabled')) return; e.stopPropagation(); focus(k); NV.Audio.sfx('select'); o.select(k); }); });
     focus(i);
     const move = d => { let k = i; for (let n = 0; n < items.length; n++) { k = (k + d + items.length) % items.length; if (!items[k].hasAttribute('disabled')) break; } NV.Audio.sfx('ui'); focus(k); };
@@ -4472,7 +4503,7 @@ NV.UI = (() => {
       ['voice', 'Voice acting', 'bool'], ['voiceVol', 'Character voice volume', 'range', 0, 1, .1], ['narrVol', 'Narrator volume', 'range', 0, 1, .1], ['duck', 'Lower music during dialogue', 'bool'], ['voiceRate', 'Speech speed', 'range', .7, 1.5, .05], ['narrator', 'Narrator voice', 'bool'], ['voicecast', 'Voice cast', 'open', () => UI.voiceCast()],
       ['textSpeed', 'Text speed', 'enum', ['Slow', 'Normal', 'Fast', 'Instant'], 0], ['sens', 'Mouse sensitivity', 'range', .3, 3, .1],
       ['fov', 'Field of view', 'range', 65, 110, 5], ['invertY', 'Invert Y axis', 'bool'], ['shake', 'Screen shake', 'bool'],
-      ['scan', 'Scanline filter', 'bool'], ['showStats', 'Show world-state changes', 'bool'], ['walk', 'Walkable story scenes', 'bool'], ['travel', 'Travel to missions in the city', 'bool'], ['showFps', 'Show FPS', 'bool'], ['vr', 'VR headset mode (WebXR · WebGL2 · reloads)', 'bool'], ['gfxmenu', 'Graphics settings', 'open', () => UI.graphics()],
+      ['scan', 'Scanline filter', 'bool'], ['showStats', 'Show world-state changes', 'bool'], ['walk', 'Walkable story scenes', 'bool'], ['travel', 'Travel to missions in the city', 'bool'], ['showFps', 'Show FPS', 'bool'], ['glitch', 'Glitch effects', 'bool'], ['vr', 'VR headset mode (WebXR · WebGL2 · reloads)', 'bool'], ['gfxmenu', 'Graphics settings', 'open', () => UI.graphics()],
     ];
     if (only === 'audio') rows = rows.filter(r => ['master', 'music', 'sfx', 'voice', 'voiceVol', 'narrVol', 'duck', 'narrator', 'voiceRate'].includes(r[0]));
     const m = modal(`<div class="stitle">${only === 'audio' ? 'AUDIO' : 'SETTINGS'}</div><div class="rows"></div><button class="btn" style="margin-top:12px">Done</button>
