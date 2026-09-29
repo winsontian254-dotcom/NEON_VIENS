@@ -206,7 +206,7 @@ body.mobile #title .menu{position:absolute;right:4vw;left:auto;top:auto;bottom:5
 body.mobile #title .logo{position:absolute;left:4vw;top:8vh;font-size:clamp(30px,10vh,64px)}body.mobile #title .tagline{position:absolute;left:4vw;top:calc(8vh + 12vh + 14px);font-size:11px}body.mobile #title .ver{display:none}body.mobile #title .badge{left:4vw;right:auto;bottom:5vh;top:auto}
 body.mobile .bm{max-height:96vh}body.mobile .bmslots{grid-template-columns:repeat(5,1fr)}
 /* phone layout: GUI at half size, minimap + mission text kept at their old size, hotbar on a swipe */
-body.mobile #ui,body.mobile #touch,body.mobile #toasts{zoom:var(--uiz,.5)}
+body.mobile #hud,body.mobile #touch{zoom:var(--uiz,.5)} /* only the in-game HUD and its touch controls shrink; title, menus and dialogue keep their size */
 body.mobile #hud .mm{transform:scale(1.55);transform-origin:right top}body.touch.hbshow #hud .bars{opacity:0}
 body.mobile #hud .obj{transform:scale(2);transform-origin:left top;max-width:22vw}
 body.mobile #hud .loc{transform:scale(2);transform-origin:right top;top:420px}
