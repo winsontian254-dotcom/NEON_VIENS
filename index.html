@@ -200,45 +200,40 @@ body.mobile{-webkit-tap-highlight-color:transparent;overscroll-behavior:none}bod
 body.mobile .panel{max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
 body.mobile .btn{padding:9px 14px;font-size:14px}
 body.mobile .logo{font-size:clamp(34px,11vh,80px)}
-body.mobile #hud .obj{transform:scale(.8);transform-origin:left top}
-body.mobile #hud .mm{transform:scale(.7);transform-origin:right top}
 body.mobile #hud .loc{top:140px}
 body.mobile .kbd{display:none}
 body.mobile #title .menu{position:absolute;right:4vw;left:auto;top:auto;bottom:5vh;width:min(420px,46vw);max-height:78vh;overflow-y:auto;padding:4px 0!important}body.mobile #title .btn small{display:none}body.mobile #title .btn{padding:8px 16px}
 body.mobile #title .logo{position:absolute;left:4vw;top:8vh;font-size:clamp(30px,10vh,64px)}body.mobile #title .tagline{position:absolute;left:4vw;top:calc(8vh + 12vh + 14px);font-size:11px}body.mobile #title .ver{display:none}body.mobile #title .badge{left:4vw;right:auto;bottom:5vh;top:auto}
 body.mobile .bm{max-height:96vh}body.mobile .bmslots{grid-template-columns:repeat(5,1fr)}
-body.mobile #hud .bars{transform:scale(.7);transform-origin:left bottom}
-/* phone HUD layout (scaled space) */
-body.mobile .dlg{min-height:0;padding:12px 18px;gap:12px;bottom:2vh;width:min(1000px,80vw)}body.mobile .dlg .portrait{width:74px;height:74px}body.mobile .dlg .txt{font-size:17px;min-height:0}body.mobile .dlg .who{font-size:13px;margin-bottom:4px}
-body.mobile .choices{bottom:calc(2vh + 120px);width:min(700px,74vw);gap:6px}body.mobile .choice{padding:8px 14px!important;font-size:15px}
-body.mobile #hud .prompt{top:auto;bottom:34%}body.cine #hud .prompt,body.storyup #hud .prompt{display:none}
-body.touch #hud .tut{top:21%!important;bottom:auto;max-width:48vw;font-size:15px}
-body.touch #hud .hotbar{top:62%!important;bottom:auto!important;left:calc(50% - 50px)!important;transform:translateX(-50%) scale(.72)!important;transform-origin:center top;gap:4px!important}body.touch #hud .hbinfo{top:57%!important;bottom:auto!important;left:calc(50% - 50px)!important;transform:translateX(-50%)!important;font-size:10px}
-body.mobile #hud .status{left:auto!important;right:300px;top:14px;transform:none!important}body.mobile #hud .obj{max-width:40vw}
-body.mobile #hud .obj{transform:none;max-width:44vw}body.mobile #hud .obj .d{font-size:14px}body.mobile #toasts{top:auto;bottom:250px;right:16px;max-width:36vw}
-body.touch #touch .tb{width:70px;height:70px;font-size:12px}body.touch #touch .tfire{width:108px;height:108px}body.touch #touch .tjoy{width:170px;height:170px}body.touch #touch .tjoy i{left:50px;top:50px;width:70px;height:70px}
+/* phone layout: GUI at half size, minimap + mission text kept at their old size, hotbar on a swipe */
+body.mobile #ui,body.mobile #touch,body.mobile #toasts{zoom:var(--uiz,.5)}
+body.mobile #hud .mm{transform:scale(1.55);transform-origin:right top}body.touch.hbshow #hud .bars{opacity:0}
+body.mobile #hud .obj{transform:scale(2);transform-origin:left top;max-width:22vw}
+body.mobile #hud .loc{transform:scale(2);transform-origin:right top;top:420px}
+body.touch #hud .hotbar{display:none!important;top:auto!important;bottom:70px!important;left:50%!important;transform:translateX(-50%) scale(1.8)!important;transform-origin:center bottom}
+body.touch.hbshow #hud .hotbar{display:flex!important}body.touch #hud .hbinfo{display:none!important}body.touch.hbshow #hud .hbinfo{display:block!important;top:auto!important;bottom:210px!important;left:50%!important;transform:translateX(-50%)!important}
+body.touch #hud .tut{top:20%!important;font-size:22px;max-width:40vw}
+#touch .tjoy{position:absolute;left:calc(56px + env(safe-area-inset-left));bottom:56px;width:340px;height:340px;border-radius:50%;border:3px solid rgba(25,240,255,.35);background:rgba(5,3,12,.22);pointer-events:auto;touch-action:none}
+#touch .tjoy i{position:absolute;left:100px;top:100px;width:140px;height:140px;border-radius:50%;background:rgba(25,240,255,.35);box-shadow:0 0 20px rgba(25,240,255,.6)}#touch .tjoy.on{border-color:rgba(25,240,255,.8)}
+#touch .tlook{position:absolute;left:38vw;right:0;top:0;bottom:0;pointer-events:auto;touch-action:none}
+#touch .tb{position:absolute;pointer-events:auto;touch-action:none;border-radius:50%;border:3px solid rgba(255,255,255,.3);background:rgba(5,3,12,.4);color:var(--ink);font:700 22px var(--fh,sans-serif);letter-spacing:.08em;padding:0}
+#touch .tb.on{background:rgba(255,178,56,.45);border-color:var(--amber)}
+#touch .tfire{right:calc(48px + env(safe-area-inset-right));bottom:56px;width:210px;height:210px;border-color:rgba(255,51,85,.7);font-size:26px}
+#touch .tuse{right:calc(290px + env(safe-area-inset-right));bottom:56px;width:140px;height:140px}
+#touch .tdash{right:calc(290px + env(safe-area-inset-right));bottom:230px;width:140px;height:140px}
+#touch .tchat{left:calc(56px + env(safe-area-inset-left));bottom:420px;width:120px;height:80px;border-radius:16px;display:none}
+#touch .tcorner{position:absolute;left:18px;top:14px;font-size:34px;color:rgba(255,255,255,.28);pointer-events:none}
+#touch .thandle{position:absolute;left:50%;bottom:10px;width:120px;height:8px;border-radius:4px;background:rgba(255,255,255,.25);transform:translateX(-50%);pointer-events:none}
 /* finger-friendly menus */
 body.touch .btn{min-height:48px;padding:12px 18px;margin:3px 0}body.touch .btn small{font-size:12px}
 body.touch .modal .panel{padding:18px 22px}body.touch .row{min-height:44px}
 body.touch .bs,body.touch .bt,body.touch .bb{min-height:40px;font-size:13px}
-body.touch #hud .bars{left:50%!important;right:auto;bottom:6px;transform:translateX(-50%) scale(.62)!important;transform-origin:center bottom!important}
+body.touch #hud .bars{left:50%!important;right:auto;bottom:6px;transform:translateX(-50%)!important;transform-origin:center bottom!important}
 /* touch controls */
 #touch{position:fixed;inset:0;z-index:40;pointer-events:none;display:none;touch-action:none;user-select:none;-webkit-user-select:none}
 body.touch.inlevel.playing #touch{display:block}body.touch.storyup #touch,body.cine #touch{display:none!important}
-#touch .tjoy{position:absolute;left:calc(28px + env(safe-area-inset-left));bottom:28px;width:150px;height:150px;border-radius:50%;border:2px solid rgba(25,240,255,.35);background:rgba(5,3,12,.25);pointer-events:auto;touch-action:none}
-#touch .tjoy i{position:absolute;left:45px;top:45px;width:60px;height:60px;border-radius:50%;background:rgba(25,240,255,.35);box-shadow:0 0 14px rgba(25,240,255,.6)}
-#touch .tjoy.on{border-color:rgba(25,240,255,.8)}
-#touch .tlook{position:absolute;left:38vw;right:0;top:0;bottom:0;pointer-events:auto;touch-action:none}
-#touch .tb{position:absolute;pointer-events:auto;touch-action:none;border-radius:50%;border:2px solid rgba(255,255,255,.3);background:rgba(5,3,12,.45);color:var(--ink);font:700 11px var(--fh,sans-serif);letter-spacing:.08em;width:62px;height:62px;padding:0}
-#touch .tb.on,#touch .tb.lit{background:rgba(255,178,56,.45);border-color:var(--amber)}
-#touch .tfire{right:calc(22px + env(safe-area-inset-right));bottom:26px;width:96px;height:96px;border-color:rgba(255,51,85,.7);font-size:13px}
-#touch .tuse{right:calc(134px + env(safe-area-inset-right));bottom:26px}#touch .tdash{right:calc(38px + env(safe-area-inset-right));bottom:136px}
-#touch .temp{right:calc(134px + env(safe-area-inset-right));bottom:106px}#touch .tzoom{right:calc(134px + env(safe-area-inset-right));bottom:186px}
-#touch .tcrouch{right:calc(214px + env(safe-area-inset-right));bottom:26px}#touch .tcar{right:calc(214px + env(safe-area-inset-right));bottom:106px}
-#touch .tpause{right:calc(240px + env(safe-area-inset-right));top:12px;width:46px;height:46px;border-radius:10px}#touch .tchat{left:3vw;bottom:calc(5vh + 170px);width:54px;height:40px;border-radius:10px;display:none}
 body.touch #hud .hotbar{pointer-events:auto;bottom:auto;top:96px;left:20px;transform:none}body.touch #hud .hs{width:48px;height:48px}body.touch #hud .hs span{display:none}body.touch #hud .hbinfo{bottom:auto;top:150px;left:20px;transform:none}
 body.touch .banner{z-index:70;pointer-events:auto}
-body.touch #hud .bars{transform:scale(.8);transform-origin:left bottom}
 /* ---- glitch effects (menus, transitions, logo, HUD hits) ---- */
 @keyframes glIn{0%{opacity:0;clip-path:inset(40% 0 45% 0);transform:translate(-14px,0) skewX(8deg);filter:hue-rotate(90deg) saturate(3)}
 12%{opacity:1;clip-path:inset(10% 0 70% 0);transform:translate(10px,0)}24%{clip-path:inset(62% 0 8% 0);transform:translate(-6px,0) skewX(-5deg)}
@@ -2817,7 +2812,7 @@ NV.Level = (() => {
       if (NV.Touch.active) { mx += NV.Touch.mx; mz += NV.Touch.my; }
       if (L.vr && L.vr.on) { if (Math.abs(L.vr.lx) > .15) mx += L.vr.lx; if (Math.abs(L.vr.ly) > .15) mz -= L.vr.ly; }
     }
-    const crouch = I.key('KeyC') || I.key('ControlLeft') || I.padBtn(10);
+    const crouch = I.key('KeyC') || I.key('ControlLeft') || I.padBtn(10) || NV.Touch.sneak;
     p.crouch = crouch;
     const ml = Math.hypot(mx, mz); if (ml > 1) { mx /= ml; mz /= ml; }
     const sprint = (I.key('ShiftLeft') || I.padBtn(4) || NV.Touch.run) && !crouch && mz > 0;
@@ -2864,7 +2859,7 @@ NV.Level = (() => {
       if (L.arms.cur) useWeapon(L.arms.cur, dt);
       if (I.hit('KeyQ') || I.padHit(3)) emp();
     }
-    const carKey = L.city && !hacking && (I.hit('KeyF') || (I.padHit(2) && (L.drive || !nearestInteract())));
+    const carKey = L.city && !hacking && (I.hit('KeyF') || (NV.Touch.active && I.hit('KeyE') && !nearestInteract()) || (I.padHit(2) && (L.drive || !nearestInteract())));
     if (carKey && (L.drive || nearestCar())) toggleCar();
     else if (I.hit('KeyE') || I.hit('KeyF') || I.padHit(2) || (hacking && I.lmbHit)) interact();
     if (hacking) { if (ml > 0 && !I.pad || I.hit('Escape')) { L.hack = null; document.getElementById('hack').classList.add('hidden'); } else drawHack(dt); if (L.hack && Math.hypot(L.hack.t.x - p.x, L.hack.t.z - p.z) > 3) { L.hack = null; document.getElementById('hack').classList.add('hidden'); } }
@@ -4451,21 +4446,21 @@ NV.Touch = (() => {
   const tap = code => { key(code, true); setTimeout(() => key(code, false), 70); };
   function build() {
     ui = U.el('div', '', `<div class="tjoy"><i></i></div><div class="tlook"></div>
-      <button class="tb tfire" data-a="fire">FIRE</button><button class="tb tuse" data-k="KeyE">E</button><button class="tb tdash" data-k="Space">DASH</button>
-      <button class="tb temp" data-k="KeyQ">EMP</button><button class="tb tcar" data-k="KeyF">CAR</button><button class="tb tcrouch" data-h="KeyC">SNEAK</button>
-      <button class="tb tzoom" data-a="zoom">ZOOM</button><button class="tb tpause" data-k="Escape">❚❚</button><button class="tb tchat" data-k="Enter">CHAT</button>`);
+      <button class="tb tfire" data-a="fire">FIRE</button><button class="tb tuse" data-k="KeyE">USE</button><button class="tb tdash" data-k="Space">DASH</button>
+      <button class="tb tchat" data-k="Enter">CHAT</button><div class="tcorner">≡</div><div class="thandle"></div>`);
     ui.id = 'touch'; document.body.appendChild(ui);
     const I = NV.In;
     // joystick
     const jz = ui.querySelector('.tjoy'), knob = jz.firstChild;
     jz.addEventListener('pointerdown', e => { e.preventDefault(); joy = { id: e.pointerId, x: e.clientX, y: e.clientY }; try { jz.setPointerCapture(e.pointerId); } catch (x) { } jz.classList.add('on'); });
     jz.addEventListener('pointermove', e => { if (!joy || e.pointerId !== joy.id) return; const dx = e.clientX - joy.x, dy = e.clientY - joy.y, d = Math.hypot(dx, dy), R = 55, k = Math.min(1, d / R);
-      T.mx = d ? dx / d * k : 0; T.my = d ? -dy / d * k : 0; T.run = k > .95 && T.my > .6; knob.style.transform = `translate(${T.mx * R}px,${-T.my * R}px)`; });
-    const jend = () => { joy = null; T.mx = T.my = 0; T.run = false; knob.style.transform = ''; jz.classList.remove('on'); };
+      T.mx = d ? dx / d * k : 0; T.my = d ? -dy / d * k : 0; T.run = k > .95 && T.my > .6; T.sneak = k > .08 && k < .45; knob.style.transform = `translate(${T.mx * R}px,${-T.my * R}px)`; });
+    const jend = () => { joy = null; T.mx = T.my = 0; T.run = false; T.sneak = false; knob.style.transform = ''; jz.classList.remove('on'); };
     jz.addEventListener('pointerup', jend); jz.addEventListener('pointercancel', jend);
     // look: drag anywhere on the right side
     const lz = ui.querySelector('.tlook');
-    lz.addEventListener('pointerdown', e => { e.preventDefault(); look = { id: e.pointerId, x: e.clientX, y: e.clientY }; try { lz.setPointerCapture(e.pointerId); } catch (x) { } });
+    let lastTap = 0;
+    lz.addEventListener('pointerdown', e => { e.preventDefault(); const now = performance.now(); if (now - lastTap < 300) { T.zoom = !T.zoom; NV.toast('ZOOM', T.zoom ? 'on — double-tap to release' : 'off', '#19f0ff', 1); } lastTap = now; look = { id: e.pointerId, x: e.clientX, y: e.clientY }; try { lz.setPointerCapture(e.pointerId); } catch (x) { } });
     lz.addEventListener('pointermove', e => { if (!look || e.pointerId !== look.id) return; I.tdx = (I.tdx || 0) + (e.clientX - look.x); I.tdy = (I.tdy || 0) + (e.clientY - look.y); look.x = e.clientX; look.y = e.clientY; });
     const lend = () => { look = null; }; lz.addEventListener('pointerup', lend); lz.addEventListener('pointercancel', lend);
     // buttons
@@ -4487,8 +4482,16 @@ NV.Touch = (() => {
     // step aside while dialogue/choices are up so taps reach them; show chat only in multiplayer
     setInterval(() => { const Lv = NV.Level.active && NV.Level.debug(); document.body.classList.toggle('playing', !!(Lv && Lv.started && !Lv.paused && !Lv.over && !document.querySelector('#ui > .modal, #ui > .banner, #ui > .card, #ui > .results'))); const st = document.getElementById('story'); document.body.classList.toggle('storyup', !!(st && !st.classList.contains('hidden') && st.offsetParent)); const c = ui.querySelector('.tchat'); c.style.display = NV.Net && NV.Net.on ? 'block' : 'none'; }, 200);
   }, { passive: true });
+  // gestures: swipe in from the top-left corner = pause; swipe up from the bottom edge = show the hotbar
+  let gs = null, hbT = null;
+  const showBar = () => { document.body.classList.add('hbshow'); clearTimeout(hbT); hbT = setTimeout(() => document.body.classList.remove('hbshow'), 4500); };
+  addEventListener('pointerdown', e => { if (e.pointerType === 'mouse' || !T.active) return; const c = e.clientX < innerWidth * .12 && e.clientY < innerHeight * .16, b = e.clientY > innerHeight * .9; gs = c || b ? { id: e.pointerId, x: e.clientX, y: e.clientY, c, b, done: false } : null; }, true);
+  addEventListener('pointermove', e => { if (!gs || gs.done || e.pointerId !== gs.id) return; const dx = e.clientX - gs.x, dy = e.clientY - gs.y;
+    if (gs.c && Math.hypot(dx, dy) > innerHeight * .08 && dx > -10 && dy > -10) { gs.done = true; if (document.body.classList.contains('inlevel')) tap('Escape'); }
+    else if (gs.b && -dy > innerHeight * .07) { gs.done = true; showBar(); } }, true);
+  addEventListener('pointerup', () => { gs = null; }, true);
   // tap a hotbar slot to select it
-  addEventListener('pointerdown', e => { const hs = e.target.closest && e.target.closest('#hud .hs'); if (hs) tap('Digit' + (+hs.dataset.i + 1)); });
+  addEventListener('pointerdown', e => { const hs = e.target.closest && e.target.closest('#hud .hs'); if (hs) { tap('Digit' + (+hs.dataset.i + 1)); showBar(); } });
   return T;
 })();
 </script>
@@ -4502,14 +4505,8 @@ NV.Mobile = (() => {
   const ua = navigator.userAgent, M = { on: /Android|iPhone|iPad|iPod|Mobile/i.test(ua) || (navigator.maxTouchPoints > 1 && Math.min(screen.width, screen.height) < 820) };
   if (!M.on) return M;
   document.body.classList.add('mobile');
-  const vp = document.querySelector('meta[name=viewport]'), VH = 620; // virtual CSS height the UI is laid out for
-  const fit = () => {
-    const w = Math.max(screen.width, screen.height), h = Math.min(screen.width, screen.height), land = innerWidth >= innerHeight;
-    if (h >= VH) { vp.content = 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover'; return; }
-    const vw = Math.round((land ? w : h) * VH / (land ? h : w));
-    vp.content = 'width=' + vw + ', user-scalable=no, viewport-fit=cover';
-  };
-  fit(); addEventListener('orientationchange', () => setTimeout(fit, 250)); if (screen.orientation) screen.orientation.addEventListener('change', () => setTimeout(fit, 250));
+  // the whole DOM GUI renders at half size on phones (the 3D view is untouched); minimap and mission text are scaled back up in CSS
+  document.documentElement.style.setProperty('--uiz', '.5');
   const rot = U.el('div', '', '<div class="rotI">⟲</div><div>Turn your phone sideways</div><small>Neon Veins plays in landscape</small>'); rot.id = 'rotate'; document.body.appendChild(rot);
   const check = () => document.body.classList.toggle('portrait', innerHeight > innerWidth); addEventListener('resize', check); check();
   let full = false;
