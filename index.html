@@ -208,6 +208,15 @@ body.mobile #title .menu{position:absolute;right:4vw;left:auto;top:auto;bottom:5
 body.mobile #title .logo{position:absolute;left:4vw;top:8vh;font-size:clamp(30px,10vh,64px)}body.mobile #title .tagline{position:absolute;left:4vw;top:calc(8vh + 12vh + 14px);font-size:11px}body.mobile #title .ver{display:none}body.mobile #title .badge{left:4vw;right:auto;bottom:5vh;top:auto}
 body.mobile .bm{max-height:96vh}body.mobile .bmslots{grid-template-columns:repeat(5,1fr)}
 body.mobile #hud .bars{transform:scale(.7);transform-origin:left bottom}
+/* phone HUD layout (scaled space) */
+body.mobile .dlg{min-height:0;padding:12px 18px;gap:12px;bottom:2vh;width:min(1000px,80vw)}body.mobile .dlg .portrait{width:74px;height:74px}body.mobile .dlg .txt{font-size:17px;min-height:0}body.mobile .dlg .who{font-size:13px;margin-bottom:4px}
+body.mobile .choices{bottom:calc(2vh + 120px);width:min(700px,74vw);gap:6px}body.mobile .choice{padding:8px 14px!important;font-size:15px}
+body.mobile #hud .prompt{top:auto;bottom:34%}body.cine #hud .prompt,body.storyup #hud .prompt{display:none}
+body.touch #hud .tut{top:21%!important;bottom:auto;max-width:48vw;font-size:15px}
+body.touch #hud .hotbar{top:62%!important;bottom:auto!important;left:calc(50% - 50px)!important;transform:translateX(-50%) scale(.72)!important;transform-origin:center top;gap:4px!important}body.touch #hud .hbinfo{top:57%!important;bottom:auto!important;left:calc(50% - 50px)!important;transform:translateX(-50%)!important;font-size:10px}
+body.mobile #hud .status{left:auto!important;right:300px;top:14px;transform:none!important}body.mobile #hud .obj{max-width:40vw}
+body.mobile #hud .obj{transform:none;max-width:44vw}body.mobile #hud .obj .d{font-size:14px}body.mobile #toasts{top:auto;bottom:250px;right:16px;max-width:36vw}
+body.touch #touch .tb{width:70px;height:70px;font-size:12px}body.touch #touch .tfire{width:108px;height:108px}body.touch #touch .tjoy{width:170px;height:170px}body.touch #touch .tjoy i{left:50px;top:50px;width:70px;height:70px}
 /* finger-friendly menus */
 body.touch .btn{min-height:48px;padding:12px 18px;margin:3px 0}body.touch .btn small{font-size:12px}
 body.touch .modal .panel{padding:18px 22px}body.touch .row{min-height:44px}
@@ -3480,16 +3489,16 @@ NV.Level = (() => {
   }
 
   const TUT = [
-    { t: 'Click to take control · <b>WASD</b> move · <b>Mouse</b> look · <b>Shift</b> sprint', until: () => L.stats.time > 6 && L.p.moving },
-    { t: 'Hold <b>C</b> to sneak — guards spot you more slowly. The dot above a guard shows their suspicion.', until: () => L.stats.time > 14 },
-    { t: 'Get behind an unaware guard and press <b>E</b> for a silent takedown.', until: () => L.stats.takedowns > 0 || L.stats.time > 40 },
-    { t: '<b>Left click</b> fires the shock pistol. Watch the heat bar · <b>Space</b> dash · <b>Q</b> EMP pulse', until: () => L.stats.time > 55 || L.stats.shots > 6 },
-    { t: 'Free trapped residents with <b>E</b> (optional). Then find the green extraction beam.', until: () => L.stats.time > 80 || L.stats.rescued > 0 },
+    { t: 'Click to take control · <b>WASD</b> move · <b>Mouse</b> look · <b>Shift</b> sprint', tt: '<b>Left stick</b> to move · <b>drag the right side</b> to look · push the stick all the way to sprint', until: () => L.stats.time > 6 && L.p.moving },
+    { tt: 'Hold <b>SNEAK</b> — guards spot you more slowly. The dot above a guard shows their suspicion.', t: 'Hold <b>C</b> to sneak — guards spot you more slowly. The dot above a guard shows their suspicion.', until: () => L.stats.time > 14 },
+    { tt: 'Get behind an unaware guard and tap <b>E</b> for a silent takedown.', t: 'Get behind an unaware guard and press <b>E</b> for a silent takedown.', until: () => L.stats.takedowns > 0 || L.stats.time > 40 },
+    { tt: '<b>FIRE</b> shoots the shock pistol. Watch the heat bar · <b>DASH</b> · <b>EMP</b> pulse', t: '<b>Left click</b> fires the shock pistol. Watch the heat bar · <b>Space</b> dash · <b>Q</b> EMP pulse', until: () => L.stats.time > 55 || L.stats.shots > 6 },
+    { tt: 'Free trapped residents with <b>E</b> (optional). Then find the green extraction beam.', t: 'Free trapped residents with <b>E</b> (optional). Then find the green extraction beam.', until: () => L.stats.time > 80 || L.stats.rescued > 0 },
   ];
   function tutorial(dt) {
     if (!L.tut) return; const el = document.querySelector('#hud .tut'); if (!el) return;
     const s = TUT[L.tutI]; if (!s) { el.classList.add('hidden'); return; }
-    el.classList.remove('hidden'); if (el._i !== L.tutI) { el.innerHTML = s.t; el._i = L.tutI; }
+    el.classList.remove('hidden'); const key = L.tutI + (NV.Touch.active ? 't' : ''); if (el._i !== key) { el.innerHTML = NV.Touch.active && s.tt ? s.tt : s.t; el._i = key; }
     if (s.until()) L.tutI++;
   }
 
@@ -4493,6 +4502,14 @@ NV.Mobile = (() => {
   const ua = navigator.userAgent, M = { on: /Android|iPhone|iPad|iPod|Mobile/i.test(ua) || (navigator.maxTouchPoints > 1 && Math.min(screen.width, screen.height) < 820) };
   if (!M.on) return M;
   document.body.classList.add('mobile');
+  const vp = document.querySelector('meta[name=viewport]'), VH = 620; // virtual CSS height the UI is laid out for
+  const fit = () => {
+    const w = Math.max(screen.width, screen.height), h = Math.min(screen.width, screen.height), land = innerWidth >= innerHeight;
+    if (h >= VH) { vp.content = 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover'; return; }
+    const vw = Math.round((land ? w : h) * VH / (land ? h : w));
+    vp.content = 'width=' + vw + ', user-scalable=no, viewport-fit=cover';
+  };
+  fit(); addEventListener('orientationchange', () => setTimeout(fit, 250)); if (screen.orientation) screen.orientation.addEventListener('change', () => setTimeout(fit, 250));
   const rot = U.el('div', '', '<div class="rotI">⟲</div><div>Turn your phone sideways</div><small>Neon Veins plays in landscape</small>'); rot.id = 'rotate'; document.body.appendChild(rot);
   const check = () => document.body.classList.toggle('portrait', innerHeight > innerWidth); addEventListener('resize', check); check();
   let full = false;
