@@ -107,6 +107,12 @@ Settings → **VR headset mode** (the page reloads). WebXR can't run on WebGPU, 
 
 A floating panel in front of you mirrors health, energy, the objective, prompts, dialogue and toasts, because HTML overlays can't be shown inside a headset. Menus (pause, Black Market, settings) still need you to take the headset off.
 
+## Controllers & touch
+
+**Gamepad** (standard layout): left stick move, right stick look, RT fire, LT zoom (precision rifles) or brake, A dash-stop / confirm / jump, B dash / back, X interact (hold near a car to enter), Y EMP, LB sprint / boost, RB or d-pad left/right switch hotbar item, L3 sneak, R3 horn, Select fast travel, Start pause. The left stick and d-pad navigate every menu, including the Black Market and Multiplayer screens. Gentle aim assist and rumble come on while you're using a controller.
+
+**Touch** (phones/tablets, appears on first touch): left thumb joystick (push fully forward to sprint), drag anywhere on the right to look, buttons for fire, interact, dash, EMP, car, sneak, zoom and pause, and tap a hotbar slot to select it. Touch gets the same gentle aim assist. Menus, dialogue and choices are simply tapped.
+
 ## Multiplayer
 
 Title → **Multiplayer**. One player hosts and gets a 6-character join code; friends type it in to join (drop-in, any time).

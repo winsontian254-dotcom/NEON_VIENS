@@ -30,6 +30,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#05030b;color:var(--
 @keyframes tout{to{transform:translateX(30px);opacity:0}}
 @keyframes fin{from{opacity:0}}
 @keyframes blink{50%{opacity:.25}}
+.pfocus{outline:2px solid var(--amber)!important;outline-offset:2px;box-shadow:0 0 12px rgba(255,178,56,.6)}
 .mpf label{display:flex;justify-content:space-between;align-items:center;gap:14px;margin:8px 0;font-size:16px}.mpf input,.mpf select,.mpcode{background:rgba(5,3,12,.8);border:1px solid var(--cyan);color:var(--ink);padding:7px 10px;font:16px var(--fb,sans-serif);min-width:220px}.mpf .chk{justify-content:flex-start}.mpf .chk input{min-width:0}
 .mpjoin{display:flex;gap:10px;align-items:center;margin:8px 0}.mpjoin .btn{width:auto;flex:0 0 auto}.mpcode{font-family:var(--fm);letter-spacing:.3em;text-transform:uppercase;flex:1}.mpstat{min-height:22px;color:var(--amber);font-size:15px;margin:8px 0}
 .btn{display:block;width:100%;text-align:left;background:transparent;border:0;color:var(--ink);font-family:var(--fh);font-weight:700;font-size:clamp(14px,1.6vw,19px);letter-spacing:.18em;padding:11px 18px;cursor:pointer;position:relative;text-transform:uppercase;transition:all .15s}
@@ -182,6 +183,23 @@ body.cine #story{bottom:11vh;inset:0 0 11vh 0;z-index:5}
 .credits h2{font-family:var(--fh);letter-spacing:.3em;font-size:14px;color:var(--pink);margin:44px 0 10px}
 .credits p{font-size:20px;margin:4px 0}
 
+
+/* touch controls */
+#touch{position:fixed;inset:0;z-index:40;pointer-events:none;display:none;touch-action:none;user-select:none;-webkit-user-select:none}
+body.touch.inlevel #touch{display:block}body.touch.storyup #touch,body.cine #touch{display:none!important}
+#touch .tjoy{position:absolute;left:3vw;bottom:5vh;width:150px;height:150px;border-radius:50%;border:2px solid rgba(25,240,255,.35);background:rgba(5,3,12,.25);pointer-events:auto;touch-action:none}
+#touch .tjoy i{position:absolute;left:45px;top:45px;width:60px;height:60px;border-radius:50%;background:rgba(25,240,255,.35);box-shadow:0 0 14px rgba(25,240,255,.6)}
+#touch .tjoy.on{border-color:rgba(25,240,255,.8)}
+#touch .tlook{position:absolute;left:38vw;right:0;top:0;bottom:0;pointer-events:auto;touch-action:none}
+#touch .tb{position:absolute;pointer-events:auto;touch-action:none;border-radius:50%;border:2px solid rgba(255,255,255,.3);background:rgba(5,3,12,.45);color:var(--ink);font:700 11px var(--fh,sans-serif);letter-spacing:.08em;width:62px;height:62px;padding:0}
+#touch .tb.on,#touch .tb.lit{background:rgba(255,178,56,.45);border-color:var(--amber)}
+#touch .tfire{right:4vw;bottom:14vh;width:92px;height:92px;border-color:rgba(255,51,85,.7);font-size:13px}
+#touch .tuse{right:calc(4vw + 104px);bottom:9vh}#touch .tdash{right:calc(4vw + 12px);bottom:calc(14vh + 104px)}#touch .temp{right:calc(4vw + 90px);bottom:calc(14vh + 84px)}
+#touch .tcar{right:calc(4vw + 176px);bottom:6vh}#touch .tcrouch{right:calc(4vw + 176px);bottom:calc(6vh + 72px)}#touch .tzoom{right:calc(4vw + 104px);bottom:calc(9vh + 150px)}
+#touch .tpause{left:50%;top:10px;width:46px;height:46px;transform:translateX(-50%);border-radius:10px}#touch .tchat{left:3vw;bottom:calc(5vh + 170px);width:54px;height:40px;border-radius:10px;display:none}
+body.touch #hud .hotbar{pointer-events:auto;bottom:auto;top:96px;left:20px;transform:none}body.touch #hud .hs{width:48px;height:48px}body.touch #hud .hs span{display:none}body.touch #hud .hbinfo{bottom:auto;top:150px;left:20px;transform:none}
+body.touch .banner{z-index:70;pointer-events:auto}
+body.touch #hud .bars{transform:scale(.8);transform-origin:left bottom}
 /* ---- glitch effects (menus, transitions, logo, HUD hits) ---- */
 @keyframes glIn{0%{opacity:0;clip-path:inset(40% 0 45% 0);transform:translate(-14px,0) skewX(8deg);filter:hue-rotate(90deg) saturate(3)}
 12%{opacity:1;clip-path:inset(10% 0 70% 0);transform:translate(10px,0)}24%{clip-path:inset(62% 0 8% 0);transform:translate(-6px,0) skewX(-5deg)}
@@ -712,16 +730,23 @@ NV.In = (() => {
   I.poll = () => {
     const pads = navigator.getGamepads ? navigator.getGamepads() : [];
     I.pad = null; for (const p of pads) if (p && p.connected) { I.pad = p; break; }
+    // left stick flicks count as d-pad presses in menus
+    const ax = I.pad ? I.pad.axes : [0, 0], dir = ax[1] < -.6 ? 'u' : ax[1] > .6 ? 'd' : ax[0] < -.6 ? 'l' : ax[0] > .6 ? 'r' : '';
+    I.flick = dir && dir !== I._lastFlick ? dir : ''; I._lastFlick = dir;
+    if (I.pad && !I._padSeen) { I._padSeen = true; if (NV.toast) NV.toast('CONTROLLER', (I.pad.id || 'Gamepad').replace(/\(.*\)/, '').slice(0, 40) + ' connected', '#19f0ff', 2.5); }
+    if (I.pad && I.pad.buttons.some(b => b.pressed)) I.lastPad = performance.now();
   };
+  I.usingPad = () => I.lastPad && performance.now() - I.lastPad < 8000;
+  I.rumble = (strong, weak, ms) => { try { const v = I.pad && I.pad.vibrationActuator; if (v && I.usingPad()) v.playEffect('dual-rumble', { duration: ms || 80, strongMagnitude: strong, weakMagnitude: weak }); } catch (e) { } };
   I.endFrame = () => {
     hit.clear(); I.lmbHit = false;
     if (I.pad) { I.padPrev = {}; I.pad.buttons.forEach((b, i) => I.padPrev[i] = b.pressed); }
   };
   // semantic menu actions
-  I.menuUp = () => I.any('ArrowUp', 'KeyW') || I.padHit(12);
-  I.menuDown = () => I.any('ArrowDown', 'KeyS') || I.padHit(13);
-  I.menuLeft = () => I.any('ArrowLeft', 'KeyA') || I.padHit(14);
-  I.menuRight = () => I.any('ArrowRight', 'KeyD') || I.padHit(15);
+  I.menuUp = () => I.any('ArrowUp', 'KeyW') || I.padHit(12) || I.flick === 'u';
+  I.menuDown = () => I.any('ArrowDown', 'KeyS') || I.padHit(13) || I.flick === 'd';
+  I.menuLeft = () => I.any('ArrowLeft', 'KeyA') || I.padHit(14) || I.flick === 'l';
+  I.menuRight = () => I.any('ArrowRight', 'KeyD') || I.padHit(15) || I.flick === 'r';
   I.confirm = () => I.any('Enter', 'Space', 'NumpadEnter') || I.padHit(0);
   I.back = () => I.any('Escape', 'Backspace') || I.padHit(1);
   I.pause = () => I.any('Escape', 'KeyP') || I.padHit(9);
@@ -2321,7 +2346,7 @@ NV.Level = (() => {
     w = w || ARMS().BY['courier-sidearm'];
     const p = L.p; if (p.heat >= 100 || p.over > 0 || p.cd > 0) return;
     p.cd = w.cd; p.heat += w.heat; if (p.heat >= 100) { p.over = 1.6; NV.Audio.sfx('hackfail'); }
-    NV.Audio.sfx('shoot'); noise(p.x, p.z, w.noise);
+    NV.Audio.sfx('shoot'); noise(p.x, p.z, w.noise); NV.In.rumble(w.pellets > 1 || w.cat === 'sniper' ? .7 : .25, .4, w.pellets > 1 ? 140 : 60);
     L.gun.kick = 1; L.gun.flash.intensity = 2.5; L.gun.mf.isVisible = true; L.gun.mf.rotation.z = Math.random() * 6.28; L.gun.mf.scaling.setAll((.8 + Math.random() * .5) * (w.pellets > 1 || w.cat === 'sniper' ? 1.6 : 1)); L.gun.mfT = .045;
     p.pitch -= .012 * (w.pellets > 1 || w.cat === 'sniper' ? 3 : 1); L.stats.shots++;
     for (let k = 0; k < w.pellets; k++) shotRay(w, false);
@@ -2330,7 +2355,8 @@ NV.Level = (() => {
   function shotRay(w, echo) {
     const o = aimO(); let d = camDir();
     if (w.spread) d = d.add(V3((Math.random() - .5) * 2 * w.spread, (Math.random() - .5) * 2 * w.spread, (Math.random() - .5) * 2 * w.spread)).normalize();
-    if (w.homing) { const e = aimTarget(w.homing, w.range); if (e) d = V3(e.x, e.drone ? e.m.root.position.y : 1.3, e.z).subtract(o).normalize(); }
+    const assist = (NV.In.usingPad() || (NV.Touch && NV.Touch.active)) ? .09 : 0; // gentle aim assist for sticks and touch
+    if (w.homing || assist) { const e = aimTarget(Math.max(w.homing || 0, assist), w.range); if (e) d = V3(e.x, e.drone ? e.m.root.position.y : 1.3, e.z).subtract(o).normalize(); }
     let tWall = w.range; for (let t = .3; t < w.range; t += .25) { const q = o.add(d.scale(t)); if (q.y < 0 || q.y > (L.map.city ? 200 : WALLH) || solid(q.x, q.z)) { tWall = t; break; } }
     L.crates.forEach(c => { const tt = rayBox(o, d, c); if (tt > 0 && tt < tWall) tWall = tt; });
     const test = (cx, cy, cz, rad) => { const oc = o.subtract(V3(cx, cy, cz)); const b = BABYLON.Vector3.Dot(oc, d), c = oc.lengthSquared() - rad * rad, h = b * b - c; if (h < 0) return -1; const t = -b - Math.sqrt(h); return t > 0 ? t : -1; };
@@ -2546,7 +2572,7 @@ NV.Level = (() => {
     armsSync();
     for (let i = 0; i < 9; i++) if (I.hit('Digit' + (i + 1))) armsSelect(i);
     if (I.wheel) { armsCycle(I.wheel > 0 ? 1 : -1); I.wheel = 0; }
-    if (I.pad && I.padHit(5)) armsCycle(1);
+    if (I.pad && (I.padHit(5) || I.padHit(15))) armsCycle(1); if (I.pad && I.padHit(14)) armsCycle(-1);
     const w = A.cur, m = w && A.models[w.id];
     if (m) {
       m.node.setEnabled(!L.drive && !L.pRag && !L.calm && L.gun.node.isEnabled());
@@ -2645,7 +2671,7 @@ NV.Level = (() => {
     if (L.over || L.p.inv > 0) return;
     if (L.arms && (L.arms.buff.shield > 0 || L.arms.droneShield)) d *= .4;
     const dm = d * NV.DIFF[L.diff].dmg * (L.tactic.armor || 1);
-    L.p.hp -= dm; L.p.regenT = 4; if (dm > 12) NV.glitch(140); L.stats.dmg += dm; NV.Audio.sfx('hurt'); shake(.35);
+    L.p.hp -= dm; L.p.regenT = 4; if (dm > 12) NV.glitch(140); NV.In.rumble(.9, .6, 180); L.stats.dmg += dm; NV.Audio.sfx('hurt'); shake(.35);
     const el = document.querySelector('#hud .dmg'); if (el) { el.style.opacity = U.clamp(dm / 30, .35, 1); clearTimeout(el._t); el._t = setTimeout(() => el.style.opacity = 0, 180); }
     if (L.p.hp <= 0) { L.p.hp = 0; if (L.free) freeRespawn(); else if (netOn()) mpRespawn(); else finish(false); }
   }
@@ -2732,10 +2758,11 @@ NV.Level = (() => {
     if (L.cine) { cineUpdate(dt); if (L.cine) { if (L.npcs) updateNpcs(dt); if (L.city) updateTraffic(dt); updateWorld(dt); hud(dt); return; } }
     if (L.pRag) { pRagUpdate(dt); if (L.pRag) { L.look.dx = L.look.dy = 0; if (L.free) updateFree(dt); if (L.city) updateTraffic(dt); updateEnemies(dt); updateBullets(dt); hud(dt); return; } }
     // look
-    const zoomed = L.arms && L.arms.cur && L.arms.cur.zoom && I.rmb && !L.drive;
+    const zoomed = L.arms && L.arms.cur && L.arms.cur.zoom && (I.rmb || (I.pad && I.pad.buttons[6] && I.pad.buttons[6].value > .4) || (NV.Touch && NV.Touch.zoom)) && !L.drive;
     const sens = .0022 * set.sens * (zoomed ? .35 : 1);
     L.lastLook = L.look.dx || L.look.dy || (I.pad && (Math.abs(I.pad.axes[2]) > .15 || Math.abs(I.pad.axes[3]) > .15));
     p.yaw += L.look.dx * sens; p.pitch += L.look.dy * sens * (set.invertY ? -1 : 1); L.look.dx = L.look.dy = 0;
+    if (I.tdx || I.tdy) { p.yaw += I.tdx * sens * 1.6; p.pitch += I.tdy * sens * 1.6 * (set.invertY ? -1 : 1); L.lastLook = true; I.tdx = I.tdy = 0; }
     if (I.pad) { const ax = I.pad.axes; const rx = Math.abs(ax[2]) > .15 ? ax[2] : 0, ry = Math.abs(ax[3]) > .15 ? ax[3] : 0; p.yaw += rx * dt * 2.8 * set.sens; p.pitch += ry * dt * 2.2 * set.sens * (set.invertY ? -1 : 1); }
     p.pitch = U.clamp(p.pitch, -1.35, 1.35);
     // move
@@ -2745,12 +2772,13 @@ NV.Level = (() => {
       if (I.key('KeyW') || I.key('ArrowUp')) mz += 1; if (I.key('KeyS') || I.key('ArrowDown')) mz -= 1;
       if (I.key('KeyA') || I.key('ArrowLeft')) mx -= 1; if (I.key('KeyD') || I.key('ArrowRight')) mx += 1;
       if (I.pad) { const ax = I.pad.axes; if (Math.abs(ax[0]) > .2) mx += ax[0]; if (Math.abs(ax[1]) > .2) mz -= ax[1]; }
+      if (NV.Touch.active) { mx += NV.Touch.mx; mz += NV.Touch.my; }
       if (L.vr && L.vr.on) { if (Math.abs(L.vr.lx) > .15) mx += L.vr.lx; if (Math.abs(L.vr.ly) > .15) mz -= L.vr.ly; }
     }
     const crouch = I.key('KeyC') || I.key('ControlLeft') || I.padBtn(10);
     p.crouch = crouch;
     const ml = Math.hypot(mx, mz); if (ml > 1) { mx /= ml; mz /= ml; }
-    const sprint = (I.key('ShiftLeft') || I.padBtn(4)) && !crouch && mz > 0;
+    const sprint = (I.key('ShiftLeft') || I.padBtn(4) || NV.Touch.run) && !crouch && mz > 0;
     let spd = (crouch ? 2.6 : sprint ? 8.2 : 5.4) * (L.tags.includes('driver') ? 1.12 : 1) * ((L.arms && L.arms.cur && L.arms.cur.slow) || 1);
     const sy = Math.sin(p.yaw), cy = Math.cos(p.yaw);
     let vx = (mx * cy + mz * sy) * spd, vz = (-mx * sy + mz * cy) * spd;
@@ -3250,6 +3278,7 @@ NV.Level = (() => {
     let thr = 0, steer = 0;
     if (I.key('KeyW') || I.key('ArrowUp')) thr += 1; if (I.key('KeyS') || I.key('ArrowDown')) thr -= 1;
     if (I.key('KeyA') || I.key('ArrowLeft')) steer -= 1; if (I.key('KeyD') || I.key('ArrowRight')) steer += 1;
+    if (NV.Touch.active) { steer += NV.Touch.mx; thr += NV.Touch.my; }
     if (L.vr && L.vr.on) { steer += Math.abs(L.vr.lx) > .15 ? L.vr.lx : 0; thr += Math.abs(L.vr.ly) > .15 ? -L.vr.ly : 0; }
     if (I.pad) { const ax = I.pad.axes, b = I.pad.buttons; if (Math.abs(ax[0]) > .15) steer += ax[0]; if (b[7] && b[7].value > .05) thr += b[7].value; if (b[6] && b[6].value > .05) thr -= b[6].value; }
     const boost = (I.key('ShiftLeft') || I.padBtn(4)) && thr > 0 && p.en > 1;
@@ -4370,6 +4399,59 @@ NV.Net = (() => {
 <script>
 'use strict';
 /* =====================================================================
+   Touch controls (phones / tablets): left thumb joystick, drag right side
+   to look, on-screen buttons. Appears on first touch, only in gameplay.
+   ===================================================================== */
+NV.Touch = (() => {
+  const T = { active: false, mx: 0, my: 0, run: false, zoom: false };
+  let ui = null, joy = null, look = null;
+  const key = (code, down) => dispatchEvent(new KeyboardEvent(down ? 'keydown' : 'keyup', { code }));
+  const tap = code => { key(code, true); setTimeout(() => key(code, false), 70); };
+  function build() {
+    ui = U.el('div', '', `<div class="tjoy"><i></i></div><div class="tlook"></div>
+      <button class="tb tfire" data-a="fire">FIRE</button><button class="tb tuse" data-k="KeyE">E</button><button class="tb tdash" data-k="Space">DASH</button>
+      <button class="tb temp" data-k="KeyQ">EMP</button><button class="tb tcar" data-k="KeyF">CAR</button><button class="tb tcrouch" data-h="KeyC">SNEAK</button>
+      <button class="tb tzoom" data-a="zoom">ZOOM</button><button class="tb tpause" data-k="Escape">❚❚</button><button class="tb tchat" data-k="Enter">CHAT</button>`);
+    ui.id = 'touch'; document.body.appendChild(ui);
+    const I = NV.In;
+    // joystick
+    const jz = ui.querySelector('.tjoy'), knob = jz.firstChild;
+    jz.addEventListener('pointerdown', e => { e.preventDefault(); joy = { id: e.pointerId, x: e.clientX, y: e.clientY }; try { jz.setPointerCapture(e.pointerId); } catch (x) { } jz.classList.add('on'); });
+    jz.addEventListener('pointermove', e => { if (!joy || e.pointerId !== joy.id) return; const dx = e.clientX - joy.x, dy = e.clientY - joy.y, d = Math.hypot(dx, dy), R = 55, k = Math.min(1, d / R);
+      T.mx = d ? dx / d * k : 0; T.my = d ? -dy / d * k : 0; T.run = k > .95 && T.my > .6; knob.style.transform = `translate(${T.mx * R}px,${-T.my * R}px)`; });
+    const jend = () => { joy = null; T.mx = T.my = 0; T.run = false; knob.style.transform = ''; jz.classList.remove('on'); };
+    jz.addEventListener('pointerup', jend); jz.addEventListener('pointercancel', jend);
+    // look: drag anywhere on the right side
+    const lz = ui.querySelector('.tlook');
+    lz.addEventListener('pointerdown', e => { e.preventDefault(); look = { id: e.pointerId, x: e.clientX, y: e.clientY }; try { lz.setPointerCapture(e.pointerId); } catch (x) { } });
+    lz.addEventListener('pointermove', e => { if (!look || e.pointerId !== look.id) return; I.tdx = (I.tdx || 0) + (e.clientX - look.x); I.tdy = (I.tdy || 0) + (e.clientY - look.y); look.x = e.clientX; look.y = e.clientY; });
+    const lend = () => { look = null; }; lz.addEventListener('pointerup', lend); lz.addEventListener('pointercancel', lend);
+    // buttons
+    ui.querySelectorAll('.tb').forEach(b => {
+      b.addEventListener('pointerdown', e => {
+        e.preventDefault(); e.stopPropagation(); b.classList.add('on');
+        if (b.dataset.a === 'fire') { I.lmb = true; I.lmbHit = true; }
+        else if (b.dataset.a === 'zoom') { T.zoom = !T.zoom; b.classList.toggle('lit', T.zoom); }
+        else if (b.dataset.h) key(b.dataset.h, true);
+        else if (b.dataset.k) tap(b.dataset.k);
+      });
+      const up = () => { b.classList.remove('on'); if (b.dataset.a === 'fire') I.lmb = false; if (b.dataset.h) key(b.dataset.h, false); };
+      b.addEventListener('pointerup', up); b.addEventListener('pointercancel', up); b.addEventListener('pointerleave', up);
+    });
+  }
+  addEventListener('touchstart', () => {
+    if (T.active) return; T.active = true; document.body.classList.add('touch'); build();
+    // step aside while dialogue/choices are up so taps reach them; show chat only in multiplayer
+    setInterval(() => { const st = document.getElementById('story'); document.body.classList.toggle('storyup', !!(st && !st.classList.contains('hidden') && st.offsetParent)); const c = ui.querySelector('.tchat'); c.style.display = NV.Net && NV.Net.on ? 'block' : 'none'; }, 200);
+  }, { passive: true });
+  // tap a hotbar slot to select it
+  addEventListener('pointerdown', e => { const hs = e.target.closest && e.target.closest('#hud .hs'); if (hs) tap('Digit' + (+hs.dataset.i + 1)); });
+  return T;
+})();
+</script>
+<script>
+'use strict';
+/* =====================================================================
    UI — screens, menus, dialogue, cards (DOM overlay)
    ===================================================================== */
 NV.UI = (() => {
@@ -4831,8 +4913,21 @@ NV.UI = (() => {
     m.addEventListener('contextmenu', e => { const b = e.target.closest('.bs'); if (b) { e.preventDefault(); st.bar[+b.dataset.s] = null; NV.State.save(); draw(); } });
     draw();
     const fin = () => { UI.pop(h); m.remove(); res(); };
-    const h = UI.push({ tick() { if (NV.In.back()) fin(); } });
+    const h = UI.push({ tick() { if (NV.In.back()) fin(); else UI.padNav(m); } });
   });
+  // controller / keyboard navigation for free-form screens (Black Market, Multiplayer): d-pad moves between controls, A presses
+  UI.padNav = box => {
+    const I = NV.In, els = [...box.querySelectorAll('button:not([disabled]),input,select')].filter(e => e.offsetParent);
+    if (!els.length) return; let cur = els.find(e => e.classList.contains('pfocus'));
+    const dir = I.padHit(12) || I.flick === 'u' ? [0, -1] : I.padHit(13) || I.flick === 'd' ? [0, 1] : I.padHit(14) || I.flick === 'l' ? [-1, 0] : I.padHit(15) || I.flick === 'r' ? [1, 0] : null;
+    if (!cur && (dir || I.padHit(0))) { cur = els[0]; cur.classList.add('pfocus'); cur.scrollIntoView({ block: 'nearest' }); return; }
+    if (dir && cur) {
+      const c = cur.getBoundingClientRect(), cx = c.left + c.width / 2, cy = c.top + c.height / 2; let best = null, bd = 1e9;
+      els.forEach(e => { if (e === cur) return; const r = e.getBoundingClientRect(), dx = r.left + r.width / 2 - cx, dy = r.top + r.height / 2 - cy, along = dx * dir[0] + dy * dir[1]; if (along <= 4) return; const d = along + Math.abs(dx * dir[1] + dy * dir[0]) * 2.5; if (d < bd) { bd = d; best = e; } });
+      if (best) { cur.classList.remove('pfocus'); best.classList.add('pfocus'); best.scrollIntoView({ block: 'nearest' }); NV.Audio.sfx('ui'); }
+    }
+    if (cur && I.padHit(0)) { if (cur.tagName === 'BUTTON') cur.click(); else cur.focus(); }
+  };
   UI.dismissModals = () => { document.querySelectorAll('#ui > .modal').forEach(m => m.remove()); stack.length = 0; };
   UI.players = () => new Promise(res => {
     const N = NV.Net, list = [{ name: N.me.name, char: N.me.char, you: 1, host: N.isHost }].concat([...N.peers.values()].map(p => ({ name: p.name, char: p.char, host: p.id === 0 })));
@@ -4874,7 +4969,7 @@ NV.UI = (() => {
     $('.mpname').addEventListener('keydown', e => e.stopPropagation());
     $('.mpback').onclick = () => fin(false);
     const fin = v => { UI.pop(h); m.remove(); res(v); };
-    const h = UI.push({ tick() { if (NV.In.back() && !busy) fin(false); } });
+    const h = UI.push({ tick() { if (NV.In.back() && !busy) fin(false); else UI.padNav(m); } });
   });
   UI.vendor = () => new Promise(res => {
     const S = NV.State.get(); S.upg = S.upg || { hp: 0, dmg: 0, en: 0 };
