@@ -113,6 +113,8 @@ A floating panel in front of you mirrors health, energy, the objective, prompts,
 
 **Touch** (phones/tablets, appears on first touch): left thumb joystick (push fully forward to sprint), drag anywhere on the right to look, buttons for fire, interact, dash, EMP, car, sneak, zoom and pause, and tap a hotbar slot to select it. Touch gets the same gentle aim assist. Menus, dialogue and choices are simply tapped.
 
+**Mobile**: on phones and tablets the game detects the device, drops to lighter graphics, goes fullscreen and locks to landscape on the first tap, asks you to rotate the phone in portrait, pauses when the app goes to the background, and can be added to the home screen as a full-screen app. It needs a browser with WebGPU (recent Chrome on Android, Safari 26+ on iOS).
+
 ## Multiplayer
 
 Title → **Multiplayer**. One player hosts and gets a 6-character join code; friends type it in to join (drop-in, any time).

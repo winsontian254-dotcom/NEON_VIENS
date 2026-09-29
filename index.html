@@ -2,7 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#05030c">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Neon Veins">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%20%22Neon%20Veins%22%2C%20%22short_name%22%3A%20%22Neon%20Veins%22%2C%20%22display%22%3A%20%22fullscreen%22%2C%20%22orientation%22%3A%20%22landscape%22%2C%20%22background_color%22%3A%20%22%2305030c%22%2C%20%22theme_color%22%3A%20%22%2305030c%22%2C%20%22start_url%22%3A%20%22.%22%7D">
 <title>NEON VEINS</title>
 <script src="https://cdn.babylonjs.com/babylon.js"></script>
 <script src="https://cdn.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
@@ -184,6 +190,24 @@ body.cine #story{bottom:11vh;inset:0 0 11vh 0;z-index:5}
 .credits p{font-size:20px;margin:4px 0}
 
 
+
+/* mobile layout */
+#rotate{display:none;position:fixed;inset:0;z-index:200;background:#05030c;color:var(--ink);flex-direction:column;align-items:center;justify-content:center;gap:10px;font-family:var(--fh);letter-spacing:.15em;text-align:center}
+#rotate .rotI{font-size:64px;color:var(--cyan);animation:spin 2s ease-in-out infinite}#rotate small{color:#8a84b3;letter-spacing:.1em}
+@keyframes spin{50%{transform:rotate(-90deg)}}
+body.mobile.portrait #rotate{display:flex}
+body.mobile{-webkit-tap-highlight-color:transparent;overscroll-behavior:none}body.mobile canvas{touch-action:none}body.mobile .panel,body.mobile .bmlist{touch-action:pan-y}
+body.mobile .panel{max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+body.mobile .btn{padding:9px 14px;font-size:14px}
+body.mobile .logo{font-size:clamp(34px,11vh,80px)}
+body.mobile #hud .obj{transform:scale(.8);transform-origin:left top}
+body.mobile #hud .mm{transform:scale(.7);transform-origin:right top}
+body.mobile #hud .loc{top:140px}
+body.mobile .kbd{display:none}
+body.mobile #title .menu{position:absolute;right:4vw;left:auto;top:auto;bottom:5vh;width:min(420px,46vw);max-height:78vh;overflow-y:auto;padding:4px 0!important}body.mobile #title .btn small{display:none}body.mobile #title .btn{padding:8px 16px}
+body.mobile #title .logo{position:absolute;left:4vw;top:8vh;font-size:clamp(30px,10vh,64px)}body.mobile #title .tagline{position:absolute;left:4vw;top:calc(8vh + 12vh + 14px);font-size:11px}body.mobile #title .ver{display:none}body.mobile #title .badge{left:4vw;right:auto;bottom:5vh;top:auto}
+body.mobile .bm{max-height:96vh}body.mobile .bmslots{grid-template-columns:repeat(5,1fr)}
+body.mobile #hud .bars{transform:scale(.7);transform-origin:left bottom}
 /* touch controls */
 #touch{position:fixed;inset:0;z-index:40;pointer-events:none;display:none;touch-action:none;user-select:none;-webkit-user-select:none}
 body.touch.inlevel #touch{display:block}body.touch.storyup #touch,body.cine #touch{display:none!important}
@@ -939,6 +963,7 @@ NV.Quality = (() => {
       gpu = ext ? String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)) : '';
     } catch (e) { }
     if (weak || /SwiftShader|llvmpipe|Mali|PowerVR|Adreno [1-5]|HD Graphics|UHD Graphics/i.test(gpu)) tier = 'low';
+    if (/Android|iPhone|iPad|Mobile/i.test(ua) || (navigator.maxTouchPoints > 1 && Math.min(screen.width, screen.height) < 820)) tier = /Adreno [7-9]|Apple GPU|Immortalis/i.test(gpu) ? 'low' : 'verylow'; // phones
     if (/RTX|Radeon RX [5-9]|Apple M[2-9]|Arc A7/i.test(gpu)) tier = 'high';
     if (/RTX [34]0[789]0|RX 7[89]00/i.test(gpu)) tier = 'veryhigh';
     return tier;
@@ -4447,6 +4472,30 @@ NV.Touch = (() => {
   // tap a hotbar slot to select it
   addEventListener('pointerdown', e => { const hs = e.target.closest && e.target.closest('#hud .hs'); if (hs) tap('Digit' + (+hs.dataset.i + 1)); });
   return T;
+})();
+</script>
+<script>
+'use strict';
+/* =====================================================================
+   Mobile: detect phones/tablets, go fullscreen + landscape on first tap,
+   ask to rotate in portrait, and tune the layout for small screens.
+   ===================================================================== */
+NV.Mobile = (() => {
+  const ua = navigator.userAgent, M = { on: /Android|iPhone|iPad|iPod|Mobile/i.test(ua) || (navigator.maxTouchPoints > 1 && Math.min(screen.width, screen.height) < 820) };
+  if (!M.on) return M;
+  document.body.classList.add('mobile');
+  const rot = U.el('div', '', '<div class="rotI">⟲</div><div>Turn your phone sideways</div><small>Neon Veins plays in landscape</small>'); rot.id = 'rotate'; document.body.appendChild(rot);
+  const check = () => document.body.classList.toggle('portrait', innerHeight > innerWidth); addEventListener('resize', check); check();
+  let full = false;
+  const goFull = async () => {
+    if (full) return; full = true;
+    try { const d = document.documentElement; if (!document.fullscreenElement && d.requestFullscreen) await d.requestFullscreen({ navigationUI: 'hide' }); } catch (e) { }
+    try { if (screen.orientation && screen.orientation.lock) await screen.orientation.lock('landscape'); } catch (e) { }
+  };
+  addEventListener('pointerup', goFull, { once: false, passive: true });
+  document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) full = false; });
+  document.addEventListener('visibilitychange', () => { if (document.hidden && NV.Level.active && NV.Level.debug() && !NV.Level.debug().paused) dispatchEvent(new KeyboardEvent('keydown', { code: 'Escape' })); }); // pause when the app is backgrounded
+  return M;
 })();
 </script>
 <script>
