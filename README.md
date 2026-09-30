@@ -80,6 +80,10 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 
 ---
 
+## Climbing & skydiving
+
+In the city, keep pushing forward into a building to climb its wall; release forward to hang, dash to let go. At the top you mount the roof and can climb taller neighbours. Walk off an edge and you fall; drops longer than ~12 m become a steerable third-person skydive, and hard landings (street or roof) knock Ghost into a ragdoll. Guards lose sight of you on high rooftops.
+
 ## Arsenal & Black Market
 
 Pause (**Esc**) → **Black Market** to buy from the arsenal: 267 weapons, tools, drones, cyberattacks, environmental triggers, boss gear, strategic strikes and legendaries from the script. Pick a hotbar slot and equip; right-click a slot to clear it.

@@ -2660,11 +2660,14 @@ NV.Level = (() => {
     if (!g.rest) {
       g.vy -= 24 * dt;
       const nx = o.x + g.vx * dt, nz = o.z + g.vz * dt;
-      if (!solid(nx, o.z)) o.x = nx; else { g.vx *= -.35; g.wz += g.vx * .2; }
-      if (!solid(o.x, nz)) o.z = nz; else { g.vz *= -.35; g.wx += g.vz * .2; }
+      const hi = o.floor != null, blocked = (x, z) => hi ? cellH(x, z) > o.floor + .6 : solid(x, z);
+      if (!blocked(nx, o.z)) o.x = nx; else { g.vx *= -.35; g.wz += g.vx * .2; }
+      if (!blocked(o.x, nz)) o.z = nz; else { g.vz *= -.35; g.wx += g.vz * .2; }
+      if (hi) o.floor = floorAt(o.x, o.z); // slid off a roof edge? keep falling
+      const f0 = hi ? o.floor : 0;
       g.h += g.vy * dt;
-      const air = g.h > g.rest0 + .05;
-      if (g.h <= g.rest0) { g.h = g.rest0; if (g.vy < -4) { g.vy *= -.28; g.wx *= .5; g.wz *= .5; if (g.vy > 1.5) { NV.Audio.sfx('step'); shakeNear(o, .12); } } else g.vy = 0; }
+      const air = g.h > g.rest0 + f0 + .05;
+      if (g.h <= g.rest0 + f0) { g.h = g.rest0 + f0; if (g.vy < -4) { g.vy *= -.28; g.wx *= .5; g.wz *= .5; if (g.vy > 1.5) { NV.Audio.sfx('step'); shakeNear(o, .12); } } else g.vy = 0; }
       if (air) { g.rx += g.wx * dt; g.rz += g.wz * dt; g.yaw += g.wy * dt; }
       else {
         const fr = Math.min(1, dt * 5); g.vx *= 1 - fr; g.vz *= 1 - fr; g.wx *= 1 - fr; g.wz *= 1 - fr;
@@ -2832,9 +2835,11 @@ NV.Level = (() => {
     let spd = (crouch ? 2.6 : sprint ? 8.2 : 5.4) * (L.tags.includes('driver') ? 1.12 : 1) * ((L.arms && L.arms.cur && L.arms.cur.slow) || 1);
     const sy = Math.sin(p.yaw), cy = Math.cos(p.yaw);
     let vx = (mx * cy + mz * sy) * spd, vz = (-mx * sy + mz * cy) * spd;
-    if (!L.calm && !L.drive && (I.hit('Space') || I.padHit(1)) && p.dashCd <= 0 && p.en >= 22 && ml > 0) { p.dash = .18; p.dashCd = L.tags.includes('driver') ? .5 : .8; p.en -= 22; p.dx = vx / spd; p.dz = vz / spd; NV.Audio.sfx('dash'); p.inv = .15; }
+    if (!L.calm && !L.drive && !p.climb && !p.air && (I.hit('Space') || I.padHit(1)) && p.dashCd <= 0 && p.en >= 22 && ml > 0) { p.dash = .18; p.dashCd = L.tags.includes('driver') ? .5 : .8; p.en -= 22; p.dx = vx / spd; p.dz = vz / spd; NV.Audio.sfx('dash'); p.inv = .15; }
     if (p.dash > 0) { p.dash -= dt; vx = p.dx * 26; vz = p.dz * 26; }
-    if (!L.drive) moveCircle(p, vx * dt, vz * dt, .45);
+    if (p.climb) { vx = vz = 0; }
+    if (!L.drive) { if (L.map.hmap && (p.y > .05 || p.air || p.climb)) moveElev(p, vx * dt * (p.air ? .8 : 1), vz * dt * (p.air ? .8 : 1)); else moveCircle(p, vx * dt, vz * dt, .45); }
+    if (L.map.hmap) vertical(dt, mz, sprint);
     p.moving = ml > 0; if (p.moving) { p.bob += dt * spd * 1.6; p.stepT -= dt * spd; if (p.stepT <= 0) { p.stepT = 2.6; NV.Audio.sfx('step'); if (sprint) noise(p.x, p.z, 7); } }
     p.dashCd -= dt; p.inv -= dt; p.cd -= dt;
     p.en = Math.min(100, p.en + dt * (12 + L.implant) * L.enMul);
@@ -2843,15 +2848,16 @@ NV.Level = (() => {
     if (L.drive) updateDrive(dt);
     if (netOn() && I.hit('Enter') && !hacking) chatOpen();
     // camera
-    const eyeH = U.lerp(L.cam.position.y, (crouch ? CROUCH : EYE) + (p.moving ? Math.sin(p.bob) * .05 : 0), Math.min(1, dt * 12));
+    const py = L.map.hmap ? p.y : 0, eyeH = py + (p.air || p.climb ? EYE + (p.climb ? Math.sin(p.bob) * .06 : 0) : U.lerp(L.cam.position.y - py, (crouch ? CROUCH : EYE) + (p.moving ? Math.sin(p.bob) * .05 : 0), Math.min(1, dt * 12)));
     L.cam.position.set(p.x, eyeH, p.z);
     let sx = 0, szz = 0; if (L.shake > 0) { L.shake -= dt * 1.8; sx = (Math.random() - .5) * L.shake * .05; szz = (Math.random() - .5) * L.shake * .05; }
     L.cam.rotation.set(p.pitch + sx, p.yaw + szz, 0);
     L.plight.position.set(p.x, eyeH + .4, p.z);
     if (L.sun) L.sun.position.set(p.x + 17, 50, p.z + 12);
-    if (L.rain) L.rain.emitter = V3(p.x, 0, p.z);
+    if (L.rain) L.rain.emitter = V3(p.x, py, p.z);
     L.cam.fov = U.lerp(L.cam.fov, set.fov * Math.PI / 180 * .75 * (sprint ? 1.08 : 1) * (p.dash > 0 ? 1.15 : 1) * (zoomed ? .3 : 1), dt * 8);
     if (L.drive) driveCamera(dt);
+    if (p.sky) skyCam(dt);
     if (L.vr && L.vr.on) vrCamera();
     if (L.map.void) { // jump with Space; past the rim there is only falling
       const onPlat = Math.hypot(p.x - L.voidC.x, p.z - L.voidC.z) < 10;
@@ -2896,6 +2902,7 @@ NV.Level = (() => {
   function canSee(e) {
     const p = L.p, dx = p.x - e.x, dz = p.z - e.z, d = Math.hypot(dx, dz);
     if (L.arms && L.arms.buff.cloak > 0) return 0;
+    if ((p.y || 0) > 5) return 0; // up on the rooftops
     let range = (e.drone ? 14 : 17) * (p.crouch ? .6 : 1) * (L.arms && L.arms.jam ? .45 : 1);
     if (d > range) return 0;
     const ang = Math.abs(U.angDiff(e.yaw, Math.atan2(dx, dz)));
@@ -3246,7 +3253,7 @@ NV.Level = (() => {
         const dodge = o => { const dx = o.x - c.x, dz = o.z - c.z, ah = dx * fx2 + dz * fz2, sd = dx * fz2 - dz * fx2; if (ah > 2 && ah < 4 + c.speed * .6 && Math.abs(sd) < 2.2) { const dir = sd >= 0 ? 1 : -1, st = Math.min(2.5, 6 * dt); const nx = o.x + fz2 * dir * st, nz = o.z - fx2 * dir * st; if (!solid(nx, nz)) { o.x = nx; o.z = nz; } } };
         L.peds.forEach(pd => { if (!pd.rag && Math.random() < .9) dodge(pd); });
         L.enemies.forEach(e => { if (e.state !== 'down' && !e.drone) dodge(e); });
-        if (!L.drive && !L.pRag && !L.cine && Math.hypot(c.x - p.x, c.z - p.z) < 2.1) launchPlayer(Math.sin(c.vh) * c.speed * .85, 4 + c.speed * .45, Math.cos(c.vh) * c.speed * .85, 8 + c.speed * 1.1, c);
+        if (!L.drive && !L.pRag && !L.cine && !(p.y > .5) && Math.hypot(c.x - p.x, c.z - p.z) < 2.1) launchPlayer(Math.sin(c.vh) * c.speed * .85, 4 + c.speed * .45, Math.cos(c.vh) * c.speed * .85, 8 + c.speed * 1.1, c);
         for (const pd of L.peds) if (!pd.rag && Math.hypot(c.x - pd.x, c.z - pd.z) < 2) { ragdoll(pd, pd.root, pd.rig, Math.sin(c.vh) * c.speed * .85, 3 + c.speed * .4, Math.cos(c.vh) * c.speed * .85, false); NV.Audio.sfx('hit'); c.speed *= .8; }
       }
     });
@@ -3269,6 +3276,7 @@ NV.Level = (() => {
     const p = L.p, G = cineGhost();
     G.x = p.x; G.z = p.z; G.root.rotation.set(0, p.yaw, 0); G.root.setEnabled(true);
     ragdoll(G, G.root, G.root.rig, vx, vy, vz, false);
+    if (L.map.hmap) { G.floor = floorAt(p.x, p.z); G.rag.h = (p.y || 0) + 1; }
     L.pRag = { t: 0, gun: L.gun.node.isEnabled() }; L.gun.node.setEnabled(false);
     NV.Audio.sfx('hit'); shake(.9); spark(V3(p.x, 1, p.z), '#ffffff', 22);
     if (car) car.speed *= .5;
@@ -3278,17 +3286,17 @@ NV.Level = (() => {
     const G = L.ghost, R = L.pRag, p = L.p, cam = L.cam; R.t += dt;
     ragStep(G, G.root, G.root.rig, dt); p.x = G.x; p.z = G.z;
     const tx = G.x, ty = G.rag.h, tz = G.z; let ex = tx - Math.sin(p.yaw) * 6.5, ez = tz - Math.cos(p.yaw) * 6.5;
-    for (let i = 0; i < 12 && solid(ex, ez); i++) { ex += (tx - ex) * .2; ez += (tz - ez) * .2; }
-    const k = Math.min(1, dt * 5); cam.position.set(U.lerp(cam.position.x, ex, k), U.lerp(cam.position.y, 2.6 + ty * .6, k), U.lerp(cam.position.z, ez, k));
+    for (let i = 0; i < 12 && (G.floor != null ? cellH(ex, ez) > ty + 1 : solid(ex, ez)); i++) { ex += (tx - ex) * .2; ez += (tz - ez) * .2; }
+    const k = Math.min(1, dt * 5); cam.position.set(U.lerp(cam.position.x, ex, k), U.lerp(cam.position.y, ty + 2.2, k), U.lerp(cam.position.z, ez, k));
     const dx = tx - cam.position.x, dy = ty - cam.position.y, dz = tz - cam.position.z; cam.rotation.set(-Math.atan2(dy, Math.hypot(dx, dz)), Math.atan2(dx, dz), 0);
     if ((G.rag.rest && R.t > 2.2) || R.t > 7) pRagEnd();
   }
   function pRagEnd() {
     const G = L.ghost, R = L.pRag, p = L.p; if (!R) return; L.pRag = null;
-    p.x = G.x; p.z = G.z; if (solid(p.x, p.z)) { const c = nearestFree(p.x, p.z); p.x = c.x; p.z = c.z; }
+    p.x = G.x; p.z = G.z; if (G.floor != null) { p.y = G.floor; G.floor = null; } else if (solid(p.x, p.z)) { const c = nearestFree(p.x, p.z); p.x = c.x; p.z = c.z; }
     G.rag = null; G.root.rotation.set(0, 0, 0); G.root.position.y = 0; G.root.setEnabled(false);
     const Rg = G.root.rig; Rg.armL.rotation.z = -.07; Rg.armR.rotation.z = .07; Rg.legL.rotation.z = 0; Rg.legR.rotation.z = 0;
-    if (R.gun) L.gun.node.setEnabled(true); p.pitch = 0; p.inv = 1; L.cam.position.set(p.x, EYE, p.z);
+    if (R.gun) L.gun.node.setEnabled(true); p.pitch = 0; p.inv = 1; L.cam.position.set(p.x, (p.y || 0) + EYE, p.z);
   }
   function nearestFree(x, z) { for (let r = 1; r < 8; r++) for (let a = 0; a < 8; a++) { const nx = x + Math.cos(a * .785) * r * 2, nz = z + Math.sin(a * .785) * r * 2; if (!solid(nx, nz)) return { x: nx, z: nz }; } return { x: L.home ? L.home.x : x, z: L.home ? L.home.z : z }; }
 
@@ -3325,7 +3333,7 @@ NV.Level = (() => {
   /* ---- player driving ---- */
   function nearestCar() {
     if (!L.cars) return null; const p = L.p; let best = null, bd = 3.8;
-    L.cars.forEach(c => { if (c.kind === 'remote' || (c.kind === 'traffic' && c.speed > .5)) return; const d = Math.hypot(c.x - p.x, c.z - p.z); if (d < bd) { bd = d; best = c; } });
+    L.cars.forEach(c => { if (c.kind === 'remote' || (c.kind === 'traffic' && c.speed > .5) || L.p.y > .5) return; const d = Math.hypot(c.x - p.x, c.z - p.z); if (d < bd) { bd = d; best = c; } });
     return best;
   }
   function carCollides(x, z, yaw) {
@@ -3550,8 +3558,16 @@ NV.Level = (() => {
   const SHARD_IDS = Array.from({ length: 24 }, (_, i) => i * 2 + 1);
   function genCity() {
     const plan = NV.CityPlan();
+    if (!plan.hmap) { // climbable heights: every building cell knows how tall it is
+      const H = new Float32Array(plan.W * plan.H);
+      for (let y = 0; y < plan.H; y++) for (let x = 0; x < plan.W; x++) if (plan.g[y][x] === 1) H[y * plan.W + x] = (x === 0 || y === 0 || x === plan.W - 1 || y === plan.H - 1) ? 1e9 : 820; // map edge unclimbable; the rest is the Helix Tower until overwritten
+      const LMH = { spire: 80, ship: 6, train: 5, crane: 40, cathedral: 20, dome: 10, vault: 9, factory: 14, hall: 20, clinic: 22, ruin: 12, craft: 2, stand: 3, station: 9, plaza: 6 };
+      plan.landmarks.forEach(lm => { for (let y = lm.y; y < lm.y + 8; y++) for (let x = lm.x; x < lm.x + 8; x++) if (plan.g[y][x] === 1) H[y * plan.W + x] = LMH[lm.kind] || 15; });
+      plan.buildings.forEach(b => { for (let y = b.y; y < b.y + b.h; y++) for (let x = b.x; x < b.x + b.w; x++) H[y * plan.W + x] = b.ht; });
+      plan.hmap = H;
+    }
     const inter = plan.inter.filter(i => plan.g[i.y][i.x] === 0 && plan.g[i.y + 1][i.x + 1] === 0 && plan.g[i.y + 1][i.x] === 0 && plan.g[i.y][i.x + 1] === 0);
-    return { W: plan.W, H: plan.H, g: plan.g.map(row => row.slice()), rooms: plan.plazas, start: plan.start, exit: plan.start, buildings: plan.buildings, plazas: plan.plazas, inter, tower: plan.tower, B: plan.B, N: plan.N, TB: plan.TB, blocks: plan.blocks, landmarks: plan.landmarks, district: plan.district, city: true };
+    return { W: plan.W, H: plan.H, g: plan.g.map(row => row.slice()), rooms: plan.plazas, start: plan.start, exit: plan.start, buildings: plan.buildings, plazas: plan.plazas, hmap: plan.hmap, inter, tower: plan.tower, B: plan.B, N: plan.N, TB: plan.TB, blocks: plan.blocks, landmarks: plan.landmarks, district: plan.district, city: true };
   }
 
   const STYLE_COL = { glass: ['#19f0ff', '#ffffff'], garden: ['#f4e6b0', '#9dffcf'], civic: ['#ffd23d', '#f4e6b0'], neon: ['#ff2bd6', '#19f0ff'], teal: ['#3dffa8', '#19f0ff'], rust: ['#ff7a2b', '#ffb238'], dead: ['#ff3355', '#3a3450'] };
@@ -4295,6 +4311,56 @@ NV.Level = (() => {
     P.tex.update();
   }
 
+  /* ---------------- climbing, falling, skydiving ----------------
+     Push into a building for a moment to climb it; release forward to hang; dash lets go. Walk off a roof and you fall;
+     falls longer than ~12 m become a skydive (third person, steerable). Hard landings ragdoll. */
+  function cellH(x, z) { const M = L.map, c = toCell(x, z); if (c.x < 0 || c.y < 0 || c.x >= M.W || c.y >= M.H) return 1e9; const v = M.g[c.y][c.x]; if (v === 2) return 1.2; if (v !== 1) return 0; return M.hmap ? M.hmap[c.y * M.W + c.x] : 1e9; }
+  const floorAt = (x, z) => { const h = cellH(x, z); return h < 1e8 ? h : 0; };
+  function moveElev(p, dx, dz) { const r = .35, ok = (x, z) => cellH(x, z) <= p.y + .6; if (dx && ok(p.x + dx + Math.sign(dx) * r, p.z)) p.x += dx; if (dz && ok(p.x, p.z + dz + Math.sign(dz) * r)) p.z += dz; }
+  function vertical(dt, mz, sprint) {
+    const p = L.p, I = NV.In; if (!L.map.hmap || L.drive || L.pRag) return;
+    const fx = Math.sin(p.yaw), fz = Math.cos(p.yaw);
+    if (p.climb) {
+      if (I.hit('Space') || I.padHit(1)) { p.climb = null; p.x -= fx * .7; p.z -= fz * .7; p.vy = 0; NV.Audio.sfx('dash'); return; } // let go
+      if (mz > .2) { p.y += (sprint ? 5 : 3.4) * dt; p.bob += dt * 9; if (Math.random() < dt * 3) NV.Audio.sfx('step'); }
+      if (p.y >= p.climb.h) { p.y = p.climb.h; p.x += fx * 1.3; p.z += fz * 1.3; p.climb = null; NV.Audio.sfx('step'); NV.In.rumble(.3, .2, 80); }
+      return;
+    }
+    // start climbing: keep pushing into a wall that's taller than you
+    if (mz > .5 && !p.air) { const h = cellH(p.x + fx * .9, p.z + fz * .9); if (h > p.y + .6 && h < 1e8) { p.climbT = (p.climbT || 0) + dt; if (p.climbT > .35) { p.climb = { h }; p.climbT = 0; if (!L.climbHint) { L.climbHint = 1; NV.toast('CLIMBING', 'Hold forward to climb · let go to hang · dash to drop', '#19f0ff', 3); } } } else p.climbT = 0; } else p.climbT = 0;
+    const fl = floorAt(p.x, p.z);
+    if (p.y > fl + .02 || p.vy > 0) {
+      p.air = true; p.vy -= 20 * dt; if (p.sky) p.vy = Math.max(p.vy, -34);
+      p.y = Math.max(fl, p.y + p.vy * dt);
+      if (!p.sky && p.vy < -5 && p.y - fl > 12) startSky();
+      if (p.y <= fl) land(-p.vy, fl);
+    } else { p.y = fl; p.vy = 0; p.air = false; }
+  }
+  function startSky() {
+    const p = L.p, G = cineGhost(); p.sky = { gun: L.gun.node.isEnabled() }; L.gun.node.setEnabled(false);
+    G.rag = null; G.root.setEnabled(true); G.root.setPivotPoint(V3(0, 1, 0)); p.pitch = .5;
+    NV.Audio.sfx('dash'); NV.toast('SKYDIVING', 'Steer with move · aim for a roof or the street', '#19f0ff', 2.5);
+  }
+  function endSky() {
+    const p = L.p, G = L.ghost; if (!p.sky) return; if (p.sky.gun) L.gun.node.setEnabled(true); p.sky = null;
+    G.root.rotation.set(0, 0, 0); G.root.setEnabled(false); const R = G.root.rig; R.armL.rotation.z = -.07; R.armR.rotation.z = .07; R.legL.rotation.z = 0; R.legR.rotation.z = 0;
+  }
+  function skyCam(dt) {
+    const p = L.p, G = L.ghost, cam = L.cam, R = G.root.rig, t = L.time;
+    G.x = p.x; G.z = p.z; G.root.position.set(p.x, p.y, p.z); G.root.rotation.set(Math.PI / 2 * .9, p.yaw, Math.sin(t * 2) * .08);
+    R.armL.rotation.set(Math.sin(t * 9) * .1, 0, -1.35); R.armR.rotation.set(Math.cos(t * 9) * .1, 0, 1.35); R.legL.rotation.set(.2, 0, -.35); R.legR.rotation.set(.2, 0, .35); R.kneeL.rotation.x = .4; R.kneeR.rotation.x = .4;
+    const ex = p.x - Math.sin(p.yaw) * 5.5, ez = p.z - Math.cos(p.yaw) * 5.5;
+    cam.position.set(ex, p.y + 3.4, ez); const dx = p.x - ex, dy = p.y + .6 - cam.position.y, dz = p.z - ez; cam.rotation.set(-Math.atan2(dy, Math.hypot(dx, dz)), Math.atan2(dx, dz), 0);
+    cam.fov = U.lerp(cam.fov, NV.Settings.get().fov * Math.PI / 180 * .75 * 1.2, dt * 3);
+  }
+  function land(impact, fl) {
+    const p = L.p; p.air = false; p.vy = 0; p.y = fl; const wasSky = !!p.sky; endSky();
+    if (impact > 16 || wasSky) { // hard landing: ragdoll wherever you hit (street or roof)
+      launchPlayer(Math.sin(p.yaw) * impact * .15, 2 + impact * .08, Math.cos(p.yaw) * impact * .15, Math.min(60, Math.max(0, impact - 14) * 2.2));
+      const G = L.ghost; G.floor = fl; if (G.rag) G.rag.h = fl + 1; shake(1);
+    } else if (impact > 7) { shake(.3); NV.Audio.sfx('step'); NV.In.rumble(.4, .3, 90); }
+  }
+
   /* ---------------- lifecycle ---------------- */
   function pause() {
     NV.Audio.engine(0); L.paused = true; if (document.pointerLockElement) document.exitPointerLock();
@@ -4367,7 +4433,7 @@ NV.Level = (() => {
       L = {
         resolve, op, act: ctx.act || 1, diff: S.profile.difficulty || 'normal', tags: S.profile.tags || [], implant: NV.State.implant(),
         seed: U.hash((ctx.chapter || '') + (op.d || '') + (ctx.retry || 0)), palette: ctx.palette, tactic: ctx.tactic || {},
-        p: { x: 0, z: 0, yaw: 0, pitch: 0, hp: 0, max: 100 + (S.stars || 0) * 5, en: 100, heat: 0, over: 0, cd: 0, dash: 0, dashCd: 0, inv: 0, bob: 0, stepT: 1, regenT: 0, crouch: false },
+        p: { x: 0, y: 0, vy: 0, z: 0, yaw: 0, pitch: 0, hp: 0, max: 100 + (S.stars || 0) * 5, en: 100, heat: 0, over: 0, cd: 0, dash: 0, dashCd: 0, inv: 0, bob: 0, stepT: 1, regenT: 0, crouch: false },
         look: { dx: 0, dy: 0 }, enemies: [], terms: [], pickups: [], civs: [], nodes: [], fxs: [], crates: [],
         stats: { time: 0, takedowns: 0, disabled: 0, alerts: 0, rescued: 0, found: 0, dmg: 0, shots: 0 },
         time: 0, shake: 0, mmT: 0, tut: !!op.tut, tutI: 0, started: false, over: false, paused: false,
