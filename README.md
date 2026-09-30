@@ -146,6 +146,18 @@ Pause (**Esc**) → **Black Market** to buy from the arsenal: 267 weapons, tools
 - Every item has its own procedural 3D viewmodel (pistol, SMG, rifle, shotgun, sniper, rotary, laser, launcher, grenade, blade, hammer, baton, wrist rig, drone remote, strike designator), coloured by faction.
 - Credits: 9 ¢ per kill, 14 ¢ per nonlethal takedown, 150 ¢ or more per completed operation, plus gigs and data shards. Multiplayer sessions start with 3000 ¢.
 
+## VR Mode (Google Cardboard)
+
+Turn it on from **Settings → Gameplay Mode**, from **Switch to VR Mode** in the pause menu, or from the **VR** button on the story top bar. It switches instantly, with no reload and no lost progress.
+- **Display:** a stereo split-screen camera (Babylon's `VRDeviceOrientationFreeCamera`). Lens distortion correction runs on WebGL; on WebGPU the view is split without it. The game asks for fullscreen and landscape.
+- **Head tracking:** uses the gyroscope, and on iPhone asks for motion permission the first time. You look to aim, and movement follows your gaze.
+- **Controls:**
+  - Tap the screen or press the Cardboard trigger to use, take down or hack whatever is in front of you. Otherwise the tap fires. In dialogue, a tap advances the story.
+  - Hold the screen to walk.
+  - A Bluetooth gamepad works as normal.
+- **HUD, dialogue and toasts:** shrunk into the left eye and mirrored into the right, so both eyes can read them.
+- **Code:** the whole feature lives in one block in `index.html`, marked `/* ================= Google Cardboard & VR Mode Manager ================= */`.
+
 ## VR (WebXR)
 
 Settings → **VR headset mode** (the page reloads). WebXR can't run on WebGPU, so VR mode uses Babylon's WebGL2 renderer. Then press the headset button in the bottom-right corner to enter VR. Works in the Quest Browser, or desktop Chrome/Edge with a PC VR headset. The page must be served over https or from localhost.
@@ -235,8 +247,32 @@ The game doesn't track a single "karma" number. It tracks:
 
 ## Graphics tiers
 
-| Tier | Trigger | Resolution | Glow | Post | Rain | Notes |
-|---|---|---|---|---|---|---|
+Ten presets run from **Ultra** to **Potato** (plus *How the hell is your PC running WebGPU*). The default is **Auto**:
+
+1. **GPU score.** The GPU's renderer string is matched against a performance table covering:
+   - NVIDIA RTX 50–20 and GTX 10/16/9;
+   - AMD RX 9000–400;
+   - Radeon 8060S/890M/780M and other iGPUs;
+   - Intel Arc, Iris Xe and UHD;
+   - Apple M-series;
+   - Adreno and Mali.
+
+   This gives a rough score (≈ 3DMark Time Spy graphics). Some examples:
+
+   | GPU | Score | Auto tier |
+   |---|---|---|
+   | Radeon 8060S | ≈ 11.5k | Very High |
+   | RTX 3060 | ≈ 8.8k | High |
+   | GTX 1660 | ≈ 5.4k | Medium High |
+   | Intel UHD 620 | ≈ 0.45k | Very Low |
+
+   Laptop dGPUs are scored lower, phones are capped for heat, and very high-resolution screens drop one tier. Unknown or masked GPUs fall back to CPU cores and memory.
+2. **Frame-rate governor.** Dynamic resolution adjusts `hardwareScalingLevel` every ~1.2 s. If that alone can't hold the target frame rate, Auto steps the whole preset down a tier (after ~5 s below 70% of the target), or back up (after ~15 s of headroom), staying within two tiers of the detected one.
+3. **Re-detection.** Auto re-detects when the GPU changes. The Graphics menu shows the detected GPU and its score. Picking any preset, or changing any option, turns Auto off.
+
+The renderer prefers WebGPU and falls back to WebGL2 automatically.
+
+---|---|---|---|---|---|---|
 | **Low** | Chromebook, mobile, iGPU, ≤4 cores, ≤4GB | 160% scale | off | FXAA only | 450 | no beams, no cones |
 | **Medium** | default | 115% scale | ¼ ratio | FXAA | 1500 | beams + cones |
 | **High** | discrete GPU | native DPR | ½ ratio | FXAA + chroma + grain | 3600 | ACES tonemap |
