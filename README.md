@@ -162,26 +162,26 @@ Pause (**Esc**) → **Black Market** to buy from the arsenal: 267 weapons, tools
 
 `android/` is a native Android project that wraps the game in a full-screen WebView.
 
-**Download:** [`android/NeonVeins.apk`](android/NeonVeins.apk), about 400 KB. It needs Android 7.0+ and an internet connection, because Babylon.js streams from its CDN.
+**Download:** [`android/NeonVeins.apk`](android/NeonVeins.apk), about 2.3 MB, for Android 7.0+.
 
 **Using it:**
 - **Launcher:** pick **Normal Mode** or **Google Cardboard VR**. The choice is remembered, and you can switch at any time in-game from the pause menu (**Back** button), **Settings → Gameplay Mode**, or the story **VR** button.
-- **Cardboard:** starts in split-screen straight away, and the gyroscope works with no permission prompt.
-- **Back button:** pauses or closes menus in-game. On the title screen it returns to the mode launcher.
+- **Back button:** pauses or closes menus in-game. On the title screen it returns to the launcher.
 
-**How it works:**
-- The page is served from `https://appassets.androidplatform.net`, a secure origin, so head tracking, saves and WebGPU work.
-- When the WebView has no WebGPU, the game falls back to WebGL2.
-- The game loads straight from the repo's `index.html`, so it is never duplicated in git.
+**Works offline:**
+- Babylon.js, the materials library and PeerJS are bundled in the APK, taken from npm (the same builds the CDN serves).
+- Everything else the game loads from a CDN (fonts, WebGPU shader tools) is cached on the first online run, and cached files refresh at most once a day.
+- With no connection at all, the game runs on WebGL2 if WebGPU's shader tools were never cached.
+
+**Updates itself from GitHub** (public repo, no login):
+- **The launcher checks the newest commit** on the development branch and shows it, and it rechecks every time you come back to the launcher. Tap the status line to check again.
+- **Game changes download on their own.** The new `index.html` is verified against GitHub's hash and used from the next launch.
+- **App changes offer an update.** When the Android app itself changes (`android/version.json` → `versionCode` goes up), an **INSTALL APP UPDATE** button downloads the new APK from that commit and opens Android's installer. The first time, Android asks you to allow installs from this app.
 
 **Building:**
-- **Android Studio / Gradle:** open `android/` and run *Build → Build APK(s)*. Gradle copies the repo's `index.html` into the APK's assets on every build.
-- **No Android SDK:** run `pip install pyaxml cryptography`, then `python3 android/tools/build-apk.py`. It needs only a JDK and downloads the Android framework jar and `dx` from Maven Central. It then:
-  - encodes the binary manifest and writes the resources table for the icon;
-  - zip-aligns the APK;
-  - signs it with APK Signature Scheme v2 using the debug key in `android/keystore/`.
-
-  Keeping that key means new builds install over old ones. Replace it before publishing anywhere.
+- **Android Studio / Gradle:** open `android/` and build. Gradle copies `index.html`, bundles the npm libraries and writes `build.json`.
+- **No Android SDK:** run `pip install pyaxml cryptography`, then `python3 android/tools/build-apk.py` (needs a JDK). It signs with the committed debug key in `android/keystore/`; replace that key before publishing anywhere.
+- **Every change to `index.html` rebuilds the APK in the same commit** (see `CLAUDE.md`).
 
 ## VR Mode (Google Cardboard)
 

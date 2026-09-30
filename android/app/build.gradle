@@ -7,8 +7,9 @@ android {
         applicationId 'com.neonveins.game'
         minSdk 24
         targetSdk 34
-        versionCode 1
-        versionName '1.0'
+        def v = new groovy.json.JsonSlurper().parse(file("$rootDir/version.json")) // single source of truth, shared with tools/build-apk.py
+        versionCode v.versionCode
+        versionName v.versionName
     }
     buildTypes {
         release { minifyEnabled false; signingConfig signingConfigs.debug }
@@ -17,9 +18,33 @@ android {
     sourceSets { main { assets.srcDirs = ["$buildDir/generated/nvassets"] } }
 }
 
-// The game itself is the repo's single-file index.html: copy it into the APK's assets on every build.
+// The game itself is the repo's single-file index.html: copy it into the APK's assets on every build,
+// plus the CDN libraries it loads (bundled from npm so the app plays offline) and build.json for the GitHub updater.
+def assetsDir = file("$buildDir/generated/nvassets")
 def copyGame = tasks.register('copyGame', Copy) {
     from("$rootDir/../index.html")
-    into("$buildDir/generated/nvassets")
+    into(assetsDir)
+    doLast {
+        def game = file("$rootDir/../index.html").bytes
+        def md = java.security.MessageDigest.getInstance('SHA-1')
+        md.update("blob ${game.length}\0".getBytes('UTF-8')); md.update(game)
+        def blob = md.digest().collect { String.format('%02x', it) }.join('')
+        def date = java.time.Instant.now().truncatedTo(java.time.temporal.ChronoUnit.SECONDS).toString()
+        new File(assetsDir, 'build.json').text = groovy.json.JsonOutput.toJson([blob: blob, date: date, versionCode: android.defaultConfig.versionCode, versionName: android.defaultConfig.versionName])
+    }
 }
-preBuild.dependsOn copyGame
+def vendor = ['babylon.js': ['babylonjs', 'latest', 'package/babylon.js'],
+              'babylonjs.materials.min.js': ['babylonjs-materials', 'latest', 'package/babylonjs.materials.min.js'],
+              'peerjs.min.js': ['peerjs', '1.5.4', 'package/dist/peerjs.min.js']]
+def fetchVendor = tasks.register('fetchVendor') {
+    outputs.dir(new File(assetsDir, 'vendor'))
+    doLast {
+        vendor.each { name, spec ->
+            def meta = new groovy.json.JsonSlurper().parse(new URL("https://registry.npmjs.org/${spec[0]}/${spec[1]}"))
+            def tgz = file("$buildDir/npm/${spec[0]}.tgz"); tgz.parentFile.mkdirs()
+            new URL(meta.dist.tarball).withInputStream { i -> tgz.withOutputStream { it << i } }
+            copy { from(tarTree(resources.gzip(tgz))) { include spec[2]; eachFile { it.path = name } }; into(new File(assetsDir, 'vendor')); includeEmptyDirs = false }
+        }
+    }
+}
+preBuild.dependsOn copyGame, fetchVendor

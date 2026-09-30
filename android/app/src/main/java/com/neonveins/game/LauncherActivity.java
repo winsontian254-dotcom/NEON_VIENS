@@ -15,11 +15,14 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 /** Start screen: pick Normal or Google Cardboard VR. The choice can also be switched in-game (pause menu, settings, story VR button). */
-public class LauncherActivity extends Activity {
+public class LauncherActivity extends Activity implements Updater.Listener {
     static final String PREFS = "neonveins";
     static final String KEY_MODE = "mode";
 
     private LinearLayout normalBtn, vrBtn;
+    private TextView status, updateBtn;
+    private String updateSha;
+    private long lastCheck;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,9 +57,24 @@ public class LauncherActivity extends Activity {
         row.addView(vrBtn, lp);
         root.addView(row);
 
-        TextView hint = text("You can switch any time from the pause menu (Back button) → Switch to VR / Normal Mode.\nThe game streams Babylon.js, so the first launch needs an internet connection.", 12, Color.rgb(138, 132, 179), false);
-        hint.setPadding(0, dp(26), 0, 0);
+        TextView hint = text("Switch any time from the pause menu (Back button) → Switch to VR / Normal Mode. Works offline.", 12, Color.rgb(138, 132, 179), false);
+        hint.setPadding(0, dp(22), 0, 0);
         root.addView(hint);
+
+        status = text("Checking GitHub for updates …", 11, Color.rgb(25, 240, 255), false);
+        status.setPadding(0, dp(10), 0, 0);
+        status.setOnClickListener(new View.OnClickListener() { @Override public void onClick(View v) { checkNow(); } });
+        root.addView(status);
+        updateBtn = text("", 14, Color.rgb(5, 3, 12), true);
+        GradientDrawable ub = new GradientDrawable();
+        ub.setColor(Color.rgb(255, 210, 61));
+        updateBtn.setBackground(ub);
+        updateBtn.setPadding(dp(16), dp(8), dp(16), dp(8));
+        updateBtn.setVisibility(View.GONE);
+        updateBtn.setOnClickListener(new View.OnClickListener() { @Override public void onClick(View v) { if (updateSha != null) Updater.installApk(LauncherActivity.this, updateSha, LauncherActivity.this); } });
+        LinearLayout.LayoutParams ulp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        ulp.topMargin = dp(8);
+        root.addView(updateBtn, ulp);
 
         normalBtn.setOnClickListener(new View.OnClickListener() { @Override public void onClick(View v) { launch("normal"); } });
         vrBtn.setOnClickListener(new View.OnClickListener() { @Override public void onClick(View v) { launch("cardboard"); } });
@@ -68,7 +86,24 @@ public class LauncherActivity extends Activity {
     protected void onResume() {
         super.onResume();
         highlight(); // the mode may have been switched in-game
+        if (System.currentTimeMillis() - lastCheck > 10 * 60 * 1000) checkNow();
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+    }
+
+    private void checkNow() { lastCheck = System.currentTimeMillis(); status.setText("Checking GitHub for updates …"); Updater.check(this, this); }
+
+    @Override public void status(String text) { status.setText(text); }
+
+    @Override public void appUpdate(int versionCode, String versionName, String notes, String sha) {
+        updateSha = sha;
+        updateBtn.setText("INSTALL APP UPDATE v" + versionName + (notes.isEmpty() ? "" : " — " + notes));
+        updateBtn.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (Updater.ACTION_INSTALL.equals(intent.getAction())) Updater.onInstallStatus(this, intent, this);
     }
 
     private void launch(String mode) {

@@ -12,8 +12,12 @@ icon, zips and 4-byte aligns the APK, and signs it with APK Signature Scheme v2.
 
 Usage:  python3 android/tools/build-apk.py            -> android/NeonVeins.apk
 """
+import datetime
 import hashlib
+import io
+import json
 import os
+import tarfile
 import re
 import struct
 import subprocess
@@ -30,7 +34,8 @@ BUILD = os.path.join(ROOT, 'build-sdkfree')
 OUT_APK = os.path.join(ROOT, 'NeonVeins.apk')
 KEYDIR = os.path.join(ROOT, 'keystore')
 
-PKG, VERSION_CODE, VERSION_NAME, MIN_SDK, TARGET_SDK = 'com.neonveins.game', 1, '1.0', 24, 34
+_V = json.load(open(os.path.join(ROOT, 'version.json')))
+PKG, VERSION_CODE, VERSION_NAME, MIN_SDK, TARGET_SDK = 'com.neonveins.game', _V['versionCode'], _V['versionName'], 24, 34
 ICON_PATH = 'res/mipmap-xxxhdpi-v4/ic_launcher.png'
 
 MIRRORS = ['https://maven-central.storage-download.googleapis.com/maven2', 'https://repo1.maven.org/maven2', 'https://repo.maven.apache.org/maven2']
@@ -38,6 +43,41 @@ TOOLS = {
     'android-all.jar': 'org/robolectric/android-all/14-robolectric-10818077/android-all-14-robolectric-10818077.jar',
     'dx.jar': 'com/jakewharton/android/repackaged/dalvik-dx/16.0.1/dalvik-dx-16.0.1.jar',
 }
+
+
+# CDN files bundled for offline play (same files the game loads from cdn.babylonjs.com / jsdelivr), taken from npm
+VENDOR = {  # asset name: (npm package, version or dist-tag, path inside the tarball)
+    'babylon.js': ('babylonjs', 'latest', 'package/babylon.js'),
+    'babylonjs.materials.min.js': ('babylonjs-materials', 'latest', 'package/babylonjs.materials.min.js'),
+    'peerjs.min.js': ('peerjs', '1.5.4', 'package/dist/peerjs.min.js'),
+}
+
+
+def fetch_vendor():
+    out = {}
+    vdir = os.path.join(CACHE, 'vendor')
+    os.makedirs(vdir, exist_ok=True)
+    for name, (pkg, ver, inner) in VENDOR.items():
+        dst = os.path.join(vdir, name)
+        try:
+            meta = json.load(urllib.request.urlopen('https://registry.npmjs.org/%s/%s' % (pkg, ver), timeout=30))
+            stamp = dst + '.version'
+            if not (os.path.exists(dst) and open(stamp).read() == meta['version'] if os.path.exists(stamp) else False):
+                log('bundling', pkg, meta['version'])
+                tgz = urllib.request.urlopen(meta['dist']['tarball'], timeout=300).read()
+                with tarfile.open(fileobj=io.BytesIO(tgz)) as t:
+                    open(dst, 'wb').write(t.extractfile(inner).read())
+                open(stamp, 'w').write(meta['version'])
+        except Exception as e:
+            if not os.path.exists(dst):
+                sys.exit('could not fetch %s from npm: %s' % (pkg, e))
+            log('npm unreachable, reusing cached', name)
+        out['assets/vendor/' + name] = open(dst, 'rb').read()
+    return out
+
+
+def git_blob_sha(b):
+    return hashlib.sha1(b'blob %d\0' % len(b) + b).hexdigest()
 
 
 def log(*a):
@@ -222,9 +262,14 @@ def main():
     arsc = build_arsc()
     icon = open(os.path.join(MAIN, 'res', 'mipmap-xxxhdpi', 'ic_launcher.png'), 'rb').read()
     game = open(os.path.join(REPO, 'index.html'), 'rb').read()
+    vendor = fetch_vendor()
+    # lets the app's GitHub updater know which index.html is bundled, and when it was built
+    build = json.dumps({'blob': git_blob_sha(game), 'date': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
+                        'versionCode': VERSION_CODE, 'versionName': VERSION_NAME}).encode()
     unsigned = os.path.join(BUILD, 'unsigned.apk')
     write_zip(unsigned, [('AndroidManifest.xml', manifest, False), ('classes.dex', dex, False), ('resources.arsc', arsc, True),
-                         (ICON_PATH, icon, True), ('assets/index.html', game, False)])
+                         (ICON_PATH, icon, True), ('assets/index.html', game, False), ('assets/build.json', build, False)]
+              + [(k, v, False) for k, v in vendor.items()])
     sign_v2(unsigned, OUT_APK)
     log('wrote', OUT_APK, '(%d KB)' % (os.path.getsize(OUT_APK) // 1024))
 

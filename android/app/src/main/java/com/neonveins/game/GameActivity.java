@@ -23,7 +23,7 @@ import java.io.InputStream;
 /**
  * Hosts the single-file game (assets/index.html) in a full-screen WebView.
  * The page is served from https://appassets.androidplatform.net so it runs in a secure context
- * (needed for gyroscope head tracking, storage and WebGPU/WebGL2); Babylon.js still loads from its CDN.
+ * (needed for gyroscope head tracking, storage and WebGPU/WebGL2). CDN files come from WebCache, so it plays offline.
  * JS bridge "NVAndroid" lets the game read/persist the Normal/Cardboard mode and handle the Back button.
  */
 public class GameActivity extends Activity {
@@ -61,11 +61,11 @@ public class GameActivity extends Activity {
         web.setWebViewClient(new WebViewClient() {
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest req) {
-                if (!HOST.equals(req.getUrl().getHost())) return null; // CDN (Babylon.js, PeerJS) goes to the network
+                if (!HOST.equals(req.getUrl().getHost())) return WebCache.serve(GameActivity.this, req); // CDN files: bundled / cached for offline play
                 String path = req.getUrl().getPath();
                 if (path == null || path.equals("/") || path.isEmpty()) path = "/index.html";
                 try {
-                    InputStream in = getAssets().open(path.substring(1));
+                    InputStream in = path.equals("/index.html") ? Updater.openGame(GameActivity.this) : getAssets().open(path.substring(1)); // newest game: GitHub download or bundled
                     return new WebResourceResponse(mime(path), "utf-8", in);
                 } catch (Exception e) {
                     return new WebResourceResponse("text/plain", "utf-8", 404, "Not Found", null, null);
