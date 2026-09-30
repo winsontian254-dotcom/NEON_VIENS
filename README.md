@@ -158,6 +158,31 @@ Pause (**Esc**) → **Black Market** to buy from the arsenal: 267 weapons, tools
 - Every item has its own procedural 3D viewmodel (pistol, SMG, rifle, shotgun, sniper, rotary, laser, launcher, grenade, blade, hammer, baton, wrist rig, drone remote, strike designator), coloured by faction.
 - Credits: 9 ¢ per kill, 14 ¢ per nonlethal takedown, 150 ¢ or more per completed operation, plus gigs and data shards. Multiplayer sessions start with 3000 ¢.
 
+## Android app (Normal / Google Cardboard VR)
+
+`android/` is a native Android project that wraps the game in a full-screen WebView.
+
+**Download:** [`android/NeonVeins.apk`](android/NeonVeins.apk), about 400 KB. It needs Android 7.0+ and an internet connection, because Babylon.js streams from its CDN.
+
+**Using it:**
+- **Launcher:** pick **Normal Mode** or **Google Cardboard VR**. The choice is remembered, and you can switch at any time in-game from the pause menu (**Back** button), **Settings → Gameplay Mode**, or the story **VR** button.
+- **Cardboard:** starts in split-screen straight away, and the gyroscope works with no permission prompt.
+- **Back button:** pauses or closes menus in-game. On the title screen it returns to the mode launcher.
+
+**How it works:**
+- The page is served from `https://appassets.androidplatform.net`, a secure origin, so head tracking, saves and WebGPU work.
+- When the WebView has no WebGPU, the game falls back to WebGL2.
+- The game loads straight from the repo's `index.html`, so it is never duplicated in git.
+
+**Building:**
+- **Android Studio / Gradle:** open `android/` and run *Build → Build APK(s)*. Gradle copies the repo's `index.html` into the APK's assets on every build.
+- **No Android SDK:** run `pip install pyaxml cryptography`, then `python3 android/tools/build-apk.py`. It needs only a JDK and downloads the Android framework jar and `dx` from Maven Central. It then:
+  - encodes the binary manifest and writes the resources table for the icon;
+  - zip-aligns the APK;
+  - signs it with APK Signature Scheme v2 using the debug key in `android/keystore/`.
+
+  Keeping that key means new builds install over old ones. Replace it before publishing anywhere.
+
 ## VR Mode (Google Cardboard)
 
 Turn it on from **Settings → Gameplay Mode**, from **Switch to VR Mode** in the pause menu, or from the **VR** button on the story top bar. It switches instantly, with no reload and no lost progress.

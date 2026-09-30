@@ -1,0 +1,25 @@
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'com.neonveins.game'
+    compileSdk 34
+    defaultConfig {
+        applicationId 'com.neonveins.game'
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName '1.0'
+    }
+    buildTypes {
+        release { minifyEnabled false; signingConfig signingConfigs.debug }
+    }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_1_8; targetCompatibility JavaVersion.VERSION_1_8 }
+    sourceSets { main { assets.srcDirs = ["$buildDir/generated/nvassets"] } }
+}
+
+// The game itself is the repo's single-file index.html: copy it into the APK's assets on every build.
+def copyGame = tasks.register('copyGame', Copy) {
+    from("$rootDir/../index.html")
+    into("$buildDir/generated/nvassets")
+}
+preBuild.dependsOn copyGame

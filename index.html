@@ -1128,7 +1128,7 @@ NV.bootEngine = async () => {
   NV.G.canvas = canvas;
   const q = NV.Quality.get();
   let engine = null;
-  const allowGL = /allowgl/.test(location.hash); // developer/test escape hatch only
+  const allowGL = /allowgl/.test(location.hash) || !!window.NVAndroid; // developer/test escape hatch; the Android app's WebView may lack WebGPU
   let gpuOk = false;
   try { gpuOk = !!navigator.gpu && await BABYLON.WebGPUEngine.IsSupportedAsync; } catch (e) { gpuOk = false; }
   const vrMode = NV.Settings.get().vr && !!navigator.xr;
@@ -5080,15 +5080,15 @@ NV.CardboardVR = (() => {
   addEventListener('pointerdown', onDown, true); addEventListener('pointerup', onUp, true); addEventListener('pointercancel', () => { C.walk = false; clearTimeout(walkTimer); }, true);
   C.enter = async () => {
     if (C.on) return true;
-    const ok = await gyroPermission(); fullscreen(true);
-    C.on = true; NV.Settings.set('cardboard', 1); document.body.classList.add('cardboard');
+    const ok = await gyroPermission(); if (!window.NVAndroid) fullscreen(true); // the Android app is already immersive full screen
+    C.on = true; NV.Settings.set('cardboard', 1); try { window.NVAndroid && NVAndroid.setMode('cardboard'); } catch (e) { } document.body.classList.add('cardboard');
     if (!mirror) { mirror = document.createElement('div'); mirror.id = 'cbmirror'; document.body.appendChild(mirror); }
     lastHtml = ''; C.recenter();
     NV.toast('VR MODE · GOOGLE CARDBOARD', (ok ? 'Look around to aim. ' : 'Gyroscope unavailable: head tracking is off. ') + 'Tap to fire / use / advance · hold to walk · a gamepad works too.', '#19f0ff', 5);
     return true;
   };
   C.exit = () => {
-    if (!C.on) return; C.on = false; C.walk = false; NV.Settings.set('cardboard', 0); document.body.classList.remove('cardboard');
+    if (!C.on) return; C.on = false; C.walk = false; NV.Settings.set('cardboard', 0); try { window.NVAndroid && NVAndroid.setMode('normal'); } catch (e) { } document.body.classList.remove('cardboard');
     rigs.forEach((r, scene) => { if (scene.activeCamera === r.cam) scene.activeCamera = r.base; });
     if (mirror) { mirror.remove(); mirror = null; }
     try { if (document.fullscreenElement && !NV.Mobile.wantFs) document.exitFullscreen(); } catch (e) { }
@@ -5096,7 +5096,17 @@ NV.CardboardVR = (() => {
   };
   C.toggle = () => C.on ? (C.exit(), Promise.resolve(false)) : C.enter();
   // a saved Cardboard preference resumes on the first tap (permissions and fullscreen need a user gesture)
-  if (NV.Settings.get().cardboard) addEventListener('pointerdown', function once() { removeEventListener('pointerdown', once, true); C.enter(); }, true);
+  if (window.NVAndroid) { // Android app: the launcher's choice wins, and no gesture is needed for the gyroscope
+    let want = 'normal'; try { want = NVAndroid.getMode(); } catch (e) { }
+    NV.Settings.set('cardboard', want === 'cardboard' ? 1 : 0);
+    if (want === 'cardboard') { const t = setInterval(() => { if (NV.G && NV.G.active && NV.toast) { clearInterval(t); C.enter(); } }, 400); }
+    // Back button: close the top menu / pause in-game; on the title screen go back to the mode launcher
+    window.NVAndroidBack = () => {
+      const top = document.querySelector('#ui > .modal:last-of-type, #ui > .panel.bm');
+      if (top || (NV.Level.active && NV.Level.debug() && !NV.Level.debug().over)) { ['keydown', 'keyup'].forEach(t => dispatchEvent(new KeyboardEvent(t, { code: 'Escape', key: 'Escape' }))); return 'handled'; }
+      return document.querySelector('#story') ? (dispatchEvent(new KeyboardEvent('keydown', { code: 'Escape', key: 'Escape' })), dispatchEvent(new KeyboardEvent('keyup', { code: 'Escape', key: 'Escape' })), 'handled') : 'exit';
+    };
+  } else if (NV.Settings.get().cardboard) addEventListener('pointerdown', function once() { removeEventListener('pointerdown', once, true); C.enter(); }, true);
   return C;
 })();
 
