@@ -231,7 +231,7 @@ Each ending has a stat/flag gate. The game tells you what you're missing.
 | **C** | Open Sky | AI Sympathy ≥ 55 + 3 autonomy choices |
 | **D** | The Crown of Glass | Corporate Leverage ≥ 58 or Elena alliance |
 | **E** | Concord | SQ45 + SQ50 + Hope ≥ 60 + no Dominion alliance |
-| **F** | Beyond the Veins | SQ60 + Raven ≥ 55 + Voss ≥ 55 + no absolute control |
+| **F** | █████ | ... |
 
 ---
 
