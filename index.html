@@ -4724,6 +4724,9 @@ NV.UI = (() => {
       ['fov', 'Field of view', 'range', 65, 110, 5], ['invertY', 'Invert Y axis', 'bool'], ['shake', 'Screen shake', 'bool'],
       ['scan', 'Scanline filter', 'bool'], ['showStats', 'Show world-state changes', 'bool'], ['walk', 'Walkable story scenes', 'bool'], ['travel', 'Travel to missions in the city', 'bool'], ['showFps', 'Show FPS', 'bool'], ['glitch', 'Glitch effects', 'bool'], ['vr', 'VR headset mode (WebXR · WebGL2 · reloads)', 'bool'], ['gfxmenu', 'Graphics settings', 'open', () => UI.graphics()],
     ];
+    // no speech voices on this device/browser: hide every voice-acting option instead of showing ones that do nothing
+    const hasVoices = NV.Voices.supported && (NV.Voices.refreshVoices() || []).length > 0;
+    if (!hasVoices) rows = rows.filter(r => !['voice', 'voiceVol', 'narrVol', 'duck', 'voiceRate', 'narrator', 'voicecast'].includes(r[0]));
     if (only === 'audio') rows = rows.filter(r => ['master', 'music', 'sfx', 'voice', 'voiceVol', 'narrVol', 'duck', 'narrator', 'voiceRate'].includes(r[0]));
     const m = modal(`<div class="stitle">${only === 'audio' ? 'AUDIO' : 'SETTINGS'}</div><div class="rows"></div><button class="btn" style="margin-top:12px">Done</button>
       <p class="muted" style="margin-top:14px;font-size:14px;line-height:1.6">Controls — <span class="kbd">WASD</span> move · <span class="kbd">Mouse</span> look · <span class="kbd">LMB</span> fire · <span class="kbd">Shift</span> sprint · <span class="kbd">C</span> sneak · <span class="kbd">Space</span> dash · <span class="kbd">E</span> interact / takedown / hack · <span class="kbd">Q</span> EMP · <span class="kbd">Esc</span> pause.<br>Story — <span class="kbd">Space</span>/<span class="kbd">Click</span> advance · <span class="kbd">1-4</span> choose · <span class="kbd">A</span> auto · <span class="kbd">Ctrl</span> hold to skip · <span class="kbd">L</span> log. Gamepads supported.</p>`);
