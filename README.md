@@ -258,7 +258,7 @@ Each ending has a stat/flag gate. The game tells you what you're missing.
 | **C** | Open Sky | AI Sympathy ≥ 55 + 3 autonomy choices |
 | **D** | The Crown of Glass | Corporate Leverage ≥ 58 or Elena alliance |
 | **E** | Concord | SQ45 + SQ50 + Hope ≥ 60 + no Dominion alliance |
-| **F** | Beyond the Veins | SQ60 + Raven ≥ 55 + Voss ≥ 55 + no absolute control |
+| **F** | █████ | ... |
 
 ---
 
@@ -294,8 +294,8 @@ Single HTML file, currently around 1MB (grows with script rebuilds). It has been
 ## Credits
 
 - **Engine:** Babylon.js
-- **Story & script:** the NEON VEINS script
+- **Story & script:** copilot in word
 - **Music & sound:** real-time WebAudio synthesis
-- **Everything else:** procedural
+- **All code:** claude opus 5.5, deepseek v4.1 flash
 
 > *"Who is outside the model?"*
