@@ -175,6 +175,9 @@ body.cardboard #toasts{transform:scale(.5);transform-origin:right top;right:calc
 body.cardboard.mobile #hud{zoom:1}
 #cbmirror{position:fixed;left:50vw;top:0;pointer-events:none;z-index:40;overflow:hidden}#cbmirror .cbui,#cbmirror .cbt{position:absolute;inset:0}
 body.cardboard::after{content:'';position:fixed;left:50%;top:0;bottom:0;width:2px;margin-left:-1px;background:#000;z-index:41;pointer-events:none}
+#hud .qbar{position:absolute;right:24px;bottom:96px;display:flex;gap:6px;align-items:flex-end;pointer-events:auto}#hud .qbar .qs{width:46px;height:46px;border:1px solid rgba(61,255,168,.35);background:rgba(8,6,20,.7);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative}#hud .qbar .qs.on{border-color:#3dffa8;box-shadow:0 0 10px rgba(61,255,168,.4)}#hud .qbar .qs.empty{opacity:.35}#hud .qbar .qs b{color:#3dffa8;font-size:17px;font-weight:400;line-height:1}#hud .qbar .qs span{font-size:10px;color:#e8e6ff;position:absolute;right:3px;bottom:1px}#hud .qbar small{position:absolute;right:0;top:-15px;font-size:9px;letter-spacing:.12em;color:#8a84b3;white-space:nowrap}
+body.touch #hud .qbar,body.mobile #hud .qbar{right:auto;left:50%;bottom:auto;top:14px;transform:translateX(-50%) scale(1.6);transform-origin:top center}body.touch #hud .qbar small{display:none}
+.bb.cq{min-width:0;padding:4px 7px}.bb.cq.on{border-color:#3dffa8;color:#3dffa8}
 .bmmats{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:11px;letter-spacing:.1em;color:#8a84b3;text-transform:uppercase;margin:0 0 6px}.bmmats b{color:#ffd23d;margin-left:4px}.bmh{font-family:var(--fh);letter-spacing:.25em;font-size:12px;color:var(--pink);margin:14px 0 4px}
 .bmup{overflow:auto;flex:1;min-height:0;padding-right:4px}.bmup .uh{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-bottom:8px}.bmup .uh .uX{margin-left:auto}.bmup .ul{display:flex;gap:12px;padding:8px 6px;border-left:2px solid rgba(255,255,255,.12);margin:4px 0;opacity:.75}.bmup .ul.got{border-color:#3dffa8;opacity:1}.bmup .ul.nx{border-color:#ffd23d;opacity:1;background:rgba(255,210,61,.05)}.bmup .ul>b{font-family:var(--fh);width:30px;color:#ffd23d}.bmup .ul>div{flex:1;display:flex;flex-wrap:wrap;gap:8px;align-items:stretch}.bmup .ul p{margin:2px 0 6px;font-size:13px}.bmup .ubr{flex:1;min-width:180px;border:1px solid rgba(255,255,255,.12);padding:6px 8px}.bmup .ubr.on{border-color:#3dffa8;background:rgba(61,255,168,.07)}.bmup .ubr.off{opacity:.35}.bmup .or{align-self:center;font-size:11px;color:#8a84b3}.bmup small{display:block;color:#8a84b3;margin-top:10px;line-height:1.4}
 .bi{display:flex;align-items:center;gap:12px;padding:8px 4px;border-bottom:1px solid rgba(255,255,255,.07)}.bic{width:40px;height:40px;border:1px solid;display:flex;align-items:center;justify-content:center;font-size:20px;flex:0 0 40px}.bid{flex:1;font-size:14px;line-height:1.35}.bid small{display:block;color:var(--cyan);font-family:var(--fm);font-size:11px;letter-spacing:.06em;margin-top:2px}.bia .bb{min-width:130px;text-align:center;font-family:var(--fh);letter-spacing:.08em}.bb.buy{border-color:var(--amber);color:var(--amber)}.bb[disabled]{opacity:.35;cursor:default}.bb.eq{border-color:var(--cyan);color:var(--cyan)}
@@ -1374,6 +1377,19 @@ NV.Arms = (() => {
   const costOf = (w, lvl) => { const c = Object.assign({}, COST[lvl]); if (lvl === 5) { const x = EXOTIC(w); if (x) c[x] = 1; else c.mil += 3; } return c; };
   const MATS = { parts: ['Weapon Parts', 999, 25, 'Common material for Levels II–III and ammunition conversion'], mil: ['Military Components', 99, 300, 'Rare material for Levels IV–V, heavy weapons and armour-piercing ammunition'],
     quantum: ['Quantum Fragments', 30, 900, 'Exotic material for Zero-Space, prediction and ASCENSION-linked upgrades'], cipher: ['Living Cipher Threads', 20, 900, 'Consent-sensitive material for untraceable hacks and independent smart weapons'] };
+
+  /* ---- script: Tactical, Medical, Hacking and Crafting Consumables [name, carry, price ¢, function, glyph] ---- */
+  const CONS = {
+    frag: ['Fragmentation Grenade', 4, 120, 'High physical damage and stagger in a five-metre radius', '✹'], emp: ['EMP Grenade', 4, 150, 'Disables drones, shields, smart weapons and cameras for ten seconds', 'ϟ'],
+    gas: ['Identity-Jamming Gas', 3, 160, 'Breaks target locks and confuses Mirror or biometric systems', '☁'], static: ['Memory-Static Grenade', 3, 180, 'Interrupts predictive enemies and hostile simulations; may disturb unprotected civilians', '≋'],
+    coolant: ['Coolant Grenade', 3, 140, 'Freezes machinery, removes weapon heat and creates slippery terrain', '❄'], decoy: ['Quantum Decoy', 2, 220, 'Creates three plausible movement echoes; predictive enemies may attack the wrong future', '◎'],
+    inhib: ['Neural Inhibitor', 3, 170, 'Temporarily blocks hostile implant commands without damaging the host', '⊘'], solar: ['Solar Charge', 2, 300, 'High-energy anti-armour explosive; may also power emergency equipment', '☀'],
+    trauma: ['Trauma Patch', 5, 90, 'Restores 35% health over six seconds; interrupted by heavy damage', '✚'], kit: ["Noah's Analogue Kit", 2, 400, 'Restores 60% health and clears implant interference; cannot be remotely disabled', '⛑'],
+    stim: ['Combat Stimulant', 3, 200, '+20% movement and reload speed for fifteen seconds, followed by temporary accuracy loss', '⚡'], oxy: ['Oxygen Cartridge', 4, 60, 'Ninety seconds of air: protects against gas, smoke and blast fire', 'O₂'],
+    ncool: ['Neural Coolant', 4, 160, 'Clears neural heat and reduces cyberattack cost by 25% for twelve seconds', '⌬'], firewall: ['Somatic Firewall Patch', 2, 260, 'Prevents identity overwrite, forced movement and memory intrusion for twenty seconds', '▣'],
+    scrub: ['Signal Scrubber', 3, 240, 'Removes tracking, bounty marks and prediction tags from Ghost and nearby allies', '⌫'], shard: ['Exploit Shard', 6, 110, "Single-use shortcut that reduces one hack's upload time by 50%", '◆'],
+    consent: ['Consent Key', 3, 280, 'Lets a willing allied AI add an effect to a hack, drone or smart weapon (20 s)', '⚿'], telemetry: ['False Telemetry Packet', 4, 150, 'Feeds fake position data into the enemy network: hunters chase a ghost', '⌖'],
+    shell: ['Portable Pallbearer Shell', 1, 900, 'Temporary safe storage for one digital mind: the next lethal hit leaves Ghost standing', '⚱'], foam: ['Repair Foam', 4, 130, 'Repairs armour, drones and machinery; restores 30% durability', '▤'] };
   /* ---- script: Ammunition and Charges (default carry, per-round price) ---- */
   const AMMO = { light: ['Light Ballistic Ammunition', 180, 2, 'Pistols and SMGs; cheap, common, low penetration'], rifle: ['Rifle Ammunition', 120, 3, 'Assault and battle rifles; balanced armour performance'],
     shells: ['Shotgun Shells', 40, 6, 'Buckshot by default; converts to slug, foam, shock or breaching loads'], precision: ['Precision Rounds', 30, 12, 'High weak-point damage and penetration; reveals firing trace unless suppressed'],
@@ -1423,7 +1439,8 @@ NV.Arms = (() => {
   }
   const stateOf = () => { const S = NV.State.get(); if (!S) return null; if (!S.arms || !S.arms.owned) S.arms = { owned: ['courier-sidearm', 'ghost-s-monoblade'], bar: ['courier-sidearm', 'ghost-s-monoblade', null, null, null, null, null, null, null], sel: 0 };
     const A = S.arms; if (!A.up) A.up = {}; if (!A.load) A.load = {}; if (!A.mats) A.mats = { parts: 20, mil: 0, quantum: 0, cipher: 0 };
-    if (!A.ammo) { A.ammo = {}; Object.keys(AMMO).forEach(k => A.ammo[k] = AMMO[k][1]); } return A; };
+    if (!A.ammo) { A.ammo = {}; Object.keys(AMMO).forEach(k => A.ammo[k] = AMMO[k][1]); }
+    if (!A.cons) { A.cons = { frag: 2, emp: 1, trauma: 2 }; A.quick = ['frag', 'emp', 'trauma', null]; A.qsel = 0; } return A; };
   const upOf = id => { const A = stateOf(); return A && A.up && A.up[id] || { l: 1 }; };
   const loadOf = id => { const A = stateOf(); return A && A.load && A.load[id] || 'std'; };
   // the weapon as it actually fires: base stats + upgrade tree + converted ammunition load
@@ -1440,7 +1457,7 @@ NV.Arms = (() => {
     A.up[id] = Object.assign({}, u, { l: nl }, nl === 3 ? { a: branch } : nl === 5 ? { b: branch } : {}); NV.State.save(); return true;
   }
   const famOf = w => FAM[w.cat];
-  return { CATS: CATS.map(c => ({ cat: c[0], name: c[1] })), ALL, BY, glyph, kindName, state: stateOf, TREE, FAM, AMMO, MATS, LOADS, ammoOf, loadsFor, eff, upgrade, costOf, canPay, famOf, upOf, loadOf };
+  return { CATS: CATS.map(c => ({ cat: c[0], name: c[1] })), ALL, BY, glyph, kindName, state: stateOf, CONS, TREE, FAM, AMMO, MATS, LOADS, ammoOf, loadsFor, eff, upgrade, costOf, canPay, famOf, upOf, loadOf };
 })();
 NV.TILE = 4;
 /* districts of New Avalon: [id, name, window colour A, window colour B, height mult, plaza rate, style] */
@@ -2636,6 +2653,7 @@ NV.Level = (() => {
   function loot(e, takedown) {
     const AR = ARMS(), A = AR.state(); if (!A) return; const M = A.mats;
     M.parts = Math.min(999, (M.parts || 0) + (takedown ? 1 : 2)); if (e.drone && Math.random() < .3) M.mil = Math.min(99, (M.mil || 0) + 1);
+    if (Math.random() < (takedown ? .12 : .08)) { const pool = ['frag', 'trauma', 'emp', 'shard', 'oxy', 'stim'], id = pool[Math.floor(Math.random() * pool.length)]; if ((A.cons[id] || 0) < AR.CONS[id][1]) { A.cons[id] = (A.cons[id] || 0) + 1; NV.toast('PICKED UP', AR.CONS[id][0], '#3dffa8', 1.2); } }
     const w = L.arms.cur, f = w && AR.ammoOf(w); if (f && f !== 'drone') A.ammo[f] = Math.min(AR.AMMO[f][1], (A.ammo[f] || 0) + Math.max(f === 'cells' ? .5 : 1, Math.round(AR.AMMO[f][1] * .08)));
   }
   function onKill(w, e, takedown) {
@@ -2649,16 +2667,16 @@ NV.Level = (() => {
   }
   // Network Safety: hostile drones within 20 m try to hijack networked weapons (0–24 easily controlled, 25–49 vulnerable)
   function hijack(w) {
-    if (w.ns == null || w.ns >= 50) return 0;
+    if (w.ns == null || w.ns >= 50 || L.arms.buff.clean > 0) return 0; // Noah's kit clears interference
     const p = L.p; if (!L.enemies.some(e => e.drone && e.state !== 'down' && !(e.stun > 0) && Math.hypot(e.x - p.x, e.z - p.z) < 20)) return 0;
     if (!L.hjHint) { L.hjHint = 1; NV.toast('WEAPON HIJACK', w.name + ' has low Network Safety: nearby drones are scrambling its optics. EMP them or switch to analogue gear.', '#ff5a3d', 4); }
     return w.ns < 25 ? 2 : 1;
   }
   function shotRay(w, echo) {
-    const o = aimO(); let d = camDir(); const hj = hijack(w), sp = (w.spread || 0) * (hj > 1 ? 2.2 : hj ? 1.5 : 1);
+    const o = aimO(); let d = camDir(); const hj = hijack(w), sp = ((w.spread || 0) + (L.arms.buff.shaky > 0 ? .02 : 0)) * (hj > 1 ? 2.2 : hj ? 1.5 : 1);
     if (sp) d = d.add(V3((Math.random() - .5) * 2 * sp, (Math.random() - .5) * 2 * sp, (Math.random() - .5) * 2 * sp)).normalize();
     const assist = (NV.In.usingPad() || (NV.Touch && NV.Touch.active)) ? .09 : 0; // gentle aim assist for sticks and touch
-    const hom = hj < 2 ? w.homing || 0 : 0; // fully hijacked smart optics lose their lock
+    const hom = hj < 2 ? (w.homing || 0) + (w.homing && L.arms.buff.consent > 0 ? .15 : 0) : 0; // fully hijacked smart optics lose their lock
     if (hom || assist) { const e = aimTarget(Math.max(hom, assist), w.range); if (e) d = V3(e.x, e.drone ? e.m.root.position.y : 1.3, e.z).subtract(o).normalize(); }
     let tWall = w.range; for (let t = .3; t < w.range; t += .25) { const q = o.add(d.scale(t)); if (q.y < 0 || q.y > (L.map.city ? 200 : WALLH) || solid(q.x, q.z)) { tWall = t; break; } }
     L.crates.forEach(c => { const tt = rayBox(o, d, c); if (tt > 0 && tt < tWall) tWall = tt; });
@@ -2745,12 +2763,13 @@ NV.Level = (() => {
   function boom(x, z, w, fxOver, rOver, dmgOver) {
     const fx = fxOver || w.fx || 'frag', r = rOver || w.radius || 5, dmg = (dmgOver != null ? dmgOver : w.dmg || 100) * dmgMulOf();
     boomFx(x, z, r, fx); if (netOn()) NV.Net.send({ t: 'fx', x: +x.toFixed(1), z: +z.toFixed(1), r, fx, lvl: L.netKey });
+    if (fx === 'decoy' && w.echoes) { [[6, 3], [-5, 6], [2, -7]].forEach(([ox, oz], k) => setTimeout(() => { if (L && !L.over) boom(x + ox, z + oz, { fx: 'decoy', col: w.col }); }, 350 * (k + 1))); }
     if (fx === 'decoy') { noise(x, z, 40); L.enemies.forEach(e => { if (e.state !== 'down' && e.state !== 'alert' && Math.hypot(e.x - x, e.z - z) < 40) { e.state = 'search'; e.lx = x; e.lz = z; e.path = pathTo(e.x, e.z, x, z); e.searchT = 8; } }); return; }
     if (fx === 'shieldbuff') { L.arms.buff.shield = 15; NV.toast('ARMOUR', 'Incoming damage cut for 15 seconds.', '#19f0ff', 2); return; }
     noise(x, z, fx === 'sleep' || fx === 'freeze' ? 8 : 25);
     L.enemies.forEach(e => {
       if (e.state === 'down') return; const dx = e.x - x, dz = e.z - z, d = Math.hypot(dx, dz); if (d > r) return; const k = 1 - d / r * .6, ux = dx / (d || 1), uz = dz / (d || 1);
-      if (fx === 'emp' || fx === 'shock') { e.stun = Math.max(e.stun, 5); weaponHit(e, (e.drone ? 80 : fx === 'shock' ? 40 : 10) * k, { emp: true }, false, null); }
+      if (fx === 'emp' || fx === 'shock') { e.stun = Math.max(e.stun, w.stunT || 5); weaponHit(e, (e.drone ? 80 : fx === 'shock' ? 40 : 10) * k, { emp: true }, false, null); }
       else if (fx === 'sleep') disable(e, true, { x: ux, y: .6, z: uz });
       else if (fx === 'freeze') e.stun = Math.max(e.stun, 7);
       else if (fx === 'glitch') { e.state = 'patrol'; e.susp = 0; e.stun = Math.max(e.stun, 3); }
@@ -2806,7 +2825,7 @@ NV.Level = (() => {
         case 'chain': L.enemies.filter(o => o.state !== 'down' && Math.hypot(o.x - e.x, o.z - e.z) < 15).slice(0, 5).forEach(o => { o.stun = Math.max(o.stun, 6); tracer(V3(e.x, 1.4, e.z), V3(o.x, 1.4, o.z)); }); break;
         default: e.stun = Math.max(e.stun, 8);
       }
-      if (w.shared) e.stun = Math.max(e.stun, 3);
+      if (w.shared || L.arms.buff.consent > 0) e.stun = Math.max(e.stun, 3);
       spark(V3(e.x, 1.6, e.z), w.col[1], 16);
     });
     return true;
@@ -2877,13 +2896,56 @@ NV.Level = (() => {
     else if (w.type === 'strike') strike(w);
     else if (w.type === 'hack') ok = hack(w);
     else if (w.type === 'drone') deploy(w);
-    if (ok) { if (w.charges > 1 && !L.arms.ch[w.id]) { L.arms.ch[w.id] = 1; L.arms.cool[w.id] = now + .35; } else { L.arms.ch[w.id] = 0; L.arms.cool[w.id] = now + (w.cool || 3); } L.gun.kick = .6; }
+    if (ok) { if (w.charges > 1 && !L.arms.ch[w.id]) { L.arms.ch[w.id] = 1; L.arms.cool[w.id] = now + .35; } else { L.arms.ch[w.id] = 0; let cl = (w.cool || 3) * (w.type === 'hack' && L.arms.buff.ncool > 0 ? .75 : 1); if (w.type === 'hack' && L.arms.exploit > 0) { L.arms.exploit--; cl *= .5; } L.arms.cool[w.id] = now + cl; } L.gun.kick = .6; }
   }
   function ammoTxt(w) {
     const AR = ARMS(), st = AR.state(), f = AR.ammoOf(w); if (!st || !f) return '';
     const res = st.ammo[f] || 0, ex = (w.load === 'null' || w.load === 'quantum') ? ' +' + (st.ammo[w.load] || 0) + ' ' + w.load.toUpperCase() : w.load && w.load !== 'std' ? ' ' + w.load.toUpperCase() : '';
     if (w.type === 'gun' && !w.beam && w.mag) { const inMag = Math.min(res, Math.max(0, Math.round((100 - L.p.heat) / (100 / w.mag)))); return ' · ' + (L.p.over > 0 ? 'RELOADING' : inMag + '/' + w.mag) + ' | ' + Math.floor(res) + ex; }
     return ' · ' + (f === 'cells' ? res.toFixed(1) : Math.floor(res)) + ' ' + AR.AMMO[f][0].split(' ').pop().toUpperCase() + ex;
+  }
+
+  /* ---------------- tactical consumables: four quick slots (G use · X next · d-pad down/up · tap the HUD slot) ---------------- */
+  const CTHROW = { frag: { fx: 'frag', radius: 5, dmg: 150 }, emp: { fx: 'emp', radius: 6, dmg: 0, stunT: 10 }, gas: { fx: 'glitch', radius: 6, dmg: 0 }, static: { fx: 'freeze', radius: 5, dmg: 0 },
+    coolant: { fx: 'freeze', radius: 5, dmg: 0 }, decoy: { fx: 'decoy', radius: 4, dmg: 0, echoes: 3 }, solar: { fx: 'frag', radius: 5.5, dmg: 260, pen: 100 } };
+  function useCons(slot) {
+    const AR = ARMS(), st = AR.state(); if (!st || L.drive || L.pRag || L.calm || L.cine) return;
+    const id = st.quick[slot == null ? st.qsel : slot], C = id && AR.CONS[id]; if (!C) { NV.Audio.sfx('hackfail'); return; }
+    if (!(st.cons[id] > 0)) { NV.Audio.sfx('hackfail'); NV.toast('NONE LEFT', C[0] + ' — buy more at the Black Market.', '#ff5a3d', 1.8); return; }
+    const p = L.p, B = L.arms.buff, T = CTHROW[id];
+    if (T) { launch(Object.assign({ id: 'c_' + id, name: C[0], type: 'throw', model: 'grenade', col: ['#1a1a22', id === 'emp' ? '#19f0ff' : id === 'solar' ? '#ffd23d' : '#ff7a2b'] }, T)); if (id === 'coolant') { p.heat = 0; p.over = 0; } }
+    else switch (id) {
+      case 'inhib': { const e = aimTarget(.35, 30) || L.enemies.filter(e => e.state !== 'down' && !e.drone && Math.hypot(e.x - p.x, e.z - p.z) < 8)[0]; if (!e) { NV.toast('NO TARGET', 'Aim at an augmented enemy.', '#8a84b3', 1.2); NV.Audio.sfx('hackfail'); return; }
+        e.stun = Math.max(e.stun, 8); e.state = 'patrol'; e.susp = 0; tracer(L.gun.node.getAbsolutePosition(), V3(e.x, 1.6, e.z)); spark(V3(e.x, 1.7, e.z), '#b48cff', 16); NV.Audio.sfx('hackok'); break; }
+      case 'trauma': B.trauma = 6; break;
+      case 'kit': p.hp = Math.min(p.max, p.hp + p.max * .6); B.trauma = 0; B.shaky = 0; B.clean = 20; break;
+      case 'stim': B.stim = 15; break;
+      case 'oxy': B.oxy = 90; break;
+      case 'ncool': B.ncool = 12; p.en = 100; Object.keys(L.arms.cool).forEach(k => { const w = AR.BY[k]; if (w && w.type === 'hack') L.arms.cool[k] = 0; }); break;
+      case 'firewall': B.fw = 20; break;
+      case 'scrub': L.enemies.forEach(e => { if (e.state === 'alert' || e.state === 'search') { e.state = 'search'; const a = Math.random() * 6.28; e.lx = p.x + Math.cos(a) * 30; e.lz = p.z + Math.sin(a) * 30; e.path = pathTo(e.x, e.z, e.lx, e.lz); e.searchT = 4; e.susp = .4; } }); L.alarmT = 0; L.anyAlert = false; break;
+      case 'shard': L.arms.exploit = (L.arms.exploit || 0) + 1; if (L.hack) { const h = L.hack; h.hits += Math.ceil((h.t.need - h.hits) / 2); L.arms.exploit--; if (h.hits >= h.t.need) hackDone(h.t); } break;
+      case 'consent': B.consent = 20; break;
+      case 'telemetry': { const a = p.yaw + Math.PI, fx = p.x + Math.sin(a) * 25, fz = p.z + Math.cos(a) * 25; L.enemies.forEach(e => { if (e.state !== 'down' && e.state !== 'patrol' && Math.hypot(e.x - p.x, e.z - p.z) < 50) { e.state = 'search'; e.lx = fx; e.lz = fz; e.path = pathTo(e.x, e.z, fx, fz); e.searchT = 8; e.lostT = 9; } }); break; }
+      case 'shell': B.shell = 1; break;
+      case 'foam': p.hp = Math.min(p.max, p.hp + p.max * .15); B.shield = Math.max(B.shield, 10); L.arms.drones.forEach(d => { if (d.life) d.life *= 1.5; }); break;
+    }
+    st.cons[id]--; NV.State.save(); NV.Audio.sfx(T ? 'dash' : 'pickup'); if (!T) NV.toast(C[0].toUpperCase(), C[3], '#3dffa8', 2.2);
+    L.arms.qsig = '';
+  }
+  function consTick(dt) {
+    const B = L.arms.buff, p = L.p;
+    if (B.trauma > 0) { B.trauma -= dt; p.hp = Math.min(p.max, p.hp + p.max * .35 / 6 * dt); }
+    if (B.stim > 0) { B.stim -= dt; if (B.stim <= 0) { B.shaky = 8; NV.toast('STIM CRASH', 'Hands shaking: accuracy reduced for 8 seconds.', '#ff5a3d', 2); } }
+    ['shaky', 'oxy', 'ncool', 'fw', 'consent', 'clean'].forEach(k => { if (B[k] > 0) B[k] = Math.max(0, B[k] - dt); });
+    const I = NV.In, st = ARMS().state(); if (!st) return;
+    if (!L.drive && (I.hit('KeyG') || I.padHit(13))) useCons();
+    if (I.hit('KeyX') || I.padHit(12)) { for (let k = 1; k <= 4; k++) { const i = (st.qsel + k) % 4; if (st.quick[i]) { st.qsel = i; NV.Audio.sfx('ui'); break; } } }
+    // HUD quick bar
+    const sig = st.quick.join(',') + st.qsel + st.quick.map(id => id ? st.cons[id] || 0 : '').join(',');
+    if (sig !== L.arms.qsig) { L.arms.qsig = sig; let q = document.querySelector('#hud .qbar'); const hud = document.getElementById('hud');
+      if (!q && hud) { q = document.createElement('div'); q.className = 'qbar'; hud.appendChild(q); q.addEventListener('pointerdown', e => { const b = e.target.closest('.qs'); if (!b) return; e.stopPropagation(); e.preventDefault(); const i = +b.dataset.i; if (NV.Touch.active || e.pointerType !== 'mouse') useCons(i); else { st.qsel = i; L.arms.qsig = ''; } }); }
+      if (q) q.innerHTML = st.quick.map((id, i) => { const C = id && ARMS().CONS[id]; return `<div class="qs${i === st.qsel ? ' on' : ''}${C && !st.cons[id] ? ' empty' : ''}" data-i="${i}"><b>${C ? C[4] : '·'}</b><span>${C ? st.cons[id] || 0 : ''}</span></div>`; }).join('') + '<small>G USE · X NEXT</small>'; }
   }
   function updateArms(dt) {
     const A = L.arms, I = NV.In; if (!A) return;
@@ -2898,10 +2960,10 @@ NV.Level = (() => {
       if (m.node.holo) m.node.holo.rotation.y += dt * 3;
     }
     A.buff.shield = Math.max(0, A.buff.shield - dt); A.buff.cloak = Math.max(0, A.buff.cloak - dt); A.reveal = Math.max(0, A.reveal - dt);
-    updateProj(dt); updateStrikes(dt); updateDrones(dt);
+    updateProj(dt); updateStrikes(dt); updateDrones(dt); consTick(dt);
     // cooldown shading on the hotbar
     const bar = document.querySelector('#hud .hotbar'); if (bar) { const st = ARMS().state(); [...bar.children].forEach((el, i) => { const id = st.bar[i], x = id && ARMS().BY[id], c = x && A.cool[x.id] > L.time ? (A.cool[x.id] - L.time) / (x.cool || 3) : 0; el.lastChild.style.height = (c * 100).toFixed(0) + '%'; }); }
-    const bf = []; if (A.buff.shield > 0 || A.droneShield) bf.push('ARMOUR'); if (A.buff.cloak > 0) bf.push('CLOAKED'); if (A.jam) bf.push('SENSORS JAMMED'); if (A.reveal > 0) bf.push('HOSTILES MARKED'); if (A.drones.length) bf.push(A.drones.length + ' DRONE' + (A.drones.length > 1 ? 'S' : ''));
+    const bf = []; if (A.buff.shield > 0 || A.droneShield) bf.push('ARMOUR'); if (A.buff.trauma > 0) bf.push('HEALING'); if (A.buff.stim > 0) bf.push('STIM'); if (A.buff.shaky > 0) bf.push('SHAKY'); if (A.buff.oxy > 0) bf.push('O₂ ' + Math.ceil(A.buff.oxy)); if (A.buff.fw > 0) bf.push('FIREWALL'); if (A.buff.consent > 0) bf.push('CONSENT KEY'); if (A.buff.shell) bf.push('PALLBEARER'); if (A.buff.cloak > 0) bf.push('CLOAKED'); if (A.jam) bf.push('SENSORS JAMMED'); if (A.reveal > 0) bf.push('HOSTILES MARKED'); if (A.drones.length) bf.push(A.drones.length + ' DRONE' + (A.drones.length > 1 ? 'S' : ''));
     const S = NV.State.get(); hset('#hud .hbinfo', 'text', (S ? (S.credits || 0) + ' ¢' : '') + (bf.length ? '  ·  ' + bf.join(' · ') : '') + (w ? '  ·  ' + w.name.toUpperCase() + (w.lvl > 1 ? ' ' + ['', 'I', 'II', 'III', 'IV', 'V'][w.lvl] : '') + ' [' + ARMS().kindName(w) + ']' + ammoTxt(w) + (w.zoom ? ' · RMB ZOOM' : '') : ''));
   }
   function rayBox(o, d, c) {
@@ -2992,15 +3054,18 @@ NV.Level = (() => {
     if (L.over || L.p.inv > 0) return;
     if (L.arms && (L.arms.buff.shield > 0 || L.arms.droneShield)) d *= .4;
     if (L.arms && L.arms.coverT > L.time) d *= .5; // Walking Cover
+    if (L.arms && L.arms.buff.trauma > 0 && d * NV.DIFF[L.diff].dmg > 15) { L.arms.buff.trauma = 0; NV.toast('PATCH TORN', 'Heavy damage interrupted the Trauma Patch.', '#ff5a3d', 1.5); }
     const dm = d * NV.DIFF[L.diff].dmg * (L.tactic.armor || 1);
     L.p.hp -= dm; L.p.regenT = 4; if (dm > 12) NV.glitch(140); NV.In.rumble(.9, .6, 180); L.stats.dmg += dm; NV.Audio.sfx('hurt'); shake(.35);
     const el = document.querySelector('#hud .dmg'); if (el) { el.style.opacity = U.clamp(dm / 30, .35, 1); clearTimeout(el._t); el._t = setTimeout(() => el.style.opacity = 0, 180); }
+    if (L.p.hp <= 0 && L.arms && L.arms.buff.shell) { L.arms.buff.shell = 0; L.p.hp = L.p.max * .3; L.p.inv = 1.5; NV.glitch(400); NV.toast('PALLBEARER SHELL', 'Your mind was held safe for a heartbeat. Get out of there.', '#b48cff', 3); }
     if (L.p.hp <= 0) { L.p.hp = 0; if (L.free) freeRespawn(); else if (netOn()) mpRespawn(); else finish(false); }
   }
 
   /* ---------------- hacking mini-game ---------------- */
   function startHack(t) {
     L.hack = { t, a: Math.random() * 6.28, zone: Math.random() * 6.28, width: .75, hits: 0, speed: 3.4 + L.act * .25, cool: 0 };
+    if (L.arms && L.arms.exploit > 0) { L.arms.exploit--; L.hack.hits = Math.floor(t.need / 2); NV.toast('EXPLOIT SHARD', 'Upload halved.', '#19f0ff', 1.2); }
     const el = document.getElementById('hack'); el.classList.remove('hidden'); NV.Audio.sfx('hack');
   }
   function hackInput() {
@@ -3104,7 +3169,7 @@ NV.Level = (() => {
     p.crouch = crouch;
     const ml = Math.hypot(mx, mz); if (ml > 1) { mx /= ml; mz /= ml; }
     const sprint = (I.key('ShiftLeft') || I.padBtn(4) || NV.Touch.run) && !crouch && mz > 0;
-    let spd = (crouch ? 2.6 : sprint ? 8.2 : 5.4) * (L.tags.includes('driver') ? 1.12 : 1) * ((L.arms && L.arms.cur && L.arms.cur.slow) || 1) * (L.arms && L.arms.duelT > L.time ? 1.15 : 1);
+    let spd = (crouch ? 2.6 : sprint ? 8.2 : 5.4) * (L.tags.includes('driver') ? 1.12 : 1) * ((L.arms && L.arms.cur && L.arms.cur.slow) || 1) * (L.arms && L.arms.duelT > L.time ? 1.15 : 1) * (L.arms && L.arms.buff.stim > 0 ? 1.2 : 1);
     const sy = Math.sin(p.yaw), cy = Math.cos(p.yaw);
     let vx = (mx * cy + mz * sy) * spd, vz = (-mx * sy + mz * cy) * spd;
     p.sprint = sprint; const pk = L.map.hmap ? parkour(dt, mx, mz, sprint, crouch) : 0;
@@ -3118,7 +3183,7 @@ NV.Level = (() => {
     p.moving = ml > 0; if (p.moving) { p.bob += dt * spd * 1.6; p.stepT -= dt * spd; if (p.stepT <= 0) { p.stepT = 2.6; NV.Audio.sfx('step'); if (sprint) noise(p.x, p.z, 7); } }
     p.dashCd -= dt; p.inv -= dt; p.cd -= dt;
     p.en = Math.min(100, p.en + dt * (12 + L.implant) * L.enMul);
-    if (p.over > 0) { p.over -= dt; if (p.over <= 0) p.heat = 0; } else p.heat = Math.max(0, p.heat - dt * (p.cd < -.25 ? 55 : 10));
+    if (p.over > 0) { p.over -= dt * (L.arms && L.arms.buff.stim > 0 ? 1.2 : 1); if (p.over <= 0) p.heat = 0; } else p.heat = Math.max(0, p.heat - dt * (p.cd < -.25 ? 55 : 10));
     p.regenT -= dt; if (L.tags.includes('medic') && p.regenT <= 0) p.hp = Math.min(p.max, p.hp + dt * 2.5);
     if (L.drive) updateDrive(dt);
     if (netOn() && I.hit('Enter') && !hacking) chatOpen();
@@ -3550,6 +3615,8 @@ NV.Level = (() => {
   }
   /* the player gets hit (or thrown from a crashing car): Ghost's body ragdolls, the camera watches, then Ghost gets up */
   function launchPlayer(vx, vy, vz, dmg, car) {
+    if (L.arms && L.arms.buff.fw > 0 && car) { hurtPlayer((dmg || 0) * .5); return; } // Somatic Firewall: no forced movement
+    if (L.arms && L.arms.buff.oxy > 0 && car) dmg = (dmg || 0) * .5; // O2 cartridge: blast fire and smoke hurt less
     const p = L.p, G = cineGhost();
     G.x = p.x; G.z = p.z; G.root.rotation.set(0, p.yaw, 0); G.root.setEnabled(true);
     ragdoll(G, G.root, G.root.rig, vx, vy, vz, false);
@@ -5524,6 +5591,11 @@ NV.UI = (() => {
     }
     const openStd = () => st.bar.some(id => id && A.eff(A.BY[id]).openStd);
     const refillCost = k => { const a = A.AMMO[k], miss = Math.max(0, a[1] - (st.ammo[k] || 0)); return Math.ceil(miss * a[2] * ((k === 'rockets' || k === 'missiles') && openStd() ? .7 : 1)); };
+    function consPage() {
+      return `<p class="muted">Ghost carries four quick consumables: bind them to slots Q1–Q4. In the field: <b>G</b> use · <b>X</b> next slot · d-pad ↓ / ↑ · tap a slot on touch.</p>` + Object.entries(A.CONS).map(([k, c]) => { const n = st.cons[k] || 0;
+        return `<div class="bi"><div class="bic" style="border-color:#3dffa8"><i style="color:#3dffa8;font-style:normal">${c[4]}</i></div><div class="bid"><b>${c[0]}</b><span class="muted"> — ${U.esc(c[3])}</span><small>CARRY ${n} / ${c[1]}</small></div>
+          <div class="bia">${[0, 1, 2, 3].map(i => `<button class="bb cq${st.quick[i] === k ? ' on' : ''}" data-k="${k}" data-q="${i}">Q${i + 1}</button>`).join('')}<button class="bb cb" data-k="${k}"${n >= c[1] || (S.credits || 0) < c[2] ? ' disabled' : ''}>BUY ${c[2]} ¢</button></div></div>`; }).join('');
+    }
     function ammoPage() {
       const cw = st.bar[slot] && A.BY[st.bar[slot]], cwE = cw && A.eff(cw), loads = cw ? A.loadsFor(cw) : [], cur = cw && A.loadOf(cw.id);
       const ammo = Object.entries(A.AMMO).map(([k, a]) => { const n = st.ammo[k] || 0, rc = refillCost(k);
@@ -5541,9 +5613,10 @@ NV.UI = (() => {
       $('.bmcr').textContent = (S.credits || 0) + ' ¢';
       $('.bmslots').innerHTML = st.bar.map((id, i) => { const w = id && A.BY[id]; return `<button class="bs${i === slot ? ' on' : ''}" data-s="${i}"><b>${i + 1}</b>${w ? `<i style="color:${w.col[1]}">${A.glyph[w.type]}</i> ${U.esc(w.name)}` : '<span class="muted">empty</span>'}</button>`; }).join('');
       $('.bmmats').innerHTML = Object.entries(A.MATS).map(([k, m]) => `<span title="${U.esc(m[3])}">${m[0]} <b>${st.mats[k] || 0}</b></span>`).join('');
-      $('.bmtabs').innerHTML = `<button class="bt${cat === 'ammo' ? ' on' : ''}" data-c="ammo">Ammo &amp; Workbench</button>` + A.CATS.map(c => `<button class="bt${c.cat === cat ? ' on' : ''}" data-c="${c.cat}">${c.name}</button>`).join('');
+      $('.bmtabs').innerHTML = `<button class="bt${cat === 'ammo' ? ' on' : ''}" data-c="ammo">Ammo &amp; Workbench</button><button class="bt${cat === 'cons' ? ' on' : ''}" data-c="cons">Consumables</button>` + A.CATS.map(c => `<button class="bt${c.cat === cat ? ' on' : ''}" data-c="${c.cat}">${c.name}</button>`).join('');
       drawUp();
       if (cat === 'ammo') { $('.bmlist').innerHTML = ammoPage(); return; }
+      if (cat === 'cons') { $('.bmlist').innerHTML = consPage(); return; }
       $('.bmlist').innerHTML = A.ALL.filter(w => w.cat === cat).map(w => { const own = st.owned.includes(w.id), inbar = st.bar.indexOf(w.id), u = A.upOf(w.id);
         return `<div class="bi"><div class="bic" style="border-color:${w.col[1]}"><i style="color:${w.col[1]}">${A.glyph[w.type]}</i></div><div class="bid"><b>${U.esc(w.name)}</b>${w.desc ? `<span class="muted"> — ${U.esc(w.desc)}</span>` : ''}<small>${stats(w)}</small></div>
           <div class="bia">${own && A.famOf(w) ? `<button class="bb upg" data-id="${w.id}">LV ${ROM[u.l]}${u.l < 5 ? ' ▲' : ' ★'}</button>` : ''}${own ? `<button class="bb eq" data-id="${w.id}">${inbar >= 0 ? 'IN SLOT ' + (inbar + 1) : 'EQUIP → ' + (slot + 1)}</button>` : `<button class="bb buy" data-id="${w.id}"${(S.credits || 0) < w.price ? ' disabled' : ''}>BUY ${w.price} ¢</button>`}</div></div>`; }).join('');
@@ -5557,6 +5630,8 @@ NV.UI = (() => {
       else if (b.classList.contains('upg')) { upId = b.dataset.id; NV.Audio.sfx('ui'); }
       else if (b.classList.contains('uX')) { upId = null; NV.Audio.sfx('ui'); }
       else if (b.classList.contains('uB')) { if (A.upgrade(upId, b.dataset.b || null)) { NV.Audio.sfx('pickup'); NV.glitch && NV.glitch(160); } else NV.Audio.sfx('hackfail'); }
+      else if (b.classList.contains('cb')) { const k = b.dataset.k, c = A.CONS[k]; if ((S.credits || 0) >= c[2] && (st.cons[k] || 0) < c[1]) { S.credits -= c[2]; st.cons[k] = (st.cons[k] || 0) + 1; if (!st.quick.includes(k)) { const e = st.quick.indexOf(null); if (e >= 0) st.quick[e] = k; } NV.Audio.sfx('pickup'); NV.State.save(); } }
+      else if (b.classList.contains('cq')) { const k = b.dataset.k, i = +b.dataset.q, old = st.quick.indexOf(k); if (st.quick[i] === k) st.quick[i] = null; else { if (old >= 0) st.quick[old] = st.quick[i]; st.quick[i] = k; } NV.Audio.sfx('select'); NV.State.save(); }
       else if (b.classList.contains('am')) { const k = b.dataset.k, c = refillCost(k); if (c && (S.credits || 0) >= c) { S.credits -= c; st.ammo[k] = A.AMMO[k][1]; NV.Audio.sfx('pickup'); NV.State.save(); } }
       else if (b.classList.contains('mt')) { const k = b.dataset.k, m = A.MATS[k]; if ((S.credits || 0) >= m[2] && (st.mats[k] || 0) < m[1]) { S.credits -= m[2]; st.mats[k] = (st.mats[k] || 0) + 1; NV.Audio.sfx('pickup'); NV.State.save(); } }
       else if (b.classList.contains('ld')) { const cw = A.BY[st.bar[slot]], l = b.dataset.l, fee = ['slug', 'foam', 'shock', 'breach'].includes(l) && !(l === 'foam' && A.eff(cw).knock) ? 4 : 0; if (cw && (st.mats.parts || 0) >= fee) { st.mats.parts -= fee; st.load[cw.id] = l; NV.Audio.sfx('select'); NV.State.save(); } }

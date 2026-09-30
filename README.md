@@ -127,6 +127,18 @@ Every owned weapon has the script's five-level tree. Open it from the **LV** but
   - Completed operations pay Parts and Military Components.
   - Materials can also be bought.
 
+### Tactical consumables
+
+All 20 of the script's tactical, medical, hacking and crafting consumables are in, with its carry limits.
+- **Quick slots:** Ghost carries four. Use **G** or d-pad ↓ to use the selected one, **X** or d-pad ↑ to pick the next slot, or tap a slot on touch screens.
+- **Getting them:** buy them and bind them to Q1–Q4 in the Black Market's *Consumables* tab. Enemies sometimes drop common ones, and you start with 2 frags, 1 EMP and 2 Trauma Patches.
+- **What they do:**
+  - **Throwables:** Frag, EMP (10 s shutdown), Identity-Jamming Gas (breaks locks), Memory-Static, Coolant (also clears your weapon heat), Quantum Decoy (three echoes) and Solar Charge (anti-armour).
+  - **Healing:** Trauma Patch heals 35% over 6 s, but heavy damage tears it. Noah's Kit heals 60% and blocks weapon hijacking for 20 s. Repair Foam restores armour, HP and drone life.
+  - **Stimulant:** +20% move and reload speed, then 8 s of shaky aim.
+  - **Protection:** Oxygen halves blast and fire damage for 90 s. Somatic Firewall stops forced launches for 20 s. The Pallbearer Shell survives one lethal hit.
+  - **Hacking and stealth:** Neural Inhibitor pacifies one target. Neural Coolant resets hack cooldowns and cuts them 25%. Exploit Shard halves the next upload. Consent Key adds a stun to hacks and extra lock to smart guns. Signal Scrubber drops every hunter's track. False Telemetry sends hunters to a fake position.
+
 ## Parkour
 
 City-only moves, built on the climbing system:
