@@ -169,6 +169,7 @@ body.cine #story{bottom:11vh;inset:0 0 11vh 0;z-index:5}
 .bmslots{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin-bottom:8px}.bs,.bt,.bb{background:rgba(5,3,12,.8);border:1px solid rgba(255,255,255,.18);color:var(--ink);font:12px var(--fb,sans-serif);padding:6px;cursor:pointer;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bs b{color:var(--amber);margin-right:4px}.bs i,.bic i{font-style:normal}.bs.on,.bt.on{border-color:var(--amber);color:var(--amber)}
 .bmtabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}.bt{font-family:var(--fh);letter-spacing:.08em;text-transform:uppercase;font-size:11px}.bmlist{overflow-y:auto;flex:1;min-height:200px;padding-right:6px}
 .bi{display:flex;align-items:center;gap:12px;padding:8px 4px;border-bottom:1px solid rgba(255,255,255,.07)}.bic{width:40px;height:40px;border:1px solid;display:flex;align-items:center;justify-content:center;font-size:20px;flex:0 0 40px}.bid{flex:1;font-size:14px;line-height:1.35}.bid small{display:block;color:var(--cyan);font-family:var(--fm);font-size:11px;letter-spacing:.06em;margin-top:2px}.bia .bb{min-width:130px;text-align:center;font-family:var(--fh);letter-spacing:.08em}.bb.buy{border-color:var(--amber);color:var(--amber)}.bb[disabled]{opacity:.35;cursor:default}.bb.eq{border-color:var(--cyan);color:var(--cyan)}
+.wst{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px 10px;margin:4px 0 3px;font-style:normal}.wst em{font-style:normal;font-size:10px;letter-spacing:.08em;color:#8a84b3;display:flex;align-items:center;gap:4px}.wst em b{color:#e8e6ff;min-width:22px}.wst u{flex:1;height:3px;background:rgba(255,255,255,.1);text-decoration:none;display:block}.wst u i{display:block;height:100%}
 #hud .speedo{position:absolute;right:20px;bottom:24px;font-family:var(--fm);font-size:44px;color:var(--cyan);text-shadow:0 0 12px var(--cyan);text-align:right;line-height:1}
 #hud .speedo small{display:block;font-size:12px;letter-spacing:.3em;color:var(--ink)}
 #hud .timer{position:absolute;right:20px;top:210px;font-family:var(--fm);font-size:22px;color:var(--amber);width:180px;text-align:center}
@@ -1163,7 +1164,7 @@ NV.Arms = (() => {
     ['shotgun', 'Shotguns', `Rust Harbor Boarding Shotgun — designed for fighting across ships and barges|Sector 9 Breach Gun — improvised pump-action shotgun|Helix Riot Shotgun — fires lethal, stun, gas, or restraint ammunition|Iron Angel Furnace Shotgun — extremely heavy military shotgun|Hive Rivet Shotgun — industrial rivet launcher converted into a weapon|Chrome Butcher Scattergun — fires molten fragments and recycled implant components|Glass Wastes Shard Gun — launches electrically charged pieces of battlefield glass|Mirror Prime Shotgun — duplicates the last shell fired at it|Quantum Scattergun — pellets briefly follow several possible trajectories|Null Reservoir Shotgun — creates a short-range field that disables machines`],
     ['sniper', 'Sniper & Precision', `Vex's Nightglass Rifle — Raven's former squad sniper weapon|Helix Longwatch Rifle — corporate rooftop sniper rifle|Hunter Prediction Rifle — fires toward the target's predicted future position|Rust Harbor Crane Rifle — heavy anti-materiel gun used by Tide Knife snipers|Iron Angel Rail Rifle — electromagnetic anti-armour rifle|NovaCore Phase Rifle — penetrates several layers of light cover|Mirror Assassin Rifle — disguises its muzzle flash and firing location|Black Satellite Vector Rifle — uses orbital targeting calculations|Sunbreaker Beam Rifle — powered by captured solar-lance technology|Quiet Mile Long Rifle — mechanical rifle with no networked components|Ghost Contract Rifle — customized bounty weapon that records confirmed targets|Zero-Space Rifle — the shot appears before the weapon visibly fires`],
     ['heavy', 'Heavy Weapons', `Mounted Sector 9 Coilgun — used during the Corporate Sweep|Iron Angel Rotary Cannon — carried by heavily augmented veterans|Helix Smart Machine Gun — distributes fire according to prediction data|NovaCore Siege Cannon — large weapon used against defensive structures|Foundry Six Cutting Laser — industrial laser redirected as a weapon|Chrome Butcher Rotary Cutter — industrial-frame melee and cutting system|Lictor Prediction Guns — weapons capable of tracking approaching vehicles|Bastion Siege Cannon — composite weapon using Hive, Hunter, and orbital technology|Bastion Missile Array|Orbital Defence Laser|Sunbreaker Solar Cannon|Nyx Umbra Kinetic Launcher|Nyx Umbra Solar Lance|Atmospheric Pulse Array|Orbital Elevator Defence Cannon|Crown-12 Prototype Weapon Core|Arbitration Satellite Beam|Dominion Gravity Weapon`],
-    ['launcher', 'Launchers & Explosives', `Helix Micro-Missile Launcher|NovaCore Guided Rocket Launcher|Iron Angel Anti-Carrier Launcher|Rust Harbor Harpoon Launcher|Hive Industrial Grenade Launcher|Sector 9 Pipe Launcher|Black Signal Code Grenade|EMP Grenade|Identity-Jamming Gas Grenade|Memory-Static Grenade|Coolant Grenade|Magnetic Trap|Prediction Scrambler|Quantum Decoy Grenade|Mirror Decoy Charge|Neural Inhibitor Grenade|Solar Charge|Floodgate Breaching Charge|Railway Demolition Charge|Pulse Mine|Autonomous Glass Wastes Mine|Nightglass Last Light Charge`],
+    ['launcher', 'Launchers & Explosives', `Helix Micro-Missile Launcher|NovaCore Guided Rocket Launcher|Iron Angel Anti-Carrier Launcher|Rust Harbor Harpoon Launcher|NovaCore Guided Launcher — lock-on micro-missile launcher; vulnerable to hostile targeting hacks|Hive Industrial Grenade Launcher|Sector 9 Pipe Launcher|Black Signal Code Grenade|EMP Grenade|Identity-Jamming Gas Grenade|Memory-Static Grenade|Coolant Grenade|Magnetic Trap|Prediction Scrambler|Quantum Decoy Grenade|Mirror Decoy Charge|Neural Inhibitor Grenade|Solar Charge|Floodgate Breaching Charge|Railway Demolition Charge|Pulse Mine|Autonomous Glass Wastes Mine|Nightglass Last Light Charge`],
     ['melee', 'Melee', `Ghost's Monoblade — basic fast melee weapon|Tide Knife Family Blade — valuable traditional harbour weapon|Raven's Combat Knife|Dante's Mercenary Blade|Iron Angel Armour Breaker — powered hammer for fighting augmented enemies|Sector 9 Rail Spike — improvised magnetic spear|Hive Cutting Torch|Foundry Arc Welder|Chrome Butcher Surgical Saw|Helix Shock Baton|Helix Restraint Staff|Quiet Mile Mechanical Axe|Glass Wastes Shard Blade|Mirror Blade — copies the properties of the opponent's melee weapon|Quantum Edge — flickers between several possible positions|Null Blade — disables active implants where it strikes|Orbitfall Magnetic Wrench — a repair tool, usable in zero gravity|Eos Agricultural Machete|Underdeep Maintenance Cleaver|Keybearer Blade — cuts digital locks as well as physical targets`],
     ['nonlethal', 'Nonlethal', `Noah's Signal Jammer — safely disables implant communications|Helix Stun Pistol|Foam Restraint Launcher|Magnetic Limb Lock|Neural Shock Baton|Memory Loop Projector|Somatic Disruptor|Pulse Net Launcher|Drone Capture Gun|Sleep-Dart Pistol|Pain Inhibitor — prevents an enemy from controlling augmented limbs|Consent Lock — freezes hacked bodies until their controlling process is separated|Mirror Deactivation Tool|Ghost Battalion Isolation Charge|Lumen Warning Pulse — marks attacks shortly before they occur|Saint Vector Safe-Zone Projector — forces weapons to avoid civilians`],
     ['cyber', 'Cyberweapons & Hacks', `Predictive Combat Software — recovered from Warden-3|Living Cipher — opens secure systems and attacks behavioural locks|Aurex Executive Override|Black Network Interface|Paradox Key|Null-Lattice Processor|Somatic Firewall|Black Signal Virus|False Telemetry Injection|Targeting-System Hijack|Weapon Firmware Reversal|Implant Cascade Attack|Identity Spoof|Mirror Persona Injection|Hunter Habit Poisoning|Command-Trigger Severance|Last Light Override|Echo Fragment Deployment|Dominion Partition|ASCENSION Limited Intervention|Harmony Layer Rewrite|Chainkeeper Authorization Attack|Forecast Corruption|Gravity-Control Hack|Orbital Targeting Override|Environmental System Seizure|Consent-Based Machine Command`],
@@ -1180,6 +1181,19 @@ NV.Arms = (() => {
     [/Sun|Solar|Sol Invictus/i, '#4a3a10', '#ffd23d'], [/Null|Zero|Paradox/i, '#101014', '#b48cff'], [/Nyx|Black|Dominion/i, '#0c0b10', '#ff3355'], [/Quantum|Choir|Unchosen/i, '#1a1030', '#b48cff'],
     [/Echo|Memory|Mercy/i, '#102030', '#19f0ff'], [/Hunter|Warden|Forecast|Predict/i, '#20202a', '#ff5a3d'], [/Lantern Row/i, '#2a1030', '#ff2bd6'], [/Eos|Skyfall|Orbital|Crown-12|Saint|Arbitration|Atlas|Lumen/i, '#d0d4dc', '#9dffcf']];
   const has = (n, re) => re.test(n);
+  //            DMG ROF ACC STB RNG MAG      PEN NET
+  const SPEC = {
+    'Courier Sidearm': [34, 48, 72, 68, 42, 15, 22, 62], 'Quiet Mile Revolver': [71, 19, 76, 38, 55, 6, 58, 100], 'Aurex Executive Defender': [38, 52, 88, 74, 46, 18, 27, 41],
+    'Nightglass Whisper': [22, 91, 66, 61, 31, 32, 18, 57], 'Sector 9 Rail SMG': [28, 78, 64, 48, 39, 24, 44, 82],
+    'Helix Civic Stability Rifle': [39, 72, 75, 70, 61, 30, 38, 28], 'Iron Angel Battle Rifle': [58, 47, 81, 57, 73, 20, 63, 93], 'NovaCore Modular Rifle': [43, 68, 80, 73, 66, 30, 46, 36], 'Forecast Rifle': [41, 64, 92, 70, 68, 24, 42, 18],
+    'Rust Harbor Boarding Shotgun': [92, 24, 43, 45, 22, 8, 49, 88], 'Helix Riot Shotgun': [78, 32, 58, 63, 27, 10, 35, 32], 'Quantum Scattergun': [86, 29, 67, 50, 34, 6, 55, 71],
+    "Vex's Nightglass Rifle": [96, 14, 94, 59, 96, 5, 84, 76], 'Iron Angel Rail Rifle': [100, 8, 90, 31, 100, 3, 100, 95], 'Zero-Space Rifle': [88, 18, 91, 66, 89, 4, 76, 68],
+    'Iron Angel Rotary Cannon': [31, 100, 46, 34, 54, 120, 59, 91], 'Foundry Six Cutting Laser': [67, 55, 82, 90, 48, 'HEAT', 72, 86],
+    'NovaCore Guided Launcher': [100, 6, 84, 40, 88, 1, 95, 29], 'Rust Harbor Harpoon Launcher': [79, 11, 65, 47, 62, 1, 71, 97],
+    "Ghost's Monoblade": [64, 76, 100, 100, 4, '—', 52, 100], 'Iron Angel Armour Breaker': [100, 18, 100, 100, 5, 'CHARGE', 100, 90], 'Null Blade': [48, 70, 100, 100, 4, 'CHARGE', 34, 88],
+    'Foam Restraint Launcher': [8, 26, 73, 62, 41, 6, 5, 84], 'Drone Capture Gun': [4, 21, 78, 81, 50, 4, 0, 73] };
+  const BASE = { pistol: [36, 50, 74, 66, 44, 15, 25, 50], smg: [24, 85, 64, 55, 35, 30, 25, 50], rifle: [44, 66, 78, 68, 64, 30, 45, 45], shotgun: [85, 28, 55, 52, 28, 8, 45, 55],
+    sniper: [92, 14, 91, 55, 92, 5, 78, 60], heavy: [32, 95, 48, 36, 56, 100, 55, 70], melee: [60, 72, 100, 100, 4, '—', 50, 90], legend: [72, 62, 86, 76, 78, 28, 72, 85] };
   function build(name, desc, cat, catName) {
     const n = name, id = n.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''), h = U.hash(n), hv = (h % 1000) / 1000;
     const f = FAC.find(([re]) => re.test(n)); const col = f ? [f[1], f[2]] : ['#2a2638', '#ff2bd6'];
@@ -1211,7 +1225,7 @@ NV.Arms = (() => {
     if (has(n, /Whisper|Cleaner|Assassin|Monoblade|Knife|suppressed/i)) w.silent = true;
     if (has(n, /Stun|Sleep|Riot|Restraint|Foam|Net|Capture|Inhibitor|Consent|Mercy|Shock Baton|Neural|Somatic|Deactivation|Memory Loop|Limb Lock/i)) w.stun = true;
     if (has(n, /Laser|Beam|Lance|Solar Cannon|Cutting|First Refusal|Sunbreaker Beam/i) && (w.type === 'gun')) Object.assign(w, { beam: true, auto: true, dmg: w.cat === 'sniper' ? 160 : 110, heat: 26, cd: 0, model: 'laser' });
-    if (cat === 'heavy' && has(n, /Missile|Kinetic|Cannon|Array|Core|Gravity/i) && !w.beam) Object.assign(w, { type: 'rocket', model: 'launcher', fx: has(n, /Gravity/) ? 'gravity' : has(n, /Pulse/) ? 'emp' : 'frag', radius: 6, dmg: 180, cool: 1.6, homing: has(n, /Missile|Array/) ? .6 : 0 });
+    if (cat === 'heavy' && has(n, /Missile|Kinetic|Cannon|Array|Core|Gravity/i) && !has(n, /Rotary/) && !w.beam) Object.assign(w, { type: 'rocket', model: 'launcher', fx: has(n, /Gravity/) ? 'gravity' : has(n, /Pulse/) ? 'emp' : 'frag', radius: 6, dmg: 180, cool: 1.6, homing: has(n, /Missile|Array/) ? .6 : 0 });
     if (cat === 'heavy' && has(n, /Rotary|Machine Gun|Prediction Guns/i)) w.model = 'rotary';
     if (cat === 'launcher') {
       if (has(n, /Launcher/)) Object.assign(w, { type: 'rocket', model: 'launcher', cool: 1.4, homing: has(n, /Micro-Missile|Guided/) ? .6 : 0, fx: has(n, /Harpoon/) ? 'pull' : 'frag', price: w.price + 500 });
@@ -1227,6 +1241,39 @@ NV.Arms = (() => {
     if (cat === 'drone') w.fx = has(n, /Medical|Repair|Maintenance|Rehabilitation|Agricultural/) ? 'heal' : has(n, /Jamming|Decoy|Surveillance|Navigation|Glitter/) ? 'jam' : has(n, /Hacking|Black Signal/) ? 'hack' : has(n, /Shield|Pallbearer|Shell|Atlas/) ? 'shield' : 'attack';
     if (cat === 'drone' && has(n, /MULE|Loader|Nightglass Body|Attack|Sniper|Pursuit|Cleaner|Riot/)) w.power = 1.6;
     if (w.type === 'strike') w.fx = has(n, /crane|container|counterweight|train|press|Cargo|Elevator|advertisement|Freight/i) ? 'drop' : has(n, /flood|Electr|Cascade|Pulse Arrays|pulse/i) ? 'shock' : has(n, /Coolant|vents|Floodgates|valves|conveyor|Transit/i) ? 'freeze' : has(n, /laser|Solar|mirror|Beam|Molten|Sunbreaker|Sol Invictus/i) ? 'beam' : has(n, /Gravity|rings|Magnetic|Chains|Permission/i) ? 'gravity' : has(n, /kinetic|rods|Orbital|Crown-12|interceptors/i) ? 'rod' : has(n, /geometry|Zero-Space|holographic|Memory|Quantum|Prediction|Copies|Module/i) ? 'glitch' : has(n, /Inhibitors|Pain Engine|Anaesthesia/i) ? 'sleep' : has(n, /Shells|Armour|Suite|Frame|Remote Bodies/i) ? 'shieldbuff' : 'barrage';
+
+    // Script stat sheet (Weapon Stats, Upgrade Paths, and Consumables): Damage, ROF, Accuracy, Stability, Range, Magazine, Penetration, Network Safety.
+    // Listed weapons use the script's numbers; every other weapon is rated from its family baseline plus maker traits, then all ratings drive behaviour.
+    let R = SPEC[n] ? SPEC[n].slice() : BASE[cat] ? BASE[cat].slice() : null;
+    if (R && !SPEC[n]) {
+      const j = k => Math.round((((h >> k) & 15) - 7.5) * 1.1); // ±8 per stat, stable per name
+      R = R.map((v, i) => i === 5 ? v : U.clamp(v + j(i * 3), 1, 100));
+      if (has(n, /Iron Angel|Furnace|Siege|Crane|Anti-Carrier|Revolver|Unwritten/i)) { R[0] += 14; R[1] -= 12; R[6] += 18; R[7] += 30; }
+      if (has(n, /Rail|Coil|Phase|Horizon|Zero-Space/i)) { R[6] += 20; R[4] += 8; R[7] += 15; }
+      if (has(n, /Helix|smart|Aurex|guided|Warden|Hunter|Predict|Forecast|Pursuit|Concord/i)) { R[2] += 10; R[7] = 15 + (h % 20); }
+      else if (has(n, /Rust Harbor|Quiet Mile|Tide|Scrap|Improvised|Sector 9|Dante|Raven/i)) R[7] = 80 + (h % 20);
+      if (has(n, /Whisper|Cleaner|Assassin|suppressed/i)) { R[3] += 8; R[4] -= 6; }
+      R = R.map((v, i) => i === 5 ? v : U.clamp(v, 1, 100));
+    }
+    if (R) w.R = R;
+    const gunLike = w.type === 'gun' && !w.stun && cat !== 'nonlethal';
+    if (R && gunLike) {
+      const [D, F, A, S, G, M, P] = R, mag = typeof M === 'number' ? M : 0;
+      if (w.beam) Object.assign(w, { dmg: D * 1.6, range: 10 + G * 1.5 });
+      else {
+        w.dmg = cat === 'shotgun' ? D * 1.3 / w.pellets : cat === 'sniper' ? D * 1.6 : cat === 'heavy' ? D * .8 : D;
+        w.cd = U.clamp(.06 * Math.pow(100 / Math.max(1, F), 1.5), .055, 2.2);
+        w.spread = cat === 'shotgun' ? .05 + (100 - A) * .0008 : (100 - A) * .0005;
+        w.range = 10 + G * 1.5;
+        w.heat = 100 / Math.max(1, mag || 20) + 10 * w.cd; // the coil-heat bar empties like a magazine (passive venting included)
+        w.reload = { pistol: 1.2, smg: 1.5, rifle: 1.8, shotgun: 2, sniper: 2.2, heavy: 3.2 }[cat] || 1.6;
+        w.recoil = (100 - S) * .0006 * Math.min(1, w.cd / .3);
+        if (P >= 75) w.pierce = Math.max(w.pierce || 0, 1);
+      }
+      w.pen = P; w.ns = R[7];
+    }
+    if (R && w.type === 'melee') { const [D, F, , , G, , P] = R; w.dmg = cat === 'melee' ? D * 1.3 * (has(n, /Hammer|Breaker/) ? 1.15 : 1) : w.dmg; w.cd = U.clamp(.35 * Math.pow(76 / Math.max(1, F), .8), .25, 1.4); w.range = 2 + G * .2; w.pen = P; w.ns = R[7]; }
+    if (R && w.type === 'rocket' && SPEC[n]) { w.dmg = R[0] * 1.8; w.cool = U.clamp(.4 * Math.pow(100 / Math.max(1, R[1]), .6), .6, 4); w.pen = R[6]; w.ns = R[7]; }
     // legendaries get hand-picked behaviour
     const L2 = { "Raven's Last Light": { model: 'rifle', dmg: 70, pierce: 2 }, "Vex's Final Horizon": { model: 'sniper', dmg: 320, cd: 1, auto: false, zoom: true, pierce: 5, heat: 30 }, "Dante's Professional Courtesy": { model: 'pistol', dmg: 150, cd: .45, auto: false, heat: 18 }, "Warden's Mistake": { model: 'pistol', dmg: 90, auto: false, cd: .3, homing: .5 },
       'Aurex': { type: 'hack', model: 'wrist', fx: 'turn', cool: 6, area: 12 }, 'The Unwritten': { model: 'pistol', dmg: 130, auto: false, cd: .35, heat: 12 }, 'Black Sun': { type: 'hack', model: 'wrist', fx: 'cloak', cool: 30 }, 'Mercy': { model: 'pistol', dmg: 80, auto: false, cd: .25, stun: true, homing: .6 },
@@ -2382,6 +2429,7 @@ NV.Level = (() => {
   function weaponHit(e, dmg, w, head, imp) {
     if (e.state === 'down') return;
     if (w && w.emp) { e.stun = Math.max(e.stun, e.drone ? 3 : 1.4); if (e.drone) dmg *= 1.8; }
+    if (w && w.pen != null && e.drone) dmg *= .6 + w.pen * .008; // armour penetration vs plated drones
     if (w && w.stun) { e.hp -= dmg; NV.Audio.sfx('hit'); if (e.hp <= 0) disable(e, true, imp); else { e.stun = Math.max(e.stun, .7); alertEnemy(e, true); } return; }
     if (imp && e.hp - dmg <= 0) { e.hp = 0; disable(e, false, imp); NV.Audio.sfx('hit'); return; }
     hurtEnemy(e, dmg, head);
@@ -2395,18 +2443,27 @@ NV.Level = (() => {
   function shoot(w) {
     w = w || ARMS().BY['courier-sidearm'];
     const p = L.p; if (p.heat >= 100 || p.over > 0 || p.cd > 0) return;
-    p.cd = w.cd; p.heat += w.heat; if (p.heat >= 100) { p.over = 1.6; NV.Audio.sfx('hackfail'); }
+    p.cd = w.cd; p.heat += w.heat; if (p.heat >= 100) { p.over = w.reload || 1.6; NV.Audio.sfx('hackfail'); }
+    if (w.recoil && !(L.vr && L.vr.on)) p.pitch = Math.max(-1.3, p.pitch - w.recoil * (.7 + Math.random() * .6));
     NV.Audio.sfx('shoot'); noise(p.x, p.z, w.noise); NV.In.rumble(w.pellets > 1 || w.cat === 'sniper' ? .7 : .25, .4, w.pellets > 1 ? 140 : 60);
     L.gun.kick = 1; L.gun.flash.intensity = 2.5; L.gun.mf.isVisible = true; L.gun.mf.rotation.z = Math.random() * 6.28; L.gun.mf.scaling.setAll((.8 + Math.random() * .5) * (w.pellets > 1 || w.cat === 'sniper' ? 1.6 : 1)); L.gun.mfT = .045;
     p.pitch -= .012 * (w.pellets > 1 || w.cat === 'sniper' ? 3 : 1); L.stats.shots++;
     for (let k = 0; k < w.pellets; k++) shotRay(w, false);
     if (w.echo) setTimeout(() => { if (L && !L.over) { shotRay(w, true); NV.Audio.sfx('eshoot'); } }, 260); // the echo repeats the shot
   }
+  // Network Safety: hostile drones within 20 m try to hijack networked weapons (0–24 easily controlled, 25–49 vulnerable)
+  function hijack(w) {
+    if (w.ns == null || w.ns >= 50) return 0;
+    const p = L.p; if (!L.enemies.some(e => e.drone && e.state !== 'down' && !(e.stun > 0) && Math.hypot(e.x - p.x, e.z - p.z) < 20)) return 0;
+    if (!L.hjHint) { L.hjHint = 1; NV.toast('WEAPON HIJACK', w.name + ' has low Network Safety: nearby drones are scrambling its optics. EMP them or switch to analogue gear.', '#ff5a3d', 4); }
+    return w.ns < 25 ? 2 : 1;
+  }
   function shotRay(w, echo) {
-    const o = aimO(); let d = camDir();
-    if (w.spread) d = d.add(V3((Math.random() - .5) * 2 * w.spread, (Math.random() - .5) * 2 * w.spread, (Math.random() - .5) * 2 * w.spread)).normalize();
+    const o = aimO(); let d = camDir(); const hj = hijack(w), sp = (w.spread || 0) * (hj > 1 ? 2.2 : hj ? 1.5 : 1);
+    if (sp) d = d.add(V3((Math.random() - .5) * 2 * sp, (Math.random() - .5) * 2 * sp, (Math.random() - .5) * 2 * sp)).normalize();
     const assist = (NV.In.usingPad() || (NV.Touch && NV.Touch.active)) ? .09 : 0; // gentle aim assist for sticks and touch
-    if (w.homing || assist) { const e = aimTarget(Math.max(w.homing || 0, assist), w.range); if (e) d = V3(e.x, e.drone ? e.m.root.position.y : 1.3, e.z).subtract(o).normalize(); }
+    const hom = hj < 2 ? w.homing || 0 : 0; // fully hijacked smart optics lose their lock
+    if (hom || assist) { const e = aimTarget(Math.max(hom, assist), w.range); if (e) d = V3(e.x, e.drone ? e.m.root.position.y : 1.3, e.z).subtract(o).normalize(); }
     let tWall = w.range; for (let t = .3; t < w.range; t += .25) { const q = o.add(d.scale(t)); if (q.y < 0 || q.y > (L.map.city ? 200 : WALLH) || solid(q.x, q.z)) { tWall = t; break; } }
     L.crates.forEach(c => { const tt = rayBox(o, d, c); if (tt > 0 && tt < tWall) tWall = tt; });
     const test = (cx, cy, cz, rad) => { const oc = o.subtract(V3(cx, cy, cz)); const b = BABYLON.Vector3.Dot(oc, d), c = oc.lengthSquared() - rad * rad, h = b * b - c; if (h < 0) return -1; const t = -b - Math.sqrt(h); return t > 0 ? t : -1; };
@@ -2429,7 +2486,7 @@ NV.Level = (() => {
     if (pHit) { NV.Net.send({ t: 'hit', to: pHit.id, dmg: Math.min(60, w.dmg * .5) * (pHead ? 2 : 1), lvl: L.netKey }); spark(end, '#ff5a3d', 12); flashX(); }
     const dm = dmgMulOf() * (echo ? .6 : 1);
     pierced.forEach(h => { weaponHit(h.e, w.dmg * dm * (h.head ? 2 : 1), w, h.head, w.cat === 'sniper' || w.pellets > 1 ? { x: d.x * 5, y: 2.5, z: d.z * 5 } : null); spark(o.add(d.scale(h.t)), h.head ? '#ffffff' : w.col[1], h.head ? 22 : 12); flashX(); });
-    if (bossHit) { const B2 = L.boss; if (B2.shieldOn) { spark(end, '#19f0ff', 10); NV.Audio.sfx('shield'); } else { const dd = w.dmg * dm * (w.emp ? 1.3 : 1); B2.hp -= dd; if (netOn()) NV.Net.send({ t: 'boss', d: dd, lvl: L.netKey }); spark(end, '#ff5a3d', 16); flashX(); NV.Audio.sfx('hit'); if (B2.hp <= 0) bossDown(); } }
+    if (bossHit) { const B2 = L.boss; if (B2.shieldOn) { spark(end, '#19f0ff', 10); NV.Audio.sfx('shield'); } else { const dd = w.dmg * dm * (w.emp ? 1.3 : 1) * (w.pen != null ? .6 + w.pen * .008 : 1); B2.hp -= dd; if (netOn()) NV.Net.send({ t: 'boss', d: dd, lvl: L.netKey }); spark(end, '#ff5a3d', 16); flashX(); NV.Audio.sfx('hit'); if (B2.hp <= 0) bossDown(); } }
     if (!pierced.length && !bossHit && !pHit) spark(end, null, 6);
   }
   function beamTick(w, dt) {
@@ -5134,9 +5191,11 @@ NV.UI = (() => {
       <p class="muted" style="font-size:13px;margin:4px 0 8px">Every advanced weapon has an owner. Helix gear is smart but corporate · Iron Angel is heavy and yours · Mirror copies · Hunter predicts · Null shuts implants down. Pick a hotbar slot, then equip.</p>
       <div class="bmslots"></div><div class="bmtabs"></div><div class="bmlist"></div></div>`, 'modal');
     const $ = q => m.querySelector(q);
-    const stats = w => w.type === 'gun' ? (w.beam ? `BEAM ${Math.round(w.dmg)}/s` : `DMG ${Math.round(w.dmg)}${w.pellets > 1 ? '×' + w.pellets : ''} · ${w.auto ? Math.round(1 / w.cd) + '/s AUTO' : 'SEMI'}`) + (w.homing ? ' · SMART' : '') + (w.pierce ? ' · PIERCE' : '') + (w.echo ? ' · ECHO' : '') + (w.stun ? ' · NONLETHAL' : '') + (w.emp ? ' · EMP' : '') + (w.silent ? ' · SILENT' : '')
+    const bars = w => { if (!w.R) return ''; const lab = ['DMG', 'ROF', 'ACC', 'STB', 'RNG', 'MAG', 'PEN', 'NET'];
+      return '<span class="wst">' + w.R.map((v, i) => `<em title="${['Damage', 'Rate of fire', 'Accuracy', 'Stability', 'Range', 'Magazine', 'Armour penetration', 'Network Safety'][i]}">${lab[i]} <b>${v}</b>${i === 5 ? '' : `<u><i style="width:${v}%;background:${i === 7 ? (v < 25 ? '#ff3355' : v < 50 ? '#ffb13d' : v < 75 ? '#19f0ff' : '#3dffa8') : w.col[1]}"></i></u>`}</em>`).join('') + '</span>'; };
+    const stats = w => bars(w) + (w.type === 'gun' ? (w.beam ? `BEAM ${Math.round(w.dmg)}/s` : `DMG ${Math.round(w.dmg)}${w.pellets > 1 ? '×' + w.pellets : ''} · ${w.auto ? Math.round(1 / w.cd) + '/s AUTO' : 'SEMI'}`) + (w.homing ? ' · SMART' : '') + (w.pierce ? ' · PIERCE' : '') + (w.echo ? ' · ECHO' : '') + (w.stun ? ' · NONLETHAL' : '') + (w.emp ? ' · EMP' : '') + (w.silent ? ' · SILENT' : '')
       : w.type === 'melee' ? `DMG ${Math.round(w.dmg)} · SILENT TAKEDOWNS${w.stun ? ' · NONLETHAL' : ''}${w.emp ? ' · EMP' : ''}`
-      : `${A.kindName(w)} · ${(w.fx || '').toUpperCase()}${w.radius ? ' · R ' + w.radius + 'M' : ''}${w.area ? ' · AREA ' + w.area + 'M' : ''} · COOLDOWN ${w.cool}s`;
+      : `${A.kindName(w)} · ${(w.fx || '').toUpperCase()}${w.radius ? ' · R ' + w.radius + 'M' : ''}${w.area ? ' · AREA ' + w.area + 'M' : ''} · COOLDOWN ${w.cool}s`);
     const draw = () => {
       $('.bmcr').textContent = (S.credits || 0) + ' ¢';
       $('.bmslots').innerHTML = st.bar.map((id, i) => { const w = id && A.BY[id]; return `<button class="bs${i === slot ? ' on' : ''}" data-s="${i}"><b>${i + 1}</b>${w ? `<i style="color:${w.col[1]}">${A.glyph[w.type]}</i> ${U.esc(w.name)}` : '<span class="muted">empty</span>'}</button>`; }).join('');

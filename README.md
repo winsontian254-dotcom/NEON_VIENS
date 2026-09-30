@@ -84,6 +84,22 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 
 In the city, keep pushing forward into a building to climb its wall; release forward to hang, dash to let go. At the top you mount the roof and can climb taller neighbours. Walk off an edge and you fall; drops longer than ~12 m become a steerable third-person skydive, and hard landings (street or roof) knock Ghost into a ragdoll. Guards lose sight of you on high rooftops.
 
+## Weapon stats
+
+Guns and melee weapons are rated on the script's 1–100 sheet: **Damage, Rate of Fire, Accuracy, Stability, Range, Magazine, Armour Penetration and Network Safety**. The Black Market shows each rating as a bar.
+- The 25 weapons listed in the script use its exact numbers.
+- Every other weapon is rated from its family baseline plus maker traits. Iron Angel gear is heavy and analogue, Helix, Aurex and predictive gear is smart but low on Network Safety, and Rust Harbor, Quiet Mile and Sector 9 gear is hardened.
+
+How each rating plays:
+- **Damage** sets hit damage.
+- **Rate of Fire** sets the shot interval.
+- **Accuracy** sets spread.
+- **Stability** sets recoil kick.
+- **Range** sets hit distance.
+- **Magazine** sets how many shots fill the coil-heat bar before a reload. Reload time depends on the weapon family.
+- **Penetration** adds damage against plated drones and bosses, and 75+ pierces a target.
+- **Network Safety** matters near live hostile drones: below 50 a weapon's spread widens, and below 25 its smart lock is also lost.
+
 ## Parkour
 
 City-only moves, built on the climbing system:
