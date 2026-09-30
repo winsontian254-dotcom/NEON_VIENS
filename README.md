@@ -100,6 +100,33 @@ How each rating plays:
 - **Penetration** adds damage against plated drones and bosses, and 75+ pierces a target.
 - **Network Safety** matters near live hostile drones: below 50 a weapon's spread widens, and below 25 its smart lock is also lost.
 
+### Upgrade trees
+
+Every owned weapon has the script's five-level tree. Open it from the **LV** button in the Black Market.
+- Levels II and IV improve core stats.
+- Levels III and V are permanent A/B branch choices, for example:
+  - Pistols: Gunslinger or Ghostwork, then Dead Certainty or Clean Exit.
+  - Shotguns: Breacher or Crowd Control, then Final Door or Mercy Pattern.
+- All ten families have their branches in the game, and each branch works in combat.
+- Costs: Levels II–III use Weapon Parts, Level IV uses Military Components, and Level V also needs a Quantum Fragment or Living Cipher Thread for prediction, smart or ASCENSION-linked weapons.
+
+### Ammunition & materials
+
+- **Ammo families:** the script's ammunition families are shared by weapon type:
+  - light, rifle, shells, precision, coil, heavy belts, micro-missiles, improvised rockets, power cells, restraint canisters, harpoon bolts and drone tokens;
+  - plus the exotic Quantum Charges and Null Capsules.
+- **Magazines and reserves:** the coil-heat bar is the magazine. Every shot draws from the family reserve, and the HUD shows `magazine | reserve`.
+- **Getting ammo:**
+  - You're resupplied to half of your carry limit at every deployment.
+  - Fallen enemies drop ammo for the gun in hand, plus Weapon Parts. Lethal kills yield more.
+  - Refills are sold in *Ammo & Workbench*.
+- **Workbench:** converts a weapon's ammunition. Shotguns take slug, foam, shock or breaching loads for 4 Parts. Any ballistic gun can load Null Capsules or Quantum Charges.
+- **Materials:**
+  - Drones sometimes drop Military Components.
+  - Bosses drop a module: Military Components, a Quantum Fragment and a Living Cipher Thread.
+  - Completed operations pay Parts and Military Components.
+  - Materials can also be bought.
+
 ## Parkour
 
 City-only moves, built on the climbing system:

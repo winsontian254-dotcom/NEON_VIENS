@@ -168,6 +168,8 @@ body.cine #story{bottom:11vh;inset:0 0 11vh 0;z-index:5}
 .bm{width:min(1100px,94vw);max-height:90vh;display:flex;flex-direction:column}.bmhead{display:flex;align-items:center;gap:16px}.bmhead .bmcr{font-family:var(--fm);font-size:22px;color:var(--amber);flex:1;text-align:right}.bmhead .btn{width:auto}
 .bmslots{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin-bottom:8px}.bs,.bt,.bb{background:rgba(5,3,12,.8);border:1px solid rgba(255,255,255,.18);color:var(--ink);font:12px var(--fb,sans-serif);padding:6px;cursor:pointer;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bs b{color:var(--amber);margin-right:4px}.bs i,.bic i{font-style:normal}.bs.on,.bt.on{border-color:var(--amber);color:var(--amber)}
 .bmtabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}.bt{font-family:var(--fh);letter-spacing:.08em;text-transform:uppercase;font-size:11px}.bmlist{overflow-y:auto;flex:1;min-height:200px;padding-right:6px}
+.bmmats{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:11px;letter-spacing:.1em;color:#8a84b3;text-transform:uppercase;margin:0 0 6px}.bmmats b{color:#ffd23d;margin-left:4px}.bmh{font-family:var(--fh);letter-spacing:.25em;font-size:12px;color:var(--pink);margin:14px 0 4px}
+.bmup{overflow:auto;flex:1;min-height:0;padding-right:4px}.bmup .uh{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-bottom:8px}.bmup .uh .uX{margin-left:auto}.bmup .ul{display:flex;gap:12px;padding:8px 6px;border-left:2px solid rgba(255,255,255,.12);margin:4px 0;opacity:.75}.bmup .ul.got{border-color:#3dffa8;opacity:1}.bmup .ul.nx{border-color:#ffd23d;opacity:1;background:rgba(255,210,61,.05)}.bmup .ul>b{font-family:var(--fh);width:30px;color:#ffd23d}.bmup .ul>div{flex:1;display:flex;flex-wrap:wrap;gap:8px;align-items:stretch}.bmup .ul p{margin:2px 0 6px;font-size:13px}.bmup .ubr{flex:1;min-width:180px;border:1px solid rgba(255,255,255,.12);padding:6px 8px}.bmup .ubr.on{border-color:#3dffa8;background:rgba(61,255,168,.07)}.bmup .ubr.off{opacity:.35}.bmup .or{align-self:center;font-size:11px;color:#8a84b3}.bmup small{display:block;color:#8a84b3;margin-top:10px;line-height:1.4}
 .bi{display:flex;align-items:center;gap:12px;padding:8px 4px;border-bottom:1px solid rgba(255,255,255,.07)}.bic{width:40px;height:40px;border:1px solid;display:flex;align-items:center;justify-content:center;font-size:20px;flex:0 0 40px}.bid{flex:1;font-size:14px;line-height:1.35}.bid small{display:block;color:var(--cyan);font-family:var(--fm);font-size:11px;letter-spacing:.06em;margin-top:2px}.bia .bb{min-width:130px;text-align:center;font-family:var(--fh);letter-spacing:.08em}.bb.buy{border-color:var(--amber);color:var(--amber)}.bb[disabled]{opacity:.35;cursor:default}.bb.eq{border-color:var(--cyan);color:var(--cyan)}
 .wst{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px 10px;margin:4px 0 3px;font-style:normal}.wst em{font-style:normal;font-size:10px;letter-spacing:.08em;color:#8a84b3;display:flex;align-items:center;gap:4px}.wst em b{color:#e8e6ff;min-width:22px}.wst u{flex:1;height:3px;background:rgba(255,255,255,.1);text-decoration:none;display:block}.wst u i{display:block;height:100%}
 #hud .speedo{position:absolute;right:20px;bottom:24px;font-family:var(--fm);font-size:44px;color:var(--cyan);text-shadow:0 0 12px var(--cyan);text-align:right;line-height:1}
@@ -1270,7 +1272,7 @@ NV.Arms = (() => {
         w.recoil = (100 - S) * .0006 * Math.min(1, w.cd / .3);
         if (P >= 75) w.pierce = Math.max(w.pierce || 0, 1);
       }
-      w.pen = P; w.ns = R[7];
+      w.pen = P; w.ns = R[7]; w.mag = mag || 20;
     }
     if (R && w.type === 'melee') { const [D, F, , , G, , P] = R; w.dmg = cat === 'melee' ? D * 1.3 * (has(n, /Hammer|Breaker/) ? 1.15 : 1) : w.dmg; w.cd = U.clamp(.35 * Math.pow(76 / Math.max(1, F), .8), .25, 1.4); w.range = 2 + G * .2; w.pen = P; w.ns = R[7]; }
     if (R && w.type === 'rocket' && SPEC[n]) { w.dmg = R[0] * 1.8; w.cool = U.clamp(.4 * Math.pow(100 / Math.max(1, R[1]), .6), .6, 4); w.pen = R[6]; w.ns = R[7]; }
@@ -1289,8 +1291,92 @@ NV.Arms = (() => {
   BY['courier-sidearm'].price = 0; BY['ghost-s-monoblade'].price = 0;
   const glyph = { gun: '▮', melee: '/', throw: '●', rocket: '➤', hack: '⌬', drone: '✈', strike: '⊕' };
   const kindName = w => w.beam ? 'BEAM' : ({ gun: w.stun ? 'STUN' : w.auto ? 'AUTO' : 'SEMI', melee: 'MELEE', throw: 'THROW', rocket: 'ROCKET', hack: 'HACK', drone: 'DRONE', strike: 'STRIKE' })[w.type];
-  const stateOf = () => { const S = NV.State.get(); if (!S) return null; if (!S.arms || !S.arms.owned) S.arms = { owned: ['courier-sidearm', 'ghost-s-monoblade'], bar: ['courier-sidearm', 'ghost-s-monoblade', null, null, null, null, null, null, null], sel: 0 }; return S.arms; };
-  return { CATS: CATS.map(c => ({ cat: c[0], name: c[1] })), ALL, BY, glyph, kindName, state: stateOf };
+
+  /* ---- script: Five-Level Upgrade Trees. II and IV improve core stats; III and V are mutually exclusive branch choices ---- */
+  const FAM = { pistol: 'pistol', smg: 'smg', rifle: 'rifle', legend: 'rifle', shotgun: 'shotgun', sniper: 'sniper', heavy: 'heavy', launcher: 'launcher', env: 'launcher', boss: 'launcher', strategic: 'launcher', melee: 'melee', nonlethal: 'nonlethal', cyber: 'cyber', drone: 'cyber' };
+  const TREE = {
+    pistol: { name: 'Pistols', II: '+10% damage, +15% reload speed', A: ['Gunslinger', 'First shot within 2 s of swapping to it gains +40% critical chance'], B: ['Ghostwork', 'Suppressed: shots delay detection and reveal no firing trace'], IV: '+15% accuracy and handling', VA: ['Dead Certainty', 'Critical (head) hits refund one round'], VB: ['Clean Exit', 'Kills and takedowns briefly cloak Ghost'] },
+    smg: { name: 'SMGs', II: '+12% stability, +20% magazine capacity', A: ['Overclock', 'Rate of fire rises during sustained fire, but heat builds faster'], B: ['Packet Storm', 'Every tenth hit uploads a vulnerability: machines stall, people are marked'], IV: '+15% armour penetration', VA: ['Runaway Cycle', 'Reloads grant six seconds of free reserve draw'], VB: ['Blackout Burst', 'Emptying a full magazine disables smart optics and drones within 12 m'] },
+    rifle: { name: 'Assault & battle rifles', II: '+10% damage, +10% stability', A: ['Vanguard', 'Armour-breaking rounds (+25 penetration) and stronger stagger'], B: ['Operator', 'Smart burst, target marking and 30% less recoil'], IV: '+20% effective range', VA: ['Independent Fire', 'Immune to remote shutdown (Network Safety 100)'], VB: ['Forecast Breaker', 'Repeated hits on one target deal up to +40% damage'] },
+    shotgun: { name: 'Shotguns', II: '+15% pellet damage, +20% reload speed', A: ['Breacher', 'Concentrated choke and +35 armour penetration'], B: ['Crowd Control', 'Wider spread, stronger knockback, free foam-shell conversion'], IV: '+1 shell and +15% handling', VA: ['Final Door', 'Point-blank hits (under 4 m) ignore armour and hit 30% harder'], VB: ['Mercy Pattern', 'Nonlethal hits chain restraint foam to targets within 4 m'] },
+    sniper: { name: 'Sniper & precision rifles', II: '+12% weak-point damage, +10% aim stability', A: ['Longwatch', 'Extreme zoom and target tagging'], B: ['Counter-Future', '+25% damage against alerted, predicting enemies'], IV: '+20% penetration and faster rechamber', VA: ['Throughline', 'One shot may pierce three targets'], VB: ['Zero Interval', 'The first shot after entering aim is instant and deals +50%'] },
+    heavy: { name: 'Heavy weapons', II: '+15% cooling', A: ['Siege', '+40% damage to armour, drones, shields and bosses'], B: ['Suppression', 'Sustained fire staggers enemies and throws off their aim'], IV: 'Reduced movement penalty and faster deployment', VA: ['Bastion Breaker', '+30% damage to bosses'], VB: ['Walking Cover', 'Firing projects a frontal barrier: half damage taken'] },
+    launcher: { name: 'Launchers & ordnance', II: '+15% blast radius, +10% reload speed', A: ['Hunter-Killer', 'Lock-on guidance for every round'], B: ['Utility Rack', 'Each launch cycles EMP, foam, cable, coolant and decoy payloads'], IV: 'Carry one additional loaded payload', VA: ['Perfect Trajectory', 'Guided rounds recalculate for a near-perfect lock'], VB: ['Open Standard', 'Improvised ammunition costs 30% less'] },
+    melee: { name: 'Melee weapons', II: '+12% damage, +15% stamina efficiency', A: ['Duelist', 'Kills grant +15% movement speed for 3 s'], B: ['Saboteur', 'Strikes damage implants, drones and shield emitters (EMP)'], IV: 'Charged attacks gain +25% armour penetration', VA: ['Refusal Edge', 'Hits interrupt and stun enemies for 1.5 s'], VB: ['Keybearer Cut', 'Finishers shut down drones within 8 m'] },
+    nonlethal: { name: 'Nonlethal weapons', II: '+20% status duration and +10% capacity', A: ['Responder', 'Restrained targets stay isolated: +30% status duration'], B: ['Collector', 'Captures yield two extra Weapon Parts'], IV: 'Fast swap and stronger status buildup (+25%)', VA: ['Consent Lock', 'Status effects last 50% longer'], VB: ['Safe Surrender', 'A capture may make a nearby enemy stand down'] },
+    cyber: { name: 'Cyberweapons & drones', II: '+15% upload speed, -10% neural heat', A: ['Black Signal', 'Attacks spread through connected enemies (+6 m area)'], B: ['Living Cipher', 'Uploads cannot be traced: hacks never raise the alarm'], IV: '+1 active daemon slot (-20% cooldown)', VA: ['Unowned System', 'Hostile networks cannot lock Ghost out (-15% cooldown)'], VB: ['Shared Authority', 'An allied AI adds a second effect: targets are also stunned'] } };
+  const EXOTIC = w => /Quantum|Zero-Space|Predict|Forecast|Hunter|ASCENSION|Paradox|Choir/i.test(w.name) ? 'quantum' : (w.homing || /Aurex|smart|Helix|Cipher|Consent/i.test(w.name) || FAM[w.cat] === 'cyber') ? 'cipher' : null;
+  const COST = [null, null, { parts: 12, cr: 150 }, { parts: 25, cr: 300 }, { mil: 3, cr: 600 }, { mil: 5, cr: 1200 }];
+  const costOf = (w, lvl) => { const c = Object.assign({}, COST[lvl]); if (lvl === 5) { const x = EXOTIC(w); if (x) c[x] = 1; else c.mil += 3; } return c; };
+  const MATS = { parts: ['Weapon Parts', 999, 25, 'Common material for Levels II–III and ammunition conversion'], mil: ['Military Components', 99, 300, 'Rare material for Levels IV–V, heavy weapons and armour-piercing ammunition'],
+    quantum: ['Quantum Fragments', 30, 900, 'Exotic material for Zero-Space, prediction and ASCENSION-linked upgrades'], cipher: ['Living Cipher Threads', 20, 900, 'Consent-sensitive material for untraceable hacks and independent smart weapons'] };
+  /* ---- script: Ammunition and Charges (default carry, per-round price) ---- */
+  const AMMO = { light: ['Light Ballistic Ammunition', 180, 2, 'Pistols and SMGs; cheap, common, low penetration'], rifle: ['Rifle Ammunition', 120, 3, 'Assault and battle rifles; balanced armour performance'],
+    shells: ['Shotgun Shells', 40, 6, 'Buckshot by default; converts to slug, foam, shock or breaching loads'], precision: ['Precision Rounds', 30, 12, 'High weak-point damage and penetration; reveals firing trace unless suppressed'],
+    coil: ['Coil Flechettes', 80, 8, 'Electromagnetic ammunition with strong shield and armour damage'], belts: ['Heavy Belts', 240, 1, 'Rotary-cannon ammunition; movement slowed while carried'],
+    missiles: ['Micro-Missiles', 6, 90, 'Guided explosive payloads; vulnerable to hostile targeting hacks'], rockets: ['Improvised Rockets', 4, 60, 'Unguided, unstable, high blast damage, immune to remote diversion'],
+    cells: ['Power Cells', 8, 45, 'Feeds beam weapons and powered melee'], quantum: ['Quantum Charges', 3, 250, 'Exotic load: forks trajectories and bypasses one layer of defence'],
+    null: ['Null Capsules', 4, 120, 'Exotic load: disables implants, smart optics and autonomous weapons'], restraint: ['Restraint Canisters', 6, 50, 'Foam, pulse net or magnetic limb-lock payloads'],
+    harpoon: ['Harpoon Bolts', 8, 40, 'Damage, pull, traversal anchor or cable bridge depending on head'], drone: ['Drone Command Tokens', 3, 200, 'Deploys, repairs or temporarily captures one drone'] };
+  function ammoOf(w) {
+    const n = w.name, c = w.cat, coil = /Rail|Coil/i.test(n);
+    if (w.type === 'gun') { if (w.beam) return 'cells'; if (c === 'shotgun') return 'shells'; if (c === 'heavy') return 'belts'; if (c === 'sniper') return coil ? 'coil' : 'precision'; if (c === 'rifle' || c === 'legend') return coil ? 'coil' : 'rifle'; return coil ? 'coil' : 'light'; }
+    if (w.type === 'rocket') return /Harpoon/i.test(n) ? 'harpoon' : (w.homing || /Missile|Guided|Array/i.test(n)) ? 'missiles' : 'rockets';
+    if (w.type === 'throw' && c === 'nonlethal' && /Launcher/i.test(n)) return 'restraint';
+    if (w.type === 'drone') return 'drone';
+    if (w.type === 'melee' && w.R && w.R[5] === 'CHARGE') return 'cells';
+    return null;
+  }
+  /* ---- specialist loads, converted at the Black Market workbench ---- */
+  const LOADS = { std: ['Standard', 'Default family ammunition'], slug: ['Slug', 'One heavy projectile: long range and penetration'], foam: ['Foam', 'Nonlethal restraint shells'], shock: ['Shock', 'Electrified shells that stall machines'], breach: ['Breaching', 'Ignores armour; short range'],
+    null: ['Null Capsules', 'Each shot disables implants and smart systems (uses Null Capsules)'], quantum: ['Quantum Charges', 'Each shot pierces and bypasses armour (uses Quantum Charges)'] };
+  const loadsFor = w => w.type !== 'gun' || w.beam ? [] : ['std'].concat(w.cat === 'shotgun' ? ['slug', 'foam', 'shock', 'breach'] : [], ['null', 'quantum']);
+  function applyLoad(e, ld) {
+    if (ld === 'slug') Object.assign(e, { dmg: e.dmg * e.pellets * .8, pellets: 1, spread: .006, range: e.range * 1.8, pen: Math.min(100, (e.pen || 0) + 20) });
+    else if (ld === 'foam') Object.assign(e, { stun: true, dmg: e.dmg * .8 });
+    else if (ld === 'shock') e.emp = true;
+    else if (ld === 'breach') Object.assign(e, { pen: 100, dmg: e.dmg * 1.1, range: e.range * .7 });
+    else if (ld === 'null') e.emp = true;
+    else if (ld === 'quantum') Object.assign(e, { pen: 100, pierce: (e.pierce || 0) + 2 });
+    e.load = ld;
+  }
+  function applyTree(e, u) {
+    const f = FAM[e.cat], L2 = u.l >= 2, L3 = u.l >= 3 && u.a, L4 = u.l >= 4, L5 = u.l >= 5 && u.b, A3 = L3 === 'A', B3 = L3 === 'B', A5 = L5 === 'A', B5 = L5 === 'B';
+    const remag = () => { if (e.mag && e.type === 'gun' && !e.beam) e.heat = 100 / e.mag + 10 * e.cd; };
+    const add = (k, v) => { if (e[k] != null) e[k] = Math.min(100, e[k] + v); };
+    switch (f) {
+      case 'pistol': if (L2) { e.dmg *= 1.1; e.reload = (e.reload || 1.6) * .85; } if (A3) e.gunslinger = 1; if (B3) { e.silent = true; e.noise = 3; } if (L4) e.spread *= .85; if (A5) e.deadCert = 1; if (B5) e.cleanExit = 1; break;
+      case 'smg': if (L2) { e.recoil = (e.recoil || 0) * .88; e.mag = Math.round((e.mag || 20) * 1.2); remag(); } if (A3) e.overclock = 1; if (B3) e.packet = 1; if (L4) add('pen', 15); if (A5) e.runaway = 1; if (B5) e.blackout = 1; break;
+      case 'rifle': if (L2) { e.dmg *= 1.1; e.recoil = (e.recoil || 0) * .9; } if (A3) { add('pen', 25); e.stagger = 1; } if (B3) { e.homing = Math.max(e.homing || 0, .25); e.recoil = (e.recoil || 0) * .7; e.operator = 1; } if (L4) e.range *= 1.2; if (A5) e.ns = 100; if (B5) e.forecast = 1; break;
+      case 'shotgun': if (L2) { e.dmg *= 1.15; e.reload = (e.reload || 1.6) * .8; } if (A3) { e.spread *= .6; add('pen', 35); } if (B3) { e.spread *= 1.3; e.knock = 1; } if (L4) { e.mag = (e.mag || 8) + 1; remag(); } if (A5) e.finalDoor = 1; if (B5) e.mercy = 1; break;
+      case 'sniper': if (L2) { e.head = 2.24; e.recoil = (e.recoil || 0) * .9; } if (A3) { e.longwatch = 1; e.tag = 1; } if (B3) e.counter = 1; if (L4) { add('pen', 20); e.cd *= .85; remag(); } if (A5) e.pierce = Math.max(e.pierce || 0, 3); if (B5) e.zeroInt = 1; break;
+      case 'heavy': if (L2) { e.reload = (e.reload || 1.6) * .85; if (e.cool) e.cool *= .85; } if (A3) e.siege = 1; if (B3) e.suppress = 1; if (L4) { e.slow = Math.min(1, (e.slow || 1) + .15); if (e.cool) e.cool *= .9; } if (A5) e.bastion = 1; if (B5) e.cover = 1; break;
+      case 'launcher': if (L2) { if (e.radius) e.radius *= 1.15; if (e.cool) e.cool *= .9; } if (A3) e.homing = Math.max(e.homing || 0, .6); if (B3) e.rack = 1; if (L4) e.charges = 2; if (A5) e.homing = 1; if (B5) e.openStd = 1; break;
+      case 'melee': if (L2) e.dmg *= 1.12; if (A3) e.duelist = 1; if (B3) e.emp = true; if (L4) add('pen', 25); if (A5) e.refusal = 1; if (B5) e.keybearer = 1; break;
+      case 'nonlethal': e.status = 1; if (L2) e.status *= 1.2; if (A3) e.status *= 1.3; if (B3) e.collector = 1; if (L4 && e.dmg) e.dmg *= 1.25; if (A5) e.status *= 1.5; if (B5) e.surrender = 1; break;
+      case 'cyber': if (L2 && e.cool) e.cool *= .85; if (A3) e.area = (e.area || 0) + 6; if (B3) { e.quiet = 1; if (e.cool) e.cool *= 1.1; } if (L4 && e.cool) e.cool *= .8; if (L4 && e.life) e.life *= 1.3; if (A5 && e.cool) e.cool *= .85; if (B5) e.shared = 1; break;
+    }
+  }
+  const stateOf = () => { const S = NV.State.get(); if (!S) return null; if (!S.arms || !S.arms.owned) S.arms = { owned: ['courier-sidearm', 'ghost-s-monoblade'], bar: ['courier-sidearm', 'ghost-s-monoblade', null, null, null, null, null, null, null], sel: 0 };
+    const A = S.arms; if (!A.up) A.up = {}; if (!A.load) A.load = {}; if (!A.mats) A.mats = { parts: 20, mil: 0, quantum: 0, cipher: 0 };
+    if (!A.ammo) { A.ammo = {}; Object.keys(AMMO).forEach(k => A.ammo[k] = AMMO[k][1]); } return A; };
+  const upOf = id => { const A = stateOf(); return A && A.up && A.up[id] || { l: 1 }; };
+  const loadOf = id => { const A = stateOf(); return A && A.load && A.load[id] || 'std'; };
+  // the weapon as it actually fires: base stats + upgrade tree + converted ammunition load
+  function eff(w, ldOver) {
+    if (!w) return w; const u = upOf(w.id), ld = ldOver || loadOf(w.id), k = u.l + (u.a || '') + (u.b || '') + ld;
+    if (k === '1std') return w; w._eff = w._eff || {}; if (w._eff[k]) return w._eff[k];
+    const e = Object.assign({}, w, { base: w, lvl: u.l, br3: u.a, br5: u.b }); applyTree(e, u); if (ld !== 'std') applyLoad(e, ld); return w._eff[k] = e;
+  }
+  const canPay = (A, c, S) => (S.credits || 0) >= (c.cr || 0) && ['parts', 'mil', 'quantum', 'cipher'].every(m => (A.mats[m] || 0) >= (c[m] || 0));
+  function upgrade(id, branch) {
+    const S = NV.State.get(), A = stateOf(), w = BY[id]; if (!S || !A || !w) return false; const u = A.up[id] || { l: 1 }; if (u.l >= 5) return false;
+    const nl = u.l + 1, c = costOf(w, nl); if ((nl === 3 || nl === 5) && !branch) return false; if (!canPay(A, c, S)) return false;
+    S.credits -= c.cr || 0; ['parts', 'mil', 'quantum', 'cipher'].forEach(m => { if (c[m]) A.mats[m] -= c[m]; });
+    A.up[id] = Object.assign({}, u, { l: nl }, nl === 3 ? { a: branch } : nl === 5 ? { b: branch } : {}); NV.State.save(); return true;
+  }
+  const famOf = w => FAM[w.cat];
+  return { CATS: CATS.map(c => ({ cat: c[0], name: c[1] })), ALL, BY, glyph, kindName, state: stateOf, TREE, FAM, AMMO, MATS, LOADS, ammoOf, loadsFor, eff, upgrade, costOf, canPay, famOf, upOf, loadOf };
 })();
 NV.TILE = 4;
 /* districts of New Avalon: [id, name, window colour A, window colour B, height mult, plaza rate, style] */
@@ -2368,7 +2454,8 @@ NV.Level = (() => {
   const aimO = () => L.vr && L.vr.on && L.vr.ray ? L.vr.ray.origin.clone() : L.cam.position.clone();
   const ARMS = () => NV.Arms;
   function armsInit() {
-    L.arms = { cur: null, curId: null, models: {}, cool: {}, swing: 0, drones: [], proj: [], strikes: [], buff: { shield: 0, cloak: 0 }, reveal: 0, sig: '', mats: {} };
+    L.arms = { cur: null, curId: null, models: {}, cool: {}, swing: 0, drones: [], proj: [], strikes: [], buff: { shield: 0, cloak: 0 }, reveal: 0, sig: '', mats: {}, ch: {}, swapT: -9, crit: 1, freeAmmo: 0, coverT: 0, duelT: 0, lastT: -9 };
+    { const AR = ARMS(), st = AR.state(); if (st) Object.keys(AR.AMMO).forEach(k => { const half = Math.ceil(AR.AMMO[k][1] / 2); if ((st.ammo[k] || 0) < half) st.ammo[k] = half; }); } // resupply cache at every deployment
     L.gun.node.getChildMeshes(true).forEach(m => { if (m.name !== 'mf') m.setEnabled(false); }); // the procedural models replace the old sidearm
     armsSync(true);
   }
@@ -2411,12 +2498,13 @@ NV.Level = (() => {
   // keep the hotbar HUD, selection and viewmodel in sync with the saved loadout
   function armsSync(force) {
     const A = ARMS().state(); if (!A) return;
-    const sig = A.bar.join(',') + '|' + A.sel;
+    const cid = A.bar[A.sel], sig = A.bar.join(',') + '|' + A.sel + '|' + (cid ? JSON.stringify(A.up[cid] || 0) + (A.load[cid] || '') : '');
     if (!force && sig === L.arms.sig) return; L.arms.sig = sig;
     const id = A.bar[A.sel], w = id && ARMS().BY[id];
+    L.arms.cur = w ? ARMS().eff(w) : null; // upgrades and converted ammo applied
     if (L.arms.curId !== id) {
       Object.values(L.arms.models).forEach(m => m.node.setEnabled(false));
-      L.arms.cur = w || null; L.arms.curId = id;
+      L.arms.curId = id; L.arms.swapT = L.time; L.arms.gsUsed = 0;
       if (w) { const m = L.arms.models[w.id] || (L.arms.models[w.id] = weaponModel(w)); m.node.setEnabled(!L.drive && !L.calm && L.gun.node.isEnabled()); L.gun.mf.position.z = m.muzzle; }
     }
     const bar = document.querySelector('#hud .hotbar'); if (!bar) return;
@@ -2429,8 +2517,18 @@ NV.Level = (() => {
   function weaponHit(e, dmg, w, head, imp) {
     if (e.state === 'down') return;
     if (w && w.emp) { e.stun = Math.max(e.stun, e.drone ? 3 : 1.4); if (e.drone) dmg *= 1.8; }
-    if (w && w.pen != null && e.drone) dmg *= .6 + w.pen * .008; // armour penetration vs plated drones
-    if (w && w.stun) { e.hp -= dmg; NV.Audio.sfx('hit'); if (e.hp <= 0) disable(e, true, imp); else { e.stun = Math.max(e.stun, .7); alertEnemy(e, true); } return; }
+    const near = w && w.finalDoor && Math.hypot(e.x - L.p.x, e.z - L.p.z) < 4;
+    if (w && w.pen != null && e.drone) dmg *= .6 + (near ? 100 : w.pen) * .008; // armour penetration vs plated drones
+    if (w) { // upgrade-branch effects
+      L.arms.lastW = w; L.arms.lastT = L.time;
+      if (near) dmg *= 1.3; if (w.siege && e.drone) dmg *= 1.4; if (w.counter && e.state === 'alert') dmg *= 1.25;
+      if (w.forecast) { if (L.arms.fcE === e) L.arms.fcN = Math.min(5, L.arms.fcN + 1); else { L.arms.fcE = e; L.arms.fcN = 0; } dmg *= 1 + L.arms.fcN * .08; }
+      if (w.stagger) e.stun = Math.max(e.stun, .25); if (w.suppress) { e.stun = Math.max(e.stun, .12); e.cd = (e.cd || 0) + .15; } if (w.refusal) e.stun = Math.max(e.stun, 1.5);
+      if (w.operator || w.tag) L.arms.reveal = Math.max(L.arms.reveal, 3);
+      if (w.packet) { L.arms.pk = (L.arms.pk || 0) + 1; if (L.arms.pk % 10 === 0) { if (e.drone) e.stun = Math.max(e.stun, 3); L.arms.reveal = Math.max(L.arms.reveal, 6); spark(V3(e.x, 1.6, e.z), '#19f0ff', 14); NV.Audio.sfx('hackok'); } }
+      if (w.stun && w.mercy) L.enemies.forEach(o => { if (o !== e && o.state !== 'down' && Math.hypot(o.x - e.x, o.z - e.z) < 4) o.stun = Math.max(o.stun, 2 * (w.status || 1)); });
+    }
+    if (w && w.stun) { e.hp -= dmg; NV.Audio.sfx('hit'); if (e.hp <= 0) disable(e, true, imp); else { e.stun = Math.max(e.stun, .7 * (w.status || 1)); alertEnemy(e, true); } return; }
     if (imp && e.hp - dmg <= 0) { e.hp = 0; disable(e, false, imp); NV.Audio.sfx('hit'); return; }
     hurtEnemy(e, dmg, head);
   }
@@ -2443,13 +2541,47 @@ NV.Level = (() => {
   function shoot(w) {
     w = w || ARMS().BY['courier-sidearm'];
     const p = L.p; if (p.heat >= 100 || p.over > 0 || p.cd > 0) return;
-    p.cd = w.cd; p.heat += w.heat; if (p.heat >= 100) { p.over = w.reload || 1.6; NV.Audio.sfx('hackfail'); }
+    w = spend(w, 1); if (!w) { p.cd = .35; return; }
+    const AA = L.arms; let crit = 1, cd = w.cd, heat = w.heat;
+    if (w.gunslinger && L.time - AA.swapT < 2 && !AA.gsUsed) { AA.gsUsed = 1; if (Math.random() < .4) crit = 2; }
+    if (w.zeroInt && AA.wasZoom && !AA.ziUsed) { AA.ziUsed = 1; crit = Math.max(crit, 1.5); }
+    if (w.overclock) { AA.sus = L.time - (AA.lastShot || -9) < .3 ? Math.min(3, (AA.sus || 0) + cd) : 0; cd *= 1 - Math.min(.35, AA.sus * .12); heat *= 1.25; }
+    AA.lastShot = L.time; if (w.cover) AA.coverT = L.time + .45;
+    p.cd = cd; p.heat += heat; if (p.heat >= 100) { p.over = w.reload || 1.6; NV.Audio.sfx('hackfail'); onReload(w); }
     if (w.recoil && !(L.vr && L.vr.on)) p.pitch = Math.max(-1.3, p.pitch - w.recoil * (.7 + Math.random() * .6));
-    NV.Audio.sfx('shoot'); noise(p.x, p.z, w.noise); NV.In.rumble(w.pellets > 1 || w.cat === 'sniper' ? .7 : .25, .4, w.pellets > 1 ? 140 : 60);
+    NV.Audio.sfx('shoot'); noise(p.x, p.z, w.noise + (!w.silent && ARMS().ammoOf(w) === 'precision' ? 10 : 0)); NV.In.rumble(w.pellets > 1 || w.cat === 'sniper' ? .7 : .25, .4, w.pellets > 1 ? 140 : 60);
     L.gun.kick = 1; L.gun.flash.intensity = 2.5; L.gun.mf.isVisible = true; L.gun.mf.rotation.z = Math.random() * 6.28; L.gun.mf.scaling.setAll((.8 + Math.random() * .5) * (w.pellets > 1 || w.cat === 'sniper' ? 1.6 : 1)); L.gun.mfT = .045;
     p.pitch -= .012 * (w.pellets > 1 || w.cat === 'sniper' ? 3 : 1); L.stats.shots++;
-    for (let k = 0; k < w.pellets; k++) shotRay(w, false);
+    AA.crit = crit; for (let k = 0; k < w.pellets; k++) shotRay(w, false); AA.crit = 1;
     if (w.echo) setTimeout(() => { if (L && !L.over) { shotRay(w, true); NV.Audio.sfx('eshoot'); } }, 260); // the echo repeats the shot
+  }
+
+  // ammunition: family reserves (script "Ammunition and Charges"); exotic loads fall back to standard when spent
+  function spend(w, n) {
+    const AR = ARMS(), A = AR.state(); if (!A) return w;
+    if ((w.load === 'null' || w.load === 'quantum') && w.base) { if ((A.ammo[w.load] || 0) >= n) { A.ammo[w.load] -= n; return w; } w = AR.eff(w.base, 'std'); }
+    const f = AR.ammoOf(w); if (!f || L.arms.freeAmmo > L.time) return w;
+    if ((A.ammo[f] || 0) < n - 1e-6) { if (!(L.arms.dryT > L.time)) { L.arms.dryT = L.time + 2.5; NV.Audio.sfx('hackfail'); NV.toast('OUT OF AMMO', AR.AMMO[f][0] + ' spent. Loot fallen enemies or restock at the Black Market (Esc).', '#ff5a3d', 2.5); } return null; }
+    A.ammo[f] = Math.max(0, A.ammo[f] - n); return w;
+  }
+  function onReload(w) {
+    if (w.runaway) { L.arms.freeAmmo = L.time + 6; NV.toast('RUNAWAY CYCLE', 'Free reserve draw for 6 seconds.', '#ffd23d', 1.5); }
+    if (w.blackout) { L.enemies.forEach(e => { if (e.state !== 'down' && Math.hypot(e.x - L.p.x, e.z - L.p.z) < 12) { e.stun = Math.max(e.stun, e.drone ? 4 : 1.2); spark(V3(e.x, 1.4, e.z), '#19f0ff', 10); } }); NV.Audio.sfx('emp'); }
+  }
+  // what a fallen enemy leaves behind: components (lethal yields more damaged parts) and ammunition for the gun in hand
+  function loot(e, takedown) {
+    const AR = ARMS(), A = AR.state(); if (!A) return; const M = A.mats;
+    M.parts = Math.min(999, (M.parts || 0) + (takedown ? 1 : 2)); if (e.drone && Math.random() < .3) M.mil = Math.min(99, (M.mil || 0) + 1);
+    const w = L.arms.cur, f = w && AR.ammoOf(w); if (f && f !== 'drone') A.ammo[f] = Math.min(AR.AMMO[f][1], (A.ammo[f] || 0) + Math.max(f === 'cells' ? .5 : 1, Math.round(AR.AMMO[f][1] * .08)));
+  }
+  function onKill(w, e, takedown) {
+    const A = ARMS().state(); L.arms.lastT = -9; // no chain reactions
+    if (!w) return;
+    if (w.collector && takedown && A) A.mats.parts = Math.min(999, A.mats.parts + 2);
+    if (w.cleanExit) L.arms.buff.cloak = Math.max(L.arms.buff.cloak, 2.5);
+    if (w.duelist) L.arms.duelT = L.time + 3;
+    if (w.keybearer) L.enemies.forEach(o => { if (o.drone && o.state !== 'down' && Math.hypot(o.x - e.x, o.z - e.z) < 8) { o.stun = Math.max(o.stun, 6); spark(V3(o.x, 1.6, o.z), '#19f0ff', 12); } });
+    if (w.surrender && takedown && Math.random() < .35) { const o = L.enemies.filter(o => o.state !== 'down' && !o.drone && Math.hypot(o.x - e.x, o.z - e.z) < 10)[0]; if (o) { disable(o, true, { x: 0, y: .3, z: 0 }); NV.toast('SAFE SURRENDER', 'A guard stands down.', '#3dffa8', 1.5); } }
   }
   // Network Safety: hostile drones within 20 m try to hijack networked weapons (0–24 easily controlled, 25–49 vulnerable)
   function hijack(w) {
@@ -2484,13 +2616,14 @@ NV.Level = (() => {
     tracer(echo ? muzzle.add(V3(.6, .3, 0)) : muzzle, end);
     if (netOn()) NV.Net.send({ t: 'shot', a: [muzzle.x, muzzle.y, muzzle.z].map(v => +v.toFixed(2)), b: [end.x, end.y, end.z].map(v => +v.toFixed(2)), lvl: L.netKey });
     if (pHit) { NV.Net.send({ t: 'hit', to: pHit.id, dmg: Math.min(60, w.dmg * .5) * (pHead ? 2 : 1), lvl: L.netKey }); spark(end, '#ff5a3d', 12); flashX(); }
-    const dm = dmgMulOf() * (echo ? .6 : 1);
-    pierced.forEach(h => { weaponHit(h.e, w.dmg * dm * (h.head ? 2 : 1), w, h.head, w.cat === 'sniper' || w.pellets > 1 ? { x: d.x * 5, y: 2.5, z: d.z * 5 } : null); spark(o.add(d.scale(h.t)), h.head ? '#ffffff' : w.col[1], h.head ? 22 : 12); flashX(); });
-    if (bossHit) { const B2 = L.boss; if (B2.shieldOn) { spark(end, '#19f0ff', 10); NV.Audio.sfx('shield'); } else { const dd = w.dmg * dm * (w.emp ? 1.3 : 1) * (w.pen != null ? .6 + w.pen * .008 : 1); B2.hp -= dd; if (netOn()) NV.Net.send({ t: 'boss', d: dd, lvl: L.netKey }); spark(end, '#ff5a3d', 16); flashX(); NV.Audio.sfx('hit'); if (B2.hp <= 0) bossDown(); } }
+    const dm = dmgMulOf() * (echo ? .6 : 1) * (L.arms.crit || 1);
+    if (w.deadCert && pierced.some(h => h.head)) { L.p.heat = Math.max(0, L.p.heat - w.heat); const f = ARMS().ammoOf(w), st = ARMS().state(); if (f && st) st.ammo[f]++; }
+    pierced.forEach(h => { weaponHit(h.e, w.dmg * dm * (h.head ? w.head || 2 : 1), w, h.head, w.cat === 'sniper' || w.pellets > 1 ? { x: d.x * 5, y: 2.5, z: d.z * 5 } : null); spark(o.add(d.scale(h.t)), h.head ? '#ffffff' : w.col[1], h.head ? 22 : 12); flashX(); });
+    if (bossHit) { const B2 = L.boss; if (B2.shieldOn) { spark(end, '#19f0ff', 10); NV.Audio.sfx('shield'); } else { const dd = w.dmg * dm * (w.emp ? 1.3 : 1) * (w.pen != null ? .6 + w.pen * .008 : 1) * (w.siege ? 1.4 : 1) * (w.bastion ? 1.3 : 1); B2.hp -= dd; if (netOn()) NV.Net.send({ t: 'boss', d: dd, lvl: L.netKey }); spark(end, '#ff5a3d', 16); flashX(); NV.Audio.sfx('hit'); if (B2.hp <= 0) bossDown(); } }
     if (!pierced.length && !bossHit && !pHit) spark(end, null, 6);
   }
   function beamTick(w, dt) {
-    const p = L.p; if (p.over > 0) return;
+    const p = L.p; if (p.over > 0) return; if (!spend(w, .12 * dt)) return;
     p.heat += w.heat * dt; if (p.heat >= 100) { p.over = 1.6; NV.Audio.sfx('hackfail'); return; }
     const o = aimO(), d = camDir(); let tEnd = w.range || 60;
     for (let t = .3; t < tEnd; t += .3) { const q = o.add(d.scale(t)); if (q.y < 0 || solid(q.x, q.z)) { tEnd = t; break; } }
@@ -2503,11 +2636,12 @@ NV.Level = (() => {
   function aimTargetBoss(range) { const B2 = L.boss, o = L.cam.position, v = V3(B2.x, 2.2, B2.z).subtract(o); return v.length() < range && BABYLON.Vector3.Dot(v.normalize(), camDir()) > .985; }
   function swing(w) {
     const p = L.p; if (p.cd > 0) return; p.cd = w.cd; L.arms.swing = .28; NV.Audio.sfx('dash');
+    const st = ARMS().state(), powered = ARMS().ammoOf(w) === 'cells', pw = !powered || (st && st.ammo.cells >= .1); if (powered && pw) st.ammo.cells -= .1; const pm = pw ? 1 : .6; // unpowered hammers hit softer
     setTimeout(() => {
       if (!L || L.over) return; const fx = Math.sin(p.yaw), fz = Math.cos(p.yaw); let any = false;
       L.enemies.forEach(e => { if (e.state === 'down') return; const dx = e.x - p.x, dz = e.z - p.z, d = Math.hypot(dx, dz); if (d > w.range || (dx * fx + dz * fz) / (d || 1) < .5) return; any = true;
         const unaware = e.state === 'patrol' || e.state === 'sus'; // blades are silent: an unaware target goes down in one hit
-        if (unaware) { disable(e, !!w.stun, { x: fx * 2, y: 1, z: fz * 2 }); L.stats.takedowns++; } else weaponHit(e, w.dmg * dmgMulOf(), w, false, { x: fx * 4, y: 2.5, z: fz * 4 });
+        if (unaware) { L.arms.lastW = w; L.arms.lastT = L.time; disable(e, !!w.stun, { x: fx * 2, y: 1, z: fz * 2 }); L.stats.takedowns++; } else weaponHit(e, w.dmg * dmgMulOf() * pm, w, false, { x: fx * 4, y: 2.5, z: fz * 4 });
         spark(V3(e.x, 1.2, e.z), w.col[1], 14); });
       if (L.boss && L.boss.hp > 0 && !L.boss.shieldOn && Math.hypot(L.boss.x - p.x, L.boss.z - p.z) < w.range + 1) { L.boss.hp -= w.dmg * 1.2; any = true; if (L.boss.hp <= 0) bossDown(); }
       if (any) { NV.Audio.sfx('hit'); shake(.2); flashX(); }
@@ -2597,7 +2731,7 @@ NV.Level = (() => {
     if (w.fx === 'shield') { L.arms.buff.shield = 14; NV.toast('FIREWALL', 'Incoming damage cut for 14 seconds.', '#19f0ff', 2); NV.Audio.sfx('shield'); return true; }
     if (w.fx === 'reveal') { L.arms.reveal = 16; NV.toast('PREDICTION ONLINE', 'Every hostile nearby is marked for 16 seconds.', '#ff3355', 3); NV.Audio.sfx('hackok'); return true; }
     const t = aimTarget(.16, w.range || 45); if (!t) { NV.Audio.sfx('hackfail'); NV.toast('NO TARGET', 'Aim at an enemy in line of sight.', '#8a84b3', 1.2); return false; }
-    tracer(L.gun.node.getAbsolutePosition(), V3(t.x, 1.4, t.z)); NV.Audio.sfx('hackok');
+    tracer(L.gun.node.getAbsolutePosition(), V3(t.x, 1.4, t.z)); NV.Audio.sfx('hackok'); if (!w.quiet) noise(t.x, t.z, 8); // Living Cipher uploads leave no trace
     const group = w.area ? L.enemies.filter(e => e.state !== 'down' && Math.hypot(e.x - t.x, e.z - t.z) < w.area) : [t];
     group.forEach(e => {
       switch (w.fx) {
@@ -2608,6 +2742,7 @@ NV.Level = (() => {
         case 'chain': L.enemies.filter(o => o.state !== 'down' && Math.hypot(o.x - e.x, o.z - e.z) < 15).slice(0, 5).forEach(o => { o.stun = Math.max(o.stun, 6); tracer(V3(e.x, 1.4, e.z), V3(o.x, 1.4, o.z)); }); break;
         default: e.stun = Math.max(e.stun, 8);
       }
+      if (w.shared) e.stun = Math.max(e.stun, 3);
       spark(V3(e.x, 1.6, e.z), w.col[1], 16);
     });
     return true;
@@ -2668,11 +2803,23 @@ NV.Level = (() => {
     if (!press) return;
     if (!ready) { NV.Audio.sfx('hackfail'); return; }
     let ok = true;
-    if (w.type === 'throw' || w.type === 'rocket') launch(w);
+    if (w.type === 'throw' || w.type === 'rocket' || w.type === 'drone') { const sw = spend(w, 1); if (!sw) return; w = sw; }
+    if (w.type === 'throw' || w.type === 'rocket') {
+      let lw = w;
+      if (w.rack) { const R = [['emp', 'EMP'], ['sleep', 'FOAM'], ['pull', 'CABLE'], ['freeze', 'COOLANT'], ['decoy', 'DECOY'], ['frag', 'FRAG']]; L.arms.rackI = ((L.arms.rackI || 0) + 1) % R.length; lw = Object.assign({}, w, { fx: R[L.arms.rackI][0] }); NV.toast('UTILITY RACK', R[L.arms.rackI][1] + ' payload', '#ffd23d', 1); }
+      if (ARMS().ammoOf(w) === 'missiles' && hijack(w)) lw = Object.assign({}, lw, { homing: 0 }); // micro-missiles are vulnerable to targeting hacks
+      launch(lw);
+    }
     else if (w.type === 'strike') strike(w);
     else if (w.type === 'hack') ok = hack(w);
     else if (w.type === 'drone') deploy(w);
-    if (ok) { L.arms.cool[w.id] = now + (w.cool || 3); L.gun.kick = .6; }
+    if (ok) { if (w.charges > 1 && !L.arms.ch[w.id]) { L.arms.ch[w.id] = 1; L.arms.cool[w.id] = now + .35; } else { L.arms.ch[w.id] = 0; L.arms.cool[w.id] = now + (w.cool || 3); } L.gun.kick = .6; }
+  }
+  function ammoTxt(w) {
+    const AR = ARMS(), st = AR.state(), f = AR.ammoOf(w); if (!st || !f) return '';
+    const res = st.ammo[f] || 0, ex = (w.load === 'null' || w.load === 'quantum') ? ' +' + (st.ammo[w.load] || 0) + ' ' + w.load.toUpperCase() : w.load && w.load !== 'std' ? ' ' + w.load.toUpperCase() : '';
+    if (w.type === 'gun' && !w.beam && w.mag) { const inMag = Math.min(res, Math.max(0, Math.round((100 - L.p.heat) / (100 / w.mag)))); return ' · ' + (L.p.over > 0 ? 'RELOADING' : inMag + '/' + w.mag) + ' | ' + Math.floor(res) + ex; }
+    return ' · ' + (f === 'cells' ? res.toFixed(1) : Math.floor(res)) + ' ' + AR.AMMO[f][0].split(' ').pop().toUpperCase() + ex;
   }
   function updateArms(dt) {
     const A = L.arms, I = NV.In; if (!A) return;
@@ -2691,7 +2838,7 @@ NV.Level = (() => {
     // cooldown shading on the hotbar
     const bar = document.querySelector('#hud .hotbar'); if (bar) { const st = ARMS().state(); [...bar.children].forEach((el, i) => { const id = st.bar[i], x = id && ARMS().BY[id], c = x && A.cool[x.id] > L.time ? (A.cool[x.id] - L.time) / (x.cool || 3) : 0; el.lastChild.style.height = (c * 100).toFixed(0) + '%'; }); }
     const bf = []; if (A.buff.shield > 0 || A.droneShield) bf.push('ARMOUR'); if (A.buff.cloak > 0) bf.push('CLOAKED'); if (A.jam) bf.push('SENSORS JAMMED'); if (A.reveal > 0) bf.push('HOSTILES MARKED'); if (A.drones.length) bf.push(A.drones.length + ' DRONE' + (A.drones.length > 1 ? 'S' : ''));
-    const S = NV.State.get(); hset('#hud .hbinfo', 'text', (S ? (S.credits || 0) + ' ¢' : '') + (bf.length ? '  ·  ' + bf.join(' · ') : '') + (w ? '  ·  ' + w.name.toUpperCase() + ' [' + ARMS().kindName(w) + ']' + (w.zoom ? ' · RMB ZOOM' : '') : ''));
+    const S = NV.State.get(); hset('#hud .hbinfo', 'text', (S ? (S.credits || 0) + ' ¢' : '') + (bf.length ? '  ·  ' + bf.join(' · ') : '') + (w ? '  ·  ' + w.name.toUpperCase() + (w.lvl > 1 ? ' ' + ['', 'I', 'II', 'III', 'IV', 'V'][w.lvl] : '') + ' [' + ARMS().kindName(w) + ']' + ammoTxt(w) + (w.zoom ? ' · RMB ZOOM' : '') : ''));
   }
   function rayBox(o, d, c) {
     const s = .8, min = [c.x - s, 0, c.z - s], max = [c.x + s, c.h * 2 - .15, c.z + s], oo = [o.x, o.y, o.z], dd = [d.x, d.y, d.z];
@@ -2752,7 +2899,7 @@ NV.Level = (() => {
     if (e.m && e.m.root) ragdoll(e, e.m.root, e.m.rig, imp.x, imp.y, imp.z, e.drone);
     if (netOn() && e.nid != null && !e.netDown) NV.Net.send({ t: 'edown', k: e.nid, imp: { x: +imp.x.toFixed(2), y: +imp.y.toFixed(2), z: +imp.z.toFixed(2) }, lvl: L.netKey });
     e.state = 'down'; e.hp = 0; NV.Audio.sfx('down');
-    if (!e.netDown) { const S = NV.State.get(); if (S) S.credits = (S.credits || 0) + (takedown ? 14 : 9); }
+    if (!e.netDown) { const S = NV.State.get(); if (S) S.credits = (S.credits || 0) + (takedown ? 14 : 9); if (L.arms) { loot(e, takedown); if (L.arms.lastT > L.time - .25) onKill(L.arms.lastW, e, takedown); } }
     if (takedown) L.stats.takedowns++; else L.stats.disabled++;
     e.m.visor.material = L.mats.visorOff; e.m.extra.forEach(x => x.material = L.mats.visorOff); e.m.mark.isVisible = false;
     spark(V3(e.x, 1, e.z), '#ffffff', 20);
@@ -2780,6 +2927,7 @@ NV.Level = (() => {
   function hurtPlayer(d) {
     if (L.over || L.p.inv > 0) return;
     if (L.arms && (L.arms.buff.shield > 0 || L.arms.droneShield)) d *= .4;
+    if (L.arms && L.arms.coverT > L.time) d *= .5; // Walking Cover
     const dm = d * NV.DIFF[L.diff].dmg * (L.tactic.armor || 1);
     L.p.hp -= dm; L.p.regenT = 4; if (dm > 12) NV.glitch(140); NV.In.rumble(.9, .6, 180); L.stats.dmg += dm; NV.Audio.sfx('hurt'); shake(.35);
     const el = document.querySelector('#hud .dmg'); if (el) { el.style.opacity = U.clamp(dm / 30, .35, 1); clearTimeout(el._t); el._t = setTimeout(() => el.style.opacity = 0, 180); }
@@ -2821,6 +2969,7 @@ NV.Level = (() => {
   /* ---------------- boss ---------------- */
   function bossDown() {
     const B2 = L.boss; B2.hp = 0; NV.Audio.sfx('boom'); shake(1); spark(V3(B2.x, 2, B2.z), '#ffffff', 60);
+    { const st = ARMS().state(); if (st) { st.mats.mil += 3; st.mats.quantum = Math.min(30, st.mats.quantum + 1); st.mats.cipher = Math.min(20, st.mats.cipher + 1); NV.toast('BOSS MODULE', '+3 Military Components · +1 Quantum Fragment · +1 Living Cipher Thread', '#ffd23d', 3); } }
     B2.root.getChildMeshes().forEach(m => m.visibility = .25);
     L.enemies.forEach(e => { if (e.state !== 'down') disable(e, false); });
     setTimeout(() => finish(true), 1400);
@@ -2869,6 +3018,7 @@ NV.Level = (() => {
     if (L.pRag) { pRagUpdate(dt); if (L.pRag) { L.look.dx = L.look.dy = 0; if (L.free) updateFree(dt); if (L.city) updateTraffic(dt); updateEnemies(dt); updateBullets(dt); hud(dt); return; } }
     // look
     const zoomed = L.arms && L.arms.cur && L.arms.cur.zoom && (I.rmb || (I.pad && I.pad.buttons[6] && I.pad.buttons[6].value > .4) || (NV.Touch && NV.Touch.zoom)) && !L.drive;
+    if (L.arms) { if (zoomed && !L.arms.wasZoom) { L.arms.ziUsed = 0; if (L.arms.cur.zeroInt) p.cd = 0; } L.arms.wasZoom = !!zoomed; }
     const sens = .0022 * set.sens * (zoomed ? .35 : 1);
     L.lastLook = L.look.dx || L.look.dy || (I.pad && (Math.abs(I.pad.axes[2]) > .15 || Math.abs(I.pad.axes[3]) > .15));
     p.yaw += L.look.dx * sens; p.pitch += L.look.dy * sens * (set.invertY ? -1 : 1); L.look.dx = L.look.dy = 0;
@@ -2889,7 +3039,7 @@ NV.Level = (() => {
     p.crouch = crouch;
     const ml = Math.hypot(mx, mz); if (ml > 1) { mx /= ml; mz /= ml; }
     const sprint = (I.key('ShiftLeft') || I.padBtn(4) || NV.Touch.run) && !crouch && mz > 0;
-    let spd = (crouch ? 2.6 : sprint ? 8.2 : 5.4) * (L.tags.includes('driver') ? 1.12 : 1) * ((L.arms && L.arms.cur && L.arms.cur.slow) || 1);
+    let spd = (crouch ? 2.6 : sprint ? 8.2 : 5.4) * (L.tags.includes('driver') ? 1.12 : 1) * ((L.arms && L.arms.cur && L.arms.cur.slow) || 1) * (L.arms && L.arms.duelT > L.time ? 1.15 : 1);
     const sy = Math.sin(p.yaw), cy = Math.cos(p.yaw);
     let vx = (mx * cy + mz * sy) * spd, vz = (-mx * sy + mz * cy) * spd;
     p.sprint = sprint; const pk = L.map.hmap ? parkour(dt, mx, mz, sprint, crouch) : 0;
@@ -2916,7 +3066,7 @@ NV.Level = (() => {
     L.plight.position.set(p.x, eyeH + .4, p.z);
     if (L.sun) L.sun.position.set(p.x + 17, 50, p.z + 12);
     if (L.rain) L.rain.emitter = V3(p.x, py, p.z);
-    L.cam.fov = U.lerp(L.cam.fov, set.fov * Math.PI / 180 * .75 * (sprint ? 1.08 : 1) * (p.dash > 0 ? 1.15 : 1) * (zoomed ? .3 : 1), dt * 8);
+    L.cam.fov = U.lerp(L.cam.fov, set.fov * Math.PI / 180 * .75 * (sprint ? 1.08 : 1) * (p.dash > 0 ? 1.15 : 1) * (zoomed ? (L.arms.cur.longwatch ? .17 : .3) : 1), dt * 8);
     if (L.drive) driveCamera(dt);
     if (p.sky) skyCam(dt);
     if (L.vr && L.vr.on) vrCamera();
@@ -4471,7 +4621,7 @@ NV.Level = (() => {
   function lock() { if ((NV.Touch && NV.Touch.active) || (NV.Mobile && NV.Mobile.on)) return; try { const r = lockEl().requestPointerLock(); if (r && r.catch) r.catch(() => { }); } catch (e) { } }
   function finish(won, why) {
     if (L.over) return;
-    if (won && !L.free) { const S = NV.State.get(), bonus = 150 + L.act * 50; if (S) { S.credits = (S.credits || 0) + bonus; NV.State.save(); } NV.toast('PAYOUT', '+' + bonus + ' ¢ — spend it at the Black Market (Esc).', '#ffd23d', 4); }
+    if (won && !L.free) { const S = NV.State.get(), bonus = 150 + L.act * 50, st = ARMS().state(); if (st) { st.mats.parts = Math.min(999, st.mats.parts + 10); st.mats.mil = Math.min(99, st.mats.mil + 1); } if (S) { S.credits = (S.credits || 0) + bonus; NV.State.save(); } NV.toast('PAYOUT', '+' + bonus + ' ¢ — spend it at the Black Market (Esc).', '#ffd23d', 4); }
     if (netOn() && !L.free && !L.netEnd) NV.Net.send({ t: 'mend', won: !!won, why, lvl: L.netKey }); L.over = true; L.hack = null;
     if (document.pointerLockElement) document.exitPointerLock();
     const s = L.stats; s.undetected = s.alerts === 0; s.won = won; s.why = why;
@@ -5189,20 +5339,53 @@ NV.UI = (() => {
     const A = NV.Arms, st = A.state(); let cat = 'pistol', slot = st.sel;
     const m = add(`<div class="panel bm"><div class="bmhead"><div class="stitle" style="margin:0">BLACK MARKET</div><div class="bmcr"></div><button class="btn bmx">Close ✕</button></div>
       <p class="muted" style="font-size:13px;margin:4px 0 8px">Every advanced weapon has an owner. Helix gear is smart but corporate · Iron Angel is heavy and yours · Mirror copies · Hunter predicts · Null shuts implants down. Pick a hotbar slot, then equip.</p>
-      <div class="bmslots"></div><div class="bmtabs"></div><div class="bmlist"></div></div>`, 'modal');
+      <div class="bmmats"></div><div class="bmslots"></div><div class="bmtabs"></div><div class="bmlist"></div><div class="bmup" hidden></div></div>`, 'modal');
+    let upId = null;
     const $ = q => m.querySelector(q);
     const bars = w => { if (!w.R) return ''; const lab = ['DMG', 'ROF', 'ACC', 'STB', 'RNG', 'MAG', 'PEN', 'NET'];
       return '<span class="wst">' + w.R.map((v, i) => `<em title="${['Damage', 'Rate of fire', 'Accuracy', 'Stability', 'Range', 'Magazine', 'Armour penetration', 'Network Safety'][i]}">${lab[i]} <b>${v}</b>${i === 5 ? '' : `<u><i style="width:${v}%;background:${i === 7 ? (v < 25 ? '#ff3355' : v < 50 ? '#ffb13d' : v < 75 ? '#19f0ff' : '#3dffa8') : w.col[1]}"></i></u>`}</em>`).join('') + '</span>'; };
     const stats = w => bars(w) + (w.type === 'gun' ? (w.beam ? `BEAM ${Math.round(w.dmg)}/s` : `DMG ${Math.round(w.dmg)}${w.pellets > 1 ? '×' + w.pellets : ''} · ${w.auto ? Math.round(1 / w.cd) + '/s AUTO' : 'SEMI'}`) + (w.homing ? ' · SMART' : '') + (w.pierce ? ' · PIERCE' : '') + (w.echo ? ' · ECHO' : '') + (w.stun ? ' · NONLETHAL' : '') + (w.emp ? ' · EMP' : '') + (w.silent ? ' · SILENT' : '')
       : w.type === 'melee' ? `DMG ${Math.round(w.dmg)} · SILENT TAKEDOWNS${w.stun ? ' · NONLETHAL' : ''}${w.emp ? ' · EMP' : ''}`
       : `${A.kindName(w)} · ${(w.fx || '').toUpperCase()}${w.radius ? ' · R ' + w.radius + 'M' : ''}${w.area ? ' · AREA ' + w.area + 'M' : ''} · COOLDOWN ${w.cool}s`);
+
+    const ROM = ['', 'I', 'II', 'III', 'IV', 'V'];
+    const costTxt = c => [c.parts && c.parts + ' Parts', c.mil && c.mil + ' Military', c.quantum && c.quantum + ' Quantum', c.cipher && c.cipher + ' Cipher', c.cr && c.cr + ' ¢'].filter(Boolean).join(' · ');
+    function drawUp() {
+      const el = $('.bmup'); $('.bmlist').hidden = !!upId; if (!upId) { el.hidden = true; return; } el.hidden = false;
+      const w = A.BY[upId], T = A.TREE[A.famOf(w)], u = A.upOf(upId), nx = u.l + 1, c = nx <= 5 ? A.costOf(w, nx) : null, pay = c && A.canPay(st, c, S);
+      const step = (lv, body) => `<div class="ul${u.l >= lv ? ' got' : ''}${nx === lv ? ' nx' : ''}"><b>${ROM[lv]}</b><div>${body}</div></div>`;
+      const plain = (lv, txt) => step(lv, `<p>${U.esc(txt)}</p>${nx === lv ? `<button class="bb uB" data-b=""${pay ? '' : ' disabled'}>UPGRADE · ${costTxt(c)}</button>` : ''}`);
+      const pick = (lv, a, b, chosen) => step(lv, ['A', 'B'].map((k, i) => { const br = i ? b : a, on = chosen === k, off = chosen && !on;
+        return `<div class="ubr${on ? ' on' : ''}${off ? ' off' : ''}"><b>${U.esc(br[0])}</b><p>${U.esc(br[1])}</p>${nx === lv ? `<button class="bb uB" data-b="${k}"${pay ? '' : ' disabled'}>CHOOSE · ${costTxt(c)}</button>` : ''}</div>`; }).join('<i class="or">or</i>'));
+      el.innerHTML = `<div class="uh"><b>${U.esc(w.name)}</b><span class="muted">${U.esc(T.name)} upgrade tree · Levels III and V are permanent branch choices</span><button class="bb uX">Back</button></div>
+        ${step(1, '<p>Base weapon</p>')}${plain(2, T.II)}${pick(3, T.A, T.B, u.a)}${plain(4, T.IV)}${pick(5, T.VA, T.VB, u.b)}
+        <small>Levels II–III use Weapon Parts · Level IV needs Military Components · Level V needs Military Components plus a Quantum Fragment or Living Cipher Thread where the weapon's identity calls for one. Parts drop from fallen enemies (lethal kills yield more damaged components), drones and bosses carry military hardware, and completed operations pay out both.</small>`;
+    }
+    const openStd = () => st.bar.some(id => id && A.eff(A.BY[id]).openStd);
+    const refillCost = k => { const a = A.AMMO[k], miss = Math.max(0, a[1] - (st.ammo[k] || 0)); return Math.ceil(miss * a[2] * ((k === 'rockets' || k === 'missiles') && openStd() ? .7 : 1)); };
+    function ammoPage() {
+      const cw = st.bar[slot] && A.BY[st.bar[slot]], cwE = cw && A.eff(cw), loads = cw ? A.loadsFor(cw) : [], cur = cw && A.loadOf(cw.id);
+      const ammo = Object.entries(A.AMMO).map(([k, a]) => { const n = st.ammo[k] || 0, rc = refillCost(k);
+        return `<div class="bi"><div class="bid"><b>${a[0]}</b><span class="muted"> — ${U.esc(a[3])}</span><span class="wst" style="grid-template-columns:1fr"><em>CARRY <b>${k === 'cells' ? n.toFixed(1) : Math.floor(n)}/${a[1]}</b><u><i style="width:${n / a[1] * 100}%;background:#19f0ff"></i></u></em></span></div>
+          <div class="bia"><button class="bb am" data-k="${k}"${rc && (S.credits || 0) >= rc ? '' : ' disabled'}>${rc ? 'REFILL ' + rc + ' ¢' : 'FULL'}</button></div></div>`; }).join('');
+      const mats = Object.entries(A.MATS).map(([k, m]) => `<div class="bi"><div class="bid"><b>${m[0]}</b><span class="muted"> — ${U.esc(m[3])}</span><small>HELD ${st.mats[k] || 0} / ${m[1]}</small></div>
+          <div class="bia"><button class="bb mt" data-k="${k}"${(S.credits || 0) >= m[2] && (st.mats[k] || 0) < m[1] ? '' : ' disabled'}>BUY 1 · ${m[2]} ¢</button></div></div>`).join('');
+      const wb = !cw ? '<p class="muted">Select a hotbar slot holding a weapon to convert its ammunition.</p>' : !loads.length ? `<p class="muted">${U.esc(cw.name)} has no convertible ammunition.</p>` :
+        `<p class="muted">Converting <b>${U.esc(cw.name)}</b> (slot ${slot + 1}) · family: ${cwE && A.ammoOf(cwE) ? A.AMMO[A.ammoOf(cwE)][0] : '—'}</p>` + loads.map(l => { const on = cur === l, fee = ['slug', 'foam', 'shock', 'breach'].includes(l) && !(l === 'foam' && cwE.knock) ? 4 : 0;
+          return `<div class="bi"><div class="bid"><b>${A.LOADS[l][0]}</b><span class="muted"> — ${A.LOADS[l][1]}</span>${l === 'null' || l === 'quantum' ? `<small>HELD ${st.ammo[l] || 0}</small>` : ''}</div>
+          <div class="bia"><button class="bb ld" data-l="${l}"${on || (st.mats.parts || 0) < fee ? ' disabled' : ''}>${on ? 'LOADED' : 'CONVERT' + (fee ? ' · ' + fee + ' Parts' : '')}</button></div></div>`; }).join('');
+      return `<h4 class="bmh">WORKBENCH · SPECIALIST LOADS</h4>${wb}<h4 class="bmh">AMMUNITION &amp; CHARGES</h4>${ammo}<h4 class="bmh">MATERIALS</h4>${mats}`;
+    }
     const draw = () => {
       $('.bmcr').textContent = (S.credits || 0) + ' ¢';
       $('.bmslots').innerHTML = st.bar.map((id, i) => { const w = id && A.BY[id]; return `<button class="bs${i === slot ? ' on' : ''}" data-s="${i}"><b>${i + 1}</b>${w ? `<i style="color:${w.col[1]}">${A.glyph[w.type]}</i> ${U.esc(w.name)}` : '<span class="muted">empty</span>'}</button>`; }).join('');
-      $('.bmtabs').innerHTML = A.CATS.map(c => `<button class="bt${c.cat === cat ? ' on' : ''}" data-c="${c.cat}">${c.name}</button>`).join('');
-      $('.bmlist').innerHTML = A.ALL.filter(w => w.cat === cat).map(w => { const own = st.owned.includes(w.id), inbar = st.bar.indexOf(w.id);
+      $('.bmmats').innerHTML = Object.entries(A.MATS).map(([k, m]) => `<span title="${U.esc(m[3])}">${m[0]} <b>${st.mats[k] || 0}</b></span>`).join('');
+      $('.bmtabs').innerHTML = `<button class="bt${cat === 'ammo' ? ' on' : ''}" data-c="ammo">Ammo &amp; Workbench</button>` + A.CATS.map(c => `<button class="bt${c.cat === cat ? ' on' : ''}" data-c="${c.cat}">${c.name}</button>`).join('');
+      drawUp();
+      if (cat === 'ammo') { $('.bmlist').innerHTML = ammoPage(); return; }
+      $('.bmlist').innerHTML = A.ALL.filter(w => w.cat === cat).map(w => { const own = st.owned.includes(w.id), inbar = st.bar.indexOf(w.id), u = A.upOf(w.id);
         return `<div class="bi"><div class="bic" style="border-color:${w.col[1]}"><i style="color:${w.col[1]}">${A.glyph[w.type]}</i></div><div class="bid"><b>${U.esc(w.name)}</b>${w.desc ? `<span class="muted"> — ${U.esc(w.desc)}</span>` : ''}<small>${stats(w)}</small></div>
-          <div class="bia">${own ? `<button class="bb eq" data-id="${w.id}">${inbar >= 0 ? 'IN SLOT ' + (inbar + 1) : 'EQUIP → ' + (slot + 1)}</button>` : `<button class="bb buy" data-id="${w.id}"${(S.credits || 0) < w.price ? ' disabled' : ''}>BUY ${w.price} ¢</button>`}</div></div>`; }).join('');
+          <div class="bia">${own && A.famOf(w) ? `<button class="bb upg" data-id="${w.id}">LV ${ROM[u.l]}${u.l < 5 ? ' ▲' : ' ★'}</button>` : ''}${own ? `<button class="bb eq" data-id="${w.id}">${inbar >= 0 ? 'IN SLOT ' + (inbar + 1) : 'EQUIP → ' + (slot + 1)}</button>` : `<button class="bb buy" data-id="${w.id}"${(S.credits || 0) < w.price ? ' disabled' : ''}>BUY ${w.price} ¢</button>`}</div></div>`; }).join('');
     };
     m.addEventListener('click', e => {
       const b = e.target.closest('button'); if (!b) return;
@@ -5210,6 +5393,12 @@ NV.UI = (() => {
       if (b.dataset.s != null) { slot = +b.dataset.s; if (e.detail === 2 || st.bar[slot]) { /* double click clears */ } NV.Audio.sfx('ui'); }
       else if (b.dataset.c) { cat = b.dataset.c; NV.Audio.sfx('ui'); $('.bmlist').scrollTop = 0; }
       else if (b.classList.contains('buy')) { const w = A.BY[b.dataset.id]; if ((S.credits || 0) >= w.price && !st.owned.includes(w.id)) { S.credits -= w.price; st.owned.push(w.id); if (!st.bar[slot]) st.bar[slot] = w.id; NV.Audio.sfx('pickup'); NV.State.save(); } }
+      else if (b.classList.contains('upg')) { upId = b.dataset.id; NV.Audio.sfx('ui'); }
+      else if (b.classList.contains('uX')) { upId = null; NV.Audio.sfx('ui'); }
+      else if (b.classList.contains('uB')) { if (A.upgrade(upId, b.dataset.b || null)) { NV.Audio.sfx('pickup'); NV.glitch && NV.glitch(160); } else NV.Audio.sfx('hackfail'); }
+      else if (b.classList.contains('am')) { const k = b.dataset.k, c = refillCost(k); if (c && (S.credits || 0) >= c) { S.credits -= c; st.ammo[k] = A.AMMO[k][1]; NV.Audio.sfx('pickup'); NV.State.save(); } }
+      else if (b.classList.contains('mt')) { const k = b.dataset.k, m = A.MATS[k]; if ((S.credits || 0) >= m[2] && (st.mats[k] || 0) < m[1]) { S.credits -= m[2]; st.mats[k] = (st.mats[k] || 0) + 1; NV.Audio.sfx('pickup'); NV.State.save(); } }
+      else if (b.classList.contains('ld')) { const cw = A.BY[st.bar[slot]], l = b.dataset.l, fee = ['slug', 'foam', 'shock', 'breach'].includes(l) && !(l === 'foam' && A.eff(cw).knock) ? 4 : 0; if (cw && (st.mats.parts || 0) >= fee) { st.mats.parts -= fee; st.load[cw.id] = l; NV.Audio.sfx('select'); NV.State.save(); } }
       else if (b.classList.contains('eq')) { const id = b.dataset.id, old = st.bar.indexOf(id); if (old >= 0) st.bar[old] = st.bar[slot]; st.bar[slot] = id; st.sel = slot; NV.Audio.sfx('select'); NV.State.save(); }
       draw();
     });
