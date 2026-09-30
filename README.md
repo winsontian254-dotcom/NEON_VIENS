@@ -267,8 +267,8 @@ Single HTML file, currently around 1MB (grows with script rebuilds). It has been
 ## Credits
 
 - **Engine:** Babylon.js
-- **Story & script:** the NEON VEINS script
+- **Story & script:** copilot in word
 - **Music & sound:** real-time WebAudio synthesis
-- **Everything else:** procedural
+- **All code:** claude opus 5.5, deepseek v4.1 flash
 
 > *"Who is outside the model?"*
