@@ -49,7 +49,23 @@ final class Updater {
     /** true when the downloaded game is newer than the one bundled in this APK */
     static boolean useDownloaded(Context c) {
         SharedPreferences p = prefs(c);
-        return downloadedGame(c).exists() && p.getString("gameDate", "").compareTo(bundledInfo(c).optString("date", "")) > 0;
+        if (!downloadedGame(c).exists()) return false;
+        String latest = p.getString("latestBlob", ""), got = p.getString("gameBlob", "");
+        if (!latest.isEmpty()) return got.equals(latest) && !latest.equals(bundledInfo(c).optString("blob", "")); // GitHub's newest file wins
+        return p.getString("gameDate", "").compareTo(bundledInfo(c).optString("date", "")) > 0;
+    }
+
+    // a check in flight: the game waits for it so it always opens the newest version
+    static volatile boolean running = false;
+    static volatile long lastDone = 0;
+    private static final java.util.List<Runnable> waiters = new java.util.ArrayList<>();
+    static void whenIdle(final Activity a, final Runnable r, long timeoutMs) {
+        synchronized (waiters) { if (!running) { a.runOnUiThread(r); return; } waiters.add(r); }
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(new Runnable() { @Override public void run() { boolean mine; synchronized (waiters) { mine = waiters.remove(r); } if (mine) r.run(); } }, timeoutMs);
+    }
+    private static void finish(Activity a) {
+        java.util.List<Runnable> rs; synchronized (waiters) { running = false; lastDone = System.currentTimeMillis(); rs = new java.util.ArrayList<>(waiters); waiters.clear(); }
+        for (Runnable r : rs) a.runOnUiThread(r);
     }
 
     static String activeBlob(Context c) { return useDownloaded(c) ? prefs(c).getString("gameBlob", "") : bundledInfo(c).optString("blob", ""); }
@@ -60,6 +76,7 @@ final class Updater {
 
     // ---------- the check ----------
     static void check(final Activity a, final Listener l) {
+        synchronized (waiters) { if (running) return; running = true; }
         new Thread(new Runnable() {
             @Override public void run() {
                 try {
@@ -70,6 +87,7 @@ final class Updater {
                     String date = info.getJSONObject("committer").getString("date");
                     // 1. game content
                     String blob = new JSONObject(get(API + "/contents/index.html?ref=" + sha)).getString("sha");
+                    prefs(a).edit().putString("latestBlob", blob).apply();
                     String note;
                     if (!blob.equals(activeBlob(a))) {
                         post(a, l, "Downloading game update: " + msg + " …");
@@ -81,6 +99,7 @@ final class Updater {
                         FileOutputStream o = new FileOutputStream(tmp);
                         o.write(html);
                         o.close();
+                        if (f.exists()) f.delete();
                         if (!tmp.renameTo(f)) throw new Exception("could not save update");
                         prefs(a).edit().putString("gameBlob", blob).putString("gameDate", date).putString("gameMsg", msg).apply();
                         note = "Game updated ✓  " + msg;
@@ -97,7 +116,7 @@ final class Updater {
                     post(a, l, "Offline — playing the installed version. Updates are checked when you're back online.");
                 } catch (Exception e) {
                     post(a, l, "Couldn't check for updates (" + e.getMessage() + "). The installed version still works.");
-                }
+                } finally { finish(a); }
             }
         }).start();
     }
@@ -162,6 +181,7 @@ final class Updater {
         c.setReadTimeout(30000);
         c.setRequestProperty("Accept", "application/vnd.github+json");
         c.setRequestProperty("User-Agent", "NeonVeins-Android");
+        c.setUseCaches(false); c.setRequestProperty("Cache-Control", "no-cache");
         try {
             if (c.getResponseCode() != 200) throw new Exception("HTTP " + c.getResponseCode());
             return WebCache.readAll(c.getInputStream());

@@ -76,7 +76,12 @@ public class GameActivity extends Activity {
         });
         setContentView(web);
         if (savedInstanceState != null) web.restoreState(savedInstanceState);
-        else web.loadUrl("https://" + HOST + "/index.html");
+        else {
+            // make sure the newest game from GitHub is in place before loading it (gives up after 8 s, e.g. offline)
+            web.loadData("<body style='background:#05030c;color:#19f0ff;font:16px monospace;display:flex;align-items:center;justify-content:center;height:100vh;margin:0'>CHECKING FOR UPDATES…</body>", "text/html", "utf-8");
+            if (!Updater.running && System.currentTimeMillis() - Updater.lastDone > 60000) Updater.check(this, new Updater.Listener() { public void status(String t) { } public void appUpdate(int c, String n, String no, String s) { } });
+            Updater.whenIdle(this, new Runnable() { @Override public void run() { web.loadUrl("https://" + HOST + "/index.html"); } }, 8000);
+        }
     }
 
     private static String mime(String p) {
