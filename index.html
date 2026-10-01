@@ -57,7 +57,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#05030b;color:var(--
 .press{margin-top:9vh;font-family:var(--fh);letter-spacing:.4em;font-size:14px;animation:blink 1.6s infinite}
 #title .logo{position:absolute;left:clamp(24px,7vw,120px);top:11vh;font-size:clamp(40px,7vw,104px)}
 #title .tagline{position:absolute;left:clamp(28px,7.2vw,124px);top:calc(11vh + clamp(90px,14vw,210px));margin:0}
-#title .menu{position:absolute;left:clamp(24px,7vw,120px);bottom:10vh;width:min(420px,80vw)}
+#title .menu{position:absolute;left:clamp(24px,7vw,120px);top:calc(11vh + clamp(90px,14vw,210px) + 44px);bottom:auto;max-height:calc(100vh - 11vh - clamp(90px,14vw,210px) - 44px - 4vh);overflow-y:auto;width:min(420px,80vw)}
+#title .tagline{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100vw - 2 * clamp(28px,7.2vw,124px))}
+#title .badge{max-width:40vw}
 #title .ver{position:absolute;right:18px;bottom:14px;font-family:var(--fm);font-size:11px;color:var(--dim);letter-spacing:.15em;text-align:right}
 #title .badge{position:absolute;right:18px;top:18px;font-family:var(--fm);font-size:12px;letter-spacing:.2em;color:var(--dim)}
 #title .badge span{color:var(--amber)}
@@ -1100,7 +1102,7 @@ NV.Quality = (() => {
     return v;
   }
   function detect() {
-    const ua = navigator.userAgent, phone = /Android|iPhone|iPad|Mobile/i.test(ua) || (navigator.maxTouchPoints > 1 && Math.min(screen.width, screen.height) < 820);
+    const ua = navigator.userAgent, phone = (/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (matchMedia('(pointer: coarse)').matches && !matchMedia('(any-pointer: fine)').matches && Math.min(screen.width, screen.height) < 820));
     gpu = gpuString(); score = scoreOf(gpu);
     if (!score) { // unknown / masked GPU: fall back to CPU cores and memory
       const cores = navigator.hardwareConcurrency || 4, mem = navigator.deviceMemory || 8;
@@ -5521,8 +5523,10 @@ NV.Touch = (() => {
       b.addEventListener('pointerup', up); b.addEventListener('pointercancel', up); b.addEventListener('pointerleave', up);
     });
   }
+  T.off = () => { if (!T.active) return; T.active = false; T.mx = T.my = 0; T.run = T.zoom = false; document.body.classList.remove('touch', 'hbshow'); };
+  let built = false;
   addEventListener('touchstart', () => {
-    if (T.active) return; T.active = true; document.body.classList.add('touch'); build();
+    if (T.active) return; T.active = true; document.body.classList.add('touch'); if (built) return; built = true; build();
     try { if (document.pointerLockElement) document.exitPointerLock(); } catch (e) { }
     // step aside while dialogue/choices are up so taps reach them; show chat only in multiplayer
     setInterval(() => { const Lv = NV.Level.active && NV.Level.debug(); document.body.classList.toggle('playing', !!(Lv && Lv.started && !Lv.paused && !Lv.over && !document.querySelector('#ui > .modal, #ui > .banner, #ui > .card, #ui > .results'))); const st = document.getElementById('story'); document.body.classList.toggle('storyup', !!(st && !st.classList.contains('hidden') && st.offsetParent)); const c = ui.querySelector('.tchat'); c.style.display = NV.Net && NV.Net.on ? 'block' : 'none'; }, 200);
@@ -5558,6 +5562,10 @@ NV.CardboardVR = (() => {
     const D = window.DeviceOrientationEvent;
     if (D && typeof D.requestPermission === 'function') { try { C.gyro = (await D.requestPermission()) === 'granted'; } catch (e) { C.gyro = false; } }
     else C.gyro = !!D;
+    if (!C.gyro) return false;
+    // an API is not a sensor: desktops expose DeviceOrientationEvent but never fire real readings — wait for one
+    if (!C.sensed) await new Promise(res => { const t = setTimeout(() => { removeEventListener('deviceorientation', h); res(); }, 1200); function h(e) { if (e.alpha != null || e.beta != null) { C.sensed = true; clearTimeout(t); removeEventListener('deviceorientation', h); res(); } } addEventListener('deviceorientation', h); });
+    C.gyro = !!C.sensed;
     return C.gyro;
   }
   async function fullscreen(on) {
@@ -5615,11 +5623,13 @@ NV.CardboardVR = (() => {
   addEventListener('pointerdown', onDown, true); addEventListener('pointerup', onUp, true); addEventListener('pointercancel', () => { C.walk = false; clearTimeout(walkTimer); }, true);
   C.enter = async () => {
     if (C.on) return true;
-    const ok = await gyroPermission(); if (!window.NVAndroid) fullscreen(true); // the Android app is already immersive full screen
+    const ok = await gyroPermission();
+    if (!ok) { NV.Settings.set('cardboard', 0); NV.toast('CARDBOARD LOCKED', 'No gyroscope detected — VR mode needs a phone with a motion sensor. Staying in desktop mode.', '#ff3355', 4); return false; }
+    if (!window.NVAndroid) fullscreen(true); // the Android app is already immersive full screen
     C.on = true; NV.Settings.set('cardboard', 1); try { window.NVAndroid && NVAndroid.setMode('cardboard'); } catch (e) { } document.body.classList.add('cardboard');
     if (!mirror) { mirror = document.createElement('div'); mirror.id = 'cbmirror'; document.body.appendChild(mirror); }
     lastHtml = ''; C.recenter();
-    NV.toast('VR MODE · GOOGLE CARDBOARD', (ok ? 'Look around to aim. ' : 'Gyroscope unavailable: head tracking is off. ') + 'Tap to fire / use / advance · hold to walk · a gamepad works too.', '#19f0ff', 5);
+    NV.toast('VR MODE · GOOGLE CARDBOARD', 'Look around to aim. ' + 'Tap to fire / use / advance · hold to walk · a gamepad works too.', '#19f0ff', 5);
     return true;
   };
   C.exit = () => {
@@ -5646,20 +5656,31 @@ NV.CardboardVR = (() => {
 })();
 
 NV.Mobile = (() => {
-  const ua = navigator.userAgent, M = { on: /Android|iPhone|iPad|iPod|Mobile/i.test(ua) || (navigator.maxTouchPoints > 1 && Math.min(screen.width, screen.height) < 820) };
+  const M = { on: (/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (matchMedia('(pointer: coarse)').matches && !matchMedia('(any-pointer: fine)').matches && Math.min(screen.width, screen.height) < 820)) };
+  // desktop mode: any real keyboard or mouse input turns the phone layout and touch controls off (touchscreen laptops stay PCs)
+  M.desktop = () => {
+    const was = M.on || (NV.Touch && NV.Touch.active); if (!was) return;
+    M.on = false; document.body.classList.remove('mobile', 'portrait', 'hbshow'); document.documentElement.style.removeProperty('--uiz');
+    const r = document.getElementById('rotate'); if (r) r.remove();
+    if (NV.Touch && NV.Touch.off) NV.Touch.off();
+    if (NV.CardboardVR && NV.CardboardVR.on && !NV.CardboardVR.gyro) NV.CardboardVR.exit();
+  };
+  addEventListener('keydown', e => { if (e.isTrusted && !e.repeat) M.desktop(); }, true);
+  addEventListener('pointerdown', e => { if (e.isTrusted && e.pointerType === 'mouse') M.desktop(); }, true);
+  addEventListener('pointermove', e => { if (e.isTrusted && e.pointerType === 'mouse' && (Math.abs(e.movementX) + Math.abs(e.movementY)) > 2) M.desktop(); }, true);
   if (!M.on) return M;
   document.body.classList.add('mobile');
   // the whole DOM GUI renders at half size on phones (the 3D view is untouched); minimap and mission text are scaled back up in CSS
   document.documentElement.style.setProperty('--uiz', '.5');
   const rot = U.el('div', '', '<div class="rotI">⟲</div><div>Turn your phone sideways</div><small>Neon Veins plays in landscape</small>'); rot.id = 'rotate'; document.body.appendChild(rot);
-  const check = () => document.body.classList.toggle('portrait', innerHeight > innerWidth); addEventListener('resize', check); check();
+  const check = () => document.body.classList.toggle('portrait', M.on && innerHeight > innerWidth); addEventListener('resize', check); check();
   let full = false;
   const goFull = async () => {
     if (full) return; full = true;
     try { const d = document.documentElement; if (!document.fullscreenElement && d.requestFullscreen) await d.requestFullscreen({ navigationUI: 'hide' }); } catch (e) { }
     try { if (screen.orientation && screen.orientation.lock) await screen.orientation.lock('landscape'); } catch (e) { }
   };
-  addEventListener('pointerup', goFull, { once: false, passive: true });
+  addEventListener('pointerup', e => { if (M.on && e.pointerType !== 'mouse') goFull(); }, { once: false, passive: true });
   document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) full = false; });
   document.addEventListener('visibilitychange', () => { if (document.hidden && NV.Level.active && NV.Level.debug() && !NV.Level.debug().paused) dispatchEvent(new KeyboardEvent('keydown', { code: 'Escape' })); }); // pause when the app is backgrounded
   return M;
@@ -5817,7 +5838,7 @@ NV.UI = (() => {
       const r = rows[k]; if (!r) return; if (r[2] === 'open') { r[3]().then(() => els[k].querySelector('.val').textContent = fmt(r)); return; } const cur = S.get()[r[0]]; let v;
       if (r[2] === 'bool') v = cur ? 0 : 1; else if (r[2] === 'enum') v = (cur + d + r[3].length) % r[3].length; else v = Math.round(U.clamp(cur + d * r[5], r[3], r[4]) * 100) / 100;
       S.set(r[0], v); els[k].querySelector('.val').textContent = fmt(r); NV.Audio.sfx('ui');
-      if (r[0] === 'cardboard') { if (v) NV.CardboardVR.enter(); else NV.CardboardVR.exit(); }
+      if (r[0] === 'cardboard') { if (v) NV.CardboardVR.enter().then(ok => { if (!ok) { S.set('cardboard', 0); els[k].querySelector('.val').textContent = fmt(r); } }); else NV.CardboardVR.exit(); }
       if (r[0] === 'vr') { if (v && !navigator.xr) NV.toast('VR', 'This browser has no WebXR. Try a headset browser (Quest Browser) or desktop Chrome with a PC VR headset.', '#ff3355', 5); else setTimeout(() => location.reload(), 400); }
       if (r[0] === 'voiceVol' || r[0] === 'narrVol' || r[0] === 'voiceRate') { NV.Voice.stop(); NV.Voice.speak(r[0] === 'narrVol' ? null : 'Ghost', r[0] === 'narrVol' ? 'Artificial rain crawls down the smart-glass.' : 'Rent is due. So is Helix.'); }
     };
