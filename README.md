@@ -111,6 +111,16 @@ Everything in-game was reworked; the title screen and menus are unchanged.
 - **Cars:** a wedge-profile extruded body, a glass canopy and a rear wing. Wheels have hex rims, and the lights sit flush.
 - **Drones:** a teardrop pod with rotor arms.
 - **Guns:** pistol, SMG, rifle, shotgun and sniper are built from extruded slides and receivers, with raked grips and magazines, stocks, muzzle brakes and scopes.
+- **Heavy weapons, launchers, melee and gadgets:**
+  - a rotary cannon with a six-barrel cluster, carry handle and drum;
+  - a beam emitter with a focusing-ring stack;
+  - a launcher tube with a sight, grip and flared muzzle;
+  - a ribbed grenade with a pin;
+  - a knife with a guard and a tapered blade;
+  - a powered hammer, and a telescoping baton;
+  - a wrist deck with a holo orb;
+  - a drone remote with a mini quad;
+  - a strike designator with a lens and a screen.
 
 **No clipping**
 - **Bodies and vehicles:** you can't walk through enemies, pedestrians, characters, cars or wrecks; enemies keep out of your body; pedestrians sidestep each other.

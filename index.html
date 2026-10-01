@@ -2738,17 +2738,34 @@ NV.Level = (() => {
         cyl(.075, .36, 0, .14, .08, dark); cyl(.09, .05, 0, .14, .27, acc); cyl(.085, .05, 0, .14, -.11, dark); box(.02, .07, .03, 0, .09, 0, dark); box(.02, .07, .03, 0, .09, .16, dark);
         ext([[-.65, -.14], [-.65, .05], [-.25, .06], [-.25, -.04]], .075, 0, 0, .1, body); box(.03, .08, .1, 0, .09, -.42, dark); ext([[-.14, -.05], [-.07, -.05], [-.1, -.21], [-.18, -.2]], .07, 0, 0, .1, dark);
         box(.02, .02, .5, .05, 0, .15, heat); muzzle = 1.24; break;
-      case 'rotary': case 'heavy': box(.2, .2, .45, 0, -.02, 0, body); for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2; cyl(.035, .6, Math.cos(a) * .06, .02 + Math.sin(a) * .06, .5, dark); } tor(.2, .03, 0, .02, .28, acc); cyl(.2, .08, 0, .02, .22, body); box(.06, .06, .3, .12, -.02, 0, heat); muzzle = .82; break;
-      case 'laser': box(.14, .16, .5, 0, 0, .02, body); cyl(.08, .38, 0, .02, .43, dark); [.3, .42, .54].forEach(z => tor(.13, .02, 0, .02, z, acc)); cyl(.03, .16, 0, .02, .68, acc, true, .14); box(.02, .02, .3, .08, .05, 0, heat); box(.09, .18, .1, 0, -.14, -.1, dark, .25); muzzle = .78; break;
-      case 'launcher': cyl(.17, .85, .02, .06, .2, body); tor(.19, .025, .02, .06, .5, acc); tor(.19, .025, .02, .06, -.1, acc); box(.05, .06, .12, .02, .17, .12, dark); box(.08, .18, .1, 0, -.12, .05, dark, .25); cyl(.12, .04, .02, .06, .63, heat); muzzle = .65; break;
-      case 'grenade': sph(.13, 0, .02, .18, body); tor(.135, .02, 0, .02, .18, acc); cyl(.03, .05, 0, .09, .18, dark, false); muzzle = .2; break;
-      case 'blade': box(.04, .04, .16, 0, -.03, -.02, dark); box(.1, .02, .03, 0, -.03, .07, body); box(.012, .05, .55 * Lg, 0, 0, .08 + .28 * Lg, body); box(.014, .008, .55 * Lg, 0, .026, .08 + .28 * Lg, acc); muzzle = .6; break;
-      case 'hammer': cyl(.035, .55, 0, -.03, .12, dark); box(.13, .13, .22, 0, -.03, .42, body); box(.135, .03, .225, 0, .03, .42, acc); muzzle = .5; break;
-      case 'baton': cyl(.045, .15, 0, -.03, -.05, dark); cyl(.035, .5, 0, -.03, .27, body); sph(.05, 0, -.03, .53, acc); tor(.06, .012, 0, -.03, .1, acc); muzzle = .55; break;
-      case 'wrist': box(.1, .09, .34, -.05, -.06, -.02, dark); tor(.13, .015, -.05, -.06, .08, acc); box(.08, .012, .12, -.05, -.01, .02, acc); const hc = box(.05, .05, .05, -.05, .08, .16, acc); root.holo = hc; muzzle = .2; break;
-      case 'remote': box(.18, .04, .12, 0, -.04, .02, body); cyl(.01, .12, .07, .02, .02, dark, false); box(.1, .005, .07, 0, -.018, .02, acc); const dr = new BABYLON.TransformNode('mini', s); dr.parent = root; dr.position.set(0, .16, .34); root.holo = dr;
-        [[0, 0, 0, .1, .03, .1]].forEach(() => { const b = box(.1, .03, .1, 0, .16, .34, body); b.parent = dr; b.position.set(0, 0, 0); }); [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([a, b]) => { const c = cyl(.06, .006, 0, 0, 0, acc, false); c.parent = dr; c.position.set(a * .06, .01, b * .06); }); muzzle = .3; break;
-      case 'designator': box(.08, .1, .3, 0, 0, .05, body); cyl(.05, .04, 0, .01, .21, acc); box(.16, .1, .012, -.14, .02, .02, dark, 0, .5); box(.14, .085, .014, -.14, .02, .026, acc, 0, .5); muzzle = .25; break;
+      // rebuilt heavy / launcher / melee / gadget models: extruded bodies, real grips, sights, guards and screens
+      case 'rotary': case 'heavy': ext([[-.3, -.1], [-.3, .08], [.12, .1], [.2, .04], [.2, -.1]], .2, 0, -.02, 0, body); cyl(.2, .1, 0, .01, .25, dark); cyl(.07, .52, 0, .01, .56, dark);
+        for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2; cyl(.032, .58, Math.cos(a) * .065, .01 + Math.sin(a) * .065, .55, dark); }
+        tor(.2, .025, 0, .01, .4, acc); tor(.2, .025, 0, .01, .74, acc); ext([[-.08, -.1], [0, -.1], [-.03, -.27], [-.11, -.26]], .07, 0, 0, 0, dark);
+        box(.05, .2, .05, 0, .16, -.05, dark); box(.32, .04, .04, 0, .26, -.05, dark); cyl(.14, .22, .14, -.05, -.05, body, false); box(.06, .06, .3, .12, -.02, 0, heat); muzzle = .86; break;
+      case 'laser': ext([[-.28, -.08], [-.28, .08], [.18, .1], [.26, .05], [.26, -.08]], .14, 0, 0, 0, body); cyl(.09, .22, 0, .02, .37, dark, true, .06);
+        [.3, .4, .5].forEach((z, k) => tor(.14 - k * .02, .018, 0, .02, z, acc)); cyl(.04, .2, 0, .02, .58, acc, true, .12); sph(.06, 0, .02, .68, acc);
+        ext([[-.12, -.08], [-.04, -.08], [-.07, -.25], [-.15, -.24]], .075, 0, 0, 0, dark); box(.05, .14, .08, -.09, .02, -.05, heat); cyl(.06, .2, .09, -.02, -.1, dark); muzzle = .74; break;
+      case 'launcher': cyl(.18, .8, .02, .07, .22, body); cyl(.22, .12, .02, .07, .64, dark, true, .19); cyl(.2, .08, .02, .07, -.2, dark); tor(.2, .022, .02, .07, .44, acc); tor(.2, .022, .02, .07, 0, acc);
+        box(.06, .09, .2, .02, .2, .2, dark); box(.04, .04, .06, .02, .26, .12, acc); ext([[-.05, -.05], [.04, -.05], [.01, -.22], [-.08, -.21]], .07, .02, .04, .1, dark); ext([[.26, -.05], [.33, -.05], [.33, -.18], [.26, -.18]], .05, .02, .04, 0, dark);
+        cyl(.12, .04, .02, .07, .67, heat); muzzle = .7; break;
+      case 'grenade': cyl(.11, .13, 0, .02, .18, body, false, .11); sph(.11, 0, .085, .18, body); sph(.11, 0, -.045, .18, body); tor(.115, .016, 0, .04, .18, acc).rotation.x = 0; tor(.115, .016, 0, 0, .18, acc).rotation.x = 0;
+        box(.035, .05, .035, 0, .15, .18, dark); box(.012, .02, .09, 0, .13, .22, dark); tor(.035, .006, .025, .17, .18, acc); muzzle = .2; break;
+      case 'blade': cyl(.032, .17, 0, -.03, -.03, dark); [-.09, -.04, .01].forEach(z => tor(.04, .006, 0, -.03, z, acc)); ext([[-.02, -.06], [-.02, .02], [.02, .02], [.02, -.06]], .14, 0, -.03, .07, body);
+        ext([[0, -.025], [0, .025], [.48 * Lg, .02], [.55 * Lg, -.01], [.5 * Lg, -.025]], .01, 0, -.03, .09, body); box(.012, .006, .5 * Lg, 0, -.005, .09 + .25 * Lg, acc); muzzle = .6; break;
+      case 'hammer': cyl(.035, .6, 0, -.03, .15, dark); [-.08, -.02].forEach(z => tor(.05, .008, 0, -.03, z, acc)); box(.17, .15, .26, 0, -.03, .45, body); cyl(.15, .06, 0, -.03, .6, dark, true, .17);
+        cyl(.13, .05, 0, -.03, .3, dark, true, .17); box(.175, .03, .27, 0, .055, .45, acc); box(.06, .06, .08, .1, -.03, .45, heat); muzzle = .62; break;
+      case 'baton': cyl(.045, .17, 0, -.03, -.05, dark); tor(.06, .012, 0, -.03, .04, acc); cyl(.036, .25, 0, -.03, .17, body); cyl(.03, .25, 0, -.03, .41, body);
+        [.29, .53].forEach(z => tor(.045, .008, 0, -.03, z, acc)); sph(.055, 0, -.03, .56, acc); muzzle = .58; break;
+      case 'wrist': ext([[-.2, -.05], [-.2, .03], [.12, .04], [.16, 0], [.16, -.05]], .11, -.05, -.06, 0, dark); box(.1, .006, .17, -.05, -.01, .02, acc);
+        tor(.12, .014, -.05, -.06, .13, acc); [-.11, -.05].forEach(z => box(.115, .02, .02, -.05, -.06, z, body)); cyl(.02, .1, -.05, -.02, .15, dark, false);
+        const hc = sph(.06, -.05, .07, .16, acc); root.holo = hc; tor(.09, .006, -.05, .07, .16, acc); muzzle = .2; break;
+      case 'remote': ext([[-.07, -.02], [-.07, .02], [.11, .02], [.13, 0], [.11, -.02]], .2, 0, -.04, 0, body); box(.13, .004, .1, 0, -.018, .02, acc); [-.08, .08].forEach(x => sph(.04, x, -.02, -.04, dark));
+        cyl(.01, .14, .08, .03, .06, dark, false); sph(.02, .08, .1, .06, acc); const dr = new BABYLON.TransformNode('mini', s); dr.parent = root; dr.position.set(0, .16, .34); root.holo = dr;
+        { const pod = sph(.09, 0, 0, 0, body); pod.parent = dr; pod.position.set(0, 0, 0); pod.scaling.set(1, .6, 1.3); } [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([a, b]) => { const arm = box(.06, .01, .01, 0, 0, 0, dark); arm.parent = dr; arm.position.set(a * .035, 0, b * .035); arm.rotation.y = Math.atan2(b, a); const c = cyl(.05, .005, 0, 0, 0, acc, false); c.parent = dr; c.position.set(a * .065, .015, b * .065); }); muzzle = .3; break;
+      case 'designator': ext([[-.12, -.05], [-.12, .05], [.15, .05], [.18, .02], [.18, -.05]], .09, 0, 0, .05, body); cyl(.06, .05, 0, .0, .25, dark); cyl(.045, .02, 0, .0, .28, acc);
+        ext([[-.06, -.05], [.02, -.05], [-.01, -.2], [-.09, -.19]], .065, 0, 0, .05, dark); box(.18, .11, .015, -.15, .03, .02, dark, 0, .5); box(.16, .09, .016, -.15, .03, .026, acc, 0, .5);
+        box(.02, .05, .02, 0, .08, .1, dark); muzzle = .3; break;
     }
     root.setEnabled(false);
     return { node: root, muzzle };
