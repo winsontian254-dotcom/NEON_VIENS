@@ -101,6 +101,23 @@ Everything in-game was reworked; the title screen and menus are unchanged.
 - **People:** enemies wear helmets, chest plates and glowing trim (heavies in red). Pedestrians wear long coats and hats, and carry neon-rimmed umbrellas in the rain.
 - **Explosions:** a white-hot core, a ground shockwave and a smoke column.
 
+**3D models (all procedural, still one HTML file)**
+- **Humans:**
+  - a lathe-turned torso, pelvis and neck;
+  - an egg-shaped head with jaw;
+  - tapered limbs with joint caps, mitten hands with thumbs, and boots;
+  - domed shoulder armour and a tank backpack;
+  - flared coats.
+- **Cars:** a wedge-profile extruded body, a glass canopy and a rear wing. Wheels have hex rims, and the lights sit flush.
+- **Drones:** a teardrop pod with rotor arms.
+- **Guns:** pistol, SMG, rifle, shotgun and sniper are built from extruded slides and receivers, with raked grips and magazines, stocks, muzzle brakes and scopes.
+
+**No clipping**
+- **Bodies and vehicles:** you can't walk through enemies, pedestrians, characters, cars or wrecks; enemies keep out of your body; pedestrians sidestep each other.
+- **Rooftops:** rooftop units and tanks are solid and never overlap each other or the billboards. Antenna lights stand on masts.
+- **Streets:** cables hang clear of lamps, signals and blade signs. Manholes stay off crosswalks.
+- **Sky and cameras:** flying lanes avoid every solid structure, and the driving and skydiving cameras pull in instead of entering buildings.
+
 **Gameplay**
 - **Movement:** momentum (quick starts, quicker stops, floaty in the air), coyote-time jumps and jump buffering.
 - **Enemy tactics:** guards take cover behind walls and crates (ducking between bursts), flank wide, fall back when hurt and lob grenades if you camp. Grenades show a red fuse ring, so get out of it.

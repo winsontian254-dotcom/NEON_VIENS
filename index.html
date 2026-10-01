@@ -1174,6 +1174,19 @@ NV.Quality = (() => {
   return Q;
 })();
 
+/* ---- procedural modelling helpers: everything stays generated inside this single file ---- */
+// side profile [[forward, up], ...] (convex) extruded across its width; forward ends up on +z
+NV.extrude = (name, pts, width, scene) => {
+  const m = BABYLON.MeshBuilder.ExtrudeShape(name, { shape: pts.map(([f, u]) => new BABYLON.Vector3(f, u, 0)), path: [V3(0, 0, -width / 2), V3(0, 0, width / 2)], cap: BABYLON.Mesh.CAP_ALL, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene);
+  m.rotation.y = -Math.PI / 2; m.bakeCurrentTransformIntoVertices(); m.name = name; return m;
+};
+// turned profile [[radius, y], ...] around the y axis, optionally squashed front-to-back
+NV.lathe = (name, pts, scene, zScale, tess) => {
+  const m = BABYLON.MeshBuilder.CreateLathe(name, { shape: pts.map(([r, y]) => new BABYLON.Vector3(r, y, 0)), tessellation: tess || 14, closed: true, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene);
+  if (zScale) { m.scaling.z = zScale; m.bakeCurrentTransformIntoVertices(); } m.name = name; return m;
+};
+// merge parts (with local offsets) into one mesh with the given name
+NV.merge = (name, parts) => { const m = BABYLON.Mesh.MergeMeshes(parts, true, true); m.name = name; return m; };
 /* mark static meshes so Babylon skips per-frame matrix/bounds work */
 NV.freeze = (meshes, keepMats) => meshes.forEach(m => {
   m.isPickable = false; m.doNotSyncBoundingInfo = true; m.freezeWorldMatrix();
@@ -2397,9 +2410,10 @@ NV.Level = (() => {
       leg: P(limbShape('leg', scene), L.mats.enemy), foot: P(limbShape('foot', scene), L.mats.armor), torso: P(limbShape('torso', scene), L.mats.enemy),
       head: P(limbShape('head', scene), L.mats.enemy), arm: P(limbShape('arm', scene), L.mats.enemy), hand: P(limbShape('hand', scene), L.mats.armor),
       pad: P(limbShape('pad', scene), L.mats.armor), pack: P(limbShape('pack', scene), L.mats.armor),
+      pelvis: P(limbShape('pelvis', scene), L.mats.armor), neck: P(limbShape('neck', scene), L.mats.enemy),
       gun: P(BABYLON.MeshBuilder.CreateBox('pg', { width: .09, height: .12, depth: .6 }, scene), L.mats.armor),
-      dbody: P(BABYLON.MeshBuilder.CreateSphere('pdb', { diameter: .7, segments: 10 }, scene), L.mats.drone),
-      darm: P(BABYLON.MeshBuilder.CreateBox('parm', { width: 1.3, height: .05, depth: .08 }, scene), L.mats.drone),
+      dbody: P((() => { const m = NV.lathe('pdb', [[0, -.3], [.22, -.22], [.33, -.02], [.3, .14], [.16, .26], [0, .29]], scene, 1.25, 12); return m; })(), L.mats.drone),
+      darm: P(NV.merge('parm', [BABYLON.MeshBuilder.CreateBox('a', { width: 1.3, height: .05, depth: .08 }, scene), ...[-.65, .65].map(x => { const d = BABYLON.MeshBuilder.CreateCylinder('rt', { diameter: .42, height: .02, tessellation: 16 }, scene); d.position.set(x, .05, 0); d.bakeCurrentTransformIntoVertices(); return d; }), ...[-.65, .65].map(x => { const d = BABYLON.MeshBuilder.CreateCylinder('hb', { diameter: .08, height: .1, tessellation: 8 }, scene); d.position.set(x, .01, 0); d.bakeCurrentTransformIntoVertices(); return d; })]), L.mats.drone),
       ring: P(BABYLON.MeshBuilder.CreateTorus('pr', { diameter: 1.1, thickness: .06, tessellation: 20 }, scene), L.mats.visor),
       ice: P(BABYLON.MeshBuilder.CreatePolyhedron('pice', { type: 1, size: .55 }, scene), L.mats.ice),
       // armour overhaul: helmets, chest plates, glowing trim and coolant tubes (cyan for guards, red for heavies)
@@ -2447,7 +2461,7 @@ NV.Level = (() => {
     }
     return null;
   }
-  const LOD_SMALL = new Set(['hand', 'foot', 'pad', 'pack', 'pg', 'parm', 'pds', 'ne', 'nc', 'nhair']);
+  const LOD_SMALL = new Set(['hand', 'foot', 'pad', 'pack', 'pg', 'parm', 'pds', 'ne', 'nc', 'nhair', 'neck', 'pelvis', 'phelm', 'pplate', 'phplate', 'pacc', 'paccH', 'ptube', 'pdcoat', 'umb', 'umbrim', 'umbh', 'pdhat']);
   function lod(mesh) {
     const m = NV.Quality.get().lod || 1, name = mesh.name;
     if (LOD_SMALL.has(name)) { mesh.addLODLevel(30 * m, null); return mesh; }
@@ -2456,16 +2470,20 @@ NV.Level = (() => {
     mesh.addLODLevel(95 * m, null);
     return mesh;
   }
+  // sculpted humanoid kit (one shape per part; instanced for crowds, copied for story characters)
   function limbShape(k, s) {
+    const at = (m, x, y, z) => { m.position.set(x || 0, y || 0, z || 0); m.bakeCurrentTransformIntoVertices(); return m; };
     switch (k) {
-      case 'leg': return BABYLON.MeshBuilder.CreateCapsule('leg', { radius: .08, height: .5, tessellation: 8, subdivisions: 1 }, s);
-      case 'foot': return BABYLON.MeshBuilder.CreateBox('foot', { width: .14, height: .08, depth: .27 }, s);
-      case 'torso': return BABYLON.MeshBuilder.CreateCapsule('torso', { radius: .25, height: .82, tessellation: 10, subdivisions: 1 }, s);
-      case 'head': return BABYLON.MeshBuilder.CreateSphere('head', { diameter: .36, segments: 10 }, s);
-      case 'arm': return BABYLON.MeshBuilder.CreateCapsule('arm', { radius: .06, height: .4, tessellation: 8, subdivisions: 1 }, s);
-      case 'hand': return BABYLON.MeshBuilder.CreateSphere('hand', { diameter: .12, segments: 6 }, s);
-      case 'pad': return BABYLON.MeshBuilder.CreateBox('pad', { width: .2, height: .1, depth: .3 }, s);
-      case 'pack': return BABYLON.MeshBuilder.CreateBox('pack', { width: .44, height: .52, depth: .2 }, s);
+      case 'leg': return NV.merge('leg', [BABYLON.MeshBuilder.CreateCylinder('lg', { height: .44, diameterTop: .17, diameterBottom: .115, tessellation: 10 }, s), at(BABYLON.MeshBuilder.CreateSphere('kn', { diameter: .125, segments: 6 }, s), 0, -.22), at(BABYLON.MeshBuilder.CreateSphere('hp', { diameter: .165, segments: 6 }, s), 0, .2)]);
+      case 'foot': return NV.merge('foot', [at(BABYLON.MeshBuilder.CreateBox('bt', { width: .13, height: .1, depth: .2 }, s), 0, 0, -.03), at(BABYLON.MeshBuilder.CreateSphere('toe', { diameterX: .13, diameterY: .1, diameterZ: .17, segments: 6 }, s), 0, 0, .07), at(BABYLON.MeshBuilder.CreateBox('sole', { width: .14, height: .03, depth: .29 }, s), 0, -.05, .01)]);
+      case 'torso': return NV.lathe('torso', [[0, -.42], [.19, -.42], [.205, -.32], [.18, -.12], [.215, .06], [.255, .24], [.25, .35], [.17, .42], [.07, .45], [0, .45]], s, .64, 14);
+      case 'pelvis': return BABYLON.MeshBuilder.CreateSphere('pelvis', { diameterX: .37, diameterY: .2, diameterZ: .25, segments: 8 }, s);
+      case 'neck': return BABYLON.MeshBuilder.CreateCylinder('neck', { height: .17, diameterTop: .1, diameterBottom: .125, tessellation: 8 }, s);
+      case 'head': return NV.merge('head', [BABYLON.MeshBuilder.CreateSphere('cr', { diameterX: .27, diameterY: .32, diameterZ: .3, segments: 10 }, s), at(BABYLON.MeshBuilder.CreateSphere('jaw', { diameterX: .2, diameterY: .14, diameterZ: .2, segments: 6 }, s), 0, -.1, .04)]);
+      case 'arm': return NV.merge('arm', [BABYLON.MeshBuilder.CreateCylinder('ua', { height: .32, diameterTop: .11, diameterBottom: .08, tessellation: 8 }, s), at(BABYLON.MeshBuilder.CreateSphere('sj', { diameter: .12, segments: 6 }, s), 0, .15)]);
+      case 'hand': return NV.merge('hand', [BABYLON.MeshBuilder.CreateSphere('pm', { diameterX: .085, diameterY: .11, diameterZ: .05, segments: 6 }, s), at(BABYLON.MeshBuilder.CreateSphere('th', { diameterX: .03, diameterY: .06, diameterZ: .03, segments: 4 }, s), .045, .01, .015)]);
+      case 'pad': return BABYLON.MeshBuilder.CreateSphere('pad', { diameterX: .25, diameterY: .16, diameterZ: .3, slice: .55, segments: 8 }, s);
+      case 'pack': return NV.merge('pack', [BABYLON.MeshBuilder.CreateBox('pk', { width: .4, height: .46, depth: .16 }, s), at(BABYLON.MeshBuilder.CreateCylinder('tk1', { diameter: .1, height: .42, tessellation: 8 }, s), -.13, 0, -.1), at(BABYLON.MeshBuilder.CreateCylinder('tk2', { diameter: .1, height: .42, tessellation: 8 }, s), .13, 0, -.1)]);
     }
   }
   function rigBuild(root, mk, armor) {
@@ -2477,8 +2495,9 @@ NV.Level = (() => {
     R.kneeL = joint(R.legL, -.45); R.kneeR = joint(R.legR, -.45); R.elbowL = joint(R.armL, -.33); R.elbowR = joint(R.armR, -.33);
     [[R.legL, R.kneeL], [R.legR, R.kneeR]].forEach(([hip, knee]) => { put(mk('leg'), hip, 0, -.22, 0); put(mk('leg'), knee, 0, -.22, 0); put(mk('foot'), knee, 0, -.43, .06); });
     put(mk('torso'), root, 0, 1.26, 0); put(mk('head'), root, 0, 1.8, 0);
+    const pv = mk('pelvis'); if (pv) put(pv, root, 0, .96, 0); const nk = mk('neck'); if (nk) put(nk, root, 0, 1.67, 0);
     [[R.armL, R.elbowL], [R.armR, R.elbowR]].forEach(([sh, el]) => { put(mk('arm'), sh, 0, -.16, 0); put(mk('arm'), el, 0, -.16, 0); put(mk('hand'), el, 0, -.34, 0); });
-    if (armor) { put(mk('pad'), R.armL, -.03, .03, 0); put(mk('pad'), R.armR, .03, .03, 0); put(mk('pack'), root, 0, 1.3, -.3); }
+    if (armor) { put(mk('pad'), R.armL, -.03, .05, 0); put(mk('pad'), R.armR, .03, .05, 0); put(mk('pack'), root, 0, 1.32, -.27); }
     R.armL.rotation.z = -.07; R.armR.rotation.z = .07;
     return R;
   }
@@ -2561,7 +2580,7 @@ NV.Level = (() => {
   function addCivilian(x, z) {
     const s = L.scene, root = new BABYLON.TransformNode('civ', s);
     const civSkin = mat(s, 'civs', '#6d5548');
-    const rig = rigBuild(root, k => { const m = limbShape(k, s); m.material = k === 'head' || k === 'hand' ? civSkin : L.mats.civ; return m; }, false);
+    const rig = rigBuild(root, k => { const m = limbShape(k, s); m.material = k === 'head' || k === 'hand' || k === 'neck' ? civSkin : L.mats.civ; return m; }, false);
     rig.armL.rotation.x = rig.armR.rotation.x = -2.7; rig.elbowL.rotation.x = rig.elbowR.rotation.x = -.6;
     const mk = BABYLON.MeshBuilder.CreatePolyhedron('cmk', { type: 1, size: .15 }, s); mk.position.y = 2.2; mk.material = L.mats.civMark; mk.parent = root;
     root.position.set(x, 0, z); root.scaling.y = .85; // crouched, scared
@@ -2696,13 +2715,29 @@ NV.Level = (() => {
     const cyl = (d, h, x, y, z, m, along, d2) => { const c = fin(BABYLON.MeshBuilder.CreateCylinder('wp', { diameterTop: d2 == null ? d : d2, diameterBottom: d, height: h, tessellation: 12 }, s)); c.position.set(x, y, z); if (along !== false) c.rotation.x = Math.PI / 2; c.material = m; return c; };
     const sph = (d, x, y, z, m) => { const q = fin(BABYLON.MeshBuilder.CreateSphere('wp', { diameter: d, segments: 8 }, s)); q.position.set(x, y, z); q.material = m; return q; };
     const tor = (d, t, x, y, z, m) => { const q = fin(BABYLON.MeshBuilder.CreateTorus('wp', { diameter: d, thickness: t, tessellation: 20 }, s)); q.position.set(x, y, z); q.rotation.x = Math.PI / 2; q.material = m; return q; };
+    const ext = (pts, wd, x, y, z, m) => { const e = fin(NV.extrude('wx', pts, wd, s)); e.position.set(x, y, z); e.material = m; return e; };
     const Lg = 1 + w.hv * .35; let muzzle = .6;
     switch (w.model) {
-      case 'pistol': box(.1, .13, .34 * Lg, 0, 0, .05, body); box(.104, .03, .3 * Lg, 0, .075, .05, acc); box(.085, .2, .1, 0, -.13, -.07, dark, .25); cyl(.045, .14, 0, .02, .05 + .17 * Lg + .05, dark); box(.02, .02, .2, .055, .02, .06, heat); muzzle = .05 + .17 * Lg + .13; if (w.hv > .6) box(.05, .04, .08, 0, .11, 0, dark); break;
-      case 'smg': box(.11, .14, .42 * Lg, 0, 0, .08, body); box(.06, .24, .08, 0, -.18, .12, dark); box(.08, .18, .09, 0, -.12, -.08, dark, .25); box(.05, .05, .22, 0, 0, -.3, dark); cyl(.045, .16, 0, .02, .08 + .21 * Lg + .07, dark); box(.113, .025, .3, 0, .08, .08, acc); box(.02, .02, .3, .06, 0, .1, heat); muzzle = .08 + .21 * Lg + .15; break;
-      case 'rifle': box(.1, .14, .62 * Lg, 0, 0, .12, body); box(.08, .13, .24, 0, -.02, -.3, dark); box(.06, .22, .09, 0, -.17, .14, dark, -.2); box(.08, .18, .09, 0, -.13, -.05, dark, .25); cyl(.04, .3, 0, .02, .12 + .31 * Lg + .14, dark); box(.02, .02, .5 * Lg, 0, .085, .12, acc); box(.02, .02, .35, .055, 0, .15, heat); if (w.hv > .45) { cyl(.06, .2, 0, .13, .05, dark); sph(.05, 0, .13, .15, acc); } muzzle = .12 + .31 * Lg + .3; break;
-      case 'shotgun': box(.13, .15, .5, 0, 0, .05, body); cyl(.06, .6, -.034, .03, .5, dark); cyl(.06, .6, .034, .03, .5, dark); box(.11, .08, .2, 0, -.07, .32, acc); box(.09, .2, .1, 0, -.13, -.12, dark, .25); box(.07, .12, .22, 0, -.02, -.3, body); box(.02, .02, .3, .07, .04, 0, heat); muzzle = .82; break;
-      case 'sniper': box(.09, .12, .75, 0, 0, .1, body); cyl(.035, .6, 0, .02, .77, dark); cyl(.075, .34, 0, .13, .05, dark); cyl(.06, .02, 0, .13, .23, acc); box(.08, .15, .26, 0, -.01, -.36, body); box(.07, .18, .09, 0, -.13, -.06, dark, .25); box(.02, .02, .5, .05, 0, .15, heat); muzzle = 1.08; break;
+      // rebuilt guns: extruded slides/receivers, raked grips and magazines, real stocks, barrels with brakes, scopes with bells
+      case 'pistol': ext([[-.12, .02], [-.12, .1], [.2 * Lg, .1], [.25 * Lg, .075], [.25 * Lg, .02]], .085, 0, 0, 0, body); box(.087, .012, .3 * Lg, 0, .096, .05, acc);
+        ext([[-.11, -.045], [-.11, .02], [.22 * Lg, .02], [.22 * Lg, -.02], [.06, -.045]], .078, 0, 0, 0, dark); ext([[-.11, -.04], [-.025, -.04], [-.06, -.21], [-.15, -.2]], .074, 0, 0, 0, dark);
+        box(.018, .012, .09, 0, -.078, .03, dark); cyl(.03, .07, 0, .055, .25 * Lg + .035, dark); box(.02, .018, .2, .045, .05, .06, heat); box(.018, .025, .02, 0, .115, .21 * Lg, acc);
+        if (w.hv > .6) box(.05, .04, .08, 0, .13, -.02, dark); muzzle = .25 * Lg + .08; break;
+      case 'smg': ext([[-.2, -.045], [-.2, .07], [.24 * Lg, .07], [.3 * Lg, .03], [.3 * Lg, -.045]], .1, 0, 0, .05, body); box(.102, .015, .4 * Lg, 0, .076, .1, acc);
+        ext([[-.02, -.04], [.06, -.04], [.045, -.27], [-.03, -.27]], .06, 0, 0, .12, dark); ext([[-.16, -.04], [-.09, -.04], [-.12, -.2], [-.2, -.19]], .07, 0, 0, .05, dark);
+        box(.05, .05, .22, 0, .01, -.28, dark); box(.03, .11, .03, 0, -.03, -.39, dark); cyl(.045, .14, 0, .015, .05 + .3 * Lg + .07, dark); cyl(.058, .04, 0, .015, .05 + .3 * Lg + .15, acc);
+        box(.02, .02, .28, .055, 0, .1, heat); muzzle = .05 + .3 * Lg + .2; break;
+      case 'rifle': ext([[-.28, -.05], [-.28, .07], [.3 * Lg, .07], [.38 * Lg, .03], [.38 * Lg, -.05]], .095, 0, 0, .1, body); box(.097, .016, .6 * Lg, 0, .079, .12, acc);
+        ext([[-.6, -.09], [-.6, .04], [-.28, .05], [-.28, -.03]], .07, 0, 0, .1, dark); ext([[0, -.05], [.09, -.05], [.13, -.27], [.04, -.29]], .065, 0, 0, .1, dark); ext([[-.14, -.05], [-.07, -.05], [-.1, -.21], [-.18, -.2]], .07, 0, 0, .1, dark);
+        cyl(.04, .26, 0, .01, .1 + .38 * Lg + .13, dark); cyl(.06, .07, 0, .01, .1 + .38 * Lg + .27, dark); box(.02, .02, .35, .052, 0, .15, heat);
+        if (w.hv > .45) { cyl(.055, .22, 0, .13, .05, dark); sph(.05, 0, .13, .17, acc); box(.02, .05, .02, 0, .1, 0, dark); } muzzle = .1 + .38 * Lg + .32; break;
+      case 'shotgun': ext([[-.25, -.05], [-.25, .08], [.18, .08], [.22, .03], [.22, -.05]], .12, 0, 0, 0, body); cyl(.06, .62, 0, .045, .5, dark); cyl(.05, .5, 0, -.025, .44, dark);
+        box(.11, .08, .22, 0, -.03, .36, acc); ext([[-.18, -.05], [-.1, -.05], [-.13, -.21], [-.21, -.2]], .08, 0, 0, 0, dark); ext([[-.62, -.13], [-.62, .03], [-.25, .06], [-.25, -.04]], .085, 0, 0, 0, body);
+        box(.02, .02, .3, .07, .04, 0, heat); muzzle = .82; break;
+      case 'sniper': ext([[-.25, -.05], [-.25, .06], [.42, .06], [.46, .02], [.46, -.05]], .09, 0, 0, .1, body); cyl(.035, .62, 0, .015, .87, dark); cyl(.05, .08, 0, .015, 1.18, dark);
+        cyl(.075, .36, 0, .14, .08, dark); cyl(.09, .05, 0, .14, .27, acc); cyl(.085, .05, 0, .14, -.11, dark); box(.02, .07, .03, 0, .09, 0, dark); box(.02, .07, .03, 0, .09, .16, dark);
+        ext([[-.65, -.14], [-.65, .05], [-.25, .06], [-.25, -.04]], .075, 0, 0, .1, body); box(.03, .08, .1, 0, .09, -.42, dark); ext([[-.14, -.05], [-.07, -.05], [-.1, -.21], [-.18, -.2]], .07, 0, 0, .1, dark);
+        box(.02, .02, .5, .05, 0, .15, heat); muzzle = 1.24; break;
       case 'rotary': case 'heavy': box(.2, .2, .45, 0, -.02, 0, body); for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2; cyl(.035, .6, Math.cos(a) * .06, .02 + Math.sin(a) * .06, .5, dark); } tor(.2, .03, 0, .02, .28, acc); cyl(.2, .08, 0, .02, .22, body); box(.06, .06, .3, .12, -.02, 0, heat); muzzle = .82; break;
       case 'laser': box(.14, .16, .5, 0, 0, .02, body); cyl(.08, .38, 0, .02, .43, dark); [.3, .42, .54].forEach(z => tor(.13, .02, 0, .02, z, acc)); cyl(.03, .16, 0, .02, .68, acc, true, .14); box(.02, .02, .3, .08, .05, 0, heat); box(.09, .18, .1, 0, -.14, -.1, dark, .25); muzzle = .78; break;
       case 'launcher': cyl(.17, .85, .02, .06, .2, body); tor(.19, .025, .02, .06, .5, acc); tor(.19, .025, .02, .06, -.1, acc); box(.05, .06, .12, .02, .17, .12, dark); box(.08, .18, .1, 0, -.12, .05, dark, .25); cyl(.12, .04, .02, .06, .63, heat); muzzle = .65; break;
@@ -3400,6 +3435,7 @@ NV.Level = (() => {
     p.vxs = vx; p.vzs = vz;
     if (!L.drive) { if (L.map.hmap && (p.y > .05 || p.air || p.climb)) { const am = p.air ? .8 * (p.leap || 1) : 1, kx = p.kick ? p.kick.x : 0, kz = p.kick ? p.kick.z : 0; moveElev(p, (vx * am + kx) * dt, (vz * am + kz) * dt); } else moveCircle(p, vx * dt, vz * dt, .45); }
     if (L.map.hmap) vertical(dt, mz, sprint);
+    if (!L.drive && !(p.y > 1)) bodyPush(p);
     p.moving = ml > 0; if (p.moving) { p.bob += dt * spd * 1.6; p.stepT -= dt * spd; if (p.stepT <= 0) { p.stepT = 2.6; NV.Audio.sfx('step'); if (sprint) noise(p.x, p.z, 7); } }
     p.dashCd -= dt; p.inv -= dt; p.cd -= dt;
     p.en = Math.min(100, p.en + dt * (12 + L.implant) * L.enMul);
@@ -3549,7 +3585,8 @@ NV.Level = (() => {
         if (dl > .05) { const mv = { x: e.x, z: e.z }; moveCircleE(mv, ddx / dl * Math.min(dl, spd * dt), ddz / dl * Math.min(dl, spd * dt), e.drone); e.x = mv.x; e.z = mv.z; if (face == null) face = Math.atan2(ddx, ddz); }
       }
       // separation
-      L.enemies.forEach(o => { if (o !== e && o.state !== 'down') { const sx = e.x - o.x, sz = e.z - o.z, sd = Math.hypot(sx, sz); if (sd < .9 && sd > .01) { e.x += sx / sd * (.9 - sd) * .5; e.z += sz / sd * (.9 - sd) * .5; } } });
+      L.enemies.forEach(o => { if (o !== e && o.state !== 'down') { const sx = e.x - o.x, sz = e.z - o.z, sd = Math.hypot(sx, sz); if (sd < .9 && sd > .01) { const nx = e.x + sx / sd * (.9 - sd) * .5, nz = e.z + sz / sd * (.9 - sd) * .5; if (!solid(nx, nz) || e.drone) { e.x = nx; e.z = nz; } } } });
+      if (!e.drone) { const sx = e.x - p.x, sz = e.z - p.z, sd = Math.hypot(sx, sz); if (sd < .85 && sd > .01 && !(p.y > 1)) { const nx = e.x + sx / sd * (.85 - sd), nz = e.z + sz / sd * (.85 - sd); if (!solid(nx, nz)) { e.x = nx; e.z = nz; } } }
       if (face != null) e.yaw += U.angDiff(e.yaw, face) * Math.min(1, dt * (e.state === 'alert' ? 8 : 3));
       m.root.position.x = e.x; m.root.position.z = e.z; m.root.rotation.y = e.yaw;
       if (e.drone) { m.root.position.y = 2.2 + Math.sin(L.time * 2 + e.bob) * .15; if (m.ring) m.ring.rotation.y += dt * 6; }
@@ -3646,7 +3683,7 @@ NV.Level = (() => {
   }
 
   function updateWorld(dt) {
-    const p = L.p; if (L.cityFx) cityFxTick(dt); floatTick(dt); grenadeTick(dt); heatTick(dt);
+    const p = L.p; if (L.cityFx) cityFxTick(dt); floatTick(dt); grenadeTick(dt); heatTick(dt); pedSeparate();
     L.pickups = L.pickups.filter(k => {
       k.t += dt; k.m.rotation.y += dt * 2; k.m.position.y = 1.1 + Math.sin(k.t * 2) * .12;
       if (Math.hypot(k.x - p.x, k.z - p.z) < 1.3) {
@@ -3731,24 +3768,24 @@ NV.Level = (() => {
     const neon = [pal.a, pal.b, '#ffb238', '#3dffa8', '#ff3355'].map((c, i) => mat(s, 'cglowm' + i, '#000', c));
     const glass = mat(s, 'cglass', '#05070d'); glass.specularColor = new BABYLON.Color3(1, 1, 1); glass.specularPower = 180; glass.emissiveColor = C3(pal.b).scale(.06);
     L.carP = {
-      body: paint.map(m => P(BABYLON.MeshBuilder.CreateBox('cbody', { width: 1.95, height: .62, depth: 4.4 }, s), m)),
-      nose: paint.map(m => P(BABYLON.MeshBuilder.CreateBox('cnose', { width: 1.9, height: .3, depth: 1.2 }, s), m)),
-      cab: P(BABYLON.MeshBuilder.CreateBox('ccab', { width: 1.7, height: .55, depth: 2.2 }, s), glass),
-      wheel: P(BABYLON.MeshBuilder.CreateCylinder('cwheel', { diameter: .72, height: .32, tessellation: 12 }, s), mat(s, 'cwheelm', '#0c0c10')),
+      body: paint.map(m => P(NV.extrude('cbody', [[-2.32, .28], [-2.36, .62], [-2.15, .86], [1.55, .9], [2.25, .66], [2.36, .42], [2.3, .28]], 1.94, s), m)),
+      nose: paint.map(m => P(NV.merge('cnose', [BABYLON.MeshBuilder.CreateBox('wing', { width: 1.8, height: .05, depth: .34 }, s), ...[-.55, .55].map(x => { const b = BABYLON.MeshBuilder.CreateBox('st', { width: .06, height: .16, depth: .12 }, s); b.position.set(x, -.1, .05); b.bakeCurrentTransformIntoVertices(); return b; })]), m)),
+      cab: P(NV.extrude('ccab', [[-1.35, .86], [-.95, 1.27], [.55, 1.3], [1.32, .88]], 1.6, s), glass),
+      wheel: P(NV.merge('cwheel', [BABYLON.MeshBuilder.CreateCylinder('tyre', { diameter: .72, height: .3, tessellation: 16 }, s), (() => { const r = BABYLON.MeshBuilder.CreateCylinder('rim', { diameter: .46, height: .32, tessellation: 6 }, s); return r; })()]), mat(s, 'cwheelm', '#0c0c10')),
       head: P(BABYLON.MeshBuilder.CreateBox('chead', { width: .42, height: .12, depth: .06 }, s), mat(s, 'cheadm', '#000', '#ffffff')),
       tail: P(BABYLON.MeshBuilder.CreateBox('ctail', { width: .5, height: .1, depth: .06 }, s), mat(s, 'ctailm', '#000', '#ff2040')),
       glow: neon.map(m => P(BABYLON.MeshBuilder.CreateBox('cglow', { width: 1.7, height: .03, depth: 3.9 }, s), m)),
-      strip: neon.map(m => P(BABYLON.MeshBuilder.CreateBox('cstrip', { width: .04, height: .05, depth: 4.2 }, s), m)),
+      strip: neon.map(m => P(BABYLON.MeshBuilder.CreateBox('cstrip', { width: .04, height: .05, depth: 3.9 }, s), m)),
     };
   }
   function makeCar(x, z, yaw, kind) {
     const s = L.scene, P = L.carP, c = Math.floor(Math.random() * 5), n = Math.floor(Math.random() * 5);
     const root = new BABYLON.TransformNode('car', s);
     const I = (proto, px, py, pz, rx, ry, rz) => { const i = proto.createInstance('ci'); i.parent = root; i.position.set(px, py, pz); if (rx || ry || rz) i.rotation.set(rx || 0, ry || 0, rz || 0); i.isPickable = false; if (L.sg && (proto.name === 'cbody' || proto.name === 'ccab')) L.sg.addShadowCaster(i, false); return i; };
-    I(P.body[c], 0, .68, 0); I(P.nose[c], 0, 1.1, 1.45, -.18); I(P.cab, 0, 1.25, -.35);
+    I(P.body[c], 0, 0, 0); I(P.nose[c], 0, 1.04, -2.02); I(P.cab, 0, 0, 0);
     [[-.95, 1.4], [.95, 1.4], [-.95, -1.4], [.95, -1.4]].forEach(([wx, wz]) => I(P.wheel, wx, .36, wz, 0, 0, Math.PI / 2));
-    I(P.head, -.62, .78, 2.21); I(P.head, .62, .78, 2.21); I(P.tail, -.6, .82, -2.21); I(P.tail, .6, .82, -2.21);
-    I(P.glow[n], 0, .1, 0); I(P.strip[n], -.99, .72, 0); I(P.strip[n], .99, .72, 0);
+    I(P.head, -.6, .55, 2.31); I(P.head, .6, .55, 2.31); I(P.tail, -.6, .5, -2.36); I(P.tail, .6, .5, -2.36);
+    I(P.glow[n], 0, .1, 0); I(P.strip[n], -.985, .6, -.1); I(P.strip[n], .985, .6, -.1);
     root.position.set(x, 0, z); root.rotation.y = yaw;
     const car = { root, x, z, yaw, vh: yaw, speed: 0, kind, stopT: 0 };
     L.cars.push(car); return car;
@@ -4040,8 +4077,9 @@ NV.Level = (() => {
   }
   function driveCamera(dt) {
     const c = L.drive.car, p = L.p, dist = 8 + Math.abs(c.speed) * .08, yaw = p.yaw;
-    const cx = c.x - Math.sin(yaw) * dist, cz = c.z - Math.cos(yaw) * dist;
-    L.cam.position.set(cx, 3.1 + p.pitch * 3, cz);
+    let cx = c.x - Math.sin(yaw) * dist, cz = c.z - Math.cos(yaw) * dist; const cy = 3.1 + p.pitch * 3;
+    for (let k = 0; k < 14 && (L.map.hmap ? cellH(cx, cz) > cy - .4 : solid(cx, cz)); k++) { cx += (c.x - cx) * .2; cz += (c.z - cz) * .2; }
+    L.cam.position.set(cx, cy, cz);
     L.cam.rotation.set(.18 + p.pitch * .4, yaw, 0);
     L.cam.fov = U.lerp(L.cam.fov, NV.Settings.get().fov * Math.PI / 180 * .75 * (1 + Math.abs(c.speed) / 140), dt * 4);
   }
@@ -4304,7 +4342,10 @@ NV.Level = (() => {
     const qy = a => BABYLON.Quaternion.RotationYawPitchRoll(a, 0, 0);
     const seg = (key, ax, ay, az, bx, by, bz, th) => { const dx = bx - ax, dy = by - ay, dz = bz - az, len = Math.hypot(dx, dy, dz); put(key, NV.M(th, th, len, (ax + bx) / 2, (ay + by) / 2, (az + bz) / 2, BABYLON.Quaternion.RotationYawPitchRoll(Math.atan2(dx, dz), -Math.atan2(dy, Math.hypot(dx, dz)), 0))); };
     const fx = L.cityFx = roofOnly ? L.cityFx : { t: 0, mats: [], ads: [], signMats: [] };
-    const blades = [[], [], []], bladeCols = ['#ff2bd6', '#19f0ff', '#ffb238'], boards = [];
+    const blades = [[], [], []], bladeCols = ['#ff2bd6', '#19f0ff', '#ffb238'], boards = [], signSpots = [];
+    const boardSet = new Set(q.signs && !roofOnly ? M.buildings.filter(b => b.ht > 50 && !b.tilt).sort((a, c) => c.ht - a.ht).slice(0, 16) : []);
+    const props = L.roofProps = roofOnly ? L.roofProps : new Map(), propKey = (cx, cy) => cx + ',' + cy;
+    const addProp = (x0, x1, z0, z1, top) => { if (roofOnly) return; for (let cy = Math.floor(z0 / T); cy <= Math.floor(z1 / T); cy++) for (let cx = Math.floor(x0 / T); cx <= Math.floor(x1 / T); cx++) { const k = propKey(cx, cy); if (!props.has(k)) props.set(k, []); props.get(k).push({ x0, x1, z0, z1, top }); } };
     // a street-facing side of a building: [dx, dy]
     const streetSides = b => [[0, -1], [0, 1], [-1, 0], [1, 0]].filter(([dx, dy]) => dx ? !solidC(dx < 0 ? b.x - 1 : b.x + b.w, b.y + (b.h >> 1)) : !solidC(b.x + (b.w >> 1), dy < 0 ? b.y - 1 : b.y + b.h));
     M.buildings.forEach(b => {
@@ -4312,11 +4353,15 @@ NV.Level = (() => {
       // neon corner strips and rooftop outlines
       if (ht > 20 && r() < .45) { const cs = [[x0 - .07, z0 - .07], [x0 + W + .07, z0 - .07], [x0 - .07, z0 + D + .07], [x0 + W + .07, z0 + D + .07]]; for (let k = 0, n = r() < .4 ? 2 : 1; k < n; k++) { const c = cs[Math.floor(r() * 4)]; put('neon' + col, NV.M(.24, ht - 2, .24, c[0], ht / 2, c[1])); } }
       if (ht > 38 && r() < .55) { const y = ht + .12; put('neon' + col, NV.M(W, .2, .2, x0 + W / 2, y, z0)); put('neon' + col, NV.M(W, .2, .2, x0 + W / 2, y, z0 + D)); put('neon' + col, NV.M(.2, .2, D, x0, y, z0 + D / 2)); put('neon' + col, NV.M(.2, .2, D, x0 + W, y, z0 + D / 2)); }
-      // rooftop clutter: AC units, water tanks, masts with blinking beacons
-      if (!b.tilt) {
-        for (let k = 0, n = Math.min(4, Math.round(b.w * b.h / 5 * lodK)); k < n; k++) put('ac', NV.M(1.5 + r(), .9, 1.1 + r() * .6, x0 + W * (.15 + .7 * r()), ht + .45, z0 + D * (.15 + .7 * r()), qy(r() < .5 ? 0 : Math.PI / 2)));
-        if (r() < .35) put('tank', NV.M(2.2, 2.6, 2.2, x0 + W * (.25 + .5 * r()), ht + 1.3, z0 + D * (.25 + .5 * r())));
-        if (ht > 30 && r() < .35) { const ax = x0 + W * (.2 + .6 * r()), az = z0 + D * (.2 + .6 * r()), mh = 5 + r() * 6; put('mast', NV.M(.14, mh, .14, ax, ht + mh / 2, az)); put('blink', NV.M(.4, .4, .4, ax, ht + mh + .2, az)); }
+      // rooftop clutter: AC units, water tanks, masts with blinking beacons — placed so nothing overlaps
+      if (b.ht > 45) { const cx = x0 + W / 2, cz = z0 + D / 2; put('mast', NV.M(.16, 1.8, .16, cx, b.ht + .9, cz)); } // the antenna light gets something to stand on
+      if (!b.tilt && !boardSet.has(b)) {
+        const occ = b.ht > 45 ? [[x0 + W / 2 - .7, x0 + W / 2 + .7, z0 + D / 2 - .7, z0 + D / 2 + .7]] : [];
+        const place = (w, d) => { if (W - 1.4 < w || D - 1.4 < d) return null; for (let t = 0; t < 8; t++) { const cx = x0 + .7 + w / 2 + r() * (W - 1.4 - w), cz = z0 + .7 + d / 2 + r() * (D - 1.4 - d); const R4 = [cx - w / 2, cx + w / 2, cz - d / 2, cz + d / 2];
+          if (occ.every(o => R4[1] + .4 < o[0] || R4[0] - .4 > o[1] || R4[3] + .4 < o[2] || R4[2] - .4 > o[3])) { occ.push(R4); return { cx, cz }; } } return null; };
+        for (let k = 0, n = Math.min(4, Math.round(b.w * b.h / 5 * lodK)); k < n; k++) { const rot = r() < .5, w = 1.5 + r(), d = 1.1 + r() * .6, sw = rot ? d : w, sd = rot ? w : d, at = place(sw, sd); if (at) { put('ac', NV.M(w, .9, d, at.cx, ht + .45, at.cz, qy(rot ? Math.PI / 2 : 0))); addProp(at.cx - sw / 2, at.cx + sw / 2, at.cz - sd / 2, at.cz + sd / 2, ht + .9); } }
+        if (r() < .35) { const at = place(2.2, 2.2); if (at) { put('tank', NV.M(2.2, 2.6, 2.2, at.cx, ht + 1.3, at.cz)); addProp(at.cx - 1.1, at.cx + 1.1, at.cz - 1.1, at.cz + 1.1, ht + 2.6); } }
+        if (ht > 30 && r() < .35) { const at = place(.5, .5); if (at) { const mh = 5 + r() * 6; put('mast', NV.M(.14, mh, .14, at.cx, ht + mh / 2, at.cz)); put('blink', NV.M(.4, .4, .4, at.cx, ht + mh + .2, at.cz)); } }
       }
       // Tokyo-style blade signs sticking out over the sidewalk
       if (q.signs && ht > 14 && r() < .55) {
@@ -4324,7 +4369,7 @@ NV.Level = (() => {
         if (sides.length) {
           const [dx, dy] = sides[Math.floor(r() * sides.length)], h = Math.min(ht - 4, 6 + r() * 9), y0 = 4 + r() * Math.max(0, Math.min(6, ht - h - 6)), along = r() < .5 ? .14 : .86;
           let px, pz, rot; if (dy) { px = x0 + W * along; pz = dy < 0 ? z0 - 1.3 : z0 + D + 1.3; rot = Math.PI / 2; } else { pz = z0 + D * along; px = dx < 0 ? x0 - 1.3 : x0 + W + 1.3; rot = 0; }
-          blades[Math.floor(r() * 3)].push({ x: px, y: y0 + h / 2, z: pz, h, rot, cell: Math.floor(r() * 16) });
+          blades[Math.floor(r() * 3)].push({ x: px, y: y0 + h / 2, z: pz, h, rot, cell: Math.floor(r() * 16) }); signSpots.push({ x: px, z: pz, y0, y1: y0 + h });
           put('bracket', dy ? NV.M(.14, .14, 2.6, px, y0 + h - .25, pz) : NV.M(2.6, .14, .14, px, y0 + h - .25, pz));
           put('bracket', dy ? NV.M(.14, .14, 2.6, px, y0 + .25, pz) : NV.M(2.6, .14, .14, px, y0 + .25, pz));
         }
@@ -4335,10 +4380,11 @@ NV.Level = (() => {
         if (sides.length) {
           const [dx, dy] = sides[Math.floor(r() * sides.length)], oh = dx ? hAt(dx < 0 ? b.x - 5 : b.x + b.w + 4, b.y + (b.h >> 1)) : hAt(b.x + (b.w >> 1), dy < 0 ? b.y - 5 : b.y + b.h + 4);
           const top = Math.min(ht, oh || ht) - 1.5;
-          for (let k = 0, n = 1 + (r() < .5 ? 1 : 0); k < n && top > 9; k++) {
-            const h0 = 8 + r() * (top - 8), h1 = Math.min(top, h0 + (r() - .5) * 4); let ax, az, bx, bz;
-            if (dy) { ax = x0 + W * (.1 + .8 * r()); az = dy < 0 ? z0 : z0 + D; bx = ax + (r() - .5) * 5; bz = az + dy * 16; } else { az = z0 + D * (.1 + .8 * r()); ax = dx < 0 ? x0 : x0 + W; bz = az + (r() - .5) * 5; bx = ax + dx * 16; }
-            const sag = 1.2 + r() * 1.6, mx = (ax + bx) / 2, mz = (az + bz) / 2, my = (h0 + h1) / 2 - sag;
+          for (let k = 0, n = 1 + (r() < .5 ? 1 : 0); k < n && top > 12.5; k++) {
+            const h0 = 11 + r() * (top - 11), h1 = Math.max(11, Math.min(top, h0 + (r() - .5) * 3)); let ax, az, bx, bz;
+            if (dy) { ax = x0 + W * (.3 + .4 * r()); az = dy < 0 ? z0 : z0 + D; bx = ax + (r() - .5) * 3; bz = az + dy * 16; } else { az = z0 + D * (.3 + .4 * r()); ax = dx < 0 ? x0 : x0 + W; bz = az + (r() - .5) * 3; bx = ax + dx * 16; }
+            if (signSpots.some(sp => [[ax, az], [bx, bz], [(ax + bx) / 2, (az + bz) / 2]].some(([x, z]) => Math.hypot(sp.x - x, sp.z - z) < 4 && Math.min(h0, h1) - 2 < sp.y1))) continue;
+            const sag = .8 + r() * .8, mx = (ax + bx) / 2, mz = (az + bz) / 2, my = (h0 + h1) / 2 - sag;
             seg('cable', ax, h0, az, mx, my, mz, .06); seg('cable', mx, my, mz, bx, h1, bz, .06);
             if (r() < .3) for (let t = 1; t < 8; t++) { const u = t / 8, px = ax + (bx - ax) * u, pz = az + (bz - az) * u, py = h0 + (h1 - h0) * u - sag * 4 * u * (1 - u); put('lantern', NV.M(.34, .44, .34, px, py - .35, pz)); }
           }
@@ -4346,7 +4392,7 @@ NV.Level = (() => {
       }
     });
     // giant holo billboards on the tallest roofs (two groups so the ads rotate out of step)
-    if (q.signs && !roofOnly) M.buildings.filter(b => b.ht > 50 && !b.tilt).sort((a, c) => c.ht - a.ht).slice(0, 16).forEach((b, i) => {
+    if (q.signs && !roofOnly) [...boardSet].forEach((b, i) => {
       const sides = streetSides(b); if (!sides.length) return; const [dx, dy] = sides[0], x0 = b.x * T, z0 = b.y * T, W = b.w * T, D = b.h * T;
       const bw = Math.min(18, (dy ? W : D) * .95), bh = bw * .56, y = b.ht + 2.5 + bh / 2;
       let px = x0 + W / 2, pz = z0 + D / 2, rot = 0;
@@ -4383,8 +4429,9 @@ NV.Level = (() => {
     if (roofOnly) return;
     // flying traffic: sky lanes above the street grid (bodies, head/tail light bars, underglow)
     const nAir = Math.round(24 + 56 * Math.min(1, q.lod || 1)), air = [];
-    for (let i = 0; i < nAir; i++) { const axis = r() < .5 ? 'x' : 'z', line = 1 + Math.floor(r() * (M.N - 1)), dir = r() < .5 ? 1 : -1; air.push({ axis, c: (2 + line * M.B) * T + dir * 3.5, dir, h: 44 + Math.floor(r() * 5) * 15 + (axis === 'x' ? 7 : 0), along: r() * M.W * T, sp: 20 + r() * 22, ph: r() * 6, col: r() < .5 ? 0 : 1 }); }
-    const amesh = (name, m) => { const b = BABYLON.MeshBuilder.CreateBox(name, { size: 1 }, scene); b.material = m; b.isPickable = false; b.alwaysSelectAsActiveMesh = true; const buf = new Float32Array(nAir * 16); b.thinInstanceSetBuffer('matrix', buf, 16, false); return { b, buf }; };
+    const laneOk = (axis, c) => { for (let t = 4; t < M.W * T - 4; t += 4) { const x = axis === 'z' ? c : t, z = axis === 'z' ? t : c; if (solid(x, z)) return false; } return true; };
+    for (let i = 0, tries = 0; i < nAir && tries < nAir * 6; tries++) { const axis = r() < .5 ? 'x' : 'z', line = 1 + Math.floor(r() * (M.N - 1)), dir = r() < .5 ? 1 : -1; if (!laneOk(axis, (2 + line * M.B) * T + dir * 3.5)) continue; i++; air.push({ axis, c: (2 + line * M.B) * T + dir * 3.5, dir, h: 44 + Math.floor(r() * 5) * 15 + (axis === 'x' ? 7 : 0), along: r() * M.W * T, sp: 20 + r() * 22, ph: r() * 6, col: r() < .5 ? 0 : 1 }); }
+    const amesh = (name, m) => { const b = BABYLON.MeshBuilder.CreateBox(name, { size: 1 }, scene); b.material = m; b.isPickable = false; b.alwaysSelectAsActiveMesh = true; const buf = new Float32Array(Math.max(1, air.length) * 16); b.thinInstanceSetBuffer('matrix', buf, 16, false); return { b, buf }; };
     const em = (n, c) => { const m = mat(scene, n, '#000', c); m.disableLighting = true; return m; };
     const bodyM = mat(scene, 'aircarm', '#1c1a26'); bodyM.specularColor = new BABYLON.Color3(.6, .6, .7); bodyM.specularPower = 64;
     fx.air = { list: air, body: amesh('aircar', bodyM), head: amesh('airhead', em('airheadm', '#eaf6ff')), tail: amesh('airtail', em('airtailm', '#ff2040')), glow: amesh('airglow', em('airglowm', pal.a)), W: M.W * T };
@@ -4398,7 +4445,7 @@ NV.Level = (() => {
     });
     // steam rising from manholes: a few pooled emitters follow the nearest vents
     const vents = [];
-    for (let i = 0; i < 160; i++) { const axis = r() < .5, k = Math.floor(r() * (M.N + 1)), c = (2 + k * M.B) * T + (r() < .5 ? -2 : 2), a = 8 + r() * (M.W * T - 16), x = axis ? c : a, z = axis ? a : c; if (!solid(x, z)) { vents.push({ x, z }); put('manhole', NV.M(1.1, .05, 1.1, x, .03, z)); } }
+    for (let i = 0; i < 160; i++) { const axis = r() < .5, k = Math.floor(r() * (M.N + 1)), c = (2 + k * M.B) * T + (r() < .5 ? -2 : 2), a = 8 + r() * (M.W * T - 16), x = axis ? c : a, z = axis ? a : c, seg = (((a - 2 * T) % (M.B * T)) + M.B * T) % (M.B * T); if (seg > 15 && seg < M.B * T - 15 && !solid(x, z)) { vents.push({ x, z }); put('manhole', NV.M(1.1, .05, 1.1, x, .03, z)); } }
     if (sets.manhole) mk('manhole', mat(scene, 'manm', '#1d1a22'), sets.manhole, () => BABYLON.MeshBuilder.CreateCylinder('manhole', { diameter: 1, height: 1, tessellation: 12 }, scene));
     if ((q.particles || 0) > .25) {
       const tex = NV.tex(scene, 64, 64, (c, w, h) => { const gr = c.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, 'rgba(255,255,255,.9)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = gr; c.fillRect(0, 0, w, h); }, 'steamtex');
@@ -4534,9 +4581,9 @@ NV.Level = (() => {
     const Pp = (mesh, m) => { mesh.material = m; mesh.position.y = -1000; mesh.isPickable = false; return lod(mesh); };
     const torsos = pm.map(m => Pp(limbShape('torso', L.scene), m)), arms = pm.map(m => Pp(limbShape('arm', L.scene), m));
     const skin = mat(L.scene, 'pdhm', '#6d5548'), pants = mat(L.scene, 'pdpm', '#17141f');
-    const shared = { head: Pp(limbShape('head', L.scene), skin), hand: Pp(limbShape('hand', L.scene), skin), leg: Pp(limbShape('leg', L.scene), pants), foot: Pp(limbShape('foot', L.scene), pants) };
+    const shared = { head: Pp(limbShape('head', L.scene), skin), hand: Pp(limbShape('hand', L.scene), skin), leg: Pp(limbShape('leg', L.scene), pants), foot: Pp(limbShape('foot', L.scene), pants), pelvis: Pp(limbShape('pelvis', L.scene), pants), neck: Pp(limbShape('neck', L.scene), skin) };
     const strip = Pp(BABYLON.MeshBuilder.CreateBox('pds', { width: .05, height: .4, depth: .05 }, L.scene), mat(L.scene, 'pdsm', '#000', L.palette.a));
-    const coats = pm.map(m => Pp(BABYLON.MeshBuilder.CreateBox('pdcoat', { width: .46, height: .64, depth: .07 }, L.scene), m));
+    const coats = pm.map(m => Pp(NV.lathe('pdcoat', [[.2, .3], [.235, .1], [.27, -.12], [.3, -.3]], L.scene, .82, 12), m));
     const canopyM = mat(L.scene, 'umbm', '#16101f', null, .85); canopyM.backFaceCulling = false; canopyM.specularColor = new BABYLON.Color3(.7, .7, .8); canopyM.specularPower = 64;
     const canopy = Pp(BABYLON.MeshBuilder.CreateCylinder('umb', { diameterTop: .06, diameterBottom: 1.25, height: .3, tessellation: 12, cap: BABYLON.Mesh.NO_CAP }, L.scene), canopyM);
     const rims = ['#ff2bd6', '#19f0ff', '#ffb238', '#3dffa8'].map((c, k) => { const m = mat(L.scene, 'umbr' + k, '#000', c); m.disableLighting = true; return Pp(BABYLON.MeshBuilder.CreateTorus('umbrim', { diameter: 1.25, thickness: .035, tessellation: 18 }, L.scene), m); });
@@ -4546,7 +4593,7 @@ NV.Level = (() => {
       const root = new BABYLON.TransformNode('ped', L.scene);
       const rig = rigBuild(root, k => (k === 'torso' ? torsos[i % 4] : k === 'arm' ? arms[i % 4] : shared[k]).createInstance('i'), false);
       inst(strip, root, .16, 1.3, .22);
-      if (r() < .45) inst(coats[i % 4], root, 0, .95, -.14);
+      if (r() < .45) inst(coats[i % 4], root, 0, .86, 0);
       if (r() < (L.rain ? .4 : .12)) { inst(canopy, root, .1, 2.14, .06); inst(rims[(i >> 1) % 4], root, .1, 1.99, .06); inst(handle, root, .1, 1.66, .06); } else if (r() < .3) inst(hat, root, 0, 1.97, 0);
       const pd = { root, rig, x: 0, z: 0, sp: 1.1 + r() * .9, ph: r() * 6, jay: r() < .08, cw: r() < .5 ? 1 : 3 };
       pedPlace(pd, 8, 110); L.peds.push(pd);
@@ -4815,13 +4862,13 @@ NV.Level = (() => {
     } else {
       const body = mat(s, 'npcb' + sp.name, info.hair || '#2a2638'), accent = mat(s, 'npca' + sp.name, '#000', col), skin = mat(s, 'npch' + sp.name, '#6d5548'), pants = mat(s, 'npcp' + sp.name, '#15121e');
       body.specularColor = new BABYLON.Color3(.3, .3, .35);
-      const matFor = k => k === 'head' || k === 'hand' ? skin : k === 'leg' || k === 'foot' ? pants : body;
+      const matFor = k => k === 'head' || k === 'hand' || k === 'neck' ? skin : k === 'leg' || k === 'foot' || k === 'pelvis' ? pants : body;
       root.rig = rigBuild(root, k => { const m = limbShape(k, s); m.material = matFor(k); return lod(m); }, false);
       const P = (mesh, m, y, z2) => { mesh.material = m; mesh.parent = root; mesh.position.y = y; if (z2) mesh.position.z = z2; mesh.isPickable = false; return mesh; };
       P(BABYLON.MeshBuilder.CreateBox('ne', { width: info.kind === 'mask' || info.kind === 'shadow' ? .3 : .22, height: .045, depth: .05 }, s), accent, 1.82, .16);
       P(BABYLON.MeshBuilder.CreateBox('nc', { width: .05, height: .45, depth: .04 }, s), accent, 1.3, .25);
       if (info.f) P(BABYLON.MeshBuilder.CreateBox('nhair', { width: .38, height: .45, depth: .18 }, s), body, 1.72, -.1);
-      P(BABYLON.MeshBuilder.CreateBox('ncoat', { width: .48, height: .72, depth: .06 }, s), body, .95, -.15);
+      P(NV.lathe('ncoat', [[.21, .32], [.24, .1], [.28, -.14], [.31, -.34]], s, .82, 12), body, .86);
       P(BABYLON.MeshBuilder.CreateTorus('ncol', { diameter: .32, thickness: .035, tessellation: 14 }, s), accent, 1.6);
       if (L.sg) root.getChildMeshes().forEach(m => L.sg.addShadowCaster(m, false));
     }
@@ -5142,7 +5189,23 @@ NV.Level = (() => {
      falls longer than ~12 m become a skydive (third person, steerable). Hard landings ragdoll. */
   function cellH(x, z) { const M = L.map, c = toCell(x, z); if (c.x < 0 || c.y < 0 || c.x >= M.W || c.y >= M.H) return 1e9; const v = M.g[c.y][c.x]; if (v === 2) return 1.2; if (v !== 1) return 0; return M.hmap ? M.hmap[c.y * M.W + c.x] : 1e9; }
   const floorAt = (x, z) => { const h = cellH(x, z); return h < 1e8 ? h : 0; };
-  function moveElev(p, dx, dz) { const r = .35, ok = (x, z) => cellH(x, z) <= p.y + .6; if (dx && ok(p.x + dx + Math.sign(dx) * r, p.z)) p.x += dx; if (dz && ok(p.x, p.z + dz + Math.sign(dz) * r)) p.z += dz; }
+  // nobody walks through anybody: the player is pushed out of enemies, pedestrians, characters, cars and wrecks
+  function bodyPush(p) {
+    const push = (x, z, r) => { const dx = p.x - x, dz = p.z - z, d = Math.hypot(dx, dz), m = r + .38; if (d < m) { const ux = d > 1e-4 ? dx / d : 1, uz = d > 1e-4 ? dz / d : 0, nx = x + ux * m, nz = z + uz * m; if (!solid(nx, nz)) { p.x = nx; p.z = nz; } } };
+    const near = (x, z, R) => Math.abs(x - p.x) < R && Math.abs(z - p.z) < R;
+    L.enemies.forEach(e => { if (e.state !== 'down' && !e.drone && near(e.x, e.z, 2)) push(e.x, e.z, e.m.r || .45); });
+    if (L.peds) L.peds.forEach(pd => { if (!pd.rag && near(pd.x, pd.z, 2)) push(pd.x, pd.z, .3); });
+    if (L.npcs) L.npcs.forEach(n => { if (near(n.x, n.z, 2)) push(n.x, n.z, .35); });
+    if (L.cars) L.cars.forEach(c => { if (!near(c.x, c.z, 4)) return; const fx = Math.sin(c.yaw), fz = Math.cos(c.yaw); [-1.5, -.5, .5, 1.5].forEach(k => push(c.x + fx * k, c.z + fz * k, .82)); });
+    if (L.wrecks) L.wrecks.forEach(w => { if (w.x != null && near(w.x, w.z, 3)) push(w.x, w.z, 1.6); });
+  }
+  // pedestrians step around each other instead of walking through
+  function pedSeparate() {
+    const P = L.peds; if (!P) return;
+    for (let i = 0; i < P.length; i++) { const a = P[i]; if (a.rag) continue; for (let j = i + 1; j < P.length; j++) { const b = P[j]; if (b.rag) continue; const dx = b.x - a.x, dz = b.z - a.z; if (Math.abs(dx) > .7 || Math.abs(dz) > .7) continue; const d = Math.hypot(dx, dz) || .01; if (d < .62) { const k = (.62 - d) / 2, ux = dx / d, uz = dz / d; if (!solid(a.x - ux * k, a.z - uz * k)) { a.x -= ux * k; a.z -= uz * k; } if (!solid(b.x + ux * k, b.z + uz * k)) { b.x += ux * k; b.z += uz * k; } } } }
+  }
+  function propHit(x, z, y) { const P = L.roofProps; if (!P) return false; const l = P.get(Math.floor(x / TILE) + ',' + Math.floor(z / TILE)); return !!l && l.some(o => x > o.x0 - .3 && x < o.x1 + .3 && z > o.z0 - .3 && z < o.z1 + .3 && y < o.top - .25 && y > o.top - 4); }
+  function moveElev(p, dx, dz) { const r = .35, ok = (x, z) => cellH(x, z) <= p.y + .6 && !propHit(x, z, p.y); if (dx && ok(p.x + dx + Math.sign(dx) * r, p.z)) p.x += dx; if (dz && ok(p.x, p.z + dz + Math.sign(dz) * r)) p.z += dz; }
   function vertical(dt, mz, sprint) {
     const p = L.p, I = NV.In; if (!L.map.hmap || L.drive || L.pRag) return;
     const fx = Math.sin(p.yaw), fz = Math.cos(p.yaw);
@@ -5177,7 +5240,8 @@ NV.Level = (() => {
     const p = L.p, G = L.ghost, cam = L.cam, R = G.root.rig, t = L.time;
     G.x = p.x; G.z = p.z; G.root.position.set(p.x, p.y, p.z); G.root.rotation.set(Math.PI / 2 * .9, p.yaw, Math.sin(t * 2) * .08);
     R.armL.rotation.set(Math.sin(t * 9) * .1, 0, -1.35); R.armR.rotation.set(Math.cos(t * 9) * .1, 0, 1.35); R.legL.rotation.set(.2, 0, -.35); R.legR.rotation.set(.2, 0, .35); R.kneeL.rotation.x = .4; R.kneeR.rotation.x = .4;
-    const ex = p.x - Math.sin(p.yaw) * 5.5, ez = p.z - Math.cos(p.yaw) * 5.5;
+    let ex = p.x - Math.sin(p.yaw) * 5.5, ez = p.z - Math.cos(p.yaw) * 5.5;
+    for (let k = 0; k < 12 && cellH(ex, ez) > p.y + 3; k++) { ex += (p.x - ex) * .2; ez += (p.z - ez) * .2; }
     cam.position.set(ex, p.y + 3.4, ez); const dx = p.x - ex, dy = p.y + .6 - cam.position.y, dz = p.z - ez; cam.rotation.set(-Math.atan2(dy, Math.hypot(dx, dz)), Math.atan2(dx, dz), 0);
     cam.fov = U.lerp(cam.fov, NV.Settings.get().fov * Math.PI / 180 * .75 * 1.2, dt * 3);
   }
