@@ -80,6 +80,38 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 
 ---
 
+## The overhaul (HUD, world, gameplay)
+
+Everything in-game was reworked; the title screen and menus are unchanged.
+
+**HUD (bold cyberpunk)**
+- **Panels and vitals:** angled neon panels, and segmented health and energy bars with a white damage trail.
+- **Weapon panel:** a big magazine counter, reserve, level and load.
+- **Crosshair:** opens with spread, movement and recoil. It shows hit markers, and red kill and headshot markers.
+- **Minimap:** a compass bezel and heading.
+- **Threat and stealth:** a threat badge and stealth meter.
+- **Damage feedback:** glitch shake when you're hurt, a pulsing red critical state under 30% HP, damage-direction arcs and floating damage numbers.
+
+**World**
+- **Buildings:** new facades with lit floors, blinds and silhouettes; neon corner strips and roof outlines; rooftop AC units, water tanks and blinking masts.
+- **Street signage:** Tokyo-style vertical blade signs over the sidewalks, and animated holo billboards on the tallest towers.
+- **Above the streets:** cables strung across the streets (some with lanterns), flying-car traffic lanes, and ad blimps circling the skyline.
+- **Street level:** steam from manholes, and wet asphalt with puddle highlights. High tiers and above also mirror the neon in the street.
+- **Sky:** a light-polluted night sky with a drifting cloud deck, plus teal and magenta colour grading.
+- **People:** enemies wear helmets, chest plates and glowing trim (heavies in red). Pedestrians wear long coats and hats, and carry neon-rimmed umbrellas in the rain.
+- **Explosions:** a white-hot core, a ground shockwave and a smoke column.
+
+**Gameplay**
+- **Movement:** momentum (quick starts, quicker stops, floaty in the air), coyote-time jumps and jump buffering.
+- **Enemy tactics:** guards take cover behind walls and crates (ducking between bursts), flank wide, fall back when hurt and lob grenades if you camp. Grenades show a red fuse ring, so get out of it.
+- **Enemy call-outs:** "CONTACT!", "FLANKING!", "GRENADE OUT!", "RELOADING!" and more.
+- **Hit reactions:** enemies flinch and slow down when hit.
+- **Kill chains:** kills within 4 s chain for bonus credits.
+- **Helix heat (open world):**
+  - Being spotted, killing Helix units and carjacking raise heat, up to 5 ◆.
+  - Response squads converge on you, with armoured heavies from 3 ◆.
+  - Heat cools off after about 12 s with no one hunting you.
+
 ## Climbing & skydiving
 
 In the city, keep pushing forward into a building to climb its wall; release forward to hang, dash to let go. At the top you mount the roof and can climb taller neighbours. Walk off an edge and you fall; drops longer than ~12 m become a steerable third-person skydive, and hard landings (street or roof) knock Ghost into a ragdoll. Guards lose sight of you on high rooftops.

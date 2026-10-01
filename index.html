@@ -205,6 +205,14 @@ body.cine #story{bottom:11vh;inset:0 0 11vh 0;z-index:5}
 #hud .wpn .wa span{font-family:var(--fh);font-size:15px;color:var(--ink);opacity:.8}
 #hud .wpn .wa i{font-style:normal;font-family:var(--fm);font-size:15px;color:var(--amber);border-left:1px solid rgba(255,178,56,.5);padding-left:8px}
 #hud .wpn .bar.ht{margin-top:6px}#hud .wpn .wl{font-family:var(--fm);font-size:9px;letter-spacing:.3em;color:var(--dim);margin-top:5px}
+/* damage direction arcs, floating numbers / call-outs, wanted heat, kill chain */
+#hud .dirs{position:absolute;left:50%;top:50%;width:0;height:0}#hud .dirs i{position:absolute;left:-90px;top:-90px;width:180px;height:180px;border-radius:50%;border-top:6px solid var(--red);filter:drop-shadow(0 0 8px var(--red));opacity:0;transition:opacity .35s;-webkit-mask:linear-gradient(#000 0 0);clip-path:polygon(30% 0,70% 0,50% 50%)}
+#hud .fl{position:absolute;inset:0;overflow:hidden}#hud .fl em{position:absolute;left:0;top:0;font-style:normal;font-family:var(--fh);font-weight:900;font-size:15px;color:#fff;text-shadow:0 0 8px var(--pink),0 0 2px #000;white-space:nowrap;pointer-events:none;will-change:transform,opacity}
+#hud .fl em.hd{color:var(--amber);font-size:19px;text-shadow:0 0 10px var(--amber),0 0 2px #000}#hud .fl em.bk{font-size:12px;letter-spacing:.18em;color:#fff;background:rgba(255,30,70,.82);padding:2px 8px;clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%);text-shadow:none}
+#hud .heat{position:absolute;left:50%;top:62px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;font-family:var(--fh);font-size:10px;letter-spacing:.25em;color:var(--red)}#hud .heat span{font-size:16px;letter-spacing:.15em;text-shadow:0 0 10px var(--red)}#hud .heat.hot span{animation:blink .7s infinite}
+#hud .chain{position:absolute;left:calc(50% + 40px);top:calc(50% - 46px);font-family:var(--fh);font-weight:900;font-size:22px;color:var(--amber);text-shadow:0 0 12px var(--amber);opacity:0;transform:skewX(-12deg);transition:opacity .3s}#hud .chain.on{opacity:1}#hud .chain small{display:block;font-size:11px;letter-spacing:.2em;color:#fff}
+#hud.cine .dirs,#hud.cine .fl,#hud.cine .heat,#hud.cine .chain{opacity:0}
+body.touch #hud .heat{left:66%;top:62px}
 /* hurt glitch */
 #hud.hurt .bars,#hud.hurt .obj,#hud.hurt .wpn,#hud.hurt .mmf,#hud.hurt .status{animation:hudgl .32s steps(3)}
 @keyframes hudgl{0%{translate:0 0;filter:none}25%{translate:-5px 2px;filter:drop-shadow(4px 0 rgba(255,43,214,.9)) drop-shadow(-4px 0 rgba(25,240,255,.9))}50%{translate:4px -2px;filter:hue-rotate(60deg)}75%{translate:-2px 0;filter:drop-shadow(-3px 0 rgba(255,43,214,.9))}100%{translate:0 0;filter:none}}
@@ -1251,6 +1259,64 @@ NV.windowTex = (scene, seed, hueA, hueB) => NV.tex(scene, 128, 256, (g, w, h) =>
   }
   g.fillStyle = 'rgba(0,0,0,.6)'; for (let y = 0; y < h; y += 64) g.fillRect(0, y, w, 3);
 }, 'win' + seed);
+/* in-game facades: floor slabs, mullions, ribbon or grid windows with blinds and the odd silhouette */
+NV.windowTex2 = (scene, seed, hueA, hueB) => NV.tex(scene, 256, 512, (g, w, h) => {
+  const r = U.rng(seed); g.fillStyle = '#07050d'; g.fillRect(0, 0, w, h);
+  for (let x = 0; x < w; x += 32) { g.fillStyle = 'rgba(130,120,190,.08)'; g.fillRect(x, 0, 2, h); }
+  const ribbon = r() < .35;
+  for (let y = 0; y < h; y += 16) {
+    g.fillStyle = 'rgba(170,160,220,.11)'; g.fillRect(0, y, w, 2);
+    const lit = r() < .5, tint = r(), wc = tint > .6 ? '#ffd08a' : tint > .25 ? '#8fb4ff' : '#ff86d8';
+    if (ribbon) {
+      if (!lit && r() < .7) continue;
+      g.globalAlpha = .3 + r() * .45; g.fillStyle = r() < .08 ? hueA : wc; g.fillRect(0, y + 4, w, 9); g.globalAlpha = 1;
+      g.fillStyle = '#05030a'; for (let x = 0; x < w; x += 18 + Math.floor(r() * 46)) g.fillRect(x, y + 4, 3 + r() * 14, 9);
+      continue;
+    }
+    for (let x = 2; x < w; x += 16) {
+      const v = r(); if (!lit && v < .8) continue; if (v < .2) continue;
+      g.globalAlpha = .45 + v * .5; g.fillStyle = v > .95 ? hueA : v > .9 ? hueB : wc; g.fillRect(x, y + 4, 12, 10); g.globalAlpha = 1;
+      if (r() < .3) { g.fillStyle = 'rgba(0,0,0,.55)'; for (let k = 0; k < 4; k++) g.fillRect(x, y + 5 + k * 2.5, 12, 1); }
+      if (r() < .07) { g.fillStyle = 'rgba(0,0,0,.75)'; g.fillRect(x + 5, y + 8, 3, 6); g.beginPath(); g.arc(x + 6.5, y + 7, 1.7, 0, 7); g.fill(); }
+    }
+  }
+}, 'win2_' + seed);
+/* vertical blade-sign atlas (8 x 2 cells of 128 x 512), drawn in one neon colour */
+NV.BLADE_WORDS = ['ネオン', 'HOTEL', 'RAMEN', '酸素', 'BAR', '24H', 'CLUB', '夢', 'DATA', '薬局', 'SUSHI', 'バー', 'O₂', 'SYNTH', 'カフェ', 'EXIT'];
+NV.bladeAtlas = (scene, col) => {
+  const t = NV.tex(scene, 1024, 1024, (g, w, h) => {
+    g.clearRect(0, 0, w, h);
+    NV.BLADE_WORDS.forEach((word, i) => {
+      const cx = (i % 8) * 128, cy = Math.floor(i / 8) * 512, chars = [...word], n = chars.length;
+      g.fillStyle = 'rgba(8,4,18,.9)'; g.fillRect(cx + 6, cy + 6, 116, 500);
+      g.strokeStyle = col; g.lineWidth = 4; g.shadowColor = col; g.shadowBlur = 14; g.strokeRect(cx + 10, cy + 10, 108, 492);
+      const step = Math.min(98, 470 / n), fs = Math.min(84, step * .92);
+      g.font = 'bold ' + fs + 'px Orbitron, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      chars.forEach((ch, k) => { const y = cy + 256 + (k - (n - 1) / 2) * step; g.fillStyle = col; g.shadowBlur = 22; g.fillText(ch, cx + 64, y); g.shadowBlur = 0; g.fillStyle = 'rgba(255,255,255,.85)'; g.font = 'bold ' + (fs * .9) + 'px Orbitron, sans-serif'; g.fillText(ch, cx + 64, y); g.font = 'bold ' + fs + 'px Orbitron, sans-serif'; });
+      g.shadowBlur = 0;
+    });
+  }, 'blade' + col);
+  t.hasAlpha = true; return t;
+};
+/* holo billboard ads: 4 frames stacked vertically (512 x 256 each) */
+NV.adAtlas = (scene, k) => NV.tex(scene, 512, 1024, (g, w, h) => {
+  const ads = [['HELIX', 'TOMORROW IS TESTED', '#19f0ff', '#061a3a'], ['O₂+', 'BREATHE PREMIUM · FIRST MONTH FREE', '#3dffa8', '#06261e'], ['AUREX', 'YOUR VOICE · OPTIMIZED', '#ff2bd6', '#2a0630'], ['MEMORY INSURANCE', 'NEVER FORGET WHO YOU PAID', '#ffb238', '#2a1606']];
+  ads.forEach(([big, small, c, bg], i) => {
+    const y0 = i * 256, gr = g.createLinearGradient(0, y0, w, y0 + 256); gr.addColorStop(0, bg); gr.addColorStop(1, '#05030c'); g.fillStyle = gr; g.fillRect(0, y0, w, 256);
+    g.strokeStyle = c; g.globalAlpha = .35; for (let k = 0; k < 6; k++) { g.beginPath(); g.arc(420, y0 + 128, 30 + k * 26, 0, 7); g.stroke(); } g.globalAlpha = 1;
+    g.shadowColor = c; g.shadowBlur = 24; g.fillStyle = c; g.font = 'bold ' + (big.length > 8 ? 52 : 92) + 'px Orbitron, sans-serif'; g.textBaseline = 'middle'; g.fillText(big, 26, y0 + 112, 460);
+    g.shadowBlur = 0; g.fillStyle = '#ffffff'; g.font = '600 22px Rajdhani, sans-serif'; g.fillText(small, 28, y0 + 190, 460);
+    g.fillStyle = c; g.fillRect(26, y0 + 160, 120, 4);
+    g.fillStyle = 'rgba(0,0,0,.25)'; for (let y = y0; y < y0 + 256; y += 4) g.fillRect(0, y, w, 1);
+  });
+}, 'adatlas' + (k || 0));
+/* the city's night sky: deep indigo, light-polluted horizon, a few stars */
+NV.citySky = scene => NV.tex(scene, 512, 512, (g, w, h) => {
+  const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#03020c'); gr.addColorStop(.3, '#0c0626'); gr.addColorStop(.43, '#2a0c3e'); gr.addColorStop(.485, '#7a1c5a'); gr.addColorStop(.5, '#c4446a'); gr.addColorStop(.52, '#3a1030'); gr.addColorStop(1, '#000');
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  const r = U.rng(99); for (let i = 0; i < 260; i++) { const y = r() * h * .36; g.fillStyle = 'rgba(255,255,255,' + (.15 + r() * .6) * (1 - y / (h * .36)) + ')'; g.fillRect(r() * w, y, 1, 1); }
+  g.globalAlpha = .12; for (let k = 0; k < 3; k++) { const yb = h * (.3 + k * .04); const gb = g.createLinearGradient(0, yb - 14, 0, yb + 14); gb.addColorStop(0, 'transparent'); gb.addColorStop(.5, k % 2 ? '#19f0ff' : '#ff2bd6'); gb.addColorStop(1, 'transparent'); g.fillStyle = gb; g.fillRect(0, yb - 14, w, 28); } g.globalAlpha = 1;
+}, 'citysky');
 /* one texture atlas for every holo sign (16 cells of 512x128) -> signs merge into one draw call */
 NV.SIGN_WORDS = ['HELIX', 'O₂ PLANS', 'MEMORY INSURANCE', 'TOMORROW IS TESTED', 'NEON', 'OPEN 24H', 'SUBSCRIBE TO BREATHE', 'AVALON', 'SYNTH', 'RENT A LIFE', 'NO SIGNAL', 'KEYBEARER?', '新アヴァロン', 'CLINIC', 'NOODLES', 'EXIT C'];
 NV.signAtlas = scene => {
@@ -2157,6 +2223,7 @@ NV.Level = (() => {
     const plight = new BABYLON.PointLight('pl', V3(0, 2, 0), scene); plight.range = 16; plight.intensity = .7; plight.diffuse = C3(pal.b);
     const fx = NV.Quality.setup(scene, cam), glow = fx.glow || { addExcludedMesh() { } };
     L.fx = fx;
+    if ((L.map.city || L.map.roof) && BABYLON.ColorCurves) { const cc = new BABYLON.ColorCurves(); cc.globalSaturation = 14; cc.shadowsHue = 192; cc.shadowsDensity = 32; cc.shadowsSaturation = 45; cc.highlightsHue = 318; cc.highlightsDensity = 22; cc.highlightsSaturation = 40; scene.imageProcessingConfiguration.colorCurvesEnabled = true; scene.imageProcessingConfiguration.colorCurves = cc; }
     const statics = [];
     const { W, H, g } = L.map;
     // floor
@@ -2168,7 +2235,7 @@ NV.Level = (() => {
     }
     if (L.map.roof) { // the city, far below: same plan, shifted so the chosen roof sits under the walkable area
       floor.isVisible = false; const R = L.map.roof, keep = L.map, n0 = statics.length;
-      L.map = genCity(); cityMeshes(scene, statics, pal, []); L.map = keep; L.sig = null;
+      L.map = genCity(); L._roofBuild = true; cityMeshes(scene, statics, pal, []); L._roofBuild = false; L.map = keep; L.sig = null;
       const root = new BABYLON.TransformNode('cityBelow', scene); root.position.set(R.cx - R.tx, -R.y, R.cz - R.tz);
       statics.slice(n0).forEach(m => { if (!m.parent) m.parent = root; });
       if (R.shape.r) { // Helix upper deck around the tower's last section
@@ -2249,7 +2316,14 @@ NV.Level = (() => {
       for (let i = 0; i < 90; i++) { const a = rr() * Math.PI * 2, d = W * TILE * .75 + rr() * 160, h = 30 + rr() * 150, w = 12 + rr() * 20; arr.push(NV.M(w, h, w, cx + Math.cos(a) * d, h / 2 - 20, cz + Math.sin(a) * d)); }
       NV.thin(sk, arr); statics.push(sk);
       const dome = BABYLON.MeshBuilder.CreateSphere('dome', { diameter: 1100, segments: 10, sideOrientation: BABYLON.Mesh.BACKSIDE }, scene);
-      const dm = mat(scene, 'domem', '#000'); dm.emissiveTexture = NV.skyTex(scene, pal, 'lsky'); dm.disableLighting = true; dm.fogEnabled = false; dome.material = dm; dome.applyFog = false; dome.infiniteDistance = true; glow.addExcludedMesh(dome); statics.push(dome);
+      const dm = mat(scene, 'domem', '#000'); dm.emissiveTexture = L.map.city || L.map.roof ? NV.citySky(scene) : NV.skyTex(scene, pal, 'lsky'); dm.disableLighting = true; dm.fogEnabled = false; dome.material = dm; dome.applyFog = false; dome.infiniteDistance = true; glow.addExcludedMesh(dome); statics.push(dome);
+      if (L.mirror) L.mirror.renderList.push(dome);
+      if ((L.map.city || L.map.roof) && (q.lod || 1) >= .6) { // a slow-drifting cloud deck lit from below by the city
+        const cl = BABYLON.MeshBuilder.CreateGround('clouds', { width: 3600, height: 3600 }, scene); cl.position.set(W * TILE / 2, L.map.roof ? 260 : 330, H * TILE / 2); cl.rotation.x = Math.PI;
+        const ct = NV.tex(scene, 512, 512, (c, w, h) => { c.clearRect(0, 0, w, h); const rr = U.rng(61); for (let i = 0; i < 140; i++) { const x = rr() * w, y = rr() * h, rad = 20 + rr() * 70; const gr = c.createRadialGradient(x, y, 0, x, y, rad); gr.addColorStop(0, 'rgba(255,255,255,' + (.18 + rr() * .25) + ')'); gr.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = gr; c.beginPath(); c.arc(x, y, rad, 0, 7); c.fill(); } }, 'clouds');
+        ct.hasAlpha = true; ct.uScale = ct.vScale = 3; const cm = mat(scene, 'cloudm', '#000', '#5a2a7a'); cm.emissiveTexture = ct; cm.opacityTexture = ct; cm.disableLighting = true; cm.backFaceCulling = false; cl.material = cm; cl.isPickable = false; glow.addExcludedMesh(cl);
+        if (L.cityFx) L.cityFx.clouds = ct;
+      }
       if (th !== 'space' && !cyber && q.lrain > 0) {
         const rain = new BABYLON.ParticleSystem('rain', q.lrain, scene);
         rain.particleTexture = NV.tex(scene, 8, 64, (c, w, h) => { const gr = c.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(1, 'rgba(200,230,255,.9)'); c.fillStyle = gr; c.fillRect(3, 0, 2, h); }, 'rt');
@@ -2328,6 +2402,13 @@ NV.Level = (() => {
       darm: P(BABYLON.MeshBuilder.CreateBox('parm', { width: 1.3, height: .05, depth: .08 }, scene), L.mats.drone),
       ring: P(BABYLON.MeshBuilder.CreateTorus('pr', { diameter: 1.1, thickness: .06, tessellation: 20 }, scene), L.mats.visor),
       ice: P(BABYLON.MeshBuilder.CreatePolyhedron('pice', { type: 1, size: .55 }, scene), L.mats.ice),
+      // armour overhaul: helmets, chest plates, glowing trim and coolant tubes (cyan for guards, red for heavies)
+      helm: P(BABYLON.MeshBuilder.CreateSphere('phelm', { diameter: .45, segments: 10, slice: .62 }, scene), L.mats.armor),
+      plate: P(BABYLON.MeshBuilder.CreateBox('pplate', { width: .46, height: .34, depth: .1 }, scene), L.mats.armor),
+      hplate: P(BABYLON.MeshBuilder.CreateBox('phplate', { width: .62, height: .5, depth: .16 }, scene), L.mats.armor),
+      acc: P(BABYLON.MeshBuilder.CreateBox('pacc', { width: .035, height: .3, depth: .03 }, scene), (() => { const m = mat(scene, 'enacc', '#000', '#19f0ff'); m.disableLighting = true; return m; })()),
+      accH: P(BABYLON.MeshBuilder.CreateBox('paccH', { width: .045, height: .34, depth: .035 }, scene), (() => { const m = mat(scene, 'enaccH', '#000', '#ff3355'); m.disableLighting = true; return m; })()),
+      tube: P(BABYLON.MeshBuilder.CreateCylinder('ptube', { diameter: .07, height: .5, tessellation: 6 }, scene), (() => { const m = mat(scene, 'entube', '#000', '#9b5cff'); m.disableLighting = true; return m; })()),
     };
     // sparks
     const sp = new BABYLON.ParticleSystem('sparks', Math.max(8, q.sparks), scene);
@@ -2335,8 +2416,11 @@ NV.Level = (() => {
     sp.emitter = V3(0, 0, 0); sp.minSize = .04; sp.maxSize = .14; sp.minLifeTime = .15; sp.maxLifeTime = .45; sp.emitRate = 0; sp.minEmitPower = 3; sp.maxEmitPower = 9; sp.gravity = V3(0, -12, 0);
     sp.createSphereEmitter(.1); sp.color1 = BABYLON.Color4.FromColor3(C3(pal.b)); sp.color2 = new BABYLON.Color4(1, 1, 1, 1); sp.colorDead = new BABYLON.Color4(0, 0, 0, 0); sp.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD; sp.manualEmitCount = 0; sp.start();
     L.sparks = sp;
+    const sm = new BABYLON.ParticleSystem('smoke', Math.max(16, q.sparks / 3 | 0), scene); sm.particleTexture = sp.particleTexture; sm.emitter = V3(0, -50, 0); sm.createSphereEmitter(1.4);
+    sm.minSize = 1.6; sm.maxSize = 4.2; sm.minLifeTime = 1.2; sm.maxLifeTime = 2.8; sm.emitRate = 0; sm.minEmitPower = .8; sm.maxEmitPower = 2.6; sm.gravity = V3(0, 1.4, 0); sm.minAngularSpeed = -1; sm.maxAngularSpeed = 1;
+    sm.color1 = new BABYLON.Color4(.3, .22, .32, .5); sm.color2 = new BABYLON.Color4(.14, .11, .18, .42); sm.colorDead = new BABYLON.Color4(0, 0, 0, 0); sm.blendMode = BABYLON.ParticleSystem.BLENDMODE_STANDARD; sm.manualEmitCount = 0; sm.start(); L.smoke = sm;
     L.tracers = [];
-    for (let i = 0; i < 10; i++) { const t = BABYLON.MeshBuilder.CreateBox('tr', { width: .03, height: .03, depth: 1 }, scene); t.material = L.mats.tracer; t.isVisible = false; t.isPickable = false; L.tracers.push({ m: t, life: 0 }); }
+    for (let i = 0; i < 10; i++) { const t = BABYLON.MeshBuilder.CreateBox('tr', { width: .045, height: .045, depth: 1 }, scene); t.material = L.mats.tracer; t.isVisible = false; t.isPickable = false; L.tracers.push({ m: t, life: 0 }); }
     L.bulletPool = [];
     NV.Quality.textures(scene);
     return { scene, cam, plight };
@@ -2427,8 +2511,12 @@ NV.Level = (() => {
     root.scaling.setAll(sc);
     const rig = rigBuild(root, k => P[k].createInstance('i'), true);
     inst(P.gun, rig.elbowR, 0, -.34, .14, Math.PI / 2, 0, 0);
+    const acc = big ? P.accH : P.acc;
+    inst(P.helm, root, 0, 1.79, -.015); inst(big ? P.hplate : P.plate, root, 0, 1.37, big ? .21 : .2);
+    inst(acc, root, -.13, 1.38, big ? .3 : .26); inst(acc, root, .13, 1.38, big ? .3 : .26);
+    inst(acc, rig.legL, -.085, -.2, .04); inst(acc, rig.legR, .085, -.2, .04); inst(P.tube, root, 0, 1.32, -.42, .3, 0, 0);
     // per-enemy emissive bits (swap to "off" material when disabled)
-    const visor = BABYLON.MeshBuilder.CreateBox('v', { width: .3, height: .07, depth: .08 }, s); visor.position.set(0, 1.82, .15); visor.material = L.mats.visor; visor.parent = root; visor.isPickable = false;
+    const visor = BABYLON.MeshBuilder.CreateBox('v', { width: .33, height: .07, depth: .08 }, s); visor.position.set(0, 1.82, .2); visor.material = L.mats.visor; visor.parent = root; visor.isPickable = false;
     const chest = BABYLON.MeshBuilder.CreateBox('c', { width: .05, height: .05, depth: .04 }, s); chest.position.set(-.1, 1.36, .25); chest.material = L.mats.visor; chest.parent = root; chest.isPickable = false;
     const mark = BABYLON.MeshBuilder.CreateSphere('mk', { diameter: .18, segments: 6 }, s); mark.position.y = 2.25; mark.material = L.mats.mS; mark.parent = root; mark.isVisible = false; mark.isPickable = false;
     return { root, visor, extra: [chest], mark, rig, hy: 1.8 * sc, r: .45 * sc };
@@ -2754,7 +2842,8 @@ NV.Level = (() => {
     if (pHit) { NV.Net.send({ t: 'hit', to: pHit.id, dmg: Math.min(60, w.dmg * .5) * (pHead ? 2 : 1), lvl: L.netKey }); spark(end, '#ff5a3d', 12); flashX(); }
     const dm = dmgMulOf() * (echo ? .6 : 1) * (L.arms.crit || 1);
     if (w.deadCert && pierced.some(h => h.head)) { L.p.heat = Math.max(0, L.p.heat - w.heat); const f = ARMS().ammoOf(w), st = ARMS().state(); if (f && st) st.ammo[f]++; }
-    pierced.forEach(h => { weaponHit(h.e, w.dmg * dm * (h.head ? w.head || 2 : 1), w, h.head, w.cat === 'sniper' || w.pellets > 1 ? { x: d.x * 5, y: 2.5, z: d.z * 5 } : null); spark(o.add(d.scale(h.t)), h.head ? '#ffffff' : w.col[1], h.head ? 22 : 12); flashX(); });
+    pierced.forEach(h => { const dmgN = w.dmg * dm * (h.head ? w.head || 2 : 1); floater(String(Math.round(dmgN)), h.e.x, h.head ? 2.1 : 1.5, h.e.z, h.head ? 'hd' : '', .8); if (h.head) { const xh = document.querySelector('#hud .xh'); if (xh) { xh.classList.add('kill'); clearTimeout(xh._k); xh._k = setTimeout(() => xh.classList.remove('kill'), 140); } }
+      weaponHit(h.e, w.dmg * dm * (h.head ? w.head || 2 : 1), w, h.head, w.cat === 'sniper' || w.pellets > 1 ? { x: d.x * 5, y: 2.5, z: d.z * 5 } : null); spark(o.add(d.scale(h.t)), h.head ? '#ffffff' : w.col[1], h.head ? 22 : 12); flashX(); });
     if (bossHit) { const B2 = L.boss; if (B2.shieldOn) { spark(end, '#19f0ff', 10); NV.Audio.sfx('shield'); } else { const dd = w.dmg * dm * (w.emp ? 1.3 : 1) * (w.pen != null ? .6 + w.pen * .008 : 1) * (w.siege ? 1.4 : 1) * (w.bastion ? 1.3 : 1); B2.hp -= dd; if (netOn()) NV.Net.send({ t: 'boss', d: dd, lvl: L.netKey }); spark(end, '#ff5a3d', 16); flashX(); NV.Audio.sfx('hit'); if (B2.hp <= 0) bossDown(); } }
     if (!pierced.length && !bossHit && !pHit) spark(end, null, 6);
   }
@@ -2810,6 +2899,9 @@ NV.Level = (() => {
     const m = BABYLON.MeshBuilder.CreateSphere('bm', { diameter: 1, segments: 10 }, L.scene); m.position.set(x, .6, z); m.isPickable = false;
     const mt = mat(L.scene, 'bmm', '#000', FXCOL[fx] || '#ff7a2b', .6); mt.alphaMode = BABYLON.Engine.ALPHA_ADD; mt.disableLighting = true; m.material = mt;
     L.fxs.push({ m, t: 0, dur: .5, grow: r * 2 }); spark(V3(x, .8, z), FXCOL[fx] || '#ff7a2b', 26);
+    const core = BABYLON.MeshBuilder.CreateSphere('bmc', { diameter: .8, segments: 8 }, L.scene); core.position.set(x, .9, z); core.isPickable = false; const cm2 = mat(L.scene, 'bmcm', '#000', '#fff4d0', .9); cm2.alphaMode = BABYLON.Engine.ALPHA_ADD; cm2.disableLighting = true; core.material = cm2; L.fxs.push({ m: core, t: 0, dur: .22, grow: r * 1.1 });
+    const ring = BABYLON.MeshBuilder.CreateTorus('shock', { diameter: 1, thickness: .1, tessellation: 36 }, L.scene); ring.position.set(x, .2, z); ring.isPickable = false; ring.material = mt; L.fxs.push({ m: ring, t: 0, dur: .45, grow: r * 2.8 });
+    if (L.smoke && /frag|drop|rod|barrage|beam|gravity|pull/.test(fx || 'frag')) { L.smoke.emitter = V3(x, .9, z); L.smoke.manualEmitCount = Math.min(L.smoke.getCapacity(), 8 + r * 4 | 0); }
     NV.Audio.sfx(fx === 'emp' || fx === 'shock' ? 'emp' : fx === 'sleep' || fx === 'freeze' || fx === 'glitch' || fx === 'decoy' ? 'glitch' : 'boom');
     if (Math.hypot(x - L.p.x, z - L.p.z) < 30) shake(fx === 'rod' ? 1 : .4);
   }
@@ -3043,10 +3135,61 @@ NV.Level = (() => {
     const s = .8, min = [c.x - s, 0, c.z - s], max = [c.x + s, c.h * 2 - .15, c.z + s], oo = [o.x, o.y, o.z], dd = [d.x, d.y, d.z];
     let t0 = 0, t1 = 1e9; for (let i = 0; i < 3; i++) { if (Math.abs(dd[i]) < 1e-6) { if (oo[i] < min[i] || oo[i] > max[i]) return -1; continue; } let a = (min[i] - oo[i]) / dd[i], b = (max[i] - oo[i]) / dd[i]; if (a > b) [a, b] = [b, a]; t0 = Math.max(t0, a); t1 = Math.min(t1, b); if (t0 > t1) return -1; } return t0;
   }
+  // ---- combat feedback: screen projection, floating damage numbers, enemy call-outs ----
+  function toScreen(x, y, z) {
+    const eng = L.scene.getEngine(), W = eng.getRenderWidth(), H = eng.getRenderHeight(), v = BABYLON.Vector3.Project(V3(x, y, z), BABYLON.Matrix.Identity(), L.scene.getTransformMatrix(), L.cam.viewport.toGlobal(W, H));
+    const hud = document.getElementById('hud'), zk = hud && hud._zk || 1; return { x: v.x / W * innerWidth / zk, y: v.y / H * innerHeight / zk, ok: v.z > 0 && v.z < 1 };
+  }
+  function floater(text, x, y, z, cls, life, follow) {
+    const box = document.querySelector('#hud .fl'); if (!box || L.cine) return null; L.floats = L.floats || [];
+    if (L.floats.length > 18) { const o = L.floats.shift(); o.el.remove(); }
+    const el = document.createElement('em'); el.className = cls || ''; el.textContent = text; box.appendChild(el);
+    const f = { el, x, y, z, t: 0, life: life || .9, follow, rise: cls === 'bk' ? 0 : 1.1, jx: (Math.random() - .5) * 24 }; L.floats.push(f); return f;
+  }
+  function floatTick(dt) {
+    if (!L.floats || !L.floats.length) return; const hud = document.getElementById('hud'); if (hud && !hud._zkT) { hud._zk = parseFloat(getComputedStyle(hud).zoom) || 1; hud._zkT = 1; }
+    L.floats = L.floats.filter(f => { f.t += dt; if (f.t >= f.life) { f.el.remove(); return false; }
+      if (f.follow && f.follow.state !== 'down') { f.x = f.follow.x; f.z = f.follow.z; f.y = f.follow.drone ? f.follow.m.root.position.y + .8 : 2.5; }
+      const s = toScreen(f.x, f.y + f.t * f.rise, f.z); if (!s.ok) { f.el.style.opacity = 0; return true; }
+      const k = f.t / f.life; f.el.style.opacity = (k < .75 ? 1 : (1 - k) * 4).toFixed(2); f.el.style.transform = `translate(${(s.x + f.jx * k - f.el.offsetWidth / 2) | 0}px,${(s.y - 10) | 0}px) scale(${(f.t < .08 ? 1.4 : 1)})`; return true; });
+  }
+  const BARK = { contact: ['CONTACT!', 'HOSTILE!', 'THERE!', 'OPEN FIRE!'], flank: ['FLANKING!', 'MOVING UP!', 'GO WIDE!'], cover: ['TAKING COVER!', 'COVER ME!'], nade: ['GRENADE OUT!', 'FLUSH THEM OUT!'], reload: ['RELOADING!', 'CHANGING MAG!'], lost: ["WHERE'D THEY GO?", 'LOST VISUAL!'], hurt: ["I'M HIT!", 'MAN DOWN!'] };
+  function bark(e, kind) {
+    if (e.drone) return; const now = L.time; if ((e.barkT || -9) > now - 4 || (L.barkT || -9) > now - .7) return;
+    if (Math.hypot(e.x - L.p.x, e.z - L.p.z) > 32) return; e.barkT = L.barkT = now; floater(U.pick(BARK[kind]), e.x, 2.5, e.z, 'bk', 1.5, e);
+  }
+  // ---- Helix wanted heat (open world only): crimes raise it, response squads hunt you, it cools off out of sight ----
+  function addHeat(v, why) {
+    if (!L.free || netOn()) return; const before = Math.ceil(L.heat || 0); L.heat = Math.min(5, (L.heat || 0) + v); L.heatQuiet = 0;
+    const now = Math.ceil(L.heat); if (now > before) { NV.toast('HELIX HEAT ' + '◆'.repeat(now), (why ? why + ' · ' : '') + (now >= 3 ? 'Armoured response squads inbound.' : 'Patrol units are converging on your position.'), '#ff3355', 2.6); NV.Audio.sfx('alert'); if (!L.respT || L.respT > 6) L.respT = 6; }
+  }
+  function heatTick(dt) {
+    if (!L.free) return; const el = document.querySelector('#hud .heat'); const h = L.heat || 0;
+    const hunting = L.enemies.some(e => e.state === 'alert' && Math.hypot(e.x - L.p.x, e.z - L.p.z) < 60);
+    if (hunting) L.heatQuiet = 0; else L.heatQuiet = (L.heatQuiet || 0) + dt;
+    if (h > 0 && L.heatQuiet > 12) { L.heat = Math.max(0, h - dt * .1); if (!L.heat) NV.toast('HEAT LOST', 'Helix has lost your trail.', '#3dffa8', 2); }
+    if (el) { const n = Math.ceil(L.heat || 0); el.classList.toggle('hidden', !n); el.classList.toggle('hot', hunting && n > 0); hset('#hud .heat span', 'text', '◆'.repeat(n) + '◇'.repeat(5 - n)); }
+    if ((L.heat || 0) >= 1 && L.spotNear) {
+      L.respT = (L.respT == null ? 8 : L.respT) - dt;
+      const active = L.enemies.filter(e => e.responder && e.state !== 'down').length;
+      if (L.respT <= 0) { L.respT = Math.max(9, 28 - L.heat * 4);
+        if (active < 4 + L.heat * 2) { const n = Math.min(6, 1 + Math.ceil(L.heat)), c = L.spotNear(34, 58);
+          for (let i = 0; i < n; i++) { const kind = i === 0 && L.heat >= 3 ? 'heavy' : i % 2 ? 'drone' : 'guard'; const e = addEnemy(kind, c.x + (Math.random() - .5) * 4, c.z + (Math.random() - .5) * 4, []); e.responder = true; e.state = 'alert'; e.susp = 1; e.lostT = 0; e.lx = L.p.x; e.lz = L.p.z; e.cd = 1.5 + Math.random(); }
+          NV.Audio.sfx('alert'); } }
+    }
+  }
+  function chainKill() {
+    const now = L.time; L.chain = (L.chainT || -9) > now - 4 ? (L.chain || 1) + 1 : 1; L.chainT = now;
+    if (L.chain >= 2) { const bonus = 5 * L.chain, S = NV.State.get(); if (S) S.credits = (S.credits || 0) + bonus; const el = document.querySelector('#hud .chain'); if (el) { el.innerHTML = 'x' + L.chain + ' CHAIN<small>+' + bonus + ' ¢</small>'; el.classList.add('on'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('on'), 1600); } }
+  }
+  function hitDir(fromX, fromZ) {
+    const el = document.querySelectorAll('#hud .dirs i'); if (!el.length) return; L.dirI = ((L.dirI || 0) + 1) % el.length;
+    const a = Math.atan2(fromX - L.p.x, fromZ - L.p.z) - L.p.yaw, d = el[L.dirI]; d.style.transform = 'rotate(' + (a * 180 / Math.PI).toFixed(0) + 'deg)'; d.style.transition = 'none'; d.style.opacity = 1; void d.offsetWidth; d.style.transition = 'opacity 1.1s'; d.style.opacity = 0;
+  }
   function flashX() { const x = document.querySelector('#hud .xh'); if (x) { x.classList.add('hit'); clearTimeout(x._t); x._t = setTimeout(() => x.classList.remove('hit'), 110); } }
   function killMark() { const x = document.querySelector('#hud .xh'); if (x) { x.classList.add('kill'); clearTimeout(x._k); x._k = setTimeout(() => x.classList.remove('kill'), 320); } }
   function hurtEnemy(e, dmg, head) {
-    e.hp -= dmg; NV.Audio.sfx('hit');
+    e.hp -= dmg; NV.Audio.sfx('hit'); e.flinch = .2; if (e.hp < e.max * .35 && e.hp > 0 && Math.random() < .5) bark(e, 'hurt');
     if (e.state !== 'alert') alertEnemy(e, true);
     if (e.hp <= 0) disable(e, false);
   }
@@ -3099,7 +3242,7 @@ NV.Level = (() => {
     if (e.m && e.m.root) ragdoll(e, e.m.root, e.m.rig, imp.x, imp.y, imp.z, e.drone);
     if (netOn() && e.nid != null && !e.netDown) NV.Net.send({ t: 'edown', k: e.nid, imp: { x: +imp.x.toFixed(2), y: +imp.y.toFixed(2), z: +imp.z.toFixed(2) }, lvl: L.netKey });
     e.state = 'down'; e.hp = 0; NV.Audio.sfx('down');
-    if (!e.netDown) { const S = NV.State.get(); if (S) S.credits = (S.credits || 0) + (takedown ? 14 : 9); if (L.arms) { loot(e, takedown); if (L.arms.lastT > L.time - .25) { killMark(); onKill(L.arms.lastW, e, takedown); } } }
+    if (!e.netDown) { const S = NV.State.get(); if (S) S.credits = (S.credits || 0) + (takedown ? 14 : 9); if (L.arms) { loot(e, takedown); if (L.arms.lastT > L.time - .25) { killMark(); chainKill(); if (!e.responder || L.heat) addHeat(takedown ? .25 : .5, takedown ? 'Takedown witnessed' : 'Helix officer down'); onKill(L.arms.lastW, e, takedown); } } }
     if (takedown) L.stats.takedowns++; else L.stats.disabled++;
     e.m.visor.material = L.mats.visorOff; e.m.extra.forEach(x => x.material = L.mats.visorOff); e.m.mark.isVisible = false;
     spark(V3(e.x, 1, e.z), '#ffffff', 20);
@@ -3107,7 +3250,7 @@ NV.Level = (() => {
   }
   function alertEnemy(e, spread) {
     if (e.state === 'down' || e.ally > 0) return;
-    if (e.state !== 'alert') { e.state = 'alert'; e.susp = 1; e.cd = .6 + Math.random() * .5; if (!L.anyAlert) { NV.Audio.sfx('alert'); } L.anyAlert = true; L.stats.alerts++; L.alarmT = 8; }
+    if (e.state !== 'alert') { e.state = 'alert'; e.susp = 1; e.cd = .6 + Math.random() * .5; if (!L.anyAlert) { NV.Audio.sfx('alert'); } L.anyAlert = true; L.stats.alerts++; L.alarmT = 8; bark(e, 'contact'); if (L.free && !e.responder) addHeat((L.heat || 0) < 1 ? 1 : .15, 'Spotted by Helix'); }
     e.lostT = 0; e.lx = L.p.x; e.lz = L.p.z;
     if (spread) L.enemies.forEach(o => { if (o !== e && o.state !== 'down' && o.state !== 'alert' && Math.hypot(o.x - e.x, o.z - e.z) < 16) { o.state = 'search'; o.lx = L.p.x; o.lz = L.p.z; o.path = pathTo(o.x, o.z, L.p.x, L.p.z); o.susp = Math.max(o.susp, .6); } });
   }
@@ -3247,12 +3390,14 @@ NV.Level = (() => {
     let spd = (crouch ? 2.6 : sprint ? 8.2 : 5.4) * (L.tags.includes('driver') ? 1.12 : 1) * ((L.arms && L.arms.cur && L.arms.cur.slow) || 1) * (L.arms && L.arms.duelT > L.time ? 1.15 : 1) * (L.arms && L.arms.buff.stim > 0 ? 1.2 : 1);
     const sy = Math.sin(p.yaw), cy = Math.cos(p.yaw);
     let vx = (mx * cy + mz * sy) * spd, vz = (-mx * sy + mz * cy) * spd;
+    if (!L.drive) { const speedUp = Math.hypot(vx, vz) > Math.hypot(p.vxs || 0, p.vzs || 0), ac = p.air ? 4.5 : speedUp ? 15 : 22; vx = U.lerp(p.vxs || 0, vx, Math.min(1, dt * ac)); vz = U.lerp(p.vzs || 0, vz, Math.min(1, dt * ac)); } // momentum: quick to start, quicker to stop, floaty in the air
     p.sprint = sprint; const pk = L.map.hmap ? parkour(dt, mx, mz, sprint, crouch) : 0;
     if (p.slide) { const k = Math.max(.25, p.slide.t / .8); vx = p.slide.x * 12 * k; vz = p.slide.z * 12 * k; }
     if (p.vault) vx = vz = 0;
     if (!pk && !L.calm && !L.drive && !p.climb && !p.air && !p.slide && (I.hit('Space') || I.padHit(1)) && p.dashCd <= 0 && p.en >= 22 && ml > 0) { p.dash = .18; p.dashCd = L.tags.includes('driver') ? .5 : .8; p.en -= 22; p.dx = vx / spd; p.dz = vz / spd; NV.Audio.sfx('dash'); p.inv = .15; }
     if (p.dash > 0) { p.dash -= dt; vx = p.dx * 26; vz = p.dz * 26; }
     if (p.climb) { vx = vz = 0; }
+    p.vxs = vx; p.vzs = vz;
     if (!L.drive) { if (L.map.hmap && (p.y > .05 || p.air || p.climb)) { const am = p.air ? .8 * (p.leap || 1) : 1, kx = p.kick ? p.kick.x : 0, kz = p.kick ? p.kick.z : 0; moveElev(p, (vx * am + kx) * dt, (vz * am + kz) * dt); } else moveCircle(p, vx * dt, vz * dt, .45); }
     if (L.map.hmap) vertical(dt, mz, sprint);
     p.moving = ml > 0; if (p.moving) { p.bob += dt * spd * 1.6; p.stepT -= dt * spd; if (p.stepT <= 0) { p.stepT = 2.6; NV.Audio.sfx('step'); if (sprint) noise(p.x, p.z, 7); } }
@@ -3362,10 +3507,21 @@ NV.Level = (() => {
         spd = e.speed * .8;
       } else if (e.state === 'alert') {
         alerted++;
-        if (vis > 0) { e.lostT = 0; e.lx = p.x; e.lz = p.z; } else { e.lostT = (e.lostT || 0) + dt; if (e.lostT > 7) { e.state = 'search'; e.path = pathTo(e.x, e.z, e.lx, e.lz); e.searchT = 5; } }
+        if (vis > 0) { e.lostT = 0; e.lx = p.x; e.lz = p.z; } else { e.lostT = (e.lostT || 0) + dt; if (e.lostT > 7) { e.state = 'search'; e.path = pathTo(e.x, e.z, e.lx, e.lz); e.searchT = 5; e.cov = null; bark(e, 'lost'); } }
         face = Math.atan2(dx, dz);
         const keep = e.drone ? 7 : e.kind === 'heavy' ? 5 : 8;
-        if (vis > 0 && dist < keep + 4) {
+        // tactics: guards take cover or flank; the hurt ones fall back; everyone lobs grenades at a camper
+        let tac = false;
+        if (!e.drone && e.kind !== 'heavy') {
+          e.coverT = (e.coverT || 0) - dt;
+          if (e.coverT <= 0) { e.coverT = 2.6 + Math.random() * 2.2; const hurt = e.hp < e.max * .3; e.role = hurt ? 'retreat' : e.role || (Math.random() < .35 ? 'flank' : 'cover');
+            e.cov = e.role === 'flank' ? flankSpot(e) : coverSpot(e, hurt); if (e.cov) bark(e, e.role === 'flank' ? 'flank' : 'cover'); }
+          if (e.cov) { const cd = Math.hypot(e.cov.x - e.x, e.cov.z - e.z); if (cd > .6) { tx = e.cov.x; tz = e.cov.z; spd = e.speed * (e.role === 'retreat' ? 1.25 : 1.1); e.inCover = false; } else e.inCover = true; tac = true; }
+        }
+        e.gcd = (e.gcd == null ? 6 + Math.random() * 8 : e.gcd) - dt;
+        if (!e.drone && e.gcd <= 0 && (L.egcd || 0) <= 0 && dist > 7 && dist < 22 && (L.campT || 0) > 2.5) { e.gcd = 12 + Math.random() * 8; L.egcd = 6; throwGrenade(e, vis > 0 ? p.x : e.lx, vis > 0 ? p.z : e.lz); bark(e, 'nade'); }
+        if (tac) { /* moving to / holding the tactical spot */ }
+        else if (vis > 0 && dist < keep + 4) {
           // strafe / hold distance
           e.str = e.str || (Math.random() < .5 ? 1 : -1); if (Math.random() < dt * .5) e.str *= -1;
           const back = dist < keep - 2 ? -1 : 0; tx = e.x + (-dz / dist) * e.str + dx / dist * back; tz = e.z + (dx / dist) * e.str + dz / dist * back; spd = e.speed * .6;
@@ -3382,10 +3538,11 @@ NV.Level = (() => {
           const spread = (1 - vis) * 1.2 + (p.moving ? .6 : .2);
           fireEnemy(e.x + Math.sin(e.yaw) * .5, ey, e.z + Math.cos(e.yaw) * .5, p.x + (Math.random() - .5) * spread, 1.3 + (p.crouch ? -.4 : 0), p.z + (Math.random() - .5) * spread, e.kind === 'heavy' ? 14 : 19, dmg, e.kind === 'heavy');
           NV.Audio.sfx('eshoot'); e.burst++;
-          if (e.burst >= (e.kind === 'heavy' ? 5 : 3)) { e.burst = 0; e.cd = 1.2 + Math.random() * .8; } else e.cd = e.kind === 'heavy' ? .12 : .2;
+          if (e.burst >= (e.kind === 'heavy' ? 5 : 3)) { e.burst = 0; e.cd = 1.2 + Math.random() * .8; if (Math.random() < .25) bark(e, 'reload'); } else e.cd = e.kind === 'heavy' ? .12 : .2;
         }
       }
       if (e.state === 'sus' || e.state === 'search') suspicious++;
+      if (e.flinch > 0) { e.flinch -= dt; spd *= .35; }
       // steering
       if (tx != null) {
         const ddx = tx - e.x, ddz = tz - e.z, dl = Math.hypot(ddx, ddz);
@@ -3396,13 +3553,55 @@ NV.Level = (() => {
       if (face != null) e.yaw += U.angDiff(e.yaw, face) * Math.min(1, dt * (e.state === 'alert' ? 8 : 3));
       m.root.position.x = e.x; m.root.position.z = e.z; m.root.rotation.y = e.yaw;
       if (e.drone) { m.root.position.y = 2.2 + Math.sin(L.time * 2 + e.bob) * .15; if (m.ring) m.ring.rotation.y += dt * 6; }
-      else if (m.rig) { animRig(m.rig, dt, tx != null, spd, e.state === 'alert' ? 'aim' : 'ready'); m.root.position.y = tx != null ? Math.abs(Math.sin(m.rig.walk)) * .04 : 0; }
+      else if (m.rig) { animRig(m.rig, dt, tx != null, spd, e.state === 'alert' ? 'aim' : 'ready'); const duck = e.inCover && e.state === 'alert' && e.cd > .35 && tx == null ? -.28 : 0; m.root.position.y = U.lerp(m.root.position.y, tx != null ? Math.abs(Math.sin(m.rig.walk)) * .04 : duck, Math.min(1, dt * 10)); m.root.rotation.x = e.flinch > 0 ? -e.flinch * 1.3 : 0; }
       m.mark.isVisible = e.state !== 'patrol' || e.susp > .1; m.mark.material = e.state === 'alert' ? L.mats.mA : L.mats.mS; m.mark.scaling.setAll(.6 + e.susp * .8);
     });
     L.alertLevel = alerted ? 2 : suspicious ? 1 : 0;
     if (!alerted) L.anyAlert = false;
     const mood = L.boss ? 'boss' : alerted ? 'combat' : L.free ? 'title' : L.obj.mode === 'explore' ? 'explore' : 'stealth';
     NV.Audio.setMood(mood);
+  }
+  // a free cell next to something solid that sits between it and the player
+  function coverSpot(e, far) {
+    const p = L.p, c0 = toCell(e.x, e.z), pc = toCell(p.x, p.z), g = L.map.g; let best = null, bs = 1e9;
+    for (let y = c0.y - 4; y <= c0.y + 4; y++) for (let x = c0.x - 4; x <= c0.x + 4; x++) {
+      if (y < 1 || x < 1 || y >= L.map.H - 1 || x >= L.map.W - 1 || g[y][x] !== 0) continue;
+      const vx = pc.x - x, vy = pc.y - y, vl = Math.hypot(vx, vy) || 1, sx = Math.round(x + vx / vl), sy = Math.round(y + vy / vl);
+      if (!(g[sy] && g[sy][sx] >= 1)) continue; // nothing to hide behind on the player's side
+      const c = cellC(x, y), dp = Math.hypot(c.x - p.x, c.z - p.z), want = far ? 20 : 11; if (dp < 5) continue;
+      const sc = Math.hypot(c.x - e.x, c.z - e.z) + Math.abs(dp - want) * .6; if (sc < bs) { bs = sc; best = c; }
+    }
+    return best;
+  }
+  // swing wide around the player's flank
+  function flankSpot(e) {
+    const p = L.p, a = Math.atan2(e.x - p.x, e.z - p.z) + (Math.random() < .5 ? 1 : -1) * (1 + Math.random() * .5);
+    for (let r2 = 9; r2 <= 14; r2 += 2.5) { const x = p.x + Math.sin(a) * r2, z = p.z + Math.cos(a) * r2; if (!solid(x, z)) return { x, z }; }
+    return null;
+  }
+  // enemy grenades: a visible arc, a red fuse ring on the ground, then a blast that hurts everyone nearby
+  function throwGrenade(e, tx, tz) {
+    const s = L.scene, m = BABYLON.MeshBuilder.CreateSphere('eg', { diameter: .26, segments: 6 }, s); m.material = L.mats.ebul; m.isPickable = false;
+    tx += (Math.random() - .5) * 2.5; tz += (Math.random() - .5) * 2.5;
+    L.egren = L.egren || []; L.egren.push({ m, x0: e.x, z0: e.z, tx, tz, t: 0, fly: 1.05, fuse: 1.5, ring: null });
+  }
+  function grenadeTick(dt) {
+    if (L.egcd > 0) L.egcd -= dt;
+    const p = L.p; L.campT = p.moving ? Math.max(0, (L.campT || 0) - dt * 2) : (L.campT || 0) + dt;
+    if (!L.egren || !L.egren.length) return;
+    L.egren = L.egren.filter(g => {
+      g.t += dt;
+      if (g.t < g.fly) { const k = g.t / g.fly; g.m.position.set(U.lerp(g.x0, g.tx, k), 1.4 + Math.sin(k * Math.PI) * 4 - k * 1.2, U.lerp(g.z0, g.tz, k)); return true; }
+      if (!g.ring) { g.m.position.set(g.tx, .15, g.tz); g.ring = BABYLON.MeshBuilder.CreateTorus('egr', { diameter: 8, thickness: .12, tessellation: 40 }, L.scene); g.ring.position.set(g.tx, .08, g.tz); g.ring.material = L.mats.ebul; g.ring.isPickable = false; NV.Audio.sfx('hackfail'); }
+      g.ring.scaling.setAll(.85 + Math.sin(g.t * 18) * .08);
+      if (g.t >= g.fly + g.fuse) {
+        g.m.dispose(); g.ring.dispose(); boomFx(g.tx, g.tz, 4, 'frag');
+        const d = Math.hypot(p.x - g.tx, p.z - g.tz); if (d < 4.5 && !p.y) { hitDir(g.tx, g.tz); hurtPlayer(10 + 30 * (1 - d / 4.5)); }
+        L.enemies.forEach(o => { if (o.state !== 'down' && Math.hypot(o.x - g.tx, o.z - g.tz) < 4) weaponHit(o, 45, null, false, { x: o.x - g.tx, y: 5, z: o.z - g.tz }); });
+        return false;
+      }
+      return true;
+    });
   }
   function moveCircleE(o, dx, dz, fly) {
     const blocked = (x, z) => { const c = toCell(x, z); if (c.x < 0 || c.y < 0 || c.x >= L.map.W || c.y >= L.map.H) return true; const v = L.map.g[c.y][c.x]; return v === 1 || (v === 2 && !fly); };
@@ -3415,7 +3614,7 @@ NV.Level = (() => {
       if (!b.on) return;
       b.x += b.vx * dt; b.y += b.vy * dt; b.z += b.vz * dt; b.life -= dt; b.m.position.set(b.x, b.y, b.z);
       if (b.life <= 0 || solid(b.x, b.z) || b.y < 0) { b.on = false; b.m.isVisible = false; return; }
-      if (Math.hypot(b.x - p.x, b.z - p.z) < .55 && b.y < (p.crouch ? 1.3 : 1.95)) { b.on = false; b.m.isVisible = false; hurtPlayer(b.dmg); return; }
+      if (Math.hypot(b.x - p.x, b.z - p.z) < .55 && b.y < (p.crouch ? 1.3 : 1.95)) { b.on = false; b.m.isVisible = false; hitDir(p.x - b.vx, p.z - b.vz); hurtPlayer(b.dmg); return; }
       if (L.nodes.length) L.nodes.forEach(n => { if (!n.dead && Math.hypot(b.x - n.x, b.z - n.z) < .8) { b.on = false; b.m.isVisible = false; n.hp -= b.dmg * .8; } });
     });
     L.tracers.forEach(t => { if (t.life > 0) { t.life -= dt; if (t.life <= 0) t.m.isVisible = false; } });
@@ -3447,7 +3646,7 @@ NV.Level = (() => {
   }
 
   function updateWorld(dt) {
-    const p = L.p;
+    const p = L.p; if (L.cityFx) cityFxTick(dt); floatTick(dt); grenadeTick(dt); heatTick(dt);
     L.pickups = L.pickups.filter(k => {
       k.t += dt; k.m.rotation.y += dt * 2; k.m.position.y = 1.1 + Math.sin(k.t * 2) * .12;
       if (Math.hypot(k.x - p.x, k.z - p.z) < 1.3) {
@@ -3774,6 +3973,7 @@ NV.Level = (() => {
       return true;
     }
     const c = nearestCar(); if (!c) return false;
+    if (c.kind === 'traffic') addHeat(.6, 'Carjacking');
     c.kind = 'player'; c.speed = c.speed || 0; c.vh = c.yaw;
     L.drive = { car: c, orbit: 0 }; L.gun.node.setEnabled(false); p.yaw = c.yaw; p.pitch = 0;
     if (L.hack) { L.hack = null; document.getElementById('hack').classList.add('hidden'); }
@@ -4013,8 +4213,8 @@ NV.Level = (() => {
     const bands = {};
     B.forEach(b => { const st = styleOf(b.d), ci = b.ht < 30 ? 0 : b.ht < 60 ? 1 : 2, k = st + ci; (bands[k] = bands[k] || { st, ci, arr: [] }).arr.push(NV.M(b.w * TILE - .1, b.ht, b.h * TILE - .1, (b.x + b.w / 2) * TILE, b.ht / 2 - (b.tilt ? 1.5 : 0), (b.y + b.h / 2) * TILE, b.tilt ? BABYLON.Quaternion.RotationYawPitchRoll(0, b.tilt, b.tilt * .6) : null)); });
     Object.values(bands).forEach(({ st, ci, arr }) => {
-      const c = STYLE_COL[st], m = mat(scene, 'bld' + st + ci, '#0a0812'); m.emissiveTexture = NV.windowTex(scene, 300 + ci * 7 + st.length, c[0], c[1]);
-      m.emissiveTexture.vScale = [3, 6, 10][ci]; m.emissiveTexture.uScale = 2; m.emissiveTexture.anisotropicFilteringLevel = 8; m.specularColor = new BABYLON.Color3(.25, .25, .35);
+      const c = STYLE_COL[st], m = mat(scene, 'bld' + st + ci, '#0a0812'); m.emissiveTexture = NV.windowTex2(scene, 300 + ci * 7 + st.length, c[0], c[1]);
+      m.emissiveTexture.vScale = [.5, .95, 1.8][ci]; m.emissiveTexture.uScale = 1.3; m.emissiveTexture.anisotropicFilteringLevel = 8; m.specularColor = new BABYLON.Color3(.25, .25, .35);
       if (st === 'dead') m.emissiveTexture.level = .35;
       mk('bld' + st + ci, m, arr);
     });
@@ -4092,7 +4292,157 @@ NV.Level = (() => {
       const w = BABYLON.MeshBuilder.CreateGround('water', { width: (x1 - x0) * TILE, height: (z1 - z0) * TILE }, scene); w.position.set((x0 + x1) / 2 * TILE, .1, (z0 + z1) / 2 * TILE);
       const wmt = mat(scene, 'waterm', '#0b2a33', null, .78); wmt.specularColor = new BABYLON.Color3(.9, .9, 1); wmt.specularPower = 160; wmt.emissiveColor = C3('#ff7a2b').scale(.04); w.material = wmt; statics.push(w);
     }
+    cityDressing(scene, statics, pal);
     landmarkMeshes(scene, statics);
+  }
+  /* ---------------- city dressing: neon edges, rooftop clutter, blade signs, holo billboards, cables, sky traffic, blimps, steam, wet streets ---------------- */
+  function cityDressing(scene, statics, pal) {
+    const M = L.map, q = NV.Quality.get(), r = U.rng(4242), T = TILE, roofOnly = !!L._roofBuild, lodK = Math.min(1.5, q.lod || 1);
+    const solidC = (x, y) => y < 0 || x < 0 || y >= M.H || x >= M.W || M.g[y][x] === 1;
+    const hAt = (x, y) => M.hmap && y >= 0 && x >= 0 && y < M.H && x < M.W ? M.hmap[y * M.W + x] : 0;
+    const sets = {}, put = (key, m4) => (sets[key] = sets[key] || []).push(m4);
+    const qy = a => BABYLON.Quaternion.RotationYawPitchRoll(a, 0, 0);
+    const seg = (key, ax, ay, az, bx, by, bz, th) => { const dx = bx - ax, dy = by - ay, dz = bz - az, len = Math.hypot(dx, dy, dz); put(key, NV.M(th, th, len, (ax + bx) / 2, (ay + by) / 2, (az + bz) / 2, BABYLON.Quaternion.RotationYawPitchRoll(Math.atan2(dx, dz), -Math.atan2(dy, Math.hypot(dx, dz)), 0))); };
+    const fx = L.cityFx = roofOnly ? L.cityFx : { t: 0, mats: [], ads: [], signMats: [] };
+    const blades = [[], [], []], bladeCols = ['#ff2bd6', '#19f0ff', '#ffb238'], boards = [];
+    // a street-facing side of a building: [dx, dy]
+    const streetSides = b => [[0, -1], [0, 1], [-1, 0], [1, 0]].filter(([dx, dy]) => dx ? !solidC(dx < 0 ? b.x - 1 : b.x + b.w, b.y + (b.h >> 1)) : !solidC(b.x + (b.w >> 1), dy < 0 ? b.y - 1 : b.y + b.h));
+    M.buildings.forEach(b => {
+      const x0 = b.x * T, z0 = b.y * T, W = b.w * T, D = b.h * T, ht = b.ht - (b.tilt ? 1.5 : 0), col = STYLE_COL[NV.REGIONS[b.d][5]][0];
+      // neon corner strips and rooftop outlines
+      if (ht > 20 && r() < .45) { const cs = [[x0 - .07, z0 - .07], [x0 + W + .07, z0 - .07], [x0 - .07, z0 + D + .07], [x0 + W + .07, z0 + D + .07]]; for (let k = 0, n = r() < .4 ? 2 : 1; k < n; k++) { const c = cs[Math.floor(r() * 4)]; put('neon' + col, NV.M(.24, ht - 2, .24, c[0], ht / 2, c[1])); } }
+      if (ht > 38 && r() < .55) { const y = ht + .12; put('neon' + col, NV.M(W, .2, .2, x0 + W / 2, y, z0)); put('neon' + col, NV.M(W, .2, .2, x0 + W / 2, y, z0 + D)); put('neon' + col, NV.M(.2, .2, D, x0, y, z0 + D / 2)); put('neon' + col, NV.M(.2, .2, D, x0 + W, y, z0 + D / 2)); }
+      // rooftop clutter: AC units, water tanks, masts with blinking beacons
+      if (!b.tilt) {
+        for (let k = 0, n = Math.min(4, Math.round(b.w * b.h / 5 * lodK)); k < n; k++) put('ac', NV.M(1.5 + r(), .9, 1.1 + r() * .6, x0 + W * (.15 + .7 * r()), ht + .45, z0 + D * (.15 + .7 * r()), qy(r() < .5 ? 0 : Math.PI / 2)));
+        if (r() < .35) put('tank', NV.M(2.2, 2.6, 2.2, x0 + W * (.25 + .5 * r()), ht + 1.3, z0 + D * (.25 + .5 * r())));
+        if (ht > 30 && r() < .35) { const ax = x0 + W * (.2 + .6 * r()), az = z0 + D * (.2 + .6 * r()), mh = 5 + r() * 6; put('mast', NV.M(.14, mh, .14, ax, ht + mh / 2, az)); put('blink', NV.M(.4, .4, .4, ax, ht + mh + .2, az)); }
+      }
+      // Tokyo-style blade signs sticking out over the sidewalk
+      if (q.signs && ht > 14 && r() < .55) {
+        const sides = streetSides(b);
+        if (sides.length) {
+          const [dx, dy] = sides[Math.floor(r() * sides.length)], h = Math.min(ht - 4, 6 + r() * 9), y0 = 4 + r() * Math.max(0, Math.min(6, ht - h - 6)), along = r() < .5 ? .14 : .86;
+          let px, pz, rot; if (dy) { px = x0 + W * along; pz = dy < 0 ? z0 - 1.3 : z0 + D + 1.3; rot = Math.PI / 2; } else { pz = z0 + D * along; px = dx < 0 ? x0 - 1.3 : x0 + W + 1.3; rot = 0; }
+          blades[Math.floor(r() * 3)].push({ x: px, y: y0 + h / 2, z: pz, h, rot, cell: Math.floor(r() * 16) });
+          put('bracket', dy ? NV.M(.14, .14, 2.6, px, y0 + h - .25, pz) : NV.M(2.6, .14, .14, px, y0 + h - .25, pz));
+          put('bracket', dy ? NV.M(.14, .14, 2.6, px, y0 + .25, pz) : NV.M(2.6, .14, .14, px, y0 + .25, pz));
+        }
+      }
+      // cables (some strung with lanterns) across the street to the building opposite
+      if (r() < .32 * lodK) {
+        const sides = streetSides(b).filter(([dx, dy]) => dx ? solidC(dx < 0 ? b.x - 5 : b.x + b.w + 4, b.y + (b.h >> 1)) : solidC(b.x + (b.w >> 1), dy < 0 ? b.y - 5 : b.y + b.h + 4));
+        if (sides.length) {
+          const [dx, dy] = sides[Math.floor(r() * sides.length)], oh = dx ? hAt(dx < 0 ? b.x - 5 : b.x + b.w + 4, b.y + (b.h >> 1)) : hAt(b.x + (b.w >> 1), dy < 0 ? b.y - 5 : b.y + b.h + 4);
+          const top = Math.min(ht, oh || ht) - 1.5;
+          for (let k = 0, n = 1 + (r() < .5 ? 1 : 0); k < n && top > 9; k++) {
+            const h0 = 8 + r() * (top - 8), h1 = Math.min(top, h0 + (r() - .5) * 4); let ax, az, bx, bz;
+            if (dy) { ax = x0 + W * (.1 + .8 * r()); az = dy < 0 ? z0 : z0 + D; bx = ax + (r() - .5) * 5; bz = az + dy * 16; } else { az = z0 + D * (.1 + .8 * r()); ax = dx < 0 ? x0 : x0 + W; bz = az + (r() - .5) * 5; bx = ax + dx * 16; }
+            const sag = 1.2 + r() * 1.6, mx = (ax + bx) / 2, mz = (az + bz) / 2, my = (h0 + h1) / 2 - sag;
+            seg('cable', ax, h0, az, mx, my, mz, .06); seg('cable', mx, my, mz, bx, h1, bz, .06);
+            if (r() < .3) for (let t = 1; t < 8; t++) { const u = t / 8, px = ax + (bx - ax) * u, pz = az + (bz - az) * u, py = h0 + (h1 - h0) * u - sag * 4 * u * (1 - u); put('lantern', NV.M(.34, .44, .34, px, py - .35, pz)); }
+          }
+        }
+      }
+    });
+    // giant holo billboards on the tallest roofs (two groups so the ads rotate out of step)
+    if (q.signs && !roofOnly) M.buildings.filter(b => b.ht > 50 && !b.tilt).sort((a, c) => c.ht - a.ht).slice(0, 16).forEach((b, i) => {
+      const sides = streetSides(b); if (!sides.length) return; const [dx, dy] = sides[0], x0 = b.x * T, z0 = b.y * T, W = b.w * T, D = b.h * T;
+      const bw = Math.min(18, (dy ? W : D) * .95), bh = bw * .56, y = b.ht + 2.5 + bh / 2;
+      let px = x0 + W / 2, pz = z0 + D / 2, rot = 0;
+      if (dy < 0) { pz = z0 + 1; rot = 0; } else if (dy > 0) { pz = z0 + D - 1; rot = Math.PI; } else if (dx < 0) { px = x0 + 1; rot = Math.PI / 2; } else { px = x0 + W - 1; rot = -Math.PI / 2; }
+      boards.push({ i, px, y, pz, bw, bh, rot });
+      const f = [Math.sin(rot), Math.cos(rot)], sideV = [Math.cos(rot), -Math.sin(rot)];
+      [-.35, .35].forEach(o => put('mast', NV.M(.3, 2.6 + bh / 2, .3, px + sideV[0] * bw * o + f[0] * .3, b.ht + (2.6 + bh / 2) / 2, pz + sideV[1] * bw * o + f[1] * .3)));
+      put('board', NV.M(bw + .4, bh + .4, .25, px + f[0] * .2, y, pz + f[1] * .2, qy(rot)));
+    });
+    // build the instanced sets
+    const mk = (name, m, arr, shape, dyn) => { if (!arr || !arr.length) return null; const b = shape ? shape() : BABYLON.MeshBuilder.CreateBox(name, { size: 1 }, scene); b.name = name; b.material = m; NV.thin(b, arr); if (dyn) { b.isPickable = false; b.freezeWorldMatrix(); } else statics.push(b); return b; };
+    Object.keys(sets).filter(k => k.startsWith('neon')).forEach(k => { const m = mat(scene, k, '#000', k.slice(4)); m.disableLighting = true; mk(k, m, sets[k]); });
+    const metal = mat(scene, 'roofmet', '#2b2834'); metal.specularColor = new BABYLON.Color3(.35, .35, .4);
+    mk('ac', metal, sets.ac); mk('tank', metal, sets.tank, () => BABYLON.MeshBuilder.CreateCylinder('tank', { diameter: 1, height: 1, tessellation: 10 }, scene));
+    mk('mast', mat(scene, 'mastm', '#16141c'), sets.mast); mk('bracket', mat(scene, 'brkm', '#16141c'), sets.bracket); mk('board', mat(scene, 'boardm', '#0b0912'), sets.board);
+    mk('cable', mat(scene, 'cablem', '#0c0b10'), sets.cable);
+    if (sets.lantern) { const lm = mat(scene, 'lanternm', '#000', '#ff5a3d'); lm.disableLighting = true; mk('lantern', lm, sets.lantern); }
+    if (sets.blink) { const bm = mat(scene, 'blinkm', '#000', '#ff2030'); bm.disableLighting = true; mk('blink', bm, sets.blink, null, !roofOnly); if (!roofOnly) fx.blink = bm; }
+    // blade signs: one merged mesh per neon colour
+    blades.forEach((list, ci) => {
+      if (!list.length) return; const atlas = NV.bladeAtlas(scene, bladeCols[ci]), planes = list.map(sg => {
+        const c = sg.cell, uv = new BABYLON.Vector4((c % 8) / 8, 1 - (Math.floor(c / 8) + 1) / 2, (c % 8 + 1) / 8, 1 - Math.floor(c / 8) / 2);
+        const pl = BABYLON.MeshBuilder.CreatePlane('bs', { width: 2.3, height: sg.h, frontUVs: uv, backUVs: uv, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene); pl.position.set(sg.x, sg.y, sg.z); pl.rotation.y = sg.rot; return pl; });
+      const mesh = BABYLON.Mesh.MergeMeshes(planes, true, true); mesh.name = 'vsign' + ci; const m = mat(scene, 'vsignm' + ci, '#000', '#000'); m.emissiveTexture = atlas; m.opacityTexture = atlas; m.disableLighting = true; m.backFaceCulling = false; mesh.material = m;
+      mesh.isPickable = false; mesh.freezeWorldMatrix(); if (!roofOnly) fx.signMats.push(m); else statics.push(mesh);
+    });
+    // billboards: two merged groups sharing the ad atlas, each showing a different ad
+    if (boards.length) {
+      [0, 1].forEach(gi => { const list = boards.filter(bd => bd.i % 2 === gi); if (!list.length) return;
+        const planes = list.map(bd => { const pl = BABYLON.MeshBuilder.CreatePlane('ad', { width: bd.bw, height: bd.bh }, scene); pl.position.set(bd.px, bd.y, bd.pz); pl.rotation.y = bd.rot; return pl; });
+        const mesh = BABYLON.Mesh.MergeMeshes(planes, true, true); mesh.name = 'hoload' + gi; const m = mat(scene, 'adm' + gi, '#000', '#000'); const tex = NV.adAtlas(scene, gi); tex.vScale = .25; tex.vOffset = gi * .5; m.emissiveTexture = tex; m.disableLighting = true; m.alpha = .92; mesh.material = m; mesh.isPickable = false; mesh.freezeWorldMatrix();
+        fx.ads.push({ m, tex, f: gi * 2, t: gi * 2.5 }); });
+    }
+    if (roofOnly) return;
+    // flying traffic: sky lanes above the street grid (bodies, head/tail light bars, underglow)
+    const nAir = Math.round(24 + 56 * Math.min(1, q.lod || 1)), air = [];
+    for (let i = 0; i < nAir; i++) { const axis = r() < .5 ? 'x' : 'z', line = 1 + Math.floor(r() * (M.N - 1)), dir = r() < .5 ? 1 : -1; air.push({ axis, c: (2 + line * M.B) * T + dir * 3.5, dir, h: 44 + Math.floor(r() * 5) * 15 + (axis === 'x' ? 7 : 0), along: r() * M.W * T, sp: 20 + r() * 22, ph: r() * 6, col: r() < .5 ? 0 : 1 }); }
+    const amesh = (name, m) => { const b = BABYLON.MeshBuilder.CreateBox(name, { size: 1 }, scene); b.material = m; b.isPickable = false; b.alwaysSelectAsActiveMesh = true; const buf = new Float32Array(nAir * 16); b.thinInstanceSetBuffer('matrix', buf, 16, false); return { b, buf }; };
+    const em = (n, c) => { const m = mat(scene, n, '#000', c); m.disableLighting = true; return m; };
+    const bodyM = mat(scene, 'aircarm', '#1c1a26'); bodyM.specularColor = new BABYLON.Color3(.6, .6, .7); bodyM.specularPower = 64;
+    fx.air = { list: air, body: amesh('aircar', bodyM), head: amesh('airhead', em('airheadm', '#eaf6ff')), tail: amesh('airtail', em('airtailm', '#ff2040')), glow: amesh('airglow', em('airglowm', pal.a)), W: M.W * T };
+    // blimps with ad screens circling the skyline
+    fx.blimps = [0, 1].map(k => {
+      const root = new BABYLON.TransformNode('blimp', scene), hull = BABYLON.MeshBuilder.CreateSphere('bh', { diameter: 1, segments: 16 }, scene); hull.scaling.set(18, 18, 70); hull.parent = root; hull.material = mat(scene, 'blimpm' + k, '#1a1726'); hull.material.specularColor = new BABYLON.Color3(.3, .3, .4);
+      const scr = fx.ads[k % Math.max(1, fx.ads.length)]; [-1, 1].forEach(sd => { const pl = BABYLON.MeshBuilder.CreatePlane('bscr', { width: 40, height: 11 }, scene); pl.parent = root; pl.position.set(sd * 9.3, 0, 0); pl.rotation.y = sd * Math.PI / 2; pl.material = scr ? scr.m : em('bscrm', '#ff2bd6'); });
+      const lt = BABYLON.MeshBuilder.CreateSphere('bl', { diameter: 1.2, segments: 6 }, scene); lt.parent = root; lt.position.set(0, -9.5, 0); lt.material = fx.blink || em('blm', '#ff2030');
+      [hull].forEach(m => { m.isPickable = false; });
+      return { root, a: k * Math.PI, rad: 300 + k * 140, y: 170 + k * 45, sp: .018 - k * .006 };
+    });
+    // steam rising from manholes: a few pooled emitters follow the nearest vents
+    const vents = [];
+    for (let i = 0; i < 160; i++) { const axis = r() < .5, k = Math.floor(r() * (M.N + 1)), c = (2 + k * M.B) * T + (r() < .5 ? -2 : 2), a = 8 + r() * (M.W * T - 16), x = axis ? c : a, z = axis ? a : c; if (!solid(x, z)) { vents.push({ x, z }); put('manhole', NV.M(1.1, .05, 1.1, x, .03, z)); } }
+    if (sets.manhole) mk('manhole', mat(scene, 'manm', '#1d1a22'), sets.manhole, () => BABYLON.MeshBuilder.CreateCylinder('manhole', { diameter: 1, height: 1, tessellation: 12 }, scene));
+    if ((q.particles || 0) > .25) {
+      const tex = NV.tex(scene, 64, 64, (c, w, h) => { const gr = c.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, 'rgba(255,255,255,.9)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = gr; c.fillRect(0, 0, w, h); }, 'steamtex');
+      fx.steam = { vents, sys: [0, 1, 2].map(() => { const ps = new BABYLON.ParticleSystem('steam', 60, scene); ps.particleTexture = tex; ps.emitter = V3(0, -50, 0); ps.createBoxEmitter(V3(-.3, 1, -.3), V3(.3, 1.6, .3), V3(-.4, 0, -.4), V3(.4, .1, .4));
+        ps.minSize = 1; ps.maxSize = 3; ps.minLifeTime = 2; ps.maxLifeTime = 3.4; ps.emitRate = 12; ps.minEmitPower = .8; ps.maxEmitPower = 1.6; ps.gravity = V3(.15, .25, 0);
+        ps.color1 = new BABYLON.Color4(.78, .72, .9, .16); ps.color2 = new BABYLON.Color4(.6, .55, .8, .1); ps.colorDead = new BABYLON.Color4(.4, .4, .5, 0); ps.blendMode = BABYLON.ParticleSystem.BLENDMODE_STANDARD; ps.minAngularSpeed = -.4; ps.maxAngularSpeed = .4; ps.start(); return ps; }), t: 0 };
+    }
+    // rain-soaked asphalt: puddles catch the light; higher tiers also mirror the neon
+    const floor = scene.getMeshByName('floor');
+    if (floor) {
+      const am = mat(scene, 'asphalt', '#ffffff');
+      am.diffuseTexture = NV.tex(scene, 512, 512, (c, w, h) => { c.fillStyle = '#1b1922'; c.fillRect(0, 0, w, h); const rr = U.rng(17); for (let i = 0; i < 9000; i++) { const v = 18 + rr() * 26 | 0; c.fillStyle = 'rgb(' + v + ',' + (v - 2) + ',' + (v + 6) + ')'; c.fillRect(rr() * w, rr() * h, 1 + rr() * 2, 1 + rr() * 2); }
+        c.strokeStyle = 'rgba(0,0,0,.5)'; c.lineWidth = 1.2; for (let i = 0; i < 14; i++) { c.beginPath(); let x = rr() * w, y = rr() * h; c.moveTo(x, y); for (let k = 0; k < 6; k++) { x += (rr() - .5) * 60; y += (rr() - .5) * 60; c.lineTo(x, y); } c.stroke(); } }, 'asphalt');
+      am.specularTexture = NV.tex(scene, 512, 512, (c, w, h) => { c.fillStyle = '#2a2a30'; c.fillRect(0, 0, w, h); const rr = U.rng(23); for (let i = 0; i < 26; i++) { const x = rr() * w, y = rr() * h, rx = 20 + rr() * 70, ry = 10 + rr() * 40; const gr = c.createRadialGradient(x, y, 0, x, y, rx); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(.7, 'rgba(255,255,255,.75)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = gr; c.save(); c.translate(x, y); c.scale(1, ry / rx); c.translate(-x, -y); c.beginPath(); c.arc(x, y, rx, 0, 7); c.fill(); c.restore(); } }, 'puddles');
+      [am.diffuseTexture, am.specularTexture].forEach(t => { t.uScale = t.vScale = M.W / 5; });
+      am.specularColor = new BABYLON.Color3(1, .95, 1.1); am.specularPower = 90;
+      if (['ultra', 'veryhigh', 'high'].includes(q.key) && BABYLON.MirrorTexture) try {
+        const mir = new BABYLON.MirrorTexture('streetMirror', q.key === 'ultra' ? 1024 : 512, scene, true); mir.mirrorPlane = new BABYLON.Plane(0, -1, 0, 0); mir.level = .34; mir.refreshRate = q.key === 'high' ? 2 : 1;
+        mir.renderList = statics.filter(m => /^(bld|neon|ftrim|lamp|tower|ring)/.test(m.name)).concat(scene.meshes.filter(m => /^(vsign|hoload)/.test(m.name)));
+        am.reflectionTexture = mir; L.mirror = mir;
+      } catch (e) { console.warn('street reflections unavailable', e); }
+      floor.material = am;
+    }
+  }
+  function cityFxTick(dt) {
+    const fx = L.cityFx; fx.t += dt; const t = fx.t;
+    if (fx.blink) fx.blink.emissiveColor.set(Math.sin(t * 3) > .3 ? 1 : .08, .02, .05);
+    fx.signMats.forEach((m, i) => { const fl = (Math.sin(t * 13 + i * 7) > .985 || Math.sin(t * 1.1 + i) > .995) ? .25 : 1; m.emissiveColor.set(0, 0, 0); if (m.emissiveTexture) m.emissiveTexture.level = fl; });
+    fx.ads.forEach(a => { a.t += dt; if (a.t > 5) { a.t = 0; a.f = (a.f + 1) % 4; a.glitch = .3; } if (a.glitch > 0) { a.glitch -= dt; a.tex.uOffset = (Math.random() - .5) * .05; a.m.alpha = .5 + Math.random() * .4; } else { a.tex.uOffset = 0; a.m.alpha = .92; } a.tex.vOffset = 1 - (a.f + 1) * .25; });
+    const A = fx.air; if (A) {
+      const tm = BABYLON.Matrix.Identity(), qq = new BABYLON.Quaternion(), sc = new BABYLON.Vector3(), ps = new BABYLON.Vector3();
+      A.list.forEach((c, i) => {
+        c.along += c.dir * c.sp * dt; if (c.along > A.W) c.along -= A.W; if (c.along < 0) c.along += A.W;
+        const yaw = c.axis === 'z' ? (c.dir > 0 ? 0 : Math.PI) : (c.dir > 0 ? Math.PI / 2 : -Math.PI / 2), fxv = Math.sin(yaw), fzv = Math.cos(yaw);
+        const x = c.axis === 'z' ? c.c : c.along, z = c.axis === 'z' ? c.along : c.c, y = c.h + Math.sin(t * 1.3 + c.ph) * .5;
+        BABYLON.Quaternion.RotationYawPitchRollToRef(yaw, 0, Math.sin(t + c.ph) * .04, qq);
+        const put = (o, sx, sy, sz, off, dy) => { sc.set(sx, sy, sz); ps.set(x + fxv * off, y + dy, z + fzv * off); BABYLON.Matrix.ComposeToRef(sc, qq, ps, tm); tm.copyToArray(o.buf, i * 16); };
+        put(A.body, 2.2, .75, 4.8, 0, 0); put(A.head, 1.9, .16, .1, 2.42, .05); put(A.tail, 1.9, .2, .1, -2.42, .05); put(A.glow, 1.8, .05, 4, 0, -.42);
+      });
+      [A.body, A.head, A.tail, A.glow].forEach(o => o.b.thinInstanceBufferUpdated('matrix'));
+    }
+    if (fx.blimps) { const cx = L.map.W * TILE / 2, cz = L.map.H * TILE / 2; fx.blimps.forEach(b => { b.a += b.sp * dt; b.root.position.set(cx + Math.cos(b.a) * b.rad, b.y, cz + Math.sin(b.a) * b.rad); b.root.rotation.y = -b.a; }); }
+    if (fx.clouds) fx.clouds.uOffset += dt * .002;
+    const S = fx.steam; if (S) { S.t -= dt; if (S.t <= 0) { S.t = .6; const p = L.p, near = S.vents.map(v => ({ v, d: Math.hypot(v.x - p.x, v.z - p.z) })).filter(o => o.d < 70).sort((a, b) => a.d - b.d); S.sys.forEach((ps, k) => { const o = near[k]; if (o) ps.emitter = V3(o.v.x, .05, o.v.z); else ps.emitter = V3(0, -50, 0); }); } }
   }
   /* named landmarks: shared archetypes (hall, spire, factory, station, ship ...) built from thin instances */
   function landmarkMeshes(scene, statics) {
@@ -4186,10 +4536,18 @@ NV.Level = (() => {
     const skin = mat(L.scene, 'pdhm', '#6d5548'), pants = mat(L.scene, 'pdpm', '#17141f');
     const shared = { head: Pp(limbShape('head', L.scene), skin), hand: Pp(limbShape('hand', L.scene), skin), leg: Pp(limbShape('leg', L.scene), pants), foot: Pp(limbShape('foot', L.scene), pants) };
     const strip = Pp(BABYLON.MeshBuilder.CreateBox('pds', { width: .05, height: .4, depth: .05 }, L.scene), mat(L.scene, 'pdsm', '#000', L.palette.a));
+    const coats = pm.map(m => Pp(BABYLON.MeshBuilder.CreateBox('pdcoat', { width: .46, height: .64, depth: .07 }, L.scene), m));
+    const canopyM = mat(L.scene, 'umbm', '#16101f', null, .85); canopyM.backFaceCulling = false; canopyM.specularColor = new BABYLON.Color3(.7, .7, .8); canopyM.specularPower = 64;
+    const canopy = Pp(BABYLON.MeshBuilder.CreateCylinder('umb', { diameterTop: .06, diameterBottom: 1.25, height: .3, tessellation: 12, cap: BABYLON.Mesh.NO_CAP }, L.scene), canopyM);
+    const rims = ['#ff2bd6', '#19f0ff', '#ffb238', '#3dffa8'].map((c, k) => { const m = mat(L.scene, 'umbr' + k, '#000', c); m.disableLighting = true; return Pp(BABYLON.MeshBuilder.CreateTorus('umbrim', { diameter: 1.25, thickness: .035, tessellation: 18 }, L.scene), m); });
+    const handle = Pp(BABYLON.MeshBuilder.CreateCylinder('umbh', { diameter: .03, height: .75, tessellation: 5 }, L.scene), pants);
+    const hat = Pp(BABYLON.MeshBuilder.CreateCylinder('pdhat', { diameter: .38, height: .13, tessellation: 10 }, L.scene), pants);
     for (let i = 0; i < NV.Quality.get().peds; i++) {
       const root = new BABYLON.TransformNode('ped', L.scene);
       const rig = rigBuild(root, k => (k === 'torso' ? torsos[i % 4] : k === 'arm' ? arms[i % 4] : shared[k]).createInstance('i'), false);
       inst(strip, root, .16, 1.3, .22);
+      if (r() < .45) inst(coats[i % 4], root, 0, .95, -.14);
+      if (r() < (L.rain ? .4 : .12)) { inst(canopy, root, .1, 2.14, .06); inst(rims[(i >> 1) % 4], root, .1, 1.99, .06); inst(handle, root, .1, 1.66, .06); } else if (r() < .3) inst(hat, root, 0, 1.97, 0);
       const pd = { root, rig, x: 0, z: 0, sp: 1.1 + r() * .9, ph: r() * 6, jay: r() < .08, cw: r() < .5 ? 1 : 3 };
       pedPlace(pd, 8, 110); L.peds.push(pd);
     }
@@ -4463,6 +4821,8 @@ NV.Level = (() => {
       P(BABYLON.MeshBuilder.CreateBox('ne', { width: info.kind === 'mask' || info.kind === 'shadow' ? .3 : .22, height: .045, depth: .05 }, s), accent, 1.82, .16);
       P(BABYLON.MeshBuilder.CreateBox('nc', { width: .05, height: .45, depth: .04 }, s), accent, 1.3, .25);
       if (info.f) P(BABYLON.MeshBuilder.CreateBox('nhair', { width: .38, height: .45, depth: .18 }, s), body, 1.72, -.1);
+      P(BABYLON.MeshBuilder.CreateBox('ncoat', { width: .48, height: .72, depth: .06 }, s), body, .95, -.15);
+      P(BABYLON.MeshBuilder.CreateTorus('ncol', { diameter: .32, thickness: .035, tessellation: 14 }, s), accent, 1.6);
       if (L.sg) root.getChildMeshes().forEach(m => L.sg.addShadowCaster(m, false));
     }
     const tag = nameTag(sp.name, col); tag.parent = root; tag.position.y = tagY;
@@ -4756,7 +5116,9 @@ NV.Level = (() => {
     if (jump && p.wall) { // kick off the wall
       p.vy = 8; p.kick = { x: p.wall.nx * 8, z: p.wall.nz * 8, t: .6 }; p.leap = 1.3; p.wall = null; p.wallCd = .35; NV.Audio.sfx('dash'); NV.In.rumble(.3, .3, 60); return 1;
     }
-    if (jump && !p.air) { p.vy = 7.4; p.air = true; p.y += .02; p.leap = sprint || p.slide ? 1.4 : 1; p.slide = null; NV.Audio.sfx('dash'); return 1; }
+    if (space && p.air && !p.wall) p.jumpBuf = L.time; // jump buffer: pressed just before landing
+    const coyote = !p.air || (L.time - (p.lastGround || -9) < .16 && p.vy <= 0 && !p.jumped);
+    if ((jump || p.bufJump) && coyote) { p.bufJump = false; p.jumped = true; p.vy = 7.4; p.air = true; p.y += .02; p.leap = sprint || p.slide ? 1.4 : 1; p.slide = null; NV.Audio.sfx('dash'); return 1; }
     if (space && p.air) return 1; // no dashing mid-air
     // slide: hit crouch while sprinting
     if (!p.air && p.wasSprint && (I.hit('KeyC') || I.hit('ControlLeft') || I.padHit(10))) { p.slide = { t: .8, x: fx, z: fz }; NV.Audio.sfx('dash'); noise(p.x, p.z, 5); }
@@ -4800,7 +5162,7 @@ NV.Level = (() => {
       p.y = Math.max(fl, p.y + p.vy * dt);
       if (!p.sky && p.vy < -5 && p.y - fl > 12) startSky();
       if (p.y <= fl) land(-p.vy, fl);
-    } else { p.y = fl; p.vy = 0; if (p.air) { p.air = false; p.leap = 1; p.kick = null; p.wall = null; } }
+    } else { p.y = fl; p.vy = 0; p.lastGround = L.time; if (p.air) { p.air = false; p.leap = 1; p.kick = null; p.wall = null; p.jumped = false; if (L.time - (p.jumpBuf || -9) < .16 && (p.sprint || p.vxs)) p.bufJump = true; } }
   }
   function startSky() {
     const p = L.p, G = cineGhost(); p.sky = { gun: L.gun.node.isEnabled() }; L.gun.node.setEnabled(false);
@@ -4867,7 +5229,7 @@ NV.Level = (() => {
     const h = U.el('div', '', `
       <div class="xh"><i class="t"></i><i class="r"></i><i class="b"></i><i class="l"></i><i class="c"></i><em class="hm"></em></div><div class="critv"></div><div class="dmg"></div><div class="lb lbt"></div><div class="lb lbb"></div><div class="loc"></div><div class="wps"></div><div class="hotbar"></div><div class="hbinfo"></div><div class="chatlog"></div><input class="chatin hidden" maxlength="140" placeholder="Say something in character — Enter to send, Esc to cancel">
       <div class="obj"><div class="t">OPERATION</div><div class="d"></div><div class="c"></div></div>
-      <div class="status s0">UNDETECTED</div><div class="stealth"><i></i></div>
+      <div class="status s0">UNDETECTED</div><div class="stealth"><i></i></div><div class="heat hidden"><b>HELIX HEAT</b><span></span></div><div class="dirs"><i></i><i></i><i></i><i></i></div><div class="fl"></div><div class="chain"></div>
       <div class="mmf"><span class="hdg">N · 000°</span></div><canvas class="mm" width="180" height="180"></canvas><div class="timer"></div><div class="speedo hidden"></div>
       <div class="bars"><div class="vit"><div class="hpn"><b class="hpv">100</b><small>INTEGRITY</small></div>
         <div class="vb"><div class="bar hp seg"><s></s><i></i></div>
@@ -4936,7 +5298,7 @@ NV.Level = (() => {
   }
   return {
     start, get active() { return !!L; },
-    cardboardTap() { if (!L || L.paused || L.over || L.drive) return; if (L.hack || nearestInteract()) { interact(); return; } const I = NV.In; I.lmb = true; I.lmbHit = true; setTimeout(() => { I.lmb = false; }, 110); }, debug: () => L, devApi: () => ({ carExplode, disable, ragdoll, shoot, launch, strike, hack, deploy, swing, armsSelect, beamTick }),
+    cardboardTap() { if (!L || L.paused || L.over || L.drive) return; if (L.hack || nearestInteract()) { interact(); return; } const I = NV.In; I.lmb = true; I.lmbHit = true; setTimeout(() => { I.lmb = false; }, 110); }, debug: () => L, devApi: () => ({ alertEnemy, addHeat, throwGrenade, carExplode, disable, ragdoll, shoot, launch, strike, hack, deploy, swing, armsSelect, beamTick }),
     stop() { if (L) end({ done: true }); },
     event: aptEvent,
     applyQuality() { if (!L) return; NV.Quality.teardown(L.fx); L.fx = NV.Quality.setup(L.scene, L.cam); const q = NV.Quality.get(); L.cam.maxZ = q.draw; },
