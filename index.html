@@ -214,7 +214,7 @@ body.cine #story{bottom:11vh;inset:0 0 11vh 0;z-index:5}
 #hud .fl em.hd{color:var(--amber);font-size:19px;text-shadow:0 0 10px var(--amber),0 0 2px #000}#hud .fl em.bk{font-size:12px;letter-spacing:.18em;color:#fff;background:rgba(255,30,70,.82);padding:2px 8px;clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%);text-shadow:none}
 #hud .heat{position:absolute;left:50%;top:62px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;font-family:var(--fh);font-size:10px;letter-spacing:.25em;color:var(--red)}#hud .heat span{font-size:16px;letter-spacing:.15em;text-shadow:0 0 10px var(--red)}#hud .heat.hot span{animation:blink .7s infinite}
 #hud .chain{position:absolute;left:calc(50% + 40px);top:calc(50% - 46px);font-family:var(--fh);font-weight:900;font-size:22px;color:var(--amber);text-shadow:0 0 12px var(--amber);opacity:0;transform:skewX(-12deg);transition:opacity .3s}#hud .chain.on{opacity:1}#hud .chain small{display:block;font-size:11px;letter-spacing:.2em;color:#fff}
-#hud.cine .dirs,#hud.cine .fl,#hud.cine .heat,#hud.cine .chain{opacity:0}
+#hud.cine .dirs,#hud.cine .fl,#hud.cine .heat,#hud.cine .chain,#hud.cine .qbar,#hud.cine .buffs{opacity:0;pointer-events:none}
 body.touch #hud .heat{left:66%;top:62px}
 /* hurt glitch */
 #hud.hurt .bars,#hud.hurt .obj,#hud.hurt .wpn,#hud.hurt .mmf,#hud.hurt .status{animation:hudgl .32s steps(3)}
@@ -4941,6 +4941,117 @@ NV.Level = (() => {
     if (!L.ghost) { L.ghost = makeNpc({ name: 'Ghost', kind: 'human' }, L.p.x, L.p.z); L.ghost.tag.setEnabled(false); L.ghost.root.setEnabled(false); }
     return L.ghost;
   }
+
+  /* ---------------- cutscene staging: narration lines become little set pieces (vehicles, ads, lifts, drones, gunfire, hacks, jumps)
+     so what you see matches what the text says. Pieces persist through the dialogue that follows, until the next action line. ---------------- */
+  const ACT = [
+    ['bike', /\b(motorcycle|motorbike|bike|hover-?bike|rider)\b/i], ['drive', /\b(drives?|driving|drove|car|van|truck|convoy|vehicle|taxi|cab|chase|speeds?)\b/i],
+    ['ad', /\b(advertisement|advert|billboard|ad screen|holo-?ad|sign)\b/i], ['lift', /\b(lift|elevator|cabin|gondola|pod)\b/i],
+    ['market', /\b(market|stalls?|vendors?|bazaar|crowd)\b/i], ['drones', /\b(drones?|turrets?|swarm)\b/i],
+    ['fire', /\b(fires?|firing|fired|shoots?|shot|gunfire|bullets?|shooting)\b/i], ['hack', /\b(hacks?|hacking|hacked|overrides?|jacks? in|terminal|barriers?|uploads?)\b/i],
+    ['boom', /\b(explodes?|explosion|blast|detonat\w*|bursts? into flame)\b/i], ['jump', /\b(jumps?|leaps?|vaults?|lands? on|drops? onto)\b/i],
+    ['run', /\b(runs?|ran|sprints?|dashes|races?|flees?)\b/i], ['fall', /\b(falls?|fell|plummets?|tumbles?)\b/i],
+  ];
+  function stageClear() { const S = L.stage; if (!S) return; S.objs.forEach(o => { try { o.dispose(); } catch (e) { } }); L.stage = null; }
+  function openDir(x, z, air) { // the direction with the longest clear run from (x, z)
+    let best = 0, bd = -1; for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2; let d = 0; for (let t = 2; t <= 60; t += 2) { if (!air && solid(x + Math.sin(a) * t, z + Math.cos(a) * t)) break; d = t; } if (d > bd) { bd = d; best = a; } }
+    return { a: best, len: Math.max(8, bd) };
+  }
+  function stageLine(text, G, partner) {
+    const acts = ACT.filter(([, re]) => re.test(text)).map(([k]) => k); if (!acts.length || !/[A-Z]/.test(text[0] || '')) return false;
+    stageClear();
+    const sc = L.scene, has = k => acts.includes(k), air = !!L.map.roof, od = openDir(G.x, G.z, air), fx = Math.sin(od.a), fz = Math.cos(od.a), rx = Math.cos(od.a), rz = -Math.sin(od.a);
+    const S = L.stage = { acts, objs: [], t: 0, home: { x: G.x, z: G.z, yaw: G.root.rotation.y }, fx, fz, rx, rz, len: od.len, gy: 0, ride: null, cam: null, drones: [], shots: 0 };
+    const keep = m => { S.objs.push(m); if (m.isPickable !== undefined) m.isPickable = false; return m; };
+    const em = (n, c, a) => { const m = mat(sc, 'st_' + n + Math.random(), '#000', c, a); m.disableLighting = true; return m; };
+    const dark = mat(sc, 'st_dk' + Math.random(), '#15121e'); dark.specularColor = new BABYLON.Color3(.4, .4, .5); S.objs.push(dark);
+    const box = (w, h, d, m) => { const b = keep(BABYLON.MeshBuilder.CreateBox('st', { width: w, height: h, depth: d }, sc)); b.material = m; return b; };
+    G.root.rotation.y = od.a;
+    // a vehicle carries Ghost (and the partner) along the clear direction
+    if (has('bike') || has('drive')) {
+      const veh = new BABYLON.TransformNode('stveh', sc); keep(veh); const bike = has('bike') && !/\bcar|van|truck\b/i.test(text);
+      if (bike) {
+        const b = box(.5, .42, 2.1, dark); b.parent = veh; b.position.y = .75; const nose = box(.44, .3, .5, dark); nose.parent = veh; nose.position.set(0, .95, .95); nose.rotation.x = -.4;
+        [-.95, .95].forEach(z => { const r = keep(BABYLON.MeshBuilder.CreateTorus('st', { diameter: .75, thickness: .09, tessellation: 20 }, sc)); r.parent = veh; r.position.set(0, .5, z); r.rotation.z = Math.PI / 2; r.material = em('ring', '#19f0ff'); });
+        const glow = box(.4, .03, 1.8, em('ug', '#ff2bd6')); glow.parent = veh; glow.position.y = .3;
+        const rider = makeNpc({ name: 'Rider', kind: 'human' }, 0, 0); rider.tag.dispose(); rider.root.parent = veh; rider.root.position.set(0, .45, .15); rider.root.rotation.y = 0; keep(rider.root);
+        rider.root.rig.legL.rotation.x = rider.root.rig.legR.rotation.x = -1.3; rider.root.rig.kneeL.rotation.x = rider.root.rig.kneeR.rotation.x = 1.4; rider.root.rig.armL.rotation.x = rider.root.rig.armR.rotation.x = -1.1;
+        S.ride = { veh, seat: V3(0, .5, -.6), arrive: 1.1, speed: 18, alt: air ? 2.5 : 1.2, bike: true };
+      } else if (L.carP) {
+        const c = makeCar(0, 0, 0, 'remote'); L.cars = L.cars.filter(x => x !== c); c.root.parent = veh; c.root.position.set(0, 0, 0); c.root.rotation.y = 0; keep(c.root);
+        S.ride = { veh, seat: V3(-.45, .35, -.2), arrive: 0, speed: 14, alt: air ? 2 : 0, hide: true };
+      } else { const b = box(1.9, .9, 4.2, dark); b.parent = veh; b.position.y = .7; S.ride = { veh, seat: V3(-.45, .5, -.2), arrive: 0, speed: 14, alt: air ? 2 : 0, hide: true }; }
+      const R = S.ride; R.sx = G.x - fx * (R.arrive ? 16 : 0) + rx * (R.arrive ? 2.5 : 0); R.sz = G.z - fz * (R.arrive ? 16 : 0) + rz * (R.arrive ? 2.5 : 0);
+      veh.position.set(R.sx, R.alt, R.sz); veh.rotation.y = od.a;
+      if (partner && R.hide) partner.root.setEnabled(false), S.hidPartner = partner;
+    }
+    // a giant moving holo ad that changes image (and Ghost rides on top of it if they jump onto it)
+    if (has('ad')) {
+      const tx = (msg, sub, c, bg) => NV.tex(sc, 512, 288, (g, w, h) => { g.fillStyle = bg; g.fillRect(0, 0, w, h); g.fillStyle = c; g.shadowColor = c; g.shadowBlur = 20; g.font = 'bold 64px Orbitron, sans-serif'; g.textAlign = 'center'; g.fillText(msg, w / 2, h / 2); g.font = '26px Rajdhani, sans-serif'; g.shadowBlur = 0; g.fillStyle = '#fff'; g.fillText(sub, w / 2, h / 2 + 52); }, 'stad' + Math.random());
+      const a1 = tx('HELIX FAMILY', 'Safety is a subscription', '#19f0ff', '#061a3a'), a2 = NV.tex(sc, 512, 288, (g, w, h) => { g.fillStyle = '#e8e4f0'; g.fillRect(0, 0, w, h); g.fillStyle = '#05030a'; g.beginPath(); g.ellipse(256, 190, 52, 62, 0, 0, 7); g.fill(); [[-46, -40, 16, 70], [-18, -70, 15, 90], [10, -76, 15, 96], [36, -64, 14, 82]].forEach(([dx, dy, ww, hh]) => { g.save(); g.translate(256 + dx, 150 + dy); g.fillRect(-ww / 2, 0, ww, hh); g.beginPath(); g.arc(0, 0, ww / 2, 0, 7); g.fill(); g.restore(); }); g.save(); g.translate(206, 190); g.rotate(-.7); g.fillRect(-10, -50, 20, 60); g.restore(); }, 'stad2' + Math.random());
+      const mk2 = t2 => { const m = mat(sc, 'st_ad' + Math.random(), '#000'); m.diffuseColor = new BABYLON.Color3(0, 0, 0); m.emissiveTexture = t2; m.emissiveColor = new BABYLON.Color3(0, 0, 0); m.disableLighting = true; m.backFaceCulling = false; S.objs.push(m); return m; };
+      const m = mk2(a1), m2 = mk2(a2); S.objs.push(a1, a2);
+      const ad = keep(BABYLON.MeshBuilder.CreatePlane('stad', { width: 7, height: 3.9, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, sc)); ad.material = m; ad.position.set(G.x + fx * 4 + rx * 3, 2.6, G.z + fz * 4 + rz * 3); ad.rotation.y = od.a + Math.PI / 2;
+      const ad2 = keep(BABYLON.MeshBuilder.CreatePlane('stad2', { width: 7, height: 3.9, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, sc)); ad2.material = m2; ad2.parent = ad; ad2.isVisible = false;
+      const frame = box(7.3, .18, .3, em('adf', '#ff2bd6')); frame.position.set(ad.position.x, 4.6, ad.position.z); frame.rotation.y = ad.rotation.y;
+      S.ad = { ad, ad2, frame, swap: 1.4, base: ad.position.clone() };
+    }
+    // a damaged cabin hanging over the street, swaying, someone pounding on the glass
+    if (has('lift')) {
+      const node = new BABYLON.TransformNode('stlift', sc); keep(node); node.position.set(G.x + fx * 9, 0, G.z + fz * 9);
+      const cab = box(2.2, 2.4, 2.2, (() => { const g = mat(sc, 'st_gl' + Math.random(), '#0a1a2a', null, .45); g.emissiveColor = C3('#19f0ff').scale(.15); g.backFaceCulling = false; S.objs.push(g); return g; })()); cab.parent = node; cab.position.y = 7;
+      const top = box(2.4, .25, 2.4, dark); top.parent = node; top.position.y = 8.3; const bot = box(2.4, .2, 2.4, dark); bot.parent = node; bot.position.y = 5.75;
+      const cable = keep(BABYLON.MeshBuilder.CreateCylinder('st', { diameter: .07, height: 30, tessellation: 6 }, sc)); cable.material = dark; cable.parent = node; cable.position.y = 23.4;
+      const spark = box(.08, .08, .08, em('sp', '#ffb238')); spark.parent = node; spark.position.set(1.1, 8.2, 0);
+      const vic = makeNpc({ name: 'Civilian', kind: 'human' }, 0, 0); vic.tag.dispose(); vic.root.parent = node; vic.root.position.set(0, 5.85, .3); vic.root.rotation.y = Math.PI + od.a; keep(vic.root);
+      S.lift = { node, cab, vic, spark };
+      S.walk = { x: G.x + fx * 7, z: G.z + fz * 7, speed: has('run') ? 5 : 1.8 };
+    }
+    // market stalls with awnings and lanterns lining the way
+    if (has('market')) for (let k = -3; k <= 3; k++) [-1, 1].forEach(sd => { const x = G.x + fx * k * 3.2 + rx * sd * 3.6, z = G.z + fz * k * 3.2 + rz * sd * 3.6; if (!air && solid(x, z)) return;
+      const st = box(2.2, 1, 1.4, dark); st.position.set(x, .5, z); st.rotation.y = od.a; const aw = box(2.6, .08, 1.9, em('aw', ['#ff2bd6', '#19f0ff', '#ffb238', '#3dffa8'][(k + 9 + sd) % 4])); aw.position.set(x, 2.3, z); aw.rotation.y = od.a; aw.rotation.z = sd * .15;
+      const ln = keep(BABYLON.MeshBuilder.CreateSphere('st', { diameter: .3, segments: 6 }, sc)); ln.material = em('ln', '#ff5a3d'); ln.position.set(x, 2, z); });
+    // drones circling ahead; gunfire picks them off one by one
+    if (has('drones') || (has('fire') && !L.enemies.some(e => e.state !== 'down' && Math.hypot(e.x - G.x, e.z - G.z) < 25))) {
+      for (let k = 0; k < 4; k++) { const d = new BABYLON.TransformNode('stdr', sc); keep(d); const b = keep(BABYLON.MeshBuilder.CreateSphere('st', { diameterX: .6, diameterY: .35, diameterZ: .7, segments: 8 }, sc)); b.material = dark; b.parent = d;
+        const ring = keep(BABYLON.MeshBuilder.CreateTorus('st', { diameter: 1, thickness: .05, tessellation: 18 }, sc)); ring.material = em('dr', '#ff3355'); ring.parent = d; const eye = keep(BABYLON.MeshBuilder.CreateSphere('st', { diameter: .16, segments: 6 }, sc)); eye.material = ring.material; eye.parent = d; eye.position.z = .32;
+        S.drones.push({ d, ph: k / 4 * Math.PI * 2, alive: true, vy: 0, y: 4 + k * .4 }); }
+    }
+    S.fire = has('fire'); S.hack = has('hack'); S.boom = has('boom'); S.jump = has('jump') || (S.ride && S.ride.bike); S.fall = has('fall') && !S.ride;
+    if (S.hack) { const ring = keep(BABYLON.MeshBuilder.CreateTorus('st', { diameter: .5, thickness: .03, tessellation: 24 }, sc)); ring.material = em('hk', '#3dffa8'); S.hring = ring;
+      if (/barrier/i.test(text)) { S.bars = []; for (let k = 0; k < 3; k++) { const b = box(3.4, 1.1, .25, em('bar', '#ffb238')); b.position.set(G.x + fx * (8 + k * 5), .55, G.z + fz * (8 + k * 5)); b.rotation.y = od.a + Math.PI / 2; S.bars.push(b); } } }
+    if (!S.ride && !S.walk && has('run')) S.walk = { x: G.x + fx * Math.min(14, od.len - 2), z: G.z + fz * Math.min(14, od.len - 2), speed: 5 };
+    return true;
+  }
+  function stageTick(dt, G) {
+    const S = L.stage; if (!S) return null; S.t += dt; const t = S.t; let cam = null, gy = 0, moving = false;
+    if (S.ride) { const R = S.ride, v = R.veh;
+      if (R.arrive && t < R.arrive) { const k = t / R.arrive; v.position.set(U.lerp(R.sx, G.x - R.seat.z * S.fx, k), R.alt + 0, U.lerp(R.sz, G.z - R.seat.z * S.fz, k)); if (S.jump && t > R.arrive - .5) gy = Math.sin((t - R.arrive + .5) / .5 * Math.PI / 2) * 1.6; }
+      else { const tt = t - R.arrive; v.position.addInPlace(V3(S.fx * R.speed * dt, 0, S.fz * R.speed * dt)); v.position.y = R.alt + (R.bike ? Math.min(2.5, tt * .8) + Math.sin(t * 3) * .1 : 0); v.rotation.z = Math.sin(t * 1.3) * .06;
+        const seat = BABYLON.Vector3.TransformCoordinates(R.seat, v.computeWorldMatrix(true)); G.x = seat.x; G.z = seat.z; gy = seat.y; G.root.rotation.y = S.home.yaw = Math.atan2(S.fx, S.fz); G.root.setEnabled(!R.hide); G.ridingPose = true; }
+      if (R.bike && t > R.arrive) { const rg = G.root.rig; rg.legL.rotation.x = rg.legR.rotation.x = -1.3; rg.kneeL.rotation.x = rg.kneeR.rotation.x = 1.4; }
+      const back = R.bike ? 5 : 7.5, vp = v.position; cam = { eye: V3(vp.x - S.fx * back + S.rx * 2.2, vp.y + 2.4, vp.z - S.fz * back + S.rz * 2.2), look: V3(vp.x + S.fx * 4, vp.y + 1, vp.z + S.fz * 4) }; }
+    if (S.ad) { const A = S.ad; A.ad.position.x = A.base.x + Math.sin(t * .4) * 1.2 * S.rx; A.ad.position.z = A.base.z + Math.sin(t * .4) * 1.2 * S.rz; A.frame.position.x = A.ad.position.x; A.frame.position.z = A.ad.position.z;
+      if (t > A.swap && !A.ad2.isVisible) { A.ad2.isVisible = true; A.ad.visibility = 0; A.ad2.visibility = 1; NV.Audio.sfx('glitch'); }
+      if (S.jump && !S.ride) { const k = Math.min(1, t / .9); G.x = U.lerp(S.home.x, A.ad.position.x, k); G.z = U.lerp(S.home.z, A.ad.position.z, k); gy = 4.7 * k + Math.sin(k * Math.PI) * 1.4; G.root.rotation.y = S.home.yaw; }
+      cam = cam || { eye: V3(S.home.x - S.fx * 3 - S.rx * 3, 3.2, S.home.z - S.fz * 3 - S.rz * 3), look: V3(A.ad.position.x, 3.2, A.ad.position.z) }; }
+    if (S.lift) { const Lf = S.lift; Lf.node.rotation.z = Math.sin(t * 1.4) * .05; Lf.node.rotation.x = Math.sin(t * .9) * .03; const rg = Lf.vic.root.rig; if (rg) { rg.armL.rotation.x = rg.armR.rotation.x = -2.6 + Math.abs(Math.sin(t * 7)) * .5; } Lf.spark.isVisible = Math.random() < .3;
+      cam = cam || { eye: V3(G.x - S.fx * 3 + S.rx * 1.5, 1.4, G.z - S.fz * 3 + S.rz * 1.5), look: V3(Lf.node.position.x, 6.4, Lf.node.position.z) }; }
+    if (S.walk && !S.ride) { const W = S.walk, dx = W.x - G.x, dz = W.z - G.z, d = Math.hypot(dx, dz); if (d > .3) { const st = Math.min(d, W.speed * dt), nx = G.x + dx / d * st, nz = G.z + dz / d * st; if (!solid(nx, nz) || L.map.roof) { G.x = nx; G.z = nz; moving = true; } G.root.rotation.y = Math.atan2(dx, dz); } }
+    if (S.jump && !S.ride && !S.ad) { const k = (t % 1.6) / .7; gy = k < 1 ? Math.sin(k * Math.PI) * 1.4 : 0; }
+    if (S.fall) gy = Math.max(-1.2, -t * 2);
+    S.drones.forEach((D, i) => { if (!D.alive) { D.vy -= 14 * dt; D.y = Math.max(.25, D.y + D.vy * dt); D.d.position.y = D.y; D.d.rotation.z += dt * 6; return; }
+      const a = D.ph + t * .8, cx = G.x + S.fx * 9, cz = G.z + S.fz * 9; D.d.position.set(cx + Math.cos(a) * 4, D.y + Math.sin(t * 2 + i) * .3, cz + Math.sin(a) * 4); D.d.rotation.y = a; });
+    if (S.fire) { S.fireT = (S.fireT || 0) - dt; if (S.fireT <= 0) { S.fireT = .32; const tg = S.drones.find(D => D.alive) || null, mz = V3(G.x + Math.sin(G.root.rotation.y) * .6, gy + 1.4, G.z + Math.cos(G.root.rotation.y) * .6);
+        const end = tg ? tg.d.position.clone() : mz.add(V3(S.fx * 20, .5, S.fz * 20)); tracer(mz, end); NV.Audio.sfx('shoot'); spark(end, '#ffb238', 8); if (tg && ++S.shots % 3 === 0) { tg.alive = false; boomFx(end.x, end.z, 1.2, 'frag'); }
+        const rg = G.root.rig; if (rg) { rg.armR.rotation.x = -1.5; rg.armL.rotation.x = -1.2; } } }
+    if (S.hack && S.hring) { const hx = G.x + Math.sin(G.root.rotation.y) * .5, hz = G.z + Math.cos(G.root.rotation.y) * .5; S.hring.position.set(hx, gy + 1.3 + Math.sin(t * 4) * .05, hz); S.hring.rotation.x = t * 3; S.hring.rotation.y = t * 2; const rg = G.root.rig; if (rg) rg.armL.rotation.x = -1.4;
+      if (S.bars) S.bars.forEach((b, k) => { if (t > .6 + k * .4) b.position.y = U.lerp(b.position.y, -.6, dt * 3); }); }
+    if (S.boom && !S.boomed && t > .6) { S.boomed = true; boomFx(G.x + S.fx * 10, G.z + S.fz * 10, 4, 'frag'); }
+    if (!cam && (S.drones.length || S.bars || S.boom)) cam = { eye: V3(G.x - S.fx * 4 + S.rx * 2, gy + 2.4, G.z - S.fz * 4 + S.rz * 2), look: V3(G.x + S.fx * 8, gy + 2.6, G.z + S.fz * 8) };
+    if (!cam && S.walk) cam = { eye: V3(G.x - S.fx * 4.5 + S.rx * 1.6, gy + 2.2, G.z - S.fz * 4.5 + S.rz * 1.6), look: V3(G.x + S.fx * 3, gy + 1.3, G.z + S.fz * 3) };
+    return { cam, gy, moving };
+  }
   function cineStart(o) {
     if (!L || !L.started) return;
     const p = L.p, G = cineGhost(), text = o.v || '', spk = o.s ? String(o.s).replace(/\s*\([^)]*\)\s*/g, ' ').trim() : null;
@@ -4955,8 +5066,11 @@ NV.Level = (() => {
     L.cineOff = 0;
     if (!was) { G.x = p.x; G.z = p.z; G.root.rotation.y = p.yaw; L.gunWas = L.gun.node.isEnabled(); L.gun.node.setEnabled(false); document.getElementById('hud').classList.add('cine'); document.body.classList.add('cine'); }
     G.root.setEnabled(true);
+    const staged = !spk && stageLine(text, G, partner);
+    if (staged) L.cine.shot = 'stage';
+    else if (L.stage && L.stage.cam !== false) L.cine.shot = L.cine.shot; // dialogue keeps the running set piece on screen
     // "Ghost steps onto / walks toward ..." — the avatar actually moves there
-    if (ghostActs && MOVE_RE.test(text)) {
+    if (!staged && ghostActs && MOVE_RE.test(text)) {
       const tgt = partner ? { x: partner.x, z: partner.z, stop: 1.7 } : { x: G.x + Math.sin(G.root.rotation.y) * 4, z: G.z + Math.cos(G.root.rotation.y) * 4, stop: .2 };
       L.cine.walk = tgt;
     }
@@ -4966,7 +5080,8 @@ NV.Level = (() => {
     if (!L || !L.cine) return;
     if (!now) { L.cineOff = .45; return; } // tiny grace so back-to-back lines don't snap the camera
     const G = L.ghost, p = L.p;
-    if (G) { p.x = G.x; p.z = G.z; p.yaw = G.root.rotation.y; G.root.setEnabled(false); }
+    if (L.stage) { const S = L.stage; if (G && (S.ride || S.ad || S.fall)) { G.x = S.home.x; G.z = S.home.z; } if (S.hidPartner) S.hidPartner.root.setEnabled(true); stageClear(); } // set pieces end with the player back on solid ground
+    if (G) { G.root.position.y = 0; G.ridingPose = false; p.x = G.x; p.z = G.z; p.yaw = G.root.rotation.y; G.root.setEnabled(false); }
     p.pitch = 0; L.cine = null; L.cineOff = 0; L.look.dx = L.look.dy = 0;
     if (L.gunWas) L.gun.node.setEnabled(true);
     L.cam.position.set(p.x, EYE, p.z); L.cam.rotation.set(0, p.yaw, 0);
@@ -4983,8 +5098,9 @@ NV.Level = (() => {
       if (d > C.walk.stop) { const st = Math.min(d - C.walk.stop, 1.6 * dt), nx = G.x + dx / d * st, nz = G.z + dz / d * st; if (!solid(nx, nz)) { G.x = nx; G.z = nz; moving = true; } else C.walk = null; G.root.rotation.y += U.angDiff(G.root.rotation.y, Math.atan2(dx, dz)) * Math.min(1, dt * 6); }
       else C.walk = null;
     } else if (C.partner) G.root.rotation.y += U.angDiff(G.root.rotation.y, Math.atan2(C.partner.x - G.x, C.partner.z - G.z)) * Math.min(1, dt * 4);
-    G.root.position.set(G.x, 0, G.z); L.p.x = G.x; L.p.z = G.z;
-    animRig(G.root.rig, dt, moving, 1.6, C.shot === 'ghost' ? 'talk' : null);
+    const ST = L.stage ? stageTick(dt, G) : null; if (ST && ST.moving) moving = true;
+    G.root.position.set(G.x, ST ? ST.gy : 0, G.z); L.p.x = G.x; L.p.z = G.z;
+    animRig(G.root.rig, dt, moving, ST && ST.moving ? 4 : 1.6, C.shot === 'ghost' ? 'talk' : null);
     // camera placement per shot type
     const P = C.partner, gh = V3(G.x, 1.62, G.z);
     let eye, look;
@@ -4999,6 +5115,7 @@ NV.Level = (() => {
       const mx = P ? (G.x + P.x) / 2 : G.x, mz = P ? (G.z + P.z) / 2 : G.z, rad = 5.5 + (P ? Math.hypot(P.x - G.x, P.z - G.z) * .5 : 0);
       eye = V3(mx + Math.cos(C.orbit) * rad, 3 + Math.sin(C.t * .2) * .3, mz + Math.sin(C.orbit) * rad); look = V3(mx, 1.2, mz);
     }
+    if (ST && ST.cam) { eye = ST.cam.eye; look = ST.cam.look; }
     // keep the camera out of walls: slide it toward the subject until it is in open space
     for (let i = 0; i < 12 && solid(eye.x, eye.z); i++) { eye.x += (look.x - eye.x) * .2; eye.z += (look.z - eye.z) * .2; }
     const k = C.cut ? 1 : Math.min(1, dt * 2.5); C.cut = false;
@@ -5382,7 +5499,7 @@ NV.Level = (() => {
   }
   return {
     start, get active() { return !!L; },
-    cardboardTap() { if (!L || L.paused || L.over || L.drive) return; if (L.hack || nearestInteract()) { interact(); return; } const I = NV.In; I.lmb = true; I.lmbHit = true; setTimeout(() => { I.lmb = false; }, 110); }, debug: () => L, devApi: () => ({ alertEnemy, addHeat, throwGrenade, carExplode, disable, ragdoll, shoot, launch, strike, hack, deploy, swing, armsSelect, beamTick }),
+    cardboardTap() { if (!L || L.paused || L.over || L.drive) return; if (L.hack || nearestInteract()) { interact(); return; } const I = NV.In; I.lmb = true; I.lmbHit = true; setTimeout(() => { I.lmb = false; }, 110); }, debug: () => L, devApi: () => ({ cineStart, cineStop, alertEnemy, addHeat, throwGrenade, carExplode, disable, ragdoll, shoot, launch, strike, hack, deploy, swing, armsSelect, beamTick }),
     stop() { if (L) end({ done: true }); },
     event: aptEvent,
     applyQuality() { if (!L) return; NV.Quality.teardown(L.fx); L.fx = NV.Quality.setup(L.scene, L.cam); const q = NV.Quality.get(); L.cam.maxZ = q.draw; },
