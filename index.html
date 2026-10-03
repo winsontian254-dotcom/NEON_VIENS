@@ -4866,22 +4866,22 @@ NV.Level = (() => {
     const sky = own(BABYLON.MeshBuilder.CreateSphere('wvsky', { diameter: 1600, segments: 12, sideOrientation: BABYLON.Mesh.BACKSIDE }, s)); const skm = mat(s, 'wvskym', '#000'); skm.emissiveTexture = NV.citySky(s); skm.disableLighting = true; skm.fogEnabled = false; sky.material = skm;
     // towers with lit facades (three palettes), Helix Tower on the horizon
     // towers in three depth layers: near ones show fine windows, far ones fade into the haze (atmospheric perspective)
-    const r = U.rng(4711), LAY = [{ z0: -50, z1: -150, h0: 18, h1: 55, lvl: 1.25, u: 3, v: 4, n: 34 }, { z0: -150, z1: -300, h0: 40, h1: 115, lvl: .8, u: 2, v: 3, n: 44 }, { z0: -300, z1: -470, h0: 70, h1: 210, lvl: .42, u: 1.4, v: 2.2, n: 46 }];
+    const r = U.rng(4711), LAY = [{ z0: -70, z1: -160, h0: 20, h1: 60, lvl: .95, u: 7, v: 10, n: 16 }, { z0: -170, z1: -320, h0: 40, h1: 95, lvl: .55, u: 4, v: 6, n: 26 }, { z0: -330, z1: -480, h0: 60, h1: 150, lvl: .28, u: 2.5, v: 4, n: 34 }];
     const facTex = NV.tex(s, 64, 128, (g, w, h) => { const rr = U.rng(907); g.fillStyle = '#0f0b1e'; g.fillRect(0, 0, w, h); const hues = ['#ff86d8', '#8fd8ff', '#ffd08a', '#7f9cff'];
       for (let y = 2; y < h; y += 8) { const floorLit = rr() < .9; for (let x = 1; x < w; x += 8) { if (!floorLit || rr() < .14) continue; g.fillStyle = rr() < .08 ? '#ffffff' : hues[Math.floor(rr() * hues.length)]; g.globalAlpha = .55 + rr() * .45; g.fillRect(x, y, 6, 5); } } g.globalAlpha = 1;
       g.fillStyle = 'rgba(0,0,0,.55)'; for (let y = 0; y < h; y += 32) g.fillRect(0, y, w, 2); }, 'wvfac', true);
     const blds = [];
     LAY.forEach((Ly, li) => { const arr = [];
-      for (let i = 0, n = 0; n < Ly.n && i < 400; i++) { const z = Ly.z0 + (Ly.z1 - Ly.z0) * r(), x = (r() - .5) * (140 + -z * 1.5), w = 12 + r() * 20, d = w * (.7 + r() * .6), h = Ly.h0 + r() * (Ly.h1 - Ly.h0); if (li === 0 && Math.abs(x) < 46) continue; n++;
+      for (let i = 0, n = 0; n < Ly.n && i < 400; i++) { const z = Ly.z0 + (Ly.z1 - Ly.z0) * r(), x = (r() - .5) * (140 + -z * 1.5), w = 12 + r() * 20, d = w * (.7 + r() * .6), h = Ly.h0 + r() * (Ly.h1 - Ly.h0); if ((li === 0 && Math.abs(x) < 75) || (li === 1 && Math.abs(x) < 25) || blds.some(o => o.li === li && Math.abs(o.x - x) < (o.w + w) / 2 + 6 && Math.abs(o.z - z) < (o.d + d) / 2 + 6)) continue; n++;
         arr.push(NV.M(w, h, d, x, h / 2 - 10, z)); blds.push({ x, z, w, d, h, li }); }
       const b = own(BABYLON.MeshBuilder.CreateBox('wvb' + li, { size: 1 }, s)); const m = mat(s, 'wvbm' + li, '#06040c'); const t = facTex.clone(); t.uScale = Ly.u; t.vScale = Ly.v; t.level = Ly.lvl; m.emissiveTexture = t;
       m.emissiveColor = C3(['#120a20', '#180c2c', '#22113a'][li]); m.disableLighting = true; m.fogEnabled = false; b.material = m; NV.thin(b, arr);
       // rooftop neon trim on the near and mid layers gives every silhouette a readable edge
       if (li < 2) { const tr = own(BABYLON.MeshBuilder.CreateBox('wvtr' + li, { size: 1 }, s)); tr.material = em('trim' + li, li ? '#ff2bd6' : '#19f0ff'); NV.thin(tr, blds.filter(o => o.li === li && r() < .6).map(o => NV.M(o.w + .4, .6, o.d + .4, o.x, o.h - 10 + .3, o.z))); } });
     // haze sheets between the layers: purple light pollution that swallows the distance
-    const hazeTex = NV.tex(s, 8, 256, (g, w, h) => { const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(.55, 'rgba(120,40,140,.35)'); gr.addColorStop(1, 'rgba(200,70,140,.75)'); g.fillStyle = gr; g.fillRect(0, 0, w, h); }, 'wvhaze');
+    const hazeTex = NV.tex(s, 8, 256, (g, w, h) => { const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(.4, 'rgba(90,30,120,.45)'); gr.addColorStop(1, 'rgba(190,60,140,.9)'); g.fillStyle = gr; g.fillRect(0, 0, w, h); }, 'wvhaze');
     hazeTex.hasAlpha = true;
-    [-150, -300, -460].forEach((z, k) => { const pl = own(BABYLON.MeshBuilder.CreatePlane('wvhz', { width: 1400, height: 160 + k * 40 }, s)); pl.position.set(0, 50 + k * 15, z + 8); const m = mat(s, 'wvhzm' + k, '#000'); m.emissiveTexture = hazeTex; m.opacityTexture = hazeTex; m.disableLighting = true; m.fogEnabled = false; m.alpha = .55 + k * .1; m.backFaceCulling = false; pl.material = m; });
+    [-150, -300, -460].forEach((z, k) => { const pl = own(BABYLON.MeshBuilder.CreatePlane('wvhz', { width: 1400, height: 160 + k * 40 }, s)); pl.position.set(0, 50 + k * 15, z + 8); const m = mat(s, 'wvhzm' + k, '#000'); m.emissiveTexture = hazeTex; m.opacityTexture = hazeTex; m.disableLighting = true; m.fogEnabled = false; m.alpha = .85; m.backFaceCulling = false; pl.material = m; });
     // the streets far below glow through the haze
     const street = own(BABYLON.MeshBuilder.CreateGround('wvst', { width: 1400, height: 600 }, s)); street.position.set(0, -10, -260);
     const stM = mat(s, 'wvstm', '#000'); stM.emissiveTexture = NV.tex(s, 256, 256, (g, w, h) => { g.fillStyle = '#0a0614'; g.fillRect(0, 0, w, h); g.strokeStyle = 'rgba(255,90,180,.55)'; g.lineWidth = 3; for (let k = 0; k < w; k += 32) { g.beginPath(); g.moveTo(k, 0); g.lineTo(k, h); g.stroke(); } g.strokeStyle = 'rgba(255,190,90,.5)'; for (let k = 0; k < h; k += 32) { g.beginPath(); g.moveTo(0, k); g.lineTo(w, k); g.stroke(); } }, 'wvsttex', true);
@@ -4906,10 +4906,10 @@ NV.Level = (() => {
     const beamM = em('wvbeam', '#9fe8ff'); beamM.alpha = .07; beamM.alphaMode = BABYLON.Engine.ALPHA_ADD; beamM.backFaceCulling = false;
     const lights = [0, 1, 2].map(k => { const c = own(BABYLON.MeshBuilder.CreateCylinder('wvsl', { diameterTop: 30, diameterBottom: 1.5, height: 320, tessellation: 12, cap: BABYLON.Mesh.NO_CAP }, s)); c.material = beamM; c.setPivotPoint(V3(0, -160, 0)); c.position.set(-120 + k * 120, 100, -260); return { c, ph: k * 2 }; });
     // rain streaking past the glass, close to the camera
-    const rainM = em('wvrain', '#aac8ff'); rainM.alpha = .35; rainM.alphaMode = BABYLON.Engine.ALPHA_ADD;
-    const drops = []; for (let i = 0; i < 70; i++) { const d = own(BABYLON.MeshBuilder.CreateBox('wvd', { width: .03, height: 1.4, depth: .03 }, s)); d.material = rainM; drops.push({ d, x: (r() - .5) * 24, y: r() * 20, z: 6 - r() * 14, sp: 26 + r() * 10 }); }
+    const rainM = em('wvrain', '#aac8ff'); rainM.alpha = .18; rainM.alphaMode = BABYLON.Engine.ALPHA_ADD;
+    const drops = []; for (let i = 0; i < 70; i++) { const d = own(BABYLON.MeshBuilder.CreateBox('wvd', { width: .015, height: .7, depth: .015 }, s)); d.material = rainM; drops.push({ d, x: (r() - .5) * 30, y: r() * 20, z: -4 - r() * 14, sp: 26 + r() * 10 }); }
     // the camera behind the glass + render target
-    const cam = new BABYLON.FreeCamera('wvcam', V3(0, Y + 86, 20), s); cam.layerMask = LAYER; cam.fov = .75; cam.minZ = .5; cam.maxZ = 2000; cam.setTarget(V3(0, Y + 90, -220));
+    const cam = new BABYLON.FreeCamera('wvcam', V3(0, Y + 100, 20), s); cam.layerMask = LAYER; cam.fov = .75; cam.minZ = .5; cam.maxZ = 2000; cam.setTarget(V3(0, Y + 112, -220));
     const size = ['ultra', 'veryhigh', 'high'].includes(q.key) ? 1024 : 512;
     const rtt = new BABYLON.RenderTargetTexture('wvrtt', { width: size, height: size / 2 }, s, false); rtt.activeCamera = cam; rtt.renderList = all; rtt.refreshRate = q.key === 'potato' || q.key === 'verylow' ? 2 : 1; rtt.clearColor = new BABYLON.Color4(.02, .01, .04, 1);
     s.customRenderTargets.push(rtt);
@@ -4921,7 +4921,7 @@ NV.Level = (() => {
     const W = L.liveWin; if (!W) return; W.t += dt; const t = W.t, p = L.p;
     // parallax: the view shifts as you move around the room
     const ox = U.clamp((p.x - 12) * 1.6, -14, 14), oz = U.clamp((p.z - 10) * .8, -6, 6);
-    W.cam.position.set(ox, W.Y + 86 + (p.crouch ? -1.2 : 0), 20 + oz); W.cam.setTarget(V3(ox * .4, W.Y + 90, -220));
+    W.cam.position.set(ox, W.Y + 100 + (p.crouch ? -1.2 : 0), 20 + oz); W.cam.setTarget(V3(ox * .4, W.Y + 112, -220));
     W.cars.forEach(c => { c.x += c.dir * c.sp * dt; if (c.x > 220) c.x = -220; if (c.x < -220) c.x = 220; c.n.position.set(c.x, c.lane + Math.sin(t + c.z) * .4, c.z); });
     W.ads.forEach(a => { a.t += dt; if (a.t > 4.5) { a.t = 0; a.f = (a.f + 1) % 4; a.pl.material = W.adMats[a.f]; a.g = .25; } a.pl.visibility = a.g > 0 ? (a.g -= dt, Math.random() < .5 ? .3 : 1) : 1; });
     W.lights.forEach(l => { l.c.rotation.z = Math.sin(t * .35 + l.ph) * .45; l.c.rotation.x = Math.cos(t * .27 + l.ph) * .2; });
