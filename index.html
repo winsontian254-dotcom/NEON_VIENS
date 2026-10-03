@@ -5283,7 +5283,7 @@ NV.Level = (() => {
       let a = L.netAv.get(pr.id);
       if (!a) {
         const npc = makeNpc({ name: pr.char, kind: 'human' }, s.x, s.z); npc.tag.dispose();
-        npc.tag = nameTag(pr.char + ' · ' + pr.name, NV.speakerInfo(pr.char).c || '#19f0ff'); npc.tag.parent = npc.root; npc.tag.position.y = 2.3;
+        npc.tag = nameTag(pr.name, NV.speakerInfo(pr.char).c || '#19f0ff'); npc.tag.parent = npc.root; npc.tag.position.y = 2.3;
         a = { npc, car: null, id: pr.id }; L.netAv.set(pr.id, a);
       }
       const n = a.npc, k = Math.min(1, dt * 10), ox = n.x, oz = n.z;
@@ -5309,7 +5309,7 @@ NV.Level = (() => {
   function chatShow(id, text) {
     const me = id === NV.Net.id, pr = me ? NV.Net.me : NV.Net.peers.get(id); if (!pr) return;
     const col = NV.speakerInfo(pr.char).c || '#19f0ff', log = document.querySelector('#hud .chatlog');
-    if (log) { const d = U.el('div', '', `<b style="color:${col}">${U.esc(pr.char)}</b> <span class="muted">(${U.esc(pr.name)})</span> ${U.esc(text)}`); log.appendChild(d); while (log.children.length > 7) log.firstChild.remove(); setTimeout(() => d.classList.add('old'), 14000); }
+    if (log) { const d = U.el('div', '', `<b style="color:${col}">${U.esc(pr.name)}</b> ${U.esc(text)}`); log.appendChild(d); while (log.children.length > 7) log.firstChild.remove(); setTimeout(() => d.classList.add('old'), 14000); }
     const a = !me && L.netAv && L.netAv.get(id);
     if (a) { if (a.bubble) a.bubble.dispose(); a.bubble = nameTag('“' + (text.length > 34 ? text.slice(0, 33) + '…' : text) + '”', col); a.bubble.parent = a.npc.root; a.bubble.position.y = 2.75; a.bubbleT = 7; }
     NV.Voice.speak(pr.char, text); // spoken in the character's voice
@@ -5695,16 +5695,16 @@ NV.Net = (() => {
     switch (msg.t) {
       case 'welcome': N.id = msg.id; N.pvp = !!msg.pvp; msg.players.forEach(p => N.peers.set(p.id, Object.assign({ st: null }, p))); if (N._welcome) N._welcome(); return;
       case 'join': if (msg.id !== N.id) { const p = { id: msg.id, name: msg.name, char: msg.char, st: null }; N.peers.set(p.id, p); joined(p); } return;
-      case 'leave': { const p = N.peers.get(msg.id); if (p) { N.peers.delete(msg.id); NV.toast('PLAYER LEFT', p.name + ' (' + p.char + ')', '#8a84b3', 3); } return; }
+      case 'leave': { const p = N.peers.get(msg.id); if (p) { N.peers.delete(msg.id); NV.toast('PLAYER LEFT', p.name, '#8a84b3', 3); } return; }
       case 'st': { const p = N.peers.get(msg.from); if (p) { p.st = msg; p.at = performance.now(); } return; }
       default: if (NV.Level.net) NV.Level.net(msg);
     }
   }
-  function joined(p) { NV.toast('PLAYER JOINED', p.name + ' as ' + p.char, '#3dffa8', 3); NV.Audio.sfx('unlock'); }
+  function joined(p) { NV.toast('PLAYER JOINED', p.name, '#3dffa8', 3); NV.Audio.sfx('unlock'); }
   function drop(conn) {
     conns = conns.filter(c => c !== conn); if (conn.pid == null) return;
     const p = N.peers.get(conn.pid); N.peers.delete(conn.pid); send({ t: 'leave', id: conn.pid, from: 0 });
-    if (p) NV.toast('PLAYER LEFT', p.name + ' (' + p.char + ')', '#8a84b3', 3);
+    if (p) NV.toast('PLAYER LEFT', p.name, '#8a84b3', 3);
   }
   N.send = m => send(m);
   N.hostGame = async (me, pvp) => {
@@ -6492,7 +6492,7 @@ NV.UI = (() => {
   UI.players = () => new Promise(res => {
     const N = NV.Net, list = [{ name: N.me.name, char: N.me.char, you: 1, host: N.isHost }].concat([...N.peers.values()].map(p => ({ name: p.name, char: p.char, host: p.id === 0 })));
     const m = modal(`<div class="stitle">PLAYERS</div><p style="font-size:15px;margin-bottom:8px">Join code: <b style="font-family:var(--fm);font-size:26px;letter-spacing:.2em;color:var(--amber)">${U.esc(N.code)}</b></p><p class="muted" style="font-size:13px;margin-bottom:12px">Friends open Neon Veins → Multiplayer → type this code. Friendly fire: ${N.pvp ? 'ON' : 'off'}.</p>` +
-      list.map(p => `<div class="row"><span><b style="color:${NV.speakerInfo(p.char).c || '#19f0ff'}">${U.esc(p.char)}</b> — ${U.esc(p.name)}</span><span class="val">${p.you ? 'YOU' : ''}${p.host ? ' HOST' : ''}</span></div>`).join('') + '<button class="btn" style="margin-top:12px">Back</button>', true);
+      list.map(p => `<div class="row"><span><b style="color:#19f0ff">${U.esc(p.name)}</b></span><span class="val">${p.you ? 'YOU' : ''}${p.host ? ' HOST' : ''}</span></div>`).join('') + '<button class="btn" style="margin-top:12px">Back</button>', true);
     const fin = () => { UI.pop(h); m.remove(); res(); };
     const h = UI.push(nav([m.querySelector('.btn')], { select: fin, back: fin }));
   });
@@ -6505,25 +6505,22 @@ NV.UI = (() => {
     const h = UI.push(nav(b, { select: k => fin(list[k] || null), back: () => fin(null) }));
   });
   UI.multiplayer = () => new Promise(res => {
-    const chars = [...new Set(NV.Voices.listProfiles().map(p => p.name).filter(n => n !== 'Narrator'))].sort();
     let saved = {}; try { saved = JSON.parse(localStorage.getItem('nv_mp') || '{}'); } catch (e) { }
     const m = modal(`<div class="stitle">MULTIPLAYER</div>
-      <p class="muted" style="font-size:14px;margin:-6px 0 12px;line-height:1.5">Peer-to-peer over the internet with one join code. No story — just New Avalon's open world and co-op missions. Role-play as anyone from the script; your chat is spoken in their voice.</p>
+      <p class="muted" style="font-size:14px;margin:-6px 0 12px;line-height:1.5">Peer-to-peer over the internet with one join code. Co-op only: no story — team up in New Avalon's open world and take on co-op missions together.</p>
       <div class="mpf">
         <label>Your name<input class="mpname" maxlength="20" autocomplete="off"></label>
-        <label>Play as<select class="mpchar">${chars.map(c => `<option>${U.esc(c)}</option>`).join('')}</select></label>
-        <label class="chk"><input type="checkbox" class="mppvp"> Friendly fire (host setting)</label>
       </div>
       <button class="btn mphost">Host a game<small>You get a 6-character join code to share</small></button>
       <div class="mpjoin"><input class="mpcode" maxlength="6" placeholder="JOIN CODE" autocomplete="off"><button class="btn mpjoinb">Join</button></div>
       <div class="mpstat"></div>
       <button class="btn mpback">Back</button>`);
     const $ = q => m.querySelector(q), stat = t => $('.mpstat').textContent = t;
-    $('.mpname').value = saved.name || 'Runner-' + (100 + Math.floor(Math.random() * 900)); $('.mpchar').value = chars.includes(saved.char) ? saved.char : (chars.includes('Ghost') ? 'Ghost' : chars[0]);
-    const me = () => { const v = { name: $('.mpname').value.trim().slice(0, 20) || 'Runner', char: $('.mpchar').value }; try { localStorage.setItem('nv_mp', JSON.stringify(v)); } catch (e) { } return v; };
+    $('.mpname').value = saved.name || 'Runner-' + (100 + Math.floor(Math.random() * 900));
+    const me = () => { const v = { name: $('.mpname').value.trim().slice(0, 20) || 'Runner', char: 'Ghost' }; try { localStorage.setItem('nv_mp', JSON.stringify(v)); } catch (e) { } return v; };
     let busy = false;
     const go = async (fn, what) => { if (busy) return; busy = true; stat(what); try { await fn(); fin(true); } catch (e) { stat(e.message || String(e)); NV.Audio.sfx('hackfail'); } busy = false; };
-    $('.mphost').onclick = () => go(() => NV.Net.hostGame(me(), $('.mppvp').checked), 'Opening a session…');
+    $('.mphost').onclick = () => go(() => NV.Net.hostGame(me(), false), 'Opening a session…');
     $('.mpjoinb').onclick = () => go(() => NV.Net.joinGame($('.mpcode').value, me()), 'Connecting…');
     $('.mpcode').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') $('.mpjoinb').onclick(); });
     $('.mpname').addEventListener('keydown', e => e.stopPropagation());
