@@ -2917,8 +2917,11 @@ NV.Level = (() => {
     if (L.boss && L.boss.hp > 0) { const B2 = L.boss; const t = test(B2.x, 2.2, B2.z, B2.shieldOn ? 2.6 : 1.1); if (t > 0 && t < tEnd) { tEnd = t; bossHit = true; pierced.length = 0; } }
     let pHit = null, pHead = false;
     if (netOn() && NV.Net.pvp && L.netAv) L.netAv.forEach(a => { if (a.car) return; const n = a.npc; [[1.8, .26, true], [1.25, .5, false], [.6, .45, false]].forEach(([yy, rad, hd]) => { const t = test(n.x, yy, n.z, rad); if (t > 0 && t < tEnd) { tEnd = t; pHit = a; pHead = hd; pierced.length = 0; bossHit = false; } }); });
+    let nHit = null; // pedestrians and story characters stop bullets too
+    npcTargets().forEach(t => [[1.6, .3], [1.05, .45]].forEach(([yy, rad]) => { const tt = test(t.o.x, yy, t.o.z, rad); if (tt > 0 && tt < tEnd) { tEnd = tt; nHit = t; pierced.length = 0; bossHit = false; pHit = null; } }));
     const end = o.add(d.scale(tEnd)), muzzle = L.gun.node.getAbsolutePosition().add(d.scale(.5));
     tracer(echo ? muzzle.add(V3(.6, .3, 0)) : muzzle, end);
+    if (nHit) { hitNpc(nHit, d.x, d.z, 3 + Math.min(6, w.dmg * .08)); spark(end, '#ff5a3d', 12); flashX(); NV.Audio.sfx('hit'); }
     if (netOn()) NV.Net.send({ t: 'shot', a: [muzzle.x, muzzle.y, muzzle.z].map(v => +v.toFixed(2)), b: [end.x, end.y, end.z].map(v => +v.toFixed(2)), lvl: L.netKey });
     if (pHit) { NV.Net.send({ t: 'hit', to: pHit.id, dmg: Math.min(60, w.dmg * .5) * (pHead ? 2 : 1), lvl: L.netKey }); spark(end, '#ff5a3d', 12); flashX(); }
     const dm = dmgMulOf() * (echo ? .6 : 1) * (L.arms.crit || 1);
@@ -2926,7 +2929,27 @@ NV.Level = (() => {
     pierced.forEach(h => { const dmgN = w.dmg * dm * (h.head ? w.head || 2 : 1); floater(String(Math.round(dmgN)), h.e.x, h.head ? 2.1 : 1.5, h.e.z, h.head ? 'hd' : '', .8); if (h.head) { const xh = document.querySelector('#hud .xh'); if (xh) { xh.classList.add('kill'); clearTimeout(xh._k); xh._k = setTimeout(() => xh.classList.remove('kill'), 140); } }
       weaponHit(h.e, w.dmg * dm * (h.head ? w.head || 2 : 1), w, h.head, w.cat === 'sniper' || w.pellets > 1 ? { x: d.x * 5, y: 2.5, z: d.z * 5 } : null); spark(o.add(d.scale(h.t)), h.head ? '#ffffff' : w.col[1], h.head ? 22 : 12); flashX(); });
     if (bossHit) { const B2 = L.boss; if (B2.shieldOn) { spark(end, '#19f0ff', 10); NV.Audio.sfx('shield'); } else { const dd = w.dmg * dm * (w.emp ? 1.3 : 1) * (w.pen != null ? .6 + w.pen * .008 : 1) * (w.siege ? 1.4 : 1) * (w.bastion ? 1.3 : 1); B2.hp -= dd; if (netOn()) NV.Net.send({ t: 'boss', d: dd, lvl: L.netKey }); spark(end, '#ff5a3d', 16); flashX(); NV.Audio.sfx('hit'); if (B2.hp <= 0) bossDown(); } }
-    if (!pierced.length && !bossHit && !pHit) spark(end, null, 6);
+    if (!pierced.length && !bossHit && !pHit && !nHit) spark(end, null, 6);
+  }
+  // bare-handed shove/punch: knocks over whoever is right in front of you
+  function punch() {
+    const p = L.p; if (p.cd > 0) return; p.cd = .45; NV.Audio.sfx('dash'); shake(.05);
+    const fx = Math.sin(p.yaw), fz = Math.cos(p.yaw); let any = false;
+    npcTargets().forEach(t => { const dx = t.o.x - p.x, dz = t.o.z - p.z, d = Math.hypot(dx, dz); if (d > 1.9 || (dx * fx + dz * fz) / (d || 1) < .55) return; any = true; hitNpc(t, fx, fz, 3.5); spark(V3(t.o.x, 1.3, t.o.z), '#ffffff', 8); });
+    if (!L.calm) L.enemies.forEach(e => { if (e.state === 'down' || e.drone) return; const dx = e.x - p.x, dz = e.z - p.z, d = Math.hypot(dx, dz); if (d > 1.9 || (dx * fx + dz * fz) / (d || 1) < .55) return; any = true; weaponHit(e, 12 * dmgMulOf(), { name: 'Fists', dmg: 12, type: 'melee', col: ['#fff', '#fff'] }, false, { x: fx * 2.5, y: 1.5, z: fz * 2.5 }); });
+    if (any) { NV.Audio.sfx('hit'); shake(.15); flashX(); }
+  }
+  // everyone in the world can be hit: pedestrians and story characters get knocked over and get back up
+  function npcTargets() {
+    const a = [];
+    (L.peds || []).forEach(pd => { if (!pd.rag) a.push({ o: pd, root: pd.root, rig: pd.rig, ped: true }); });
+    (L.npcs || []).forEach(n => { if (!n.rag && n.root.isEnabled()) a.push({ o: n, root: n.root, rig: n.root.rig, ai: !!n.root.spin }); });
+    return a;
+  }
+  function hitNpc(t, dx, dz, force) {
+    if (t.ai) { spark(V3(t.o.x, 1.5, t.o.z), '#19f0ff', 14); NV.Audio.sfx('shield'); return; } // holograms just flicker
+    ragdoll(t.o, t.root, t.rig, dx * force, 2 + force * .4, dz * force, false); shakeNear(t.o, .1);
+    if (t.ped) { L.peds.forEach(pd => { if (!pd.rag && Math.hypot(pd.x - t.o.x, pd.z - t.o.z) < 25) pd.scare = 8; }); addHeat(.6, 'Civilian assaulted'); }
   }
   function beamTick(w, dt) {
     const p = L.p; if (p.over > 0) return; if (!spend(w, .12 * dt)) return;
@@ -2949,6 +2972,7 @@ NV.Level = (() => {
         const unaware = e.state === 'patrol' || e.state === 'sus'; // blades are silent: an unaware target goes down in one hit
         if (unaware) { L.arms.lastW = w; L.arms.lastT = L.time; disable(e, !!w.stun, { x: fx * 2, y: 1, z: fz * 2 }); L.stats.takedowns++; } else weaponHit(e, w.dmg * dmgMulOf() * pm, w, false, { x: fx * 4, y: 2.5, z: fz * 4 });
         spark(V3(e.x, 1.2, e.z), w.col[1], 14); });
+      npcTargets().forEach(t => { const dx = t.o.x - p.x, dz = t.o.z - p.z, d = Math.hypot(dx, dz); if (d > w.range + .4 || (dx * fx + dz * fz) / (d || 1) < .5) return; any = true; hitNpc(t, fx, fz, 5 * pm); spark(V3(t.o.x, 1.2, t.o.z), w.col[1], 12); });
       if (L.boss && L.boss.hp > 0 && !L.boss.shieldOn && Math.hypot(L.boss.x - p.x, L.boss.z - p.z) < w.range + 1) { L.boss.hp -= w.dmg * 1.2; any = true; if (L.boss.hp <= 0) bossDown(); }
       if (any) { NV.Audio.sfx('hit'); shake(.2); flashX(); }
     }, 90);
@@ -3524,8 +3548,9 @@ NV.Level = (() => {
     if (!L.calm) updateArms(dt);
     if (!hacking && !L.calm && !L.drive) {
       if (L.arms.cur) useWeapon(L.arms.cur, dt);
+      else if (I.lmbHit || (I.pad && I.padHit(7))) punch(); // unarmed: fists
       if (I.hit('KeyQ') || I.padHit(3)) emp();
-    }
+    } else if (L.calm && L.npcs && !hacking && (I.lmbHit || (I.pad && I.padHit(7)))) punch(); // story scenes: no weapons, but you can still shove people
     const carKey = L.city && !hacking && (I.hit('KeyF') || (NV.Touch.active && I.hit('KeyE') && !nearestInteract()) || (I.padHit(2) && (L.drive || !nearestInteract())));
     if (carKey && (L.drive || nearestCar())) toggleCar();
     else if (I.hit('KeyE') || I.hit('KeyF') || I.padHit(2) || (hacking && I.lmbHit)) interact();
@@ -4722,7 +4747,8 @@ NV.Level = (() => {
       const far = Math.abs(pd.x - p.x) + Math.abs(pd.z - p.z) > 110;
       if (Math.abs(pd.x - p.x) + Math.abs(pd.z - p.z) > 180) pedPlace(pd, 60, 120);
       if (far) return;
-      const scared = panic && Math.hypot(pd.x - p.x, pd.z - p.z) < 30;
+      if (pd.scare > 0) pd.scare -= dt;
+      const scared = (panic && Math.hypot(pd.x - p.x, pd.z - p.z) < 30) || pd.scare > 0;
       let walking = d >= .3;
       if (!walking) walking = pedTarget(pd, scared);
       else { const sp = pd.sp * (scared ? 2.6 : pd.crossing ? 1.3 : 1) * dt; pd.x += dx / d * Math.min(d, sp); pd.z += dz / d * Math.min(d, sp); pd.root.rotation.y = Math.atan2(dx, dz); }
@@ -5054,6 +5080,12 @@ NV.Level = (() => {
   function updateNpcs(dt) {
     const p = L.p;
     L.npcs.forEach(n => {
+      if (n.rag) { // knocked over: lie there a moment, then stand back up where they landed
+        ragStep(n, n.root, n.root.rig, dt); if (!n.rag.rest || n.rag.t < 3) return;
+        n.rag = null; n.root.rotation.set(0, n.root.rotation.y, 0); n.root.position.set(n.x, 0, n.z);
+        const R = n.root.rig; if (R) ['armL', 'armR', 'legL', 'legR', 'kneeL', 'kneeR', 'elbowL', 'elbowR'].forEach(k => { if (R[k]) R[k].rotation.set(0, 0, 0); });
+        return;
+      }
       const d = Math.hypot(p.x - n.x, p.z - n.z);
       if (d < 9) n.root.rotation.y += U.angDiff(n.root.rotation.y, Math.atan2(p.x - n.x, p.z - n.z)) * Math.min(1, dt * 3);
       if (n.root.spin) { n.root.spin.rotation.y += dt; n.root.position.y = .2 + Math.sin(L.time * 2 + n.ph) * .08; }
