@@ -2264,6 +2264,22 @@ NV.Level = (() => {
         const w2 = R.shape.w * TILE / 2, h2 = R.shape.h * TILE / 2; NV.thin(edge, [NV.M(w2 * 2, .12, .12, R.cx, .3, R.cz - h2), NV.M(w2 * 2, .12, .12, R.cx, .3, R.cz + h2), NV.M(.12, .12, h2 * 2, R.cx - w2, .3, R.cz), NV.M(.12, .12, h2 * 2, R.cx + w2, .3, R.cz)]); statics.push(edge);
       }
     }
+    if (L.map.apt) { // the apartment hangs inside a real city tower: the window looks out over the actual streets
+      const keep = L.map, P = NV.CityPlan(), cand = P.buildings.filter(b => b.ht > 55 && !b.tilt && b.y > 2 && P.g[b.y - 1][b.x + (b.w >> 1)] === 0 && P.g[b.y - 2] && P.g[b.y - 2][b.x + (b.w >> 1)] === 0);
+      const B = cand.filter(b => b.ht > 70 && b.ht < 150 && !/helix/.test(b.d) && P.buildings.every(o => o === b || o.y + o.h <= b.y - 4 || o.y >= b.y || o.x + o.w <= b.x - 2 || o.x >= b.x + b.w + 2 || o.ht < b.ht - 30)).sort((a, b) => b.ht - a.ht)[0] || cand.sort((a, b) => b.ht - a.ht)[0]; // a tall tower with a clear view over the street
+      if (B) {
+        const n0 = scene.meshes.length, t0 = scene.transformNodes.length, saveSig = L.sig;
+        L.map = genCity(); L._aptBuild = true; L.map.buildings = L.map.buildings.filter(b => b !== B); // the host tower is replaced by the apartment's own walls
+        cityMeshes(scene, statics, pal, []); L._aptBuild = false; L.map = keep; L.sig = saveSig || null;
+        const hgt = Math.min(110, Math.max(30, B.ht - 12)), root = new BABYLON.TransformNode('cityAround', scene); root.position.set(12 - (B.x + B.w / 2) * TILE, -hgt, 8 - B.y * TILE);
+        root.computeWorldMatrix(true);
+        scene.meshes.slice(n0).forEach(m => { if (!m.parent) m.parent = root; const fz = m.isWorldMatrixFrozen; if (fz) m.unfreezeWorldMatrix(); m.doNotSyncBoundingInfo = false; m.computeWorldMatrix(true); if (m.hasThinInstances) m.thinInstanceRefreshBoundingInfo(false); m.computeWorldMatrix(true); m.alwaysSelectAsActiveMesh = true; if (fz) m.freezeWorldMatrix(); }); // bounds must follow the move or the city gets culled scene.transformNodes.slice(t0).forEach(t => { if (!t.parent && t !== root) t.parent = root; });
+        L.aptHole = { x0: 8, x1: 16, z: 8, root, B, hgt };
+        floor.scaling.set(8 / (W * TILE), 1, 12 / (H * TILE)); floor.position.set(12, 0, 14); // the floor ends at the window: no slab sticking out over the street
+        const dome = BABYLON.MeshBuilder.CreateSphere('aptsky', { diameter: 2400, segments: 12, sideOrientation: BABYLON.Mesh.BACKSIDE }, scene); const dm = mat(scene, 'aptskym', '#000'); dm.emissiveTexture = NV.citySky(scene); dm.disableLighting = true; dm.fogEnabled = false; dome.material = dm; dome.infiniteDistance = true; glow.addExcludedMesh(dome);
+        scene.fogDensity = .0035; scene.fogColor = C3('#14061f'); cam.maxZ = Math.max(q.draw, 1500);
+      }
+    }
     if (L.map.void) { // one small platform floating in nothing
       floor.isVisible = false;
       const pf = BABYLON.MeshBuilder.CreateCylinder('vplat', { diameter: 20, height: .6, tessellation: 48 }, scene); pf.position.set(W * TILE / 2 + 2, -.3, H * TILE / 2 + 2); pf.material = mat(scene, 'vpm', '#141218'); statics.push(pf);
@@ -2276,6 +2292,9 @@ NV.Level = (() => {
     const trimMat = mat(scene, 'trim', '#000', pal.a);
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       if (g[y][x] !== 1 || free || L.map.roof) continue;
+      if (L.aptHole && y === 1 && (x === 2 || x === 3)) { // window opening: sill below, header above, glass in between
+        [[.375, .75], [(WALLH + 4.45) / 2, WALLH - 4.45]].forEach(([cy, hh]) => { const b = BABYLON.MeshBuilder.CreateBox('w', { width: TILE, height: Math.abs(hh), depth: .4 }, scene); b.position.set((x + .5) * TILE, cy, (y + 1) * TILE - .2); wallBoxes.push(b); });
+        continue; }
       const nb = [[1, 0], [-1, 0], [0, 1], [0, -1]].filter(([dx, dy]) => { const nx = x + dx, ny = y + dy; return nx >= 0 && ny >= 0 && nx < W && ny < H && g[ny][nx] !== 1; });
       if (!nb.length) continue;
       const b = BABYLON.MeshBuilder.CreateBox('w', { width: TILE, height: WALLH, depth: TILE }, scene); b.position.set((x + .5) * TILE, WALLH / 2, (y + .5) * TILE); wallBoxes.push(b);
@@ -2324,7 +2343,7 @@ NV.Level = (() => {
     }
     // skyline + gradient sky around outdoor maps
     if (outdoor || cyber) {
-      const sk = BABYLON.MeshBuilder.CreateBox('sky', { size: 1 }, scene); if (L.map.roof) sk.isVisible = false;
+      const sk = BABYLON.MeshBuilder.CreateBox('sky', { size: 1 }, scene); if (L.map.roof || L.aptHole) sk.isVisible = false; // the real city replaces the fake skyline
       const sm = mat(scene, 'skm', '#000'); sm.emissiveTexture = NV.windowTex(scene, 55, pal.a, pal.b); sm.emissiveTexture.vScale = 6;
       if (cyber) { sm.wireframe = true; sm.emissiveTexture = null; sm.emissiveColor = C3(pal.b); }
       sk.material = sm; const rr = U.rng(21), arr = [];
@@ -2332,6 +2351,7 @@ NV.Level = (() => {
       for (let i = 0; i < 90; i++) { const a = rr() * Math.PI * 2, d = W * TILE * .75 + rr() * 160, h = 30 + rr() * 150, w = 12 + rr() * 20; arr.push(NV.M(w, h, w, cx + Math.cos(a) * d, h / 2 - 20, cz + Math.sin(a) * d)); }
       NV.thin(sk, arr); statics.push(sk);
       const dome = BABYLON.MeshBuilder.CreateSphere('dome', { diameter: 1100, segments: 10, sideOrientation: BABYLON.Mesh.BACKSIDE }, scene);
+      if (L.aptHole) dome.setEnabled(false);
       const dm = mat(scene, 'domem', '#000'); dm.emissiveTexture = L.map.city || L.map.roof ? NV.citySky(scene) : NV.skyTex(scene, pal, 'lsky'); dm.disableLighting = true; dm.fogEnabled = false; dome.material = dm; dome.applyFog = false; dome.infiniteDistance = true; glow.addExcludedMesh(dome); statics.push(dome);
       if (L.mirror) L.mirror.renderList.push(dome);
       if ((L.map.city || L.map.roof) && (q.lod || 1) >= .6) { // a slow-drifting cloud deck lit from below by the city
@@ -4418,9 +4438,7 @@ NV.Level = (() => {
       let px = x0 + W / 2, pz = z0 + D / 2, rot = 0;
       if (dy < 0) { pz = z0 + 1; rot = 0; } else if (dy > 0) { pz = z0 + D - 1; rot = Math.PI; } else if (dx < 0) { px = x0 + 1; rot = Math.PI / 2; } else { px = x0 + W - 1; rot = -Math.PI / 2; }
       boards.push({ i, px, y, pz, bw, bh, rot });
-      const f = [Math.sin(rot), Math.cos(rot)], sideV = [Math.cos(rot), -Math.sin(rot)];
-      [-.35, .35].forEach(o => put('mast', NV.M(.3, 2.6 + bh / 2, .3, px + sideV[0] * bw * o + f[0] * .3, b.ht + (2.6 + bh / 2) / 2, pz + sideV[1] * bw * o + f[1] * .3)));
-      put('board', NV.M(bw + .4, bh + .4, .25, px + f[0] * .2, y, pz + f[1] * .2, qy(rot)));
+      boards[boards.length - 1].y = b.ht + 6 + bh / 2; boards[boards.length - 1].px = x0 + W / 2; boards[boards.length - 1].pz = z0 + D / 2; // hover over the middle of the roof
     });
     // build the instanced sets
     const mk = (name, m, arr, shape, dyn) => { if (!arr || !arr.length) return null; const b = shape ? shape() : BABYLON.MeshBuilder.CreateBox(name, { size: 1 }, scene); b.name = name; b.material = m; NV.thin(b, arr); if (dyn) { b.isPickable = false; b.freezeWorldMatrix(); } else statics.push(b); return b; };
@@ -4441,7 +4459,22 @@ NV.Level = (() => {
     });
     // billboards: two merged groups sharing the ad atlas, each showing a different ad
     if (boards.length) {
+      const frameM = mat(scene, 'adframe', '#0b0912'); frameM.specularColor = new BABYLON.Color3(.5, .5, .6); const thrM = mat(scene, 'adthr', '#000', '#19f0ff'); thrM.disableLighting = true;
+      fx.floaters = [];
       [0, 1].forEach(gi => { const list = boards.filter(bd => bd.i % 2 === gi); if (!list.length) return;
+        const m = mat(scene, 'adm' + gi, '#000', '#000'); const tex = NV.adAtlas(scene, gi); tex.vScale = .25; tex.vOffset = gi * .5; m.emissiveTexture = tex; m.disableLighting = true; m.backFaceCulling = false;
+        fx.ads.push({ m, tex, f: gi * 2, t: gi * 2.5 });
+        list.forEach(bd => { const node = new BABYLON.TransformNode('adfloat', scene);
+          const pl = BABYLON.MeshBuilder.CreatePlane('hoload', { width: bd.bw, height: bd.bh, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene); pl.parent = node; pl.material = m; pl.isPickable = false;
+          const fr = BABYLON.MeshBuilder.CreateBox('adfr', { width: bd.bw + .5, height: bd.bh + .5, depth: .3 }, scene); fr.parent = node; fr.position.z = .2; fr.material = frameM; fr.isPickable = false;
+          [-.35, .35].forEach(o => { const t = BABYLON.MeshBuilder.CreateCylinder('adth', { diameterTop: .9, diameterBottom: .3, height: .5, tessellation: 10 }, scene); t.parent = node; t.position.set(bd.bw * o, -bd.bh / 2 - .35, .2); t.material = thrM; t.isPickable = false; });
+          node.position.set(bd.px, bd.y, bd.pz); node.rotation.y = bd.rot;
+          fx.floaters.push({ node, home: { x: bd.px, y: bd.y, z: bd.pz, rot: bd.rot }, from: null, to: null, t: 0, hold: 3 + r() * 8, ph: r() * 6 }); });
+      });
+      fx.adSpots = boards.map(bd => ({ x: bd.px, y: bd.y + 4, z: bd.pz, rot: bd.rot }));
+    }
+    if (false) {
+      [0, 1].forEach(gi => { const list = [];
         const planes = list.map(bd => { const pl = BABYLON.MeshBuilder.CreatePlane('ad', { width: bd.bw, height: bd.bh }, scene); pl.position.set(bd.px, bd.y, bd.pz); pl.rotation.y = bd.rot; return pl; });
         const mesh = BABYLON.Mesh.MergeMeshes(planes, true, true); mesh.name = 'hoload' + gi; const m = mat(scene, 'adm' + gi, '#000', '#000'); const tex = NV.adAtlas(scene, gi); tex.vScale = .25; tex.vOffset = gi * .5; m.emissiveTexture = tex; m.disableLighting = true; m.alpha = .92; mesh.material = m; mesh.isPickable = false; mesh.freezeWorldMatrix();
         fx.ads.push({ m, tex, f: gi * 2, t: gi * 2.5 }); });
@@ -4456,6 +4489,7 @@ NV.Level = (() => {
     const bodyM = mat(scene, 'aircarm', '#1c1a26'); bodyM.specularColor = new BABYLON.Color3(.6, .6, .7); bodyM.specularPower = 64;
     fx.air = { list: air, body: amesh('aircar', bodyM), head: amesh('airhead', em('airheadm', '#eaf6ff')), tail: amesh('airtail', em('airtailm', '#ff2040')), glow: amesh('airglow', em('airglowm', pal.a)), W: M.W * T };
     // blimps with ad screens circling the skyline
+    fx.cx = M.W * T / 2; fx.cz = M.H * T / 2;
     fx.blimps = [0, 1].map(k => {
       const root = new BABYLON.TransformNode('blimp', scene), hull = BABYLON.MeshBuilder.CreateSphere('bh', { diameter: 1, segments: 16 }, scene); hull.scaling.set(18, 18, 70); hull.parent = root; hull.material = mat(scene, 'blimpm' + k, '#1a1726'); hull.material.specularColor = new BABYLON.Color3(.3, .3, .4);
       const scr = fx.ads[k % Math.max(1, fx.ads.length)]; [-1, 1].forEach(sd => { const pl = BABYLON.MeshBuilder.CreatePlane('bscr', { width: 40, height: 11 }, scene); pl.parent = root; pl.position.set(sd * 9.3, 0, 0); pl.rotation.y = sd * Math.PI / 2; pl.material = scr ? scr.m : em('bscrm', '#ff2bd6'); });
@@ -4467,14 +4501,15 @@ NV.Level = (() => {
     const vents = [];
     for (let i = 0; i < 160; i++) { const axis = r() < .5, k = Math.floor(r() * (M.N + 1)), c = (2 + k * M.B) * T + (r() < .5 ? -2 : 2), a = 8 + r() * (M.W * T - 16), x = axis ? c : a, z = axis ? a : c, seg = (((a - 2 * T) % (M.B * T)) + M.B * T) % (M.B * T); if (seg > 15 && seg < M.B * T - 15 && !solid(x, z)) { vents.push({ x, z }); put('manhole', NV.M(1.1, .05, 1.1, x, .03, z)); } }
     if (sets.manhole) mk('manhole', mat(scene, 'manm', '#1d1a22'), sets.manhole, () => BABYLON.MeshBuilder.CreateCylinder('manhole', { diameter: 1, height: 1, tessellation: 12 }, scene));
-    if ((q.particles || 0) > .25) {
+    if ((q.particles || 0) > .25 && !L._aptBuild) {
       const tex = NV.tex(scene, 64, 64, (c, w, h) => { const gr = c.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, 'rgba(255,255,255,.9)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = gr; c.fillRect(0, 0, w, h); }, 'steamtex');
       fx.steam = { vents, sys: [0, 1, 2].map(() => { const ps = new BABYLON.ParticleSystem('steam', 60, scene); ps.particleTexture = tex; ps.emitter = V3(0, -50, 0); ps.createBoxEmitter(V3(-.3, 1, -.3), V3(.3, 1.6, .3), V3(-.4, 0, -.4), V3(.4, .1, .4));
         ps.minSize = 1; ps.maxSize = 3; ps.minLifeTime = 2; ps.maxLifeTime = 3.4; ps.emitRate = 12; ps.minEmitPower = .8; ps.maxEmitPower = 1.6; ps.gravity = V3(.15, .25, 0);
         ps.color1 = new BABYLON.Color4(.78, .72, .9, .16); ps.color2 = new BABYLON.Color4(.6, .55, .8, .1); ps.colorDead = new BABYLON.Color4(.4, .4, .5, 0); ps.blendMode = BABYLON.ParticleSystem.BLENDMODE_STANDARD; ps.minAngularSpeed = -.4; ps.maxAngularSpeed = .4; ps.start(); return ps; }), t: 0 };
     }
     // rain-soaked asphalt: puddles catch the light; higher tiers also mirror the neon
-    const floor = scene.getMeshByName('floor');
+    const floor = L._aptBuild ? null : scene.getMeshByName('floor');
+    if (L._aptBuild) fx.steam = null;
     if (floor) {
       const am = mat(scene, 'asphalt', '#ffffff');
       am.diffuseTexture = NV.tex(scene, 512, 512, (c, w, h) => { c.fillStyle = '#1b1922'; c.fillRect(0, 0, w, h); const rr = U.rng(17); for (let i = 0; i < 9000; i++) { const v = 18 + rr() * 26 | 0; c.fillStyle = 'rgb(' + v + ',' + (v - 2) + ',' + (v + 6) + ')'; c.fillRect(rr() * w, rr() * h, 1 + rr() * 2, 1 + rr() * 2); }
@@ -4484,7 +4519,7 @@ NV.Level = (() => {
       am.specularColor = new BABYLON.Color3(1, .95, 1.1); am.specularPower = 90;
       if (['ultra', 'veryhigh', 'high'].includes(q.key) && BABYLON.MirrorTexture) try {
         const mir = new BABYLON.MirrorTexture('streetMirror', q.key === 'ultra' ? 1024 : 512, scene, true); mir.mirrorPlane = new BABYLON.Plane(0, -1, 0, 0); mir.level = .34; mir.refreshRate = q.key === 'high' ? 2 : 1;
-        mir.renderList = statics.filter(m => /^(bld|neon|ftrim|lamp|tower|ring)/.test(m.name)).concat(scene.meshes.filter(m => /^(vsign|hoload)/.test(m.name)));
+        mir.renderList = statics.filter(m => /^(bld|neon|ftrim|lamp|tower|ring)/.test(m.name)).concat(scene.meshes.filter(m => /^(vsign|hoload|adfr)/.test(m.name)));
         am.reflectionTexture = mir; L.mirror = mir;
       } catch (e) { console.warn('street reflections unavailable', e); }
       floor.material = am;
@@ -4507,7 +4542,16 @@ NV.Level = (() => {
       });
       [A.body, A.head, A.tail, A.glow].forEach(o => o.b.thinInstanceBufferUpdated('matrix'));
     }
-    if (fx.blimps) { const cx = L.map.W * TILE / 2, cz = L.map.H * TILE / 2; fx.blimps.forEach(b => { b.a += b.sp * dt; b.root.position.set(cx + Math.cos(b.a) * b.rad, b.y, cz + Math.sin(b.a) * b.rad); b.root.rotation.y = -b.a; }); }
+    if (fx.floaters) fx.floaters.forEach(F => { // hover, then cruise to another rooftop, hover there, cruise home
+      const n = F.node;
+      if (!F.to) { F.hold -= dt; if (F.hold <= 0) { const away = F.at; const dst = away ? F.home : U.pick(fx.adSpots.filter(sp => Math.hypot(sp.x - F.home.x, sp.z - F.home.z) > 40 && Math.hypot(sp.x - F.home.x, sp.z - F.home.z) < 420)) || F.home;
+          F.from = { x: n.position.x, y: n.position.y, z: n.position.z, rot: n.rotation.y }; F.to = dst; F.t = 0; F.dur = Math.max(6, Math.hypot(dst.x - n.position.x, dst.z - n.position.z) / 14); F.at = !away; } }
+      else { F.t += dt / F.dur; const k = Math.min(1, F.t), e = k * k * (3 - 2 * k), lift = Math.sin(k * Math.PI) * 18;
+        n.position.set(U.lerp(F.from.x, F.to.x, e), U.lerp(F.from.y, F.to.y, e) + lift, U.lerp(F.from.z, F.to.z, e));
+        const head = Math.atan2(F.to.x - F.from.x, F.to.z - F.from.z) + Math.PI / 2; n.rotation.y = F.from.rot + U.angDiff(F.from.rot, k < .5 ? head : F.to.rot) * Math.min(1, (k < .5 ? k : (k - .5)) * 4); n.rotation.z = Math.sin(k * Math.PI) * .08;
+        if (k >= 1) { F.to = null; F.hold = 8 + Math.random() * 10; } }
+      if (!F.to) n.position.y += Math.sin(fx.t * 1.3 + F.ph) * .012; });
+    if (fx.blimps) { const cx = fx.cx, cz = fx.cz; fx.blimps.forEach(b => { b.a += b.sp * dt; b.root.position.set(cx + Math.cos(b.a) * b.rad, b.y, cz + Math.sin(b.a) * b.rad); b.root.rotation.y = -b.a; }); }
     if (fx.clouds) fx.clouds.uOffset += dt * .002;
     const S = fx.steam; if (S) { S.t -= dt; if (S.t <= 0) { S.t = .6; const p = L.p, near = S.vents.map(v => ({ v, d: Math.hypot(v.x - p.x, v.z - p.z) })).filter(o => o.d < 70).sort((a, b) => a.d - b.d); S.sys.forEach((ps, k) => { const o = near[k]; if (o) ps.emitter = V3(o.v.x, .05, o.v.z); else ps.emitter = V3(0, -50, 0); }); } }
   }
@@ -4794,7 +4838,8 @@ NV.Level = (() => {
       g.fillStyle = '#f4e6b0'; g.textAlign = 'center'; g.font = 'bold 24px Orbitron, sans-serif'; g.fillText('TOMORROW HAS', 845, 222); g.fillText('ALREADY BEEN TESTED', 845, 252); g.font = '16px Orbitron, sans-serif'; g.fillText('— HELIX', 845, 280);
     }, 1024, 512);
     const win = panel(s, 7.4, 3.6, view); win.position.set(12, 2.6, 8.06);
-    liveWindow(s, win);
+    if (L.aptHole) { const gl = mat(s, 'aptglass', '#0a1626', null, .1); gl.specularColor = new BABYLON.Color3(.9, .9, 1); gl.specularPower = 120; gl.backFaceCulling = false; win.material = gl; } // real glass onto the real city
+    else liveWindow(s, win);
     const rainM = mat(s, 'wrain', '#000', '#ffffff'); rainM.emissiveColor = new BABYLON.Color3(0, 0, 0);
     rainM.emissiveTexture = NV.tex(s, 256, 256, (g, w, h) => { g.clearRect(0, 0, w, h); const r = U.rng(7); for (let i = 0; i < 160; i++) { const x = r() * w, y = r() * h, l = 6 + r() * 26; g.strokeStyle = `rgba(200,225,255,${.15 + r() * .35})`; g.lineWidth = 1 + r(); g.beginPath(); g.moveTo(x, y); g.lineTo(x + 1, y + l); g.stroke(); } }, 'wraint');
     rainM.opacityTexture = rainM.emissiveTexture; rainM.emissiveTexture.uScale = 3; rainM.emissiveTexture.vScale = 1.5; rainM.disableLighting = true; rainM.alphaMode = BABYLON.Engine.ALPHA_ADD;
