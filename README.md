@@ -217,6 +217,12 @@ Pause (**Esc**) → **Black Market** to buy from the arsenal: 267 weapons, tools
 - Every item has its own procedural 3D viewmodel (pistol, SMG, rifle, shotgun, sniper, rotary, laser, launcher, grenade, blade, hammer, baton, wrist rig, drone remote, strike designator), coloured by faction.
 - Credits: 9 ¢ per kill, 14 ¢ per nonlethal takedown, 150 ¢ or more per completed operation, plus gigs and data shards. Multiplayer sessions start with 3000 ¢.
 
+## Languages — English · 简体中文 · 繁體中文
+
+Settings → **Language · 语言** switches between English, Simplified Chinese and Traditional Chinese (picked automatically from the browser the first time). Everything is translated: menus, HUD, objectives, toasts, and the full story — every chapter, choice, ending and mission synopsis. With voice acting on, characters speak through the system's Chinese voices; if none are installed the dialogue simply stays silent instead of being read in the wrong language.
+
+Translations live in `i18n/zh/` (Simplified; Traditional is generated with OpenCC) and are compiled into `index.html` by `python3 tools/build_zh.py`.
+
 ## Android app (Normal / Google Cardboard VR)
 
 `android/` is a native Android project that wraps the game in a full-screen WebView.
