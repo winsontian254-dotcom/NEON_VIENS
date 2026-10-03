@@ -197,7 +197,7 @@ body.cine #story{bottom:11vh;inset:0 0 11vh 0;z-index:5}
 #hud .boss .sh{font-family:var(--fm);font-size:11px;color:var(--cyan);letter-spacing:.2em;margin-top:6px}
 @keyframes bossgl{0%,92%,100%{transform:none}94%{transform:translateX(-4px) skewX(8deg)}96%{transform:translateX(3px)}}
 /* weapon + ammo panel */
-#hud .wpn{position:absolute;right:22px;bottom:22px;width:300px;text-align:right}
+#hud .wpn{position:absolute;right:22px;bottom:22px;width:300px;text-align:right}#hud .wpn.off{display:none}
 #hud .wpn::before{left:auto;right:0}#hud .wpn::after{right:auto;left:0}
 #hud .wpn .wn{font-family:var(--fh);font-weight:900;font-size:14px;letter-spacing:.12em;color:#fff;text-shadow:0 0 10px var(--pink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #hud .wpn .wn em{font-style:normal;color:#05030c;background:var(--amber);font-size:10px;padding:1px 6px;margin-left:6px;vertical-align:2px}
@@ -913,10 +913,14 @@ NV.State = (() => {
   const fresh = profile => ({
     ver: SAVE_VER, profile, stats: { raven: 50, voss: 50, hope: 50, corp: 50, ai: 50 }, flags: { autonomy: 0, control: 0 },
     facts: [], journal: [], sides: {}, stars: 0, memories: [], mysteries: [], evidence: [],
-    ci: 0, cp: 0, done: [], played: 0, ops: 0, ghostOps: 0, credits: 0, upg: { hp: 0, dmg: 0, en: 0 }, shards: [],
+    ci: 0, cp: 0, at: null, spot: null, done: [], played: 0, ops: 0, ghostOps: 0, credits: 0, upg: { hp: 0, dmg: 0, en: 0 }, shards: [],
   });
+  let resumeSpot = null;
   const St = {
     get: () => S,
+    // the exact spot saved on quit; handed out once to the first level started after Continue
+    takeSpot(key) { const s = resumeSpot; if (!s || s.key !== key) return null; resumeSpot = null; return s; },
+    dropSpot() { resumeSpot = null; },
     meta: () => meta,
     newGame(profile) { temp = false; S = fresh(profile); St.save(); },
     tempGame(profile) { temp = true; S = fresh(profile); },
@@ -928,6 +932,7 @@ NV.State = (() => {
         const d = JSON.parse(raw); if (!d || typeof d !== 'object' || !d.profile) throw new Error('bad save');
         // migrate: fill any fields added since the save was written, then stamp the current version
         S = Object.assign(fresh(d.profile), d); S.stats = Object.assign(fresh(d.profile).stats, d.stats || {}); S.flags = Object.assign({ autonomy: 0, control: 0 }, d.flags || {}); S.ver = SAVE_VER;
+        resumeSpot = S.spot || null;
         return true;
       } catch (e) {
         try { localStorage.setItem(KEY + '_corrupt', raw); localStorage.removeItem(KEY); } catch (e2) { }
@@ -938,7 +943,7 @@ NV.State = (() => {
     save() { if (!S || temp) return; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { } },
     wipe() { try { [KEY, KEY + '_corrupt', META].forEach(k => localStorage.removeItem(k)); } catch (e) { } S = null; meta = { endings: [], unlocked: 0, snaps: {} }; },
     saveMeta() { try { localStorage.setItem(META, JSON.stringify(meta)); } catch (e) { } },
-    snapshot(ci) { meta.snaps[ci] = JSON.stringify({ ...S, ci, cp: 0 }); meta.unlocked = Math.max(meta.unlocked, ci); St.saveMeta(); },
+    snapshot(ci) { meta.snaps[ci] = JSON.stringify({ ...S, ci, cp: 0, at: null, spot: null }); meta.unlocked = Math.max(meta.unlocked, ci); St.saveMeta(); },
     fromSnapshot(ci) { try { temp = false; S = JSON.parse(meta.snaps[ci]); St.save(); return true; } catch (e) { return false; } },
     stat(k, d) {
       const v = S.stats[k]; d *= .45;
@@ -3121,6 +3126,9 @@ NV.Level = (() => {
   }
   // weapon panel: name, level, mode, big magazine counter, reserve or cooldown
   function wpnHud(w) {
+    // no weapon, a calm story space, or dialogue on screen: hide the panel entirely
+    const off = !w || L.calm || !!L.cine || NV.UI.storyShown(), wp = document.querySelector('#hud .wpn');
+    if (wp && wp._off !== off) { wp._off = off; wp.classList.toggle('off', off); }
     if (!w) { hset('#hud .wpn .wn', 'html', 'UNARMED'); hset('#hud .wpn .wk', 'text', ''); hset('#hud .wpn .wa', 'html', ''); return; }
     const AR = ARMS(), st = AR.state(), f = AR.ammoOf(w), res = st && f ? st.ammo[f] || 0 : 0, RM = ['', 'I', 'II', 'III', 'IV', 'V'];
     hset('#hud .wpn .wn', 'html', U.esc(w.name.toUpperCase()) + (w.lvl > 1 ? '<em>LV ' + RM[w.lvl] + '</em>' : ''));
@@ -3435,6 +3443,7 @@ NV.Level = (() => {
     if (L.wantPause || I.pause()) { L.wantPause = false; if (!L.paused) pause(); return; }
     if (L.paused) return;
     L.time += dt; L.stats.time += dt;
+    if (L.spotKey && L.started && (L.spotT = (L.spotT || 0) - dt) <= 0) { L.spotT = 3; keepSpot(true); }
     vrPoll();
     if (L.cine) { cineUpdate(dt); if (L.cine) { if (L.npcs) updateNpcs(dt); if (L.city) updateTraffic(dt); updateWorld(dt); hud(dt); return; } }
     if (L.pRag) { pRagUpdate(dt); if (L.pRag) { L.look.dx = L.look.dy = 0; if (L.free) updateFree(dt); if (L.city) updateTraffic(dt); updateEnemies(dt); updateBullets(dt); hud(dt); return; } }
@@ -5536,7 +5545,17 @@ NV.Level = (() => {
     s.civTotal = L.civs.length;
     setTimeout(() => end(won ? { won: true, stats: s } : { died: true, stats: s }), won ? 400 : 900);
   }
+  // remember where the player stands so Continue resumes from this exact spot
+  function keepSpot(write) {
+    const S = NV.State.get(); if (!S || !L || !L.spotKey) return; const p = L.p;
+    if (p.hp <= 0 || L.over || !isFinite(p.x) || !isFinite(p.z)) return;
+    S.spot = { key: L.spotKey, x: +p.x.toFixed(2), y: +Math.max(0, p.y || 0).toFixed(2), z: +p.z.toFixed(2), yaw: +p.yaw.toFixed(3), pitch: +(p.pitch || 0).toFixed(3), hp: Math.round(p.hp) };
+    if (write) NV.State.save();
+  }
+  addEventListener('pagehide', () => { if (L) keepSpot(false); NV.State.save(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) { if (L) keepSpot(false); NV.State.save(); } });
   function end(res) {
+    { const S = NV.State.get(); if (S && L.spotKey) { if (res && res.quit) keepSpot(false); else if (S.spot && S.spot.key === L.spotKey) S.spot = null; } }
     if (L.xr) { try { if (L.vr && L.vr.on) L.xr.baseExperience.exitXRAsync(); L.xr.dispose(); } catch (e) { } }
     document.body.classList.remove('cine');
     NV.Audio.engine(0);
@@ -5605,6 +5624,13 @@ NV.Level = (() => {
       L.seen = new Uint8Array(L.map.W * L.map.H);
       const built = buildScene(op, ctx); L.scene = built.scene; L.cam = built.cam; L.plight = built.plight;
       populate(op, ctx);
+      // Continue puts you back at the exact spot you quit from (same level only)
+      L.spotKey = op.m === 'void' || L.netKey !== 'solo' ? null : [op.m, ctx.chapter || '', op.where || op.travel || op.d || ''].join('|');
+      const sp = L.spotKey && NV.State.takeSpot(L.spotKey);
+      if (sp && isFinite(sp.x) && isFinite(sp.z)) {
+        L.p.x = sp.x; L.p.z = sp.z; L.p.y = sp.y || 0; L.p.yaw = sp.yaw || 0; L.p.pitch = sp.pitch || 0; if (sp.hp > 0) L.p.hp = Math.min(L.p.max, sp.hp);
+        if (!(sp.y > 1) && solid(L.p.x, L.p.z)) { const c = nearestFree(L.p.x, L.p.z); L.p.x = c.x; L.p.z = c.z; }
+      }
       if (!NV.State.get().arms) NV.Arms.state();
       L.enemies.forEach((e, i) => e.nid = i); L.mpStart = { x: L.p.x, z: L.p.z };
       if (L.city && !L.free) { L.peds = []; populateCars({ x: L.p.x, z: L.p.z }, !!L.aoff || op.m === 'scene'); }
@@ -5978,7 +6004,7 @@ NV.UI = (() => {
       <div class="ver">BABYLON.JS · ${NV.G.engine.isWebGPU ? 'WEBGPU' : 'WEBGL2'}<br>v1.0 · ${NV_DATA.chapters.length} CHAPTERS</div>`, '', 'title');
     el.style.position = 'absolute'; el.style.inset = '0'; el.style.background = 'linear-gradient(90deg,rgba(3,2,10,.7),transparent 60%)';
     const items = [
-      ['continue', 'Continue', has ? 'Resume from your last checkpoint' : 'No save found', !has],
+      ['continue', 'Continue', has ? 'Pick up exactly where you left off' : 'No save found', !has],
       ['new', 'New Game', 'Begin in Neon Heights, Tier 93'],
       ['chapters', 'Chapter Select', meta.unlocked > 0 ? (meta.unlocked + 1) + ' chapters unlocked' : 'Complete a chapter to unlock', !(meta.unlocked > 0)],
       ['journal', 'Journal', 'World state, codex and side quests', !has],
@@ -6133,7 +6159,7 @@ NV.UI = (() => {
     const redraw = () => ROWS.forEach((r, i) => els[i].querySelector('.val').textContent = fmt(r));
     const commit = (msaaChanged) => {
       Q.setAll(g); NV.Backdrop.applyQuality(); if (NV.Level.applyQuality) NV.Level.applyQuality();
-      if (msaaChanged) UI.confirm('MSAA changes need a reload. Reload now? (Progress is saved at checkpoints.)').then(ok => { if (ok) location.reload(); });
+      if (msaaChanged) UI.confirm('MSAA changes need a reload. Reload now? (Your exact spot is saved.)').then(ok => { if (ok) location.reload(); });
     };
     const change = (k, d) => {
       const r = ROWS[k]; if (!r) return; NV.Audio.sfx('ui');
@@ -6201,6 +6227,7 @@ NV.UI = (() => {
   };
   UI.storyClose = () => { NV.Voice.stop(); if (story) { story.el.remove(); story = null; } };
   UI.storyHide = hide => { if (story) story.el.classList.toggle('hidden', hide); };
+  UI.storyShown = () => !!story && !story.el.classList.contains('hidden');
   function topAction(a) {
     if (!story) return;
     if (a === 'auto') { story.auto = !story.auto; story.el.querySelector('[data-a=auto]').classList.toggle('on', story.auto); }
@@ -6698,11 +6725,50 @@ NV.Story = (() => {
     w.gating = false; return null;
   }
 
-  async function runNodes(arr) { for (let i = 0; i < arr.length; i++) { const n = arr[i]; if (n.t === 'scene') ctx.cast = sceneCast(arr, i); const r = await runNode(n); if (r) return r; } return null; }
+  // ctx.path is the live position in the script: [top index, branch, index, branch, index...].
+  // It is saved on every line so Continue resumes at the exact line you left, not the last checkpoint.
+  function markPos() { const S = NV.State.get(); if (!S) return; S.at = { ci: S.ci, path: ctx.path.slice() }; S.cp = ctx.path[0] || 0; NV.State.save(); }
+  async function runNodes(arr, res) {
+    const d = ctx.path.length, from = res && res.length ? Math.min(res[0], arr.length) : 0;
+    for (let i = from; i < arr.length; i++) {
+      const n = arr[i]; ctx.path.length = d; ctx.path.push(i);
+      if (n.t === 'scene') ctx.cast = sceneCast(arr, i);
+      const sub = i === from && res && res.length > 1 ? res.slice(1) : null;
+      if (!sub) markPos();
+      const r = await runNode(n, sub); if (r) return r;
+    }
+    ctx.path.length = d; return null;
+  }
+  // on resume: rebuild the scene (world, backdrop, cast) the saved line belongs to without replaying it
+  async function restoreScene(arr, path) {
+    let last = null;
+    for (let lv = 0, a = arr; a && lv < path.length; lv += 2) {
+      const i = Math.min(path[lv], a.length - 1);
+      for (let j = 0; j <= i; j++) if (a[j] && a[j].t === 'scene') last = { a, j, self: j === i && lv === path.length - 1 };
+      const n = a[i], b = path[lv + 1]; if (b == null || !n) break;
+      a = n.t === 'choice' ? (n.o[b] || {}).b : n.t === 'cond' ? (n.b[b] || {}).n : null;
+    }
+    if (!last || last.self) return null;
+    const n = last.a[last.j]; ctx.cast = sceneCast(last.a, last.j);
+    if (ctx.id === '1' && /^NEON HEIGHTS, RESIDENTIAL TIER 93/.test(n.v)) { ctx.scene = n.v; NV.Backdrop.setScene(n.v); await startApartment(); NV.UI.location(n.v, 'NEON HEIGHTS'); return null; }
+    ctx.scene = n.v; NV.Backdrop.setScene(n.v);
+    if (walkable(n.v)) { ctx.sceneNode = n; const r = await startSceneWorld(n.v, false); if (r) return r; }
+    else ctx.sceneNode = null;
+    NV.UI.location(n.v, NV.Backdrop.palette.d);
+    return null;
+  }
 
-  async function runNode(n) {
+  async function runNode(n, res) {
     const S = NV.State.get();
     if (ctx.world && ctx.world.quit) return Q;
+    // resuming inside a choice or a conditional branch: skip straight to the saved line
+    if (res && res.length > 1 && n.t === 'choice' && n.o[res[0]]) { ctx.path.push(res[0]); const r = await runNodes(n.o[res[0]].b, res.slice(1)); if (!r) ctx.path.pop(); return r; }
+    if (res && res.length > 1 && n.t === 'cond' && n.b[res[0]]) {
+      const bi = res[0], d = ctx.path.length;
+      ctx.path.push(bi); let r = await runNodes(n.b[bi].n, res.slice(1)); if (r) return r; ctx.path.length = d;
+      for (const b of NV.Cond.pick(n)) { const k = n.b.indexOf(b); if (k <= bi) continue; ctx.path.push(k); r = await runNodes(b.n); if (r) return r; ctx.path.length = d; }
+      return null;
+    }
     switch (n.t) {
       case 'scene':
         if (ctx.world) await stopWorld();
@@ -6742,9 +6808,9 @@ NV.Story = (() => {
         applyFx(o.fx, o.text || o.label);
         if (o.text) { if (ctx.world) NV.Level.cine({ s: 'Ghost', v: o.text }); const r = await NV.UI.say('Ghost', o.text); if (ctx.world) NV.Level.cine(null); if (r === 'quit') return Q; }
         NV.State.save();
-        return await runNodes(o.b);
+        ctx.path.push(k); { const r = await runNodes(o.b); if (r) return r; } ctx.path.pop(); return null;
       }
-      case 'cond': { for (const b of NV.Cond.pick(n)) { const r = await runNodes(b.n); if (r) return r; } return null; }
+      case 'cond': { const d = ctx.path.length; for (const b of NV.Cond.pick(n)) { ctx.path.push(n.b.indexOf(b)); const r = await runNodes(b.n); if (r) return r; ctx.path.length = d; } return null; }
       case 'play': return await runOp(n);
       case 'final': return await finalChoice();
       default: return null;
@@ -6809,26 +6875,22 @@ NV.Story = (() => {
   }
   const firstScene = ch => { const s = ch.n.find(n => n.t === 'scene'); return s ? s.v : ''; };
 
-  async function playChapter(ci, cp) {
+  async function playChapter(ci, path) {
     const ch = chapters()[ci], S = NV.State.get();
     const prevAct = ci > 0 ? chapters()[ci - 1].act : 0;
-    ctx = { id: ch.id, act: ch.act || 5, scene: firstScene(ch), echoes: [], lastChoice: '' };
+    ctx = { id: ch.id, act: ch.act || 5, scene: firstScene(ch), echoes: [], lastChoice: '', path: [] };
     S.ci = ci;
-    if (!cp) { if (!ch.ending) NV.State.snapshot(ci); S.cp = 0; NV.State.save(); await chapterCard(ch, prevAct); }
+    if (!path) { if (!ch.ending) NV.State.snapshot(ci); S.cp = 0; S.at = null; NV.State.save(); await chapterCard(ch, prevAct); }
     else {
-      // resume: restore backdrop from the checkpoint scene
-      const sc = ch.n[cp]; if (sc && sc.t === 'scene') ctx.scene = sc.v; NV.Backdrop.setScene(ctx.scene);
+      // resume at the exact line: rebuild that line's scene first
+      NV.Backdrop.setScene(ctx.scene);
       await NV.fade(false, 600);
+      NV.UI.storyOpen();
+      const r = await restoreScene(ch.n, path); if (r) return r;
     }
     NV.UI.storyOpen();
-    const top = ch.n;
-    for (let i = cp || 0; i < top.length; i++) {
-      const n = top[i];
-      if (n.t === 'scene' && i !== cp) { S.cp = i; NV.State.save(); }
-      if (n.t === 'scene') ctx.cast = sceneCast(top, i);
-      const r = await runNode(n);
-      if (r) return r;
-    }
+    const r = await runNodes(ch.n, path);
+    if (r) return r;
     if (ctx.world) await stopWorld();
     return 'done';
   }
@@ -6847,17 +6909,19 @@ NV.Story = (() => {
 
   async function run(ci, cp) {
     const S = NV.State.get();
+    // cp: saved script path (array), an old-style checkpoint index, or 0 for a fresh chapter
+    cp = Array.isArray(cp) ? cp : cp ? [cp] : null;
     NV.UI.storyOpen();
     while (true) {
       const ch = chapters()[ci];
       if (!ch) break;
       if (!cp && ci > 0 && !ch.ending) { const fr = await freeRoam(ci); if (fr === Q) { NV.State.save(); NV.UI.storyClose(); return; } }
-      const r = await playChapter(ci, cp); cp = 0;
-      if (r === Q) { if (ctx.world || NV.Level.active) { NV.Level.stop(); ctx.world = null; } NV.State.save(); NV.UI.storyClose(); return; }
+      const r = await playChapter(ci, cp); cp = null;
+      if (r === Q) { if (ctx.world || NV.Level.active) { NV.Level.exitWith({ quit: true }); ctx.world = null; } NV.State.save(); NV.UI.storyClose(); return; }
       if (typeof r === 'string' && r.startsWith('ending:')) {
         const L = r.split(':')[1]; const ei = chapters().findIndex(c => c.id === '70' + L);
         if (!S.done.includes(ch.id)) S.done.push(ch.id);
-        ci = ei; NV.State.save(); continue;
+        ci = ei; S.at = null; NV.State.save(); continue;
       }
       // chapter finished
       if (!S.done.includes(ch.id)) S.done.push(ch.id);
@@ -6866,7 +6930,7 @@ NV.Story = (() => {
         NV.UI.storyClose();
         await NV.UI.card('ENDING ' + ch.ending + ' ACHIEVED', (NV_DATA.endings[ch.ending] || {}).title || ch.title, U.esc(((NV_DATA.endings[ch.ending] || {}).desc || '').replace(/^Choice:\s*/, '')), { color: '#ffb238', min: 2 });
         await NV.UI.credits(ch.ending);
-        S.ci = chapters().findIndex(c => c.id === '69'); S.cp = 0; NV.State.save();
+        S.ci = chapters().findIndex(c => c.id === '69'); S.cp = 0; S.at = null; NV.State.save();
         // after the end of the world: an empty void. Jumping in erases the save.
         await NV.fade(true, 800);
         const vr = await NV.Level.start({ t: 'play', m: 'void', k: 0, d: 'Nothing remains. Step off the edge to erase this save.' }, { act: 1, palette: NV.paletteFor('VOID'), chapter: 'void', echoes: [], tactic: {} });
@@ -6875,8 +6939,8 @@ NV.Story = (() => {
         return;
       }
       const lvlUp = NV.State.implant();
-      await NV.UI.card('CHAPTER ' + ch.id + ' COMPLETE', ch.title, `<ul><li>Checkpoint saved</li><li>Implant level ${lvlUp}</li><li>Paper stars ${S.stars}/12 · Operations ${S.ops}</li></ul>`, { color: '#3dffa8', min: .8 });
-      ci++; S.ci = ci; S.cp = 0; NV.State.save();
+      await NV.UI.card('CHAPTER ' + ch.id + ' COMPLETE', ch.title, `<ul><li>Progress saved</li><li>Implant level ${lvlUp}</li><li>Paper stars ${S.stars}/12 · Operations ${S.ops}</li></ul>`, { color: '#3dffa8', min: .8 });
+      ci++; S.ci = ci; S.cp = 0; S.at = null; S.spot = null; NV.State.dropSpot(); NV.State.save();
       if (chapters()[ci] && chapters()[ci].ending) break; // safety: never walk into endings by order
     }
     NV.UI.storyClose();
@@ -6956,7 +7020,7 @@ NV.Story = (() => {
     const c = await NV.UI.title();
     await NV.fade(true, 600);
     if (c.mode === 'new') { NV.State.newGame(c.profile); await NV.Story.run(0, 0); }
-    else if (c.mode === 'continue') { if (NV.State.load()) { const S = NV.State.get(); await NV.Story.run(S.ci || 0, S.cp || 0); } }
+    else if (c.mode === 'continue') { if (NV.State.load()) { const S = NV.State.get(); await NV.Story.run(S.ci || 0, S.at && S.at.ci === S.ci && Array.isArray(S.at.path) ? S.at.path : S.cp || 0); } }
     else if (c.mode === 'chapter') { if (NV.State.fromSnapshot(c.ci)) await NV.Story.run(c.ci, 0); }
     else if (c.mode === 'mp') await mpSession();
     await NV.fade(true, 400);
