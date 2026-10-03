@@ -1282,7 +1282,7 @@ NV.windowTex2 = (scene, seed, hueA, hueB) => NV.tex(scene, 256, 512, (g, w, h) =
   const ribbon = r() < .35;
   for (let y = 0; y < h; y += 16) {
     g.fillStyle = 'rgba(170,160,220,.11)'; g.fillRect(0, y, w, 2);
-    const lit = r() < .5, tint = r(), wc = tint > .6 ? '#ffd08a' : tint > .25 ? '#8fb4ff' : '#ff86d8';
+    const lit = r() < .95, tint = r(), wc = tint > .6 ? '#ffd08a' : tint > .25 ? '#8fb4ff' : '#ff86d8'; // nearly every floor lit
     if (ribbon) {
       if (!lit && r() < .7) continue;
       g.globalAlpha = .3 + r() * .45; g.fillStyle = r() < .08 ? hueA : wc; g.fillRect(0, y + 4, w, 9); g.globalAlpha = 1;
@@ -1290,8 +1290,8 @@ NV.windowTex2 = (scene, seed, hueA, hueB) => NV.tex(scene, 256, 512, (g, w, h) =
       continue;
     }
     for (let x = 2; x < w; x += 16) {
-      const v = r(); if (!lit && v < .8) continue; if (v < .2) continue;
-      g.globalAlpha = .45 + v * .5; g.fillStyle = v > .95 ? hueA : v > .9 ? hueB : wc; g.fillRect(x, y + 4, 12, 10); g.globalAlpha = 1;
+      const v = r(); if (!lit && v < .6) continue; if (v < .1) continue;
+      g.globalAlpha = .6 + v * .4; g.fillStyle = v > .95 ? hueA : v > .9 ? hueB : wc; g.fillRect(x, y + 4, 12, 10); g.globalAlpha = 1;
       if (r() < .3) { g.fillStyle = 'rgba(0,0,0,.55)'; for (let k = 0; k < 4; k++) g.fillRect(x, y + 5 + k * 2.5, 12, 1); }
       if (r() < .07) { g.fillStyle = 'rgba(0,0,0,.75)'; g.fillRect(x + 5, y + 8, 3, 6); g.beginPath(); g.arc(x + 6.5, y + 7, 1.7, 0, 7); g.fill(); }
     }
@@ -4293,7 +4293,7 @@ NV.Level = (() => {
     Object.values(bands).forEach(({ st, ci, arr }) => {
       const c = STYLE_COL[st], m = mat(scene, 'bld' + st + ci, '#0a0812'); m.emissiveTexture = NV.windowTex2(scene, 300 + ci * 7 + st.length, c[0], c[1]);
       m.emissiveTexture.vScale = [.5, .95, 1.8][ci]; m.emissiveTexture.uScale = 1.3; m.emissiveTexture.anisotropicFilteringLevel = 8; m.specularColor = new BABYLON.Color3(.25, .25, .35);
-      if (st === 'dead') m.emissiveTexture.level = .35;
+      if (st === 'dead') m.emissiveTexture.level = .8; else m.emissiveTexture.level = 1.25;
       mk('bld' + st + ci, m, arr);
     });
     // street furniture
