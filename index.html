@@ -2274,7 +2274,8 @@ NV.Level = (() => {
       const B = cand.filter(b => b.ht > 70 && b.ht < 150 && !/helix/.test(b.d) && P.buildings.every(o => o === b || o.y + o.h <= b.y - 4 || o.y >= b.y || o.x + o.w <= b.x - 2 || o.x >= b.x + b.w + 2 || o.ht < b.ht - 30)).sort((a, b) => b.ht - a.ht)[0] || cand.sort((a, b) => b.ht - a.ht)[0]; // a tall tower with a clear view over the street
       if (B) {
         const n0 = scene.meshes.length, t0 = scene.transformNodes.length, saveSig = L.sig;
-        L.map = genCity(); L._aptBuild = true; L.map.buildings = L.map.buildings.filter(b => b !== B); // the host tower is replaced by the apartment's own walls
+        L.map = genCity(); L._aptBuild = true; { const cx = (B.x + B.w / 2) * TILE, z0 = B.y * TILE; // the host tower, and any neighbour poking into the room's footprint, give way to the apartment's own walls
+          L.map.buildings = L.map.buildings.filter(b => b !== B && ((b.x + b.w) * TILE <= cx - 7 || b.x * TILE >= cx + 7 || (b.y + b.h) * TILE <= z0 - 1 || b.y * TILE >= z0 + 15 || b.ht < Math.min(110, Math.max(30, B.ht - 12)) - 1)); }
         cityMeshes(scene, statics, pal, []); L._aptBuild = false; L.map = keep; L.sig = saveSig || null;
         const hgt = Math.min(110, Math.max(30, B.ht - 12)), root = new BABYLON.TransformNode('cityAround', scene); root.position.set(12 - (B.x + B.w / 2) * TILE, -hgt, 8 - B.y * TILE);
         root.computeWorldMatrix(true);
@@ -5590,7 +5591,7 @@ NV.Level = (() => {
       else if (e.key === 'Escape') closeChat();
     });
     ci.addEventListener('keyup', e => e.stopPropagation());
-    document.getElementById('ui').appendChild(h);
+    document.getElementById('ui').appendChild(h); { const wp = h.querySelector('.wpn'); if (wp && L.calm) { wp._off = true; wp.classList.add('off'); } } // calm story spaces start without the weapon panel
     h.querySelector('.obj .d').textContent = op.d || L.obj.label;
     h.querySelector('.obj .t').textContent = 'OPERATION · ' + L.obj.label.toUpperCase();
     if (L.boss) h.querySelector('.boss .nm').textContent = L.boss.name.toUpperCase();
