@@ -4794,6 +4794,7 @@ NV.Level = (() => {
       g.fillStyle = '#f4e6b0'; g.textAlign = 'center'; g.font = 'bold 24px Orbitron, sans-serif'; g.fillText('TOMORROW HAS', 845, 222); g.fillText('ALREADY BEEN TESTED', 845, 252); g.font = '16px Orbitron, sans-serif'; g.fillText('— HELIX', 845, 280);
     }, 1024, 512);
     const win = panel(s, 7.4, 3.6, view); win.position.set(12, 2.6, 8.06);
+    liveWindow(s, win);
     const rainM = mat(s, 'wrain', '#000', '#ffffff'); rainM.emissiveColor = new BABYLON.Color3(0, 0, 0);
     rainM.emissiveTexture = NV.tex(s, 256, 256, (g, w, h) => { g.clearRect(0, 0, w, h); const r = U.rng(7); for (let i = 0; i < 160; i++) { const x = r() * w, y = r() * h, l = 6 + r() * 26; g.strokeStyle = `rgba(200,225,255,${.15 + r() * .35})`; g.lineWidth = 1 + r(); g.beginPath(); g.moveTo(x, y); g.lineTo(x + 1, y + l); g.stroke(); } }, 'wraint');
     rainM.opacityTexture = rainM.emissiveTexture; rainM.emissiveTexture.uScale = 3; rainM.emissiveTexture.vScale = 1.5; rainM.disableLighting = true; rainM.alphaMode = BABYLON.Engine.ALPHA_ADD;
@@ -4854,8 +4855,66 @@ NV.Level = (() => {
     }
     if (ev === 'breach') { L.doorFrame.emissiveColor = C3('#ff7a2b'); L.breach = true; NV.Audio.sfx('alert'); }
   }
+
+  /* the apartment window is a live view: a real 3D skyline far below the level, filmed by its own camera into the window texture */
+  function liveWindow(s, win) {
+    const q = NV.Quality.get(); if (q.key === 'howtf') return;
+    const LAYER = 0x10000000, Y = -800, root = new BABYLON.TransformNode('winCity', s); root.position.y = Y;
+    const all = [], own = m => { m.parent = root; m.layerMask = LAYER; m.isPickable = false; all.push(m); return m; };
+    const em = (n, c) => { const m = mat(s, 'wv' + n, '#000', c); m.disableLighting = true; m.fogEnabled = false; return m; };
+    // sky + distant haze
+    const sky = own(BABYLON.MeshBuilder.CreateSphere('wvsky', { diameter: 1600, segments: 12, sideOrientation: BABYLON.Mesh.BACKSIDE }, s)); const skm = mat(s, 'wvskym', '#000'); skm.emissiveTexture = NV.citySky(s); skm.disableLighting = true; skm.fogEnabled = false; sky.material = skm;
+    // towers with lit facades (three palettes), Helix Tower on the horizon
+    const r = U.rng(4711), bands = [[], [], []];
+    for (let i = 0, n = 0; n < 110 && i < 400; i++) { const z = -40 - r() * 440, x = (r() - .5) * (160 + -z * 1.4), w = 10 + r() * 22, near = z > -120, h = near ? 20 + r() * 45 : 50 + r() * (z < -260 ? 210 : 120); if (near && Math.abs(x) < 50) continue; n++; bands[n % 3].push(NV.M(w, h, w * (.7 + r() * .6), x, h / 2 - 10, z)); }
+    bands.forEach((arr, k) => { const b = own(BABYLON.MeshBuilder.CreateBox('wvb' + k, { size: 1 }, s)); const m = mat(s, 'wvbm' + k, '#06040c'); m.emissiveTexture = NV.tex(s, 128, 256, (g, w, h) => { const rr = U.rng(900 + k); g.fillStyle = '#08060f'; g.fillRect(0, 0, w, h); const hue = ['#ff86d8', '#8fd8ff', '#ffd08a'][k];
+      for (let y = 2; y < h; y += 8) { const lit = rr() < .85; for (let x = 1; x < w; x += 8) { if (!(lit ? rr() < .85 : rr() < .2)) continue; g.fillStyle = rr() < .12 ? '#ffffff' : rr() < .5 ? hue : '#7f9cff'; g.globalAlpha = .65 + rr() * .35; g.fillRect(x, y, 6, 5); } } g.globalAlpha = 1; }, 'wvfac' + k, true);
+      m.emissiveTexture.uScale = 2; m.emissiveTexture.vScale = 5; m.disableLighting = true; m.fogEnabled = false; b.material = m; NV.thin(b, arr); });
+    const tower = own(BABYLON.MeshBuilder.CreateCylinder('wvt', { diameterTop: 18, diameterBottom: 34, height: 900, tessellation: 16 }, s)); tower.position.set(-70, 390, -380); tower.material = mat(s, 'wvtm', '#05060c');
+    const rings = []; for (let k = 0; k < 7; k++) { const t = own(BABYLON.MeshBuilder.CreateTorus('wvr', { diameter: 40 - k * 2, thickness: 1.2, tessellation: 32 }, s)); t.position.set(-70, 40 + k * 70, -380); t.material = em('ring', '#19f0ff'); rings.push(t); }
+    // neon edge strips + beacons
+    const beacons = []; for (let i = 0; i < 18; i++) { const bcn = own(BABYLON.MeshBuilder.CreateSphere('wvbc', { diameter: 2.2, segments: 6 }, s)); bcn.position.set((r() - .5) * 300, 80 + r() * 140, -140 - r() * 280); bcn.material = em('bcn' + i, '#ff2030'); beacons.push({ m: bcn, ph: r() * 6 }); }
+    // animated holo billboards: four ad screens, each its own texture, cycled per board
+    const AD = [['HELIX', 'TOMORROW IS TESTED', '#19f0ff', '#062a5a'], ['O₂+', 'BREATHE PREMIUM', '#3dffa8', '#06402e'], ['AUREX', 'YOUR VOICE · OPTIMIZED', '#ff2bd6', '#40084a'], ['MEMORY+', 'NEVER FORGET WHO YOU PAID', '#ffb238', '#40220a']];
+    const adMats = AD.map(([big, small, c, bg], i) => { const m = mat(s, 'wvadm' + i, '#000'); m.emissiveTexture = NV.tex(s, 512, 288, (g, w, h) => { g.fillStyle = bg; g.fillRect(0, 0, w, h); g.strokeStyle = c; g.lineWidth = 8; g.strokeRect(8, 8, w - 16, h - 16); g.fillStyle = c; g.shadowColor = c; g.shadowBlur = 24; g.font = 'bold 84px Orbitron, sans-serif'; g.textAlign = 'center'; g.fillText(big, w / 2, h / 2 + 10); g.shadowBlur = 0; g.fillStyle = '#ffffff'; g.font = 'bold 30px Rajdhani, sans-serif'; g.fillText(small, w / 2, h / 2 + 70); }, 'wvadt' + i, true); m.disableLighting = true; m.fogEnabled = false; m.backFaceCulling = false; return m; });
+    const ads = []; for (let k = 0; k < 3; k++) { const pl = own(BABYLON.MeshBuilder.CreatePlane('wvad', { width: 56, height: 31, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, s)); pl.position.set(-70 + k * 70, 75 + k * 16, -150 - k * 40); pl.rotation.y = (k - 1) * .25 + Math.PI; pl.material = adMats[k]; ads.push({ pl, f: k, t: k * 1.7 }); }
+    // flying traffic on three sky lanes
+    const bodyM = mat(s, 'wvcar', '#1c1a26'), head = em('wvh', '#eaf6ff'), tail = em('wvtl', '#ff2040');
+    const cars = []; for (let i = 0; i < 34; i++) { const n = new BABYLON.TransformNode('wvc', s); n.parent = root; const body = own(BABYLON.MeshBuilder.CreateBox('wvcb', { width: 6, height: 1.7, depth: 2.6 }, s)); const ug = own(BABYLON.MeshBuilder.CreateBox('wvcu', { width: 5.4, height: .15, depth: 2.2 }, s)); ug.material = em('wvug' + (i % 3), ['#ff2bd6', '#19f0ff', '#ffb238'][i % 3]); ug.parent = n; ug.position.y = -.95; body.material = bodyM; body.parent = n;
+      const dir = r() < .5 ? 1 : -1, lt = own(BABYLON.MeshBuilder.CreateBox('wvcl', { width: .3, height: .35, depth: 1.8 }, s)); lt.material = dir > 0 ? head : tail; lt.parent = n; lt.position.x = 3.1;
+      const lt2 = own(BABYLON.MeshBuilder.CreateBox('wvcl', { width: .3, height: .35, depth: 1.8 }, s)); lt2.material = dir > 0 ? tail : head; lt2.parent = n; lt2.position.x = -3.1;
+      cars.push({ n, dir, lane: [58, 72, 90][i % 3] + r() * 5, z: -45 - (i % 3) * 35 - r() * 25, x: (r() - .5) * 400, sp: 20 + r() * 25 }); }
+    // sweeping searchlights
+    const beamM = em('wvbeam', '#9fe8ff'); beamM.alpha = .07; beamM.alphaMode = BABYLON.Engine.ALPHA_ADD; beamM.backFaceCulling = false;
+    const lights = [0, 1, 2].map(k => { const c = own(BABYLON.MeshBuilder.CreateCylinder('wvsl', { diameterTop: 30, diameterBottom: 1.5, height: 320, tessellation: 12, cap: BABYLON.Mesh.NO_CAP }, s)); c.material = beamM; c.setPivotPoint(V3(0, -160, 0)); c.position.set(-120 + k * 120, 100, -260); return { c, ph: k * 2 }; });
+    // rain streaking past the glass, close to the camera
+    const rainM = em('wvrain', '#aac8ff'); rainM.alpha = .35; rainM.alphaMode = BABYLON.Engine.ALPHA_ADD;
+    const drops = []; for (let i = 0; i < 70; i++) { const d = own(BABYLON.MeshBuilder.CreateBox('wvd', { width: .03, height: 1.4, depth: .03 }, s)); d.material = rainM; drops.push({ d, x: (r() - .5) * 24, y: r() * 20, z: 6 - r() * 14, sp: 26 + r() * 10 }); }
+    // the camera behind the glass + render target
+    const cam = new BABYLON.FreeCamera('wvcam', V3(0, Y + 86, 20), s); cam.layerMask = LAYER; cam.fov = .75; cam.minZ = .5; cam.maxZ = 2000; cam.setTarget(V3(0, Y + 74, -220));
+    const size = ['ultra', 'veryhigh', 'high'].includes(q.key) ? 1024 : 512;
+    const rtt = new BABYLON.RenderTargetTexture('wvrtt', { width: size, height: size / 2 }, s, false); rtt.activeCamera = cam; rtt.renderList = all; rtt.refreshRate = q.key === 'potato' || q.key === 'verylow' ? 2 : 1; rtt.clearColor = new BABYLON.Color4(.02, .01, .04, 1);
+    s.customRenderTargets.push(rtt);
+    const wm = mat(s, 'wvwin', '#000'); wm.emissiveTexture = rtt; wm.disableLighting = true; wm.backFaceCulling = false; wm.fogEnabled = false; win.material = wm;
+    const sky0 = skm.emissiveColor.clone();
+    L.liveWin = { adMats, cam, cars, ads, lights, rings, beacons, drops, Y, flash: 0, skm, sky0, t: 0 };
+  }
+  function liveWindowTick(dt) {
+    const W = L.liveWin; if (!W) return; W.t += dt; const t = W.t, p = L.p;
+    // parallax: the view shifts as you move around the room
+    const ox = U.clamp((p.x - 12) * 1.6, -14, 14), oz = U.clamp((p.z - 10) * .8, -6, 6);
+    W.cam.position.set(ox, W.Y + 86 + (p.crouch ? -1.2 : 0), 20 + oz); W.cam.setTarget(V3(ox * .4, W.Y + 74, -220));
+    W.cars.forEach(c => { c.x += c.dir * c.sp * dt; if (c.x > 220) c.x = -220; if (c.x < -220) c.x = 220; c.n.position.set(c.x, c.lane + Math.sin(t + c.z) * .4, c.z); });
+    W.ads.forEach(a => { a.t += dt; if (a.t > 4.5) { a.t = 0; a.f = (a.f + 1) % 4; a.pl.material = W.adMats[a.f]; a.g = .25; } a.pl.visibility = a.g > 0 ? (a.g -= dt, Math.random() < .5 ? .3 : 1) : 1; });
+    W.lights.forEach(l => { l.c.rotation.z = Math.sin(t * .35 + l.ph) * .45; l.c.rotation.x = Math.cos(t * .27 + l.ph) * .2; });
+    W.rings.forEach((rg, k) => rg.material.emissiveColor.set(.1, .94 * (.6 + .4 * Math.sin(t * 2 - k * .6)), 1));
+    W.beacons.forEach(b => b.m.isVisible = Math.sin(t * 2.5 + b.ph) > .4);
+    W.drops.forEach(d => { d.y -= d.sp * dt; if (d.y < -4) d.y = 22; d.d.position.set(d.x + W.cam.position.x * .9, d.y + 70, d.z); });
+    // the odd lightning flash
+    if (W.flash > 0) { W.flash -= dt; W.skm.emissiveColor.set(W.flash * 2.2, W.flash * 2.2, W.flash * 2.8); } else if (Math.random() < dt * .06) { W.flash = .35; NV.Audio.sfx('boom'); } else W.skm.emissiveColor.copyFrom(W.sky0);
+  }
   function updateApartment(dt) {
-    if (L.aptRain) L.aptRain.vOffset -= dt * .35;
+    if (L.aptRain) L.aptRain.vOffset -= dt * .35; liveWindowTick(dt);
     if (L.vossT > 0) { L.vossT -= dt; L.screens.forEach(m => m.emissiveTexture.level = Math.random() > .3 ? 1 : .2); }
     if (L.breach) { if (Math.random() < dt * 8) spark(V3(12 + (Math.random() - .5) * .8, 1.2 + Math.random(), 19.75), '#ff7a2b', 6); L.doorFrame.emissiveColor.g = .3 + .2 * Math.sin(L.time * 12); }
   }
