@@ -6804,7 +6804,7 @@ NV.UI = (() => {
   const ago = t => { if (!t) return 'never'; const s = (Date.now() - t) / 1000; return s < 90 ? 'just now' : s < 3600 ? Math.round(s / 60) + ' min ago' : s < 86400 ? Math.round(s / 3600) + ' h ago' : Math.round(s / 86400) + ' days ago'; };
   const avatar = u => `<span class="av" style="background:${U.esc(u.color || '#19f0ff')}">${U.esc((u.username || '?')[0].toUpperCase())}</span>`;
   const busyBtn = async (btn, fn) => { if (btn.disabled) return; const t = btn.innerHTML; btn.disabled = true; btn.textContent = '…'; try { return await fn(); } finally { btn.disabled = false; btn.innerHTML = t; } };
-  const serverBox = () => `<details class="srv"><summary>Server</summary><div class="f">ACCOUNT SERVER ADDRESS<input class="srvu" spellcheck="false" placeholder="https://neon-veins-api.…workers.dev"></div><button type="button" class="ab srvs">Save server</button></details>`;
+  const serverBox = () => '';
   const bindServer = (m, after) => { const A = NV.Account, u = m.querySelector('.srvu'); if (!u) return; u.value = A.configured() ? A.server() : ''; m.querySelector('.srvs').onclick = () => { A.setServer(u.value); NV.toast('ACCOUNT', A.configured() ? 'Server saved.' : 'That is not a valid address.', A.configured() ? '#3dffa8' : '#ff3355', 3); if (after) after(); }; };
 
   UI.auth = tab => new Promise(res => {
@@ -6820,7 +6820,7 @@ NV.UI = (() => {
       m.querySelectorAll('.tabs .ab').forEach(b => b.classList.toggle('pri', b.dataset.t === mode));
       $('.pane').innerHTML = mode === 'in'
         ? `<label class="f">EMAIL OR USERNAME<input class="lg" autocomplete="username" maxlength="254"></label>${pw('pw1', 'PASSWORD', 'current-password')}`
-        : `<label class="f">EMAIL<input class="em" type="email" autocomplete="email" maxlength="254"></label><label class="f">USERNAME<input class="un" autocomplete="username" maxlength="20" placeholder="3–20 letters, numbers, _ or -"></label>${pw('pw1', 'PASSWORD', 'new-password')}${pw('pw2', 'CONFIRM PASSWORD', 'new-password')}<p class="muted hint" style="font-size:12px;margin-top:4px">At least 8 characters with a letter and a number. Your password is stored hashed, never in plain text.</p>`;
+        : `<label class="f">EMAIL<input class="em" type="email" autocomplete="email" maxlength="254"></label><label class="f">USERNAME<input class="un" autocomplete="username" maxlength="20" placeholder="3–20 letters, numbers, _ or -"></label>${pw('pw1', 'PASSWORD', 'new-password')}${pw('pw2', 'CONFIRM PASSWORD', 'new-password')}<p class="muted" style="font-size:12px;margin-top:4px">At least 8 characters with a letter and a number. Your password is stored hashed, never in plain text.</p>`;
       $('.go').textContent = mode === 'in' ? 'Sign in ▸' : 'Create account ▸';
       m.querySelectorAll('.eye').forEach(b => b.onclick = () => { const i = b.previousElementSibling; i.type = i.type === 'password' ? 'text' : 'password'; b.textContent = i.type === 'password' ? 'Show' : 'Hide'; });
       stopKeys(m); m.querySelectorAll('.pane input').forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); submit(); } }));
