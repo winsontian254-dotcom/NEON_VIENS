@@ -6234,6 +6234,7 @@ NV.UI = (() => {
   });
 
   UI.title = () => new Promise(res => {
+    document.querySelectorAll('.banner, .vigbanner').forEach(x => x.remove());
     NV.Backdrop.setScene('NEON HEIGHTS — SKYLINE'); NV.Audio.setMood('title');
     const meta = NV.State.meta(), has = NV.State.hasSave();
     const el = add(`<div class="logo">NEON <span class="v">VEINS</span></div><div class="tagline">IF YOU CAN READ THIS, I FAILED.</div>
