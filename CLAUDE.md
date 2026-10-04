@@ -12,6 +12,10 @@ Whenever you edit `index.html`, in the same commit:
 If you changed native code (`android/app/src/**`, the manifest, or the build script), also bump `versionCode` (and `versionName`) in `android/version.json` before rebuilding: installed apps offer a one-tap update only when versionCode goes up.
 Game-only changes do not need a version bump: installed apps download the new `index.html` from GitHub by themselves, and the rebuilt APK keeps the offline bundle current.
 
+## Rule: announce player-visible changes (new-version prompt)
+- Players get a "New version available" prompt (with change log) when `version.json` on GitHub Pages has a higher `build` than the `NV_BUILD` inside their loaded `index.html`.
+- When you change the game in a way players should be told about, run `python3 tools/release.py "short change line" "another line"` (bumps `NV_BUILD` in index.html and adds an entry to `version.json`), then commit both with the rebuilt APK. Purely internal fixes don't need it.
+
 ## Android app facts
 - The updater in `Updater.java` reads the branch `claude/festive-faraday-4v0m9s` of `winsontian254-dotcom/NEON_VIENS` (public GitHub API, no token). If the working branch changes, update `Updater.BRANCH` and bump versionCode.
 - The APK is signed with the debug key in `android/keystore/`; keep using it so updates install over older versions.

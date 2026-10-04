@@ -1,0 +1,19 @@
+{
+  "build": 1,
+  "history": [
+    {
+      "build": 1,
+      "version": "1.1",
+      "date": "2026-10-04",
+      "notes": [
+        "Free accounts: sign up with email, username and password; friends, co-op invites and cloud saves",
+        "Without an account you get a 2-chapter demo; multiplayer needs an account",
+        "Full Chinese translation (Simplified and Traditional)",
+        "Continue resumes at the exact line and spot you quit from",
+        "NPCs can be hit; weapon panel hides when you have no weapon or are in dialogue",
+        "Multiplayer is co-op only",
+        "New version alerts with this change log"
+      ]
+    }
+  ]
+}
