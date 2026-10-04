@@ -217,6 +217,15 @@ Pause (**Esc**) → **Black Market** to buy from the arsenal: 267 weapons, tools
 - Every item has its own procedural 3D viewmodel (pistol, SMG, rifle, shotgun, sniper, rotary, laser, launcher, grenade, blade, hammer, baton, wrist rig, drone remote, strike designator), coloured by faction.
 - Credits: 9 ¢ per kill, 14 ¢ per nonlethal takedown, 150 ¢ or more per completed operation, plus gigs and data shards. Multiplayer sessions start with 3000 ¢.
 
+## Accounts, friends & cloud saves
+
+A free account (email, username, password) unlocks the full game. Without one, Neon Veins is a **demo**: the first two chapters, no multiplayer.
+
+- **Account hub** (title → Account): profile, **Friends** (add by username with live search, accept/decline requests, see who is online and what they are doing, one-click **Join** on a friend's co-op game, **Invite** friends from inside a session), **Cloud saves** (story save + chapter unlocks + endings; auto-upload while playing, manual upload/download/delete, newest-wins check when you sign in on another device), **Settings** (username, bio, colour, privacy toggles, change email/password, signed-in devices, sign out everywhere, delete account).
+- Signed-in players keep the full game offline; the session token is remembered on the device.
+- The server is `server/worker.js`, a Cloudflare Worker with a D1 database (`neon-veins-accounts`). Passwords are PBKDF2-SHA256 with per-user salts; sessions are random tokens stored only as hashes; logins and sign-ups are rate-limited.
+- Deploy/update the server: `cd server && wrangler deploy`. Its URL goes in `DEFAULT_API` in `index.html` (players can also enter one under Account → Server).
+
 ## Languages — English · 简体中文 · 繁體中文
 
 Settings → **Language · 语言** switches between English, Simplified Chinese and Traditional Chinese (picked automatically from the browser the first time). Everything is translated: menus, HUD, objectives, toasts, and the full story — every chapter, choice, ending and mission synopsis. With voice acting on, characters speak through the system's Chinese voices; if none are installed the dialogue simply stays silent instead of being read in the wrong language.

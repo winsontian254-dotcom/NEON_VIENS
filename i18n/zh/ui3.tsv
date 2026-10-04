@@ -1,0 +1,161 @@
+ACCOUNT	账户
+A free account unlocks the full story, co-op with friends and cloud saves. Without one you can play the demo.	免费账户可解锁完整剧情、与好友合作游玩和云存档。没有账户也可以玩试玩版。
+Sign in	登录
+Create account	创建账户
+Sign in ▸	登录 ▸
+Create account ▸	创建账户 ▸
+EMAIL OR USERNAME	邮箱或用户名
+PASSWORD	密码
+CONFIRM PASSWORD	确认密码
+EMAIL	邮箱
+USERNAME	用户名
+3–20 letters, numbers, _ or -	3–20 个字母、数字、_ 或 -
+At least 8 characters with a letter and a number. Your password is stored hashed, never in plain text.	至少 8 个字符，包含字母和数字。你的密码经过哈希处理存储，绝不会以明文保存。
+Show	显示
+Hide	隐藏
+Server	服务器
+ACCOUNT SERVER	账户服务器
+ACCOUNT SERVER ADDRESS	账户服务器地址
+Save server	保存服务器
+Server saved.	服务器已保存。
+That is not a valid address.	这不是一个有效的地址。
+The account server has not been set up yet. Ask the game host for its address (Server, below).	账户服务器尚未设置。请向游戏主机索要地址（见下方“服务器”）。
+The account server is not set up yet (Account → Server).	账户服务器尚未设置（账户 → 服务器）。
+Enter a valid email address.	请输入有效的邮箱地址。
+Usernames are 3–20 letters, numbers, _ or -.	用户名为 3–20 个字母、数字、_ 或 -。
+Password needs 8+ characters with a letter and a number.	密码需要至少 8 个字符，包含字母和数字。
+The passwords do not match.	两次输入的密码不一致。
+Enter your email/username and password.	请输入邮箱/用户名和密码。
+Signing in…	正在登录…
+Creating your account…	正在创建账户…
+WELCOME BACK	欢迎回来
+ACCOUNT CREATED	账户已创建
+Create a free account ▸	创建免费账户 ▸
+Not now	以后再说
+END OF THE DEMO	试玩版结束
+You've reached the end of the free demo. Create a free account (or sign in) to continue Ghost's story, play co-op with friends and keep your progress in the cloud. Your progress so far is kept.	你已到达免费试玩版的结尾。创建免费账户（或登录）即可继续幽灵的故事、与好友合作游玩，并把进度保存在云端。你目前的进度会被保留。
+MULTIPLAYER	多人游戏
+Co-op needs a free account, so friends can find you and join your games. The demo is single-player only.	合作模式需要免费账户，这样好友才能找到你并加入你的游戏。试玩版仅限单人。
+Profile	资料
+Friends	好友
+Cloud saves	云存档
+Settings	设置
+Close	关闭
+Loading…	加载中…
+You stay signed in offline; the full game still works.	离线时你仍保持登录状态；完整游戏依然可用。
+Story	剧情
+Not started	未开始
+Endings discovered	已发现结局
+Chapters unlocked	已解锁章节
+Operations cleared	已完成行动
+Cloud save	云存档
+not uploaded yet	尚未上传
+ADD A FRIEND	添加好友
+Username	用户名
+Send request	发送请求
+CO-OP INVITES	合作邀请
+Join	加入
+FRIEND REQUESTS	好友请求
+Accept	接受
+Decline	拒绝
+wants to be friends	想加你为好友
+FRIENDS	好友
+Invite	邀请
+Remove	移除
+No friends yet. Add someone by their username above.	还没有好友。在上方输入用户名添加好友。
+SENT REQUESTS	已发送的请求
+Cancel	取消
+waiting for a reply	等待回复
+Add	添加
+Online	在线
+Offline	离线
+Invite sent.	邀请已发送。
+Sent	已发送
+This device	本设备
+No save	无存档
+Cloud	云端
+Nothing uploaded yet	尚未上传任何内容
+Last sync	上次同步
+Upload automatically while playing	游玩时自动上传
+Upload this device ▸ cloud	上传本设备 ▸ 云端
+Download cloud ▸ this device	下载云端 ▸ 本设备
+Delete cloud save	删除云存档
+Your story save, chapter unlocks and endings travel with your account: sign in on another device to continue there.	你的剧情存档、章节解锁和结局都会跟随你的账户：在另一台设备上登录即可继续游玩。
+Uploaded.	已上传。
+Cloud save loaded on this device.	云存档已加载到本设备。
+Cloud save deleted.	云存档已删除。
+Replace the save on this device with your cloud save?	用云存档替换本设备上的存档吗？
+Delete your cloud save? The save on this device is kept.	删除云存档吗？本设备上的存档会保留。
+PROFILE	资料
+BIO	简介
+A line your friends see	一句好友能看到的话
+Save	保存
+COLOUR	颜色
+PRIVACY	隐私
+Allow friend requests	允许好友请求
+Show friends when I'm online	向好友显示我的在线状态
+NEW EMAIL	新邮箱
+CURRENT PASSWORD	当前密码
+Change email	更改邮箱
+NEW PASSWORD	新密码
+CONFIRM NEW PASSWORD	确认新密码
+Change password	更改密码
+DEVICES	设备
+Sign out	退出登录
+Sign out everywhere	在所有设备上退出
+DANGER ZONE	危险区域
+PASSWORD TO DELETE YOUR ACCOUNT	输入密码以删除账户
+Delete account permanently	永久删除账户
+Username saved.	用户名已保存。
+Bio saved.	简介已保存。
+Saved.	已保存。
+Email changed.	邮箱已更改。
+Password changed. Other devices were signed out.	密码已更改。其他设备已退出登录。
+The new passwords do not match.	两次输入的新密码不一致。
+Sign out on every device, including this one?	在所有设备上退出登录，包括本设备？
+Delete your account, friends list and cloud saves forever? This cannot be undone.	永久删除你的账户、好友列表和云存档？此操作无法撤销。
+Signed out. The game is back in demo mode.	已退出登录。游戏已回到试玩模式。
+ACCOUNT DELETED	账户已删除
+Your account and cloud data were removed.	你的账户和云端数据已被删除。
+DEMO	试玩版
+SIGN IN FOR THE FULL GAME	登录以解锁完整游戏
+SIGNED IN	已登录
+Sign in / Create account	登录 / 创建账户
+Free · unlocks the full story, co-op and cloud saves	免费 · 解锁完整剧情、合作模式和云存档
+Friends, cloud saves, account settings	好友、云存档、账户设置
+Needs a free account	需要免费账户
+Online co-op with friends · no story	与好友在线合作 · 无剧情
+Playing as	当前身份
+FRIENDS IN A GAME	正在游戏中的好友
+invited you	邀请了你
+INVITE FRIENDS	邀请好友
+No friends online right now.	目前没有在线的好友。
+ACCOUNT	账户
+CO-OP INVITE	合作邀请
+FRIEND REQUEST	好友请求
+CLOUD SAVE	云存档
+CO-OP	合作
+Connecting…	正在连接…
+Hosting co-op	正在主持合作游戏
+Playing co-op	正在合作游戏
+Exploring New Avalon	正在探索新阿瓦隆
+Playing the story	正在游玩剧情
+In the menus	在菜单中
+Please sign in.	请登录。
+You are offline.	你已离线。
+Could not reach the account server.	无法连接账户服务器。
+There is no save on this device yet.	本设备上还没有存档。
+Wrong email/username or password.	邮箱/用户名或密码错误。
+That email already has an account.	该邮箱已注册账户。
+That username is taken.	该用户名已被占用。
+Too many attempts. Try again in a few minutes.	尝试次数过多。请几分钟后再试。
+No player with that username.	没有使用该用户名的玩家。
+You're already friends.	你们已经是好友了。
+Request already sent.	请求已发送。
+That player is not accepting friend requests.	该玩家不接受好友请求。
+Your current password is wrong.	当前密码错误。
+Enter your current password to change your email.	请输入当前密码以更改邮箱。
+Enter your password to delete your account.	请输入密码以删除账户。
+Your session expired. Please sign in again.	你的登录已过期。请重新登录。
+ACCOUNT	账户
+Account	账户

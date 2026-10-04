@@ -1,0 +1,10 @@
+# Neon Veins account server (Cloudflare Worker + D1). Deploy from this folder:  wrangler deploy
+name = "neon-veins-api"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "neon-veins-accounts"
+database_id = "2bf66b1c-6fb4-423f-8a7b-fa927242c9df"
