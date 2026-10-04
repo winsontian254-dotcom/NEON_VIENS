@@ -23,5 +23,5 @@ Game-only changes do not need a version bump: installed apps download the new `i
 - After editing any translation, or the story data (NV_DATA), run `python3 tools/build_zh.py` (needs `pip install opencc-python-reimplemented`); it rewrites the `NV_ZH` block in index.html. New UI strings: add them to a `uiN.tsv`.
 
 ## Accounts server
-- `server/` is the account API (Cloudflare Worker + D1 `neon-veins-accounts`, id in `server/wrangler.toml`; schema in `server/schema.sql`). It is deployed separately with `cd server && wrangler deploy` (from the user's PC; this cloud session cannot reach Cloudflare's API).
+- `server/` is the account API (Cloudflare Worker + D1 `neon-veins-accounts`, id in `server/wrangler.toml`; schema in `server/schema.sql`). It is deployed at https://neon-veins-api.winsontian254.workers.dev (`cd server && wrangler deploy` from a PC; this cloud session cannot reach Cloudflare).
 - The game reads the API base from `DEFAULT_API` in `NV.Account` (index.html); `NV.Account.DEMO` is the number of chapters playable without an account.

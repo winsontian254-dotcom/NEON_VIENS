@@ -1063,7 +1063,7 @@ NV.State = (() => {
 NV.Account = (() => {
   const KEY = 'nv_account_v1', DEMO = 2;
   // where server/worker.js is deployed (wrangler prints this URL); players can override it in Account → Server
-  const DEFAULT_API = 'https://neon-veins-api.REPLACE-ME.workers.dev';
+  const DEFAULT_API = 'https://neon-veins-api.winsontian254.workers.dev';
   let st = {}; try { st = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { st = {}; }
   const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { } };
   const subs = new Set(), emit = () => subs.forEach(f => { try { f(); } catch (e) { } });
