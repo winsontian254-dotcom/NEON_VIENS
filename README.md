@@ -32,7 +32,7 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 
 **Gameplay**
 - **Open world free roam** — procedural New Avalon with buildings, pedestrians, patrols, gigs, vendors, and 24 hidden data shards
-- **First-person operations** — stealth, silent takedowns, hacking minigame, shock-pistol combat, EMP pulse, dash
+- **First-person operations** — stealth, silent takedowns, the ICE BREAK hacking matrix (pick codes along alternating rows and columns to upload a sequence before the trace finishes), shock-pistol combat, EMP pulse, dash
 - **Boss fights** — multi-phase encounters with shields, rings, spirals, charges, and summoned adds
 - **Arena waves**, **defend-the-uplink**, **hack-the-terminals**, **retrieve-the-shards**, **escort/rescue** modes
 - **Overwatch of your choices** — every decision nudges 5 faction stats: Raven Trust, Voss Integrity, Civilian Hope, Corporate Leverage, AI Sympathy
@@ -68,7 +68,7 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 | Drive: handbrake, boost, horn | `Space`, `Shift`, `H` | A, LB, R3 |
 | Pause · Black Market | `Esc` | Start |
 | Hotbar slot / cycle | `1`–`9` / wheel | RB |
-| Zoom (precision rifles) | RMB | — |
+| Aim down sights (red dot, holo, 2.5× and 6× scopes) | RMB (hold `Shift` to steady a scope) | LT |
 | Chat (multiplayer) | `Enter` | — |
 | Volume down / up, mute | `-` / `=`, `M` | — |
 | Jump (the void after the ending) | `Space` | A |
@@ -212,7 +212,7 @@ City-only moves, built on the climbing system:
 
 Pause (**Esc**) → **Black Market** to buy from the arsenal: 267 weapons, tools, drones, cyberattacks, environmental triggers, boss gear, strategic strikes and legendaries from the script. Pick a hotbar slot and equip; right-click a slot to clear it.
 
-- Hotbar: **1–9** or mouse wheel (RB on gamepad). **LMB** uses the selected item, **RMB** zooms precision rifles.
+- Hotbar: **1–9** or mouse wheel (RB on gamepad). **LMB** uses the selected item, **RMB** aims down the gun's sight: pistols carry a red dot, SMGs and shotguns a holo sight, rifles a 2.5× scope and precision rifles a 6× scope. Aiming tightens spread and recoil and slows you down.
 - Each item's behaviour comes from what it is: smart/predictive guns home in, rail/phase guns pierce, Echo guns repeat their shot, Null/EMP gear stuns and fries drones, nonlethal gear takes enemies down alive, melee is silent and one-shots unaware guards.
 - Grenades, rockets and mines have area effects: frag, EMP, sleep gas, coolant freeze, decoys and gravity. Hacks can stun, turn guards against their squad, overload them, blind a squad, mark every hostile, or cloak you. Drones attack, heal, jam sensors or shield you. Environmental and strategic weapons call in crane drops, floods, coolant, kinetic rods, solar beams and barrages at the point you aim at.
 - Every item has its own procedural 3D viewmodel (pistol, SMG, rifle, shotgun, sniper, rotary, laser, launcher, grenade, blade, hammer, baton, wrist rig, drone remote, strike designator), coloured by faction.
@@ -289,7 +289,7 @@ A floating panel in front of you mirrors health, energy, the objective, prompts,
 
 ## Controllers & touch
 
-**Gamepad** (standard layout): left stick move, right stick look, RT fire, LT zoom (precision rifles) or brake, A dash-stop / confirm / jump, B dash / back, X interact (hold near a car to enter), Y EMP, LB sprint / boost, RB or d-pad left/right switch hotbar item, L3 sneak, R3 horn, Select fast travel, Start pause. The left stick and d-pad navigate every menu, including the Black Market and Multiplayer screens. Gentle aim assist and rumble come on while you're using a controller.
+**Gamepad** (standard layout): left stick move, right stick look, RT fire, LT aim down sights or brake, A dash-stop / confirm / jump, B dash / back, X interact (hold near a car to enter), Y EMP, LB sprint / boost, RB or d-pad left/right switch hotbar item, L3 sneak, R3 horn, Select fast travel, Start pause. The left stick and d-pad navigate every menu, including the Black Market and Multiplayer screens. Gentle aim assist and rumble come on while you're using a controller.
 
 **Touch** (phones/tablets, appears on first touch): left thumb joystick (push fully forward to sprint), drag anywhere on the right to look, buttons for fire, interact, dash, EMP, car, sneak, zoom and pause, and tap a hotbar slot to select it. Touch gets the same gentle aim assist. Menus, dialogue and choices are simply tapped.
 

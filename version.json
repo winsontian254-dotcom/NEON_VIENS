@@ -1,6 +1,16 @@
 {
-  "build": 3,
+  "build": 4,
   "history": [
+    {
+      "build": 4,
+      "version": "1.4",
+      "date": "2026-10-09",
+      "notes": [
+        "Every gun now has a sight: red dots on pistols, holo sights on SMGs and shotguns, a 2.5× scope on rifles and a 6× scope on precision rifles",
+        "Right-click (LT) to aim down sights: the gun swings up to your eye, scopes close in to a lens view; aiming tightens your shots — hold Shift to steady a scope",
+        "New hacking: ICE BREAK — pick codes along alternating rows and columns to upload the sequence before the trace runs out"
+      ]
+    },
     {
       "build": 3,
       "version": "1.3",
