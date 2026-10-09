@@ -29,8 +29,8 @@ PATTERNS = [
     (r'^Operations (\d+)$', '', r'行动 $1'),
     (r'^Next: Chapter (\w+)$', '', r'下一章：第$1章'),
     (r'^(\d+) objective\(s\) left$', '', r'剩余 $1 个目标'),
-    (r'^Find (.+) and talk to them \[E\]\. Follow the yellow beam — T to fast travel\.$', '', r'找到$1并与其交谈 [E]。跟随黄色光柱——按 T 快速移动。'),
-    (r'^Head to the red beam to start: (.+)\. Press T to fast travel\.$', '', r'前往红色光柱开始：$1。按 T 快速移动。'),
+    (r'^Find (.+) and talk to them \[E\]\. Follow the yellow beam\.$', '', r'找到$1并与其交谈 [E]。跟随黄色光柱。'),
+    (r'^Head to the red beam to start: (.+)\.$', '', r'前往红色光柱开始：$1。'),
 ]
 
 

@@ -62,7 +62,7 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 | Dash | `Space` | A |
 | Interact / Takedown / Hack | `E` | X |
 | EMP pulse | `Q` | Y |
-| Fast travel (free roam) | `T` | Select |
+| Reload | `R` | Select |
 | Enter / exit vehicle (free roam) | `F` | X |
 | Drive: throttle / reverse, steer | `W`/`S`, `A`/`D` | RT / LT, left stick |
 | Drive: handbrake, boost, horn | `Space`, `Shift`, `H` | A, LB, R3 |
@@ -289,7 +289,7 @@ A floating panel in front of you mirrors health, energy, the objective, prompts,
 
 ## Controllers & touch
 
-**Gamepad** (standard layout): left stick move, right stick look, RT fire, LT aim down sights or brake, A dash-stop / confirm / jump, B dash / back, X interact (hold near a car to enter), Y EMP, LB sprint / boost, RB or d-pad left/right switch hotbar item, L3 sneak, R3 horn, Select fast travel, Start pause. The left stick and d-pad navigate every menu, including the Black Market and Multiplayer screens. Gentle aim assist and rumble come on while you're using a controller.
+**Gamepad** (standard layout): left stick move, right stick look, RT fire, LT aim down sights or brake, A dash-stop / confirm / jump, B dash / back, X interact (hold near a car to enter), Y EMP, LB sprint / boost, RB or d-pad left/right switch hotbar item, L3 sneak, R3 horn, Select reload, Start pause. The left stick and d-pad navigate every menu, including the Black Market and Multiplayer screens. Gentle aim assist and rumble come on while you're using a controller.
 
 **Touch** (phones/tablets, appears on first touch): left thumb joystick (push fully forward to sprint), drag anywhere on the right to look, buttons for fire, interact, dash, EMP, car, sneak, zoom and pause, and tap a hotbar slot to select it. Touch gets the same gentle aim assist. Menus, dialogue and choices are simply tapped.
 

@@ -1,6 +1,18 @@
 {
-  "build": 4,
+  "build": 5,
   "history": [
+    {
+      "build": 5,
+      "version": "1.5",
+      "date": "2026-10-09",
+      "notes": [
+        "Guns have real magazines: when they run dry they click — reload with R (Select on a controller, RELOAD on touch)",
+        "Recoil kicks the view up and now settles back to where you were aiming",
+        "Fast travel removed",
+        "SKIP SCENE button (or Tab) fast-forwards dialogue to the next choice or gameplay",
+        "Characters now match their dialogue portraits; brighter jacket colours, and the courier profile screen fits on phones"
+      ]
+    },
     {
       "build": 4,
       "version": "1.4",
