@@ -1164,7 +1164,7 @@ NV.Account = (() => {
 
 /* Condition evaluation for conditional blocks compiled from the script */
 NV.Update = (() => {
-  const NV_BUILD = 1;
+  const NV_BUILD = 2;
   const URL = 'https://winsontian254-dotcom.github.io/NEON_VIENS/version.json', KEY = 'nv_seen_build';
   let info = null, shown = 0, alerted = false;
   const seen = () => { try { return Number(localStorage.getItem(KEY)) || 0; } catch (e) { return 0; } };
@@ -6254,6 +6254,23 @@ NV.UI = (() => {
   UI.nav = nav;
 
   /* ---------------- splash & title ---------------- */
+  /* first launch: pick the language (shown once; Settings → Language changes it later) */
+  UI.language = () => new Promise(res => {
+    const cur = NV.Settings.get().lang | 0;
+    const el = add(`<div class="center notr"><div class="logo">NEON <span class="v">VEINS</span></div>
+      <div class="tagline">LANGUAGE · 语言 · 語言</div>
+      <div class="menu panel" style="padding:10px 0;position:static;margin:26px auto 0;width:min(380px,86vw);max-height:none;overflow:visible"></div></div>`, '', 'langpick');
+    el.style.position = 'absolute'; el.style.inset = '0'; el.style.background = 'radial-gradient(ellipse at center,rgba(0,0,0,.15),rgba(0,0,0,.85))';
+    const menu = el.querySelector('.menu');
+    const subs = ['Play in English', '用简体中文游玩', '用繁體中文遊玩'];
+    const btns = NV.I18n.NAMES.map((n, i) => { const b = U.el('button', 'btn', n + '<small>' + subs[i] + '</small>'); menu.appendChild(b); return b; });
+    const h = UI.push(nav(btns, { start: cur, select: k => {
+      try { localStorage.setItem('nv_lang_picked', '1'); } catch (e) { }
+      UI.pop(h); el.remove(); NV.Audio.sfx('select');
+      NV.Settings.set('lang', k); NV.I18n.set(k); if (k === cur) res(k); // a different language reloads the page, then continues
+    } }));
+  });
+
   UI.splash = () => new Promise(res => {
     const el = add(`<div class="center"><div class="logo">NEON <span class="v">VEINS</span></div><div class="tagline">NEW AVALON · 2098</div><div class="press">PRESS ANY KEY</div></div>`, '', 'splash');
     el.style.position = 'absolute'; el.style.inset = '0'; el.style.background = 'radial-gradient(ellipse at center,rgba(0,0,0,.1),rgba(0,0,0,.8))';
@@ -7506,6 +7523,7 @@ NV.Story = (() => {
     N.leave();
   }
   NV.Update.start();
+  { let picked = 0; try { picked = localStorage.getItem('nv_lang_picked'); } catch (e) { } if (!picked) await NV.UI.language(); }
   await NV.UI.splash();
   while (true) {
     const c = await NV.UI.title();
