@@ -41,6 +41,7 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 
 **Presentation**
 - Cinematic title screen with animated skyline, flying traffic, holo signs, rain, searchlight beams
+- Film-style cutscenes: the cast is blocked facing each other, the camera keeps to one side of the conversation (180° rule) and cuts on speaker changes between over-the-shoulder shots, close-ups, two-shots and establishing moves; it frames around walls and street props, eases in and out of first person, and shows dialogue as subtitles in the letterbox
 - Procedural character portraits (2D canvas)
 - Procedural WebAudio score — 8 moods (title, story, stealth, combat, boss, explore, tense, ending) with adaptive layering
 - Volumetric-looking light shafts, glow layer, chromatic aberration + film grain on high tier

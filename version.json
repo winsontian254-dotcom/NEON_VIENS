@@ -1,6 +1,16 @@
 {
-  "build": 2,
+  "build": 3,
   "history": [
+    {
+      "build": 3,
+      "version": "1.3",
+      "date": "2026-10-09",
+      "notes": [
+        "Cutscenes overhauled: characters face each other and the camera films them like a movie — over-the-shoulder shots and close-ups that cut on each speaker, two-shots and establishing shots for narration",
+        "Story dialogue in cutscenes is shown as subtitles in the letterbox; the camera eases in and out of first person",
+        "No more random vehicles, billboards and props popping up during story scenes; the camera frames around walls and street poles"
+      ]
+    },
     {
       "build": 2,
       "version": "1.2",
