@@ -686,8 +686,18 @@ NV.LOOK = (() => {
     { jacket: '#24448a', visor: '#ffb238', skin: 11, hair: 'mohawk', hairCol: '#19f0ff', eyes: 'eyes', ware: 'full' },
   ];
   const norm = l => Object.assign({}, DEFAULT, l || {});
-  return { SKIN, HAIRCOL, JACKETS, VISORS, STYLES, EYES, WARE, DEFAULT, PRESETS, norm, skin: l => SKIN[norm(l).skin] || SKIN[6] };
+  // a look received from another player: keep only values the creator could have produced
+  const HEX = /^#[0-9a-f]{6}$/i, has = (list, v) => list.some(x => x[0] === v);
+  const clean = l => {
+    l = l && typeof l === 'object' ? l : {}; const o = {};
+    ['jacket', 'visor', 'hairCol'].forEach(k => { if (typeof l[k] === 'string' && HEX.test(l[k])) o[k] = l[k]; });
+    if (Number.isInteger(l.skin) && l.skin >= 0 && l.skin < SKIN.length) o.skin = l.skin;
+    if (has(STYLES, l.hair)) o.hair = l.hair; if (has(EYES, l.eyes)) o.eyes = l.eyes; if (has(WARE, l.ware)) o.ware = l.ware;
+    return o;
+  };
+  return { SKIN, HAIRCOL, JACKETS, VISORS, STYLES, EYES, WARE, DEFAULT, PRESETS, norm, clean, skin: l => SKIN[norm(l).skin] || SKIN[6] };
 })();
+NV.myLook = () => { const S = NV.State && NV.State.get(); return NV.LOOK.clean(S && S.profile && S.profile.look); };
 // a three-quarter bust of Ghost, drawn from the chosen look (used by the appearance screen and dialogue portraits)
 NV.ghostPortrait = (cv, look) => {
   const g = cv.getContext('2d'), W = cv.width, H = cv.height, L0 = NV.LOOK.norm(look), s = Math.min(W, H) / 120, cx = W / 2;
@@ -1560,7 +1570,7 @@ NV.Account = (() => {
 
 /* Condition evaluation for conditional blocks compiled from the script */
 NV.Update = (() => {
-  const NV_BUILD = 8;
+  const NV_BUILD = 9;
   const URL = 'https://winsontian254-dotcom.github.io/NEON_VIENS/version.json', KEY = 'nv_seen_build';
   let info = null, shown = 0, alerted = false;
   const seen = () => { try { return Number(localStorage.getItem(KEY)) || 0; } catch (e) { return 0; } };
@@ -3107,6 +3117,11 @@ NV.Level = (() => {
       hplate: P(BABYLON.MeshBuilder.CreateBox('phplate', { width: .62, height: .5, depth: .16 }, scene), L.mats.armor),
       acc: P(BABYLON.MeshBuilder.CreateBox('pacc', { width: .035, height: .3, depth: .03 }, scene), (() => { const m = mat(scene, 'enacc', '#000', '#19f0ff'); m.disableLighting = true; return m; })()),
       accH: P(BABYLON.MeshBuilder.CreateBox('paccH', { width: .045, height: .34, depth: .035 }, scene), (() => { const m = mat(scene, 'enaccH', '#000', '#ff3355'); m.disableLighting = true; return m; })()),
+      cap: P(BABYLON.MeshBuilder.CreateSphere('pcap', { diameter: .36, segments: 8, slice: .5 }, scene), L.mats.armor),
+      ant: P(BABYLON.MeshBuilder.CreateCylinder('pant', { diameter: .02, height: .35, tessellation: 5 }, scene), L.mats.armor),
+      accM: P(BABYLON.MeshBuilder.CreateBox('paccM', { width: .035, height: .3, depth: .03 }, scene), (() => { const m = mat(scene, 'enaccM', '#000', '#ff2bd6'); m.disableLighting = true; return m; })()),
+      accA: P(BABYLON.MeshBuilder.CreateBox('paccA', { width: .035, height: .3, depth: .03 }, scene), (() => { const m = mat(scene, 'enaccA', '#000', '#ffb238'); m.disableLighting = true; return m; })()),
+      accG: P(BABYLON.MeshBuilder.CreateBox('paccG', { width: .035, height: .3, depth: .03 }, scene), (() => { const m = mat(scene, 'enaccG', '#000', '#3dffa8'); m.disableLighting = true; return m; })()),
       tube: P(BABYLON.MeshBuilder.CreateCylinder('ptube', { diameter: .07, height: .5, tessellation: 6 }, scene), (() => { const m = mat(scene, 'entube', '#000', '#9b5cff'); m.disableLighting = true; return m; })()),
     };
     // sparks
@@ -3213,11 +3228,13 @@ NV.Level = (() => {
   function makeHuman(kind) {
     const s = L.scene, root = new BABYLON.TransformNode('e', s), P = L.proto;
     const big = kind === 'heavy', sc = big ? 1.25 : 1;
-    root.scaling.setAll(sc);
+    const rnd = Math.random, hv = big ? 0 : (v => v < .6 ? 0 : v < .8 ? 1 : 2)(rnd()); // helmet type: full helm, cap, or helm with an antenna
+    root.scaling.set(sc * (.95 + rnd() * .1), sc * (.96 + rnd() * .1), sc * (.95 + rnd() * .1));
     const rig = rigBuild(root, k => P[k].createInstance('i'), true);
     inst(P.gun, rig.elbowR, 0, -.34, .14, Math.PI / 2, 0, 0);
-    const acc = big ? P.accH : P.acc;
-    inst(P.helm, root, 0, 1.79, -.015); inst(big ? P.hplate : P.plate, root, 0, 1.37, big ? .21 : .2);
+    const acc = big ? P.accH : P[['acc', 'accM', 'accA', 'accG'][Math.floor(rnd() * 4)]];
+    if (hv === 1) inst(P.cap, root, 0, 1.82, -.01); else inst(P.helm, root, 0, 1.79, -.015);
+    if (hv === 2) inst(P.ant, root, .12, 1.98, -.05); inst(big ? P.hplate : P.plate, root, 0, 1.37, big ? .21 : .2);
     inst(acc, root, -.13, 1.38, big ? .3 : .26); inst(acc, root, .13, 1.38, big ? .3 : .26);
     inst(acc, rig.legL, -.085, -.2, .04); inst(acc, rig.legR, .085, -.2, .04); inst(P.tube, root, 0, 1.32, -.42, .3, 0, 0);
     // per-enemy emissive bits (swap to "off" material when disabled)
@@ -3273,13 +3290,32 @@ NV.Level = (() => {
     m.position.set(x, 1.1, z);
     L.pickups.push({ kind, x, z, m, text, t: Math.random() * 6, nid: L.pickN = (L.pickN || 0) + 1 });
   }
+  // every civilian gets their own skin tone, outfit, hair, build and the odd cap or backpack
+  const CIV_TOPS = ['#4b5a78', '#7a3b4a', '#3f6b5a', '#8a6a3a', '#5a4a8a', '#9a9a9a', '#2f3f5a', '#a85a2a', '#3a3a46', '#6a2f6a'];
+  const CIV_BOTS = ['#23232e', '#2e3a4a', '#3a2e2a', '#1d2a24', '#4a4a52'];
+  const CIV_HAIR = ['#14110f', '#3b2417', '#7a4a25', '#c9a061', '#d8d8e0', '#2a1a3a', '#ff2bd6'];
+  const CIV_STYLES = ['none', 'none', 'buzz', 'undercut', 'bob', 'long', 'bun', 'braids', 'hood', 'cap'];
   function addCivilian(x, z) {
-    const s = L.scene, root = new BABYLON.TransformNode('civ', s);
-    const civSkin = mat(s, 'civs', '#6d5548');
-    const rig = rigBuild(root, k => { const m = limbShape(k, s); m.material = k === 'head' || k === 'hand' || k === 'neck' ? civSkin : L.mats.civ; return m; }, false);
+    const s = L.scene, root = new BABYLON.TransformNode('civ', s), rnd = Math.random, pick = a => a[Math.floor(rnd() * a.length)];
+    const C = L.civMats || (L.civMats = {}), cm = (key, hex) => C[key] || (C[key] = mat(s, 'cv' + key, hex));
+    const skinI = Math.floor(rnd() * NV.LOOK.SKIN.length), top = pick(CIV_TOPS), bot = pick(CIV_BOTS), hc = pick(CIV_HAIR), style = pick(CIV_STYLES);
+    const skin = cm('s' + skinI, NV.LOOK.SKIN[skinI]), shirt = cm('t' + top, top), pants = cm('p' + bot, bot), hair = cm('h' + hc, hc);
+    const rig = rigBuild(root, k => { const m = limbShape(k, s); m.material = k === 'head' || k === 'hand' || k === 'neck' ? skin : k === 'leg' || k === 'foot' || k === 'pelvis' ? pants : shirt; return m; }, false);
+    const hb = (w, h2, d, y, z2, xx, m2) => { const b = BABYLON.MeshBuilder.CreateBox('chair', { width: w, height: h2, depth: d }, s); b.material = m2 || hair; b.parent = rig.head; b.position.set(xx || 0, y - 1.67, z2); b.isPickable = false; return b; };
+    switch (style) {
+      case 'buzz': hb(.29, .05, .31, 1.96, -.02); break;
+      case 'undercut': hb(.27, .1, .3, 1.99, -.01).rotation.z = -.15; break;
+      case 'bob': hb(.34, .24, .32, 1.88, -.04); break;
+      case 'long': hb(.34, .2, .32, 1.95, -.03); hb(.33, .42, .1, 1.66, -.15); break;
+      case 'bun': hb(.29, .07, .31, 1.97, -.02); hb(.11, .1, .1, 2.04, -.12); break;
+      case 'braids': hb(.29, .07, .31, 1.97, -.02); [-1, 1].forEach(sx => hb(.05, .36, .05, 1.66, -.04, sx * .15)); break;
+      case 'hood': hb(.4, .42, .36, 1.84, -.05, 0, shirt); break;
+      case 'cap': hb(.3, .06, .33, 1.98, 0, 0, pants); hb(.26, .02, .12, 1.95, .2, 0, pants); break;
+    }
+    if (rnd() < .3) { const pk = limbShape('pack', s); pk.material = cm('k' + bot, bot); pk.parent = root; pk.position.set(0, 1.32, -.27); pk.isPickable = false; }
     rig.armL.rotation.x = rig.armR.rotation.x = -2.7; rig.elbowL.rotation.x = rig.elbowR.rotation.x = -.6;
     const mk = BABYLON.MeshBuilder.CreatePolyhedron('cmk', { type: 1, size: .15 }, s); mk.position.y = 2.2; mk.material = L.mats.civMark; mk.parent = root;
-    root.position.set(x, 0, z); root.scaling.y = .85; // crouched, scared
+    root.position.set(x, 0, z); const h = .9 + rnd() * .2, w = .92 + rnd() * .16; root.scaling.set(w, .85 * h, w); // crouched, scared; every build a little different
     L.civs.push({ x, z, root, mk, rig, saved: false, t: 0 });
   }
   function addNode(x, z) {
@@ -6297,8 +6333,8 @@ NV.Level = (() => {
       if (!live(pr)) return; const s = pr.st;
       let a = L.netAv.get(pr.id);
       if (!a) {
-        const npc = makeNpc({ name: pr.char, kind: 'human' }, s.x, s.z); npc.tag.dispose();
-        npc.tag = nameTag(pr.name, NV.speakerInfo(pr.char).c || '#19f0ff'); npc.tag.parent = npc.root; npc.tag.position.y = 2.3;
+        const npc = makeNpc({ name: pr.char, kind: 'human', look: pr.look && Object.keys(pr.look).length ? pr.look : null }, s.x, s.z); npc.tag.dispose();
+        npc.tag = nameTag(pr.name, (pr.look && pr.look.visor) || NV.speakerInfo(pr.char).c || '#19f0ff'); npc.tag.parent = npc.root; npc.tag.position.y = 2.3;
         a = { npc, car: null, id: pr.id }; L.netAv.set(pr.id, a);
       }
       const n = a.npc, k = Math.min(1, dt * 10), ox = n.x, oz = n.z;
@@ -6691,7 +6727,7 @@ NV.Net = (() => {
   let peer = null, conns = [], hostConn = null, nextId = 1;
   const load = () => window.Peer ? Promise.resolve() : new Promise((res, rej) => { const s = document.createElement('script'); s.src = LIB; s.onload = res; s.onerror = () => rej(new Error('Could not load the networking library — are you online?')); document.head.appendChild(s); });
   const mkCode = () => Array.from({ length: 6 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join('');
-  const roster = () => [{ id: N.id, name: N.me.name, char: N.me.char }].concat([...N.peers.values()].map(p => ({ id: p.id, name: p.name, char: p.char })));
+  const roster = () => [{ id: N.id, name: N.me.name, char: N.me.char, look: N.me.look }].concat([...N.peers.values()].map(p => ({ id: p.id, name: p.name, char: p.char, look: p.look })));
   function send(msg, except) {
     if (!N.on) return; if (msg.from == null) msg.from = N.id;
     if (N.isHost) conns.forEach(c => { if (c.open && c !== except) try { c.send(msg); } catch (e) { } });
@@ -6701,15 +6737,15 @@ NV.Net = (() => {
     if (!msg || typeof msg !== 'object' || typeof msg.t !== 'string') return;
     if (N.isHost && conn) {
       if (msg.t === 'hello') { // a new player: give them an id, tell them who is here, tell everyone else
-        conn.pid = nextId++; const p = { id: conn.pid, name: String(msg.name || 'Runner').slice(0, 20), char: String(msg.char || 'Ghost').slice(0, 40), st: null };
+        conn.pid = nextId++; const p = { id: conn.pid, name: String(msg.name || 'Runner').slice(0, 20), char: String(msg.char || 'Ghost').slice(0, 40), look: NV.LOOK.clean(msg.look), st: null };
         N.peers.set(p.id, p); conn.send({ t: 'welcome', id: p.id, pvp: N.pvp, players: roster().filter(x => x.id !== p.id) });
-        send({ t: 'join', id: p.id, name: p.name, char: p.char, from: 0 }, conn); joined(p); return;
+        send({ t: 'join', id: p.id, name: p.name, char: p.char, look: p.look, from: 0 }, conn); joined(p); return;
       }
       msg.from = conn.pid; send(msg, conn); // relay with the real sender id
     }
     switch (msg.t) {
-      case 'welcome': N.id = msg.id; N.pvp = !!msg.pvp; msg.players.forEach(p => N.peers.set(p.id, Object.assign({ st: null }, p))); if (N._welcome) N._welcome(); return;
-      case 'join': if (msg.id !== N.id) { const p = { id: msg.id, name: msg.name, char: msg.char, st: null }; N.peers.set(p.id, p); joined(p); } return;
+      case 'welcome': N.id = msg.id; N.pvp = !!msg.pvp; msg.players.forEach(p => N.peers.set(p.id, Object.assign({ st: null }, p, { look: NV.LOOK.clean(p.look) }))); if (N._welcome) N._welcome(); return;
+      case 'join': if (msg.id !== N.id) { const p = { id: msg.id, name: msg.name, char: msg.char, look: NV.LOOK.clean(msg.look), st: null }; N.peers.set(p.id, p); joined(p); } return;
       case 'leave': { const p = N.peers.get(msg.id); if (p) { N.peers.delete(msg.id); NV.toast('PLAYER LEFT', p.name, '#8a84b3', 3); } return; }
       case 'st': { const p = N.peers.get(msg.from); if (p) { p.st = msg; p.at = performance.now(); } return; }
       default: if (NV.Level.net) NV.Level.net(msg);
@@ -6723,7 +6759,7 @@ NV.Net = (() => {
   }
   N.send = m => send(m);
   N.hostGame = async (me, pvp) => {
-    await load();
+    me.look = NV.myLook(); await load();
     for (let attempt = 0; attempt < 4; attempt++) {
       const code = mkCode();
       const ok = await new Promise(res => {
@@ -6740,6 +6776,7 @@ NV.Net = (() => {
     throw new Error('Could not get a free join code — try again.');
   };
   N.joinGame = async (code, me) => {
+    me.look = NV.myLook();
     await load(); code = String(code || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
     if (code.length !== 6) throw new Error('Join codes are 6 characters.');
     return new Promise((res, rej) => {
@@ -6749,7 +6786,7 @@ NV.Net = (() => {
       peer.on('error', e => { if (!done) fail(e.type === 'peer-unavailable' ? 'No game with that code.' : 'Network error: ' + (e.type || e.message)); });
       peer.on('open', () => {
         hostConn = peer.connect(PREFIX + code, { reliable: true });
-        hostConn.on('open', () => { Object.assign(N, { on: true, isHost: false, code, me, id: -1 }); N.peers.clear(); hostConn.send({ t: 'hello', name: me.name, char: me.char }); });
+        hostConn.on('open', () => { Object.assign(N, { on: true, isHost: false, code, me, id: -1 }); N.peers.clear(); hostConn.send({ t: 'hello', name: me.name, char: me.char, look: me.look }); });
         hostConn.on('data', d => recv(d));
         hostConn.on('close', () => { if (N.on) { NV.toast('DISCONNECTED', 'The host ended the session.', '#ff3355', 5); N.leave(); if (NV.Level.active) NV.Level.exitWith({ quit: true }); } });
         N._welcome = () => { if (done) return; done = true; clearTimeout(to); res(code); };
