@@ -143,6 +143,12 @@ Everything in-game was reworked; the title screen and menus are unchanged.
 ## Hand-drawn levels & interiors
 Missions, arenas and story scenes that happen indoors are hand-drawn plans, not random rooms: an office floor, a clinic, a warehouse, the Hive factory line, a metro station, the Underdeep caves, a nightclub and a records vault, plus server halls, a network lattice and orbital stations for the digital and space chapters. Each plan has its own furniture (shelving, beds, desks, counters, machines, server racks, sofas, tanks, planters, tables), cover, rails, patrol routes, terminals, pickups and enemy posts, and the layout an operation uses is picked from its scene heading and objective, so the same mission always plays in the same place. Fights out in the streets stay outdoors, with hand-placed barricades and pillars. Story scenes in Noah's clinic, clubs, offices, boardrooms, metro platforms, bars and small flats play in their own interiors, and Ghost's apartment is a lived-in bedroom with posters, blinds and neon light coming through them.
 
+## Hardcore & performance
+
+**Hardcore** is a fourth difficulty (New Game, step 3). Enemies hit twice as hard and have 40% more health, detection is 50% faster, you carry half the ammunition and the HUD shows no markers (the minimap draws streets only; no waypoints, no enemy or pickup dots). If an operation fails the run ends: the save is flagged dead the moment you die (closing the tab does not help), is erased, and a signed-in account's cloud copy is replaced by a tombstone so it cannot be restored. Endings and unlocked chapters stay. There are no chapter snapshots, no retry, no skip and no Black Market. Free roam, story scenes and multiplayer cannot end a hardcore run. A hardcore run cannot be made easier, not even by remaking the character.
+
+**Performance.** Large repeated city sets (facade panels, windows, signs) are cut into chunks that draw only near the player (`NV.thinChunks`); pedestrians, guards and cars outside the active radius are switched off instead of simulated. Active triangles in free roam dropped from about 2.5 M to 0.7 M.
+
 ## Climbing & skydiving
 
 In the city, keep pushing forward into a building to climb its wall; release forward to hang, dash to let go. At the top you mount the roof and can climb taller neighbours. Walk off an edge and you fall; drops longer than ~12 m become a steerable third-person skydive, and hard landings (street or roof) knock Ghost into a ragdoll. Guards lose sight of you on high rooftops.
