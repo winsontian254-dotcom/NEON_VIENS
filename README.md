@@ -208,6 +208,18 @@ City-only moves, built on the climbing system:
 - **Slide**: press crouch while sprinting.
 - **Roll**: land a 12–27 m/s drop while sprinting or crouching to roll out instead of ragdolling.
 
+## Your character: backgrounds & appearance
+
+New Game opens a three-step creator styled after a corporate ID terminal.
+
+1. **Background — pick two of eight.** Each has a five-part write-up (who you were, how it shaped you, what it does in play, its drawback, how the city reacts), real effects with numbers, and a starting change to your standing:
+   Street Medic · Helix Contractor · Wheelman · Black-Market Engineer · Nightglass Washout · Night Courier · Lantern Row Hustler · Signal Ghost.
+   Some pairs combine into a bonus (Rapid Response, Deep Diver, Combat Medic, Never Stop Moving); two pairs can't be combined.
+2. **Appearance** — presets, 12 skin tones, 8 hair styles and 10 hair colours, visor / optics / shades, glow colour, cyberware lines and jacket. Ghost's dialogue portrait and 3D body both use them.
+3. **Difficulty and voice.**
+
+Saves from before this system ask once whether to keep the old character or remake it; either way all progress is kept. The Journal has a **Remake character** button.
+
 ## Arsenal & Black Market
 
 Pause (**Esc**) → **Black Market** to buy from the arsenal: 267 weapons, tools, drones, cyberattacks, environmental triggers, boss gear, strategic strikes and legendaries from the script. Pick a hotbar slot and equip; right-click a slot to clear it.

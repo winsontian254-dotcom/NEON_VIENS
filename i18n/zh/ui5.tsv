@@ -1,0 +1,171 @@
+Street Medic	街头医生
+Patched up the Quiet Mile for food and favours.	在静谧一英里给人缝伤口，换口饭吃，换点人情。
+Integrity regenerates (2.5 per second) once you have gone 4 seconds without taking damage	连续4秒未受伤后，完整度会持续恢复（每秒2.5点）
+Medkits restore 50 Integrity instead of 35	医疗包恢复50点完整度，而不是35点
+Trauma Kits heal 75% instead of 60%	创伤急救包恢复75%，而不是60%
+Weapon damage −10%	武器伤害 −10%
+Before the erasure you ran a folding table under the Quiet Mile overpass: stitches for noodles, antibiotics for battery cells, no questions for anyone. Couriers, gangers and Helix guards on their day off all lay on the same bloodstained tarp.	在你被抹除之前，你在静谧一英里的高架桥下支着一张折叠桌：缝针换面条，抗生素换电池，对谁都不多问。信使、帮派分子和休班的螺旋保安，都躺过同一块沾满血的防水布。
+It taught you that bodies are just machines that complain, and that most people are one bad night away from needing a stranger. You learned to stay calm with your hands inside someone else's worst moment.	这教会了你：身体不过是会抱怨的机器，而大多数人离需要一个陌生人帮忙，只差一个糟糕的夜晚。你学会了在别人最糟糕的时刻，把手伸进去时依然保持冷静。
+In the field your old habits keep you alive. Your Integrity slowly regenerates (2.5 per second) once you have gone four seconds without being hit, medkits restore 50 Integrity instead of 35, and Trauma Kits heal 75% of your Integrity instead of 60%.	在行动中，你的老习惯让你活了下来。连续四秒没有被击中后，你的完整度会慢慢恢复（每秒2.5点）；医疗包恢复50点完整度而不是35点；创伤急救包恢复你75%的完整度，而不是60%。
+The drawback: you were trained to put people back together, not to take them apart. Your weapon damage is reduced by 10%, and every operation where you fight instead of sneaking will feel it.	代价是：你受的训练是把人拼回去，而不是把人拆开。你的武器伤害降低10%，每一次选择开打而不是潜行的行动，你都会感觉到。
+The lower districts remember the medic who never asked for a civic ID. You start with Civilian Hope +4, and people who were patched up by you are quicker to trust the stranger with no name.	下层街区记得那个从不要市民ID的医生。你开局获得平民希望 +4，被你救治过的人，会更快地信任这个没有名字的陌生人。
+Helix Contractor	螺旋外包员
+Wore a lanyard, smiled on cue, read the memos.	戴着工牌，按时微笑，读过所有备忘录。
+Guards take 35% longer to recognise you	守卫认出你所需的时间延长35%
+All credits you earn +20%	你赚到的所有信用点 +20%
+Helix Heat builds 25% faster once you are wanted	一旦被通缉，螺旋通缉度上升速度加快25%
+You spent years as an outside contractor inside Helix Tower: badge readers, catered stand-ups, mandatory optimism seminars. You never had a real title, which made you invisible in exactly the way the company liked.	你在螺旋塔里当了好几年外包承包商：刷卡门禁、提供餐点的站会、强制参加的乐观主义研讨会。你从来没有正式头衔，这恰好让你以公司喜欢的方式隐形。
+You learned the rhythm of corporate space: walk like you belong, carry a tablet, never run. You can read a security post the way other people read a menu.	你学会了企业空间的节奏：走路要像你属于这里，手里拿着平板，永远不要跑。你看一个安保岗位，就像别人看菜单一样。
+Guards take 35% longer to recognise you as a threat, so you can stand in places you should not be for a few more seconds. You also know how money moves: every credit you earn is worth 20% more.	守卫要多花35%的时间才能把你认作威胁，所以你可以在不该待的地方多站几秒。你也懂钱是怎么流动的：你赚到的每一个信用点都多值20%。
+The drawback: Helix still has your face on file. Once you are wanted, Helix Heat builds 25% faster, because every camera already knows what it is looking for.	代价是：螺旋的档案里仍然有你的脸。一旦被通缉，螺旋通缉度上升速度加快25%，因为每一台摄像头都已经知道自己在找谁。
+You start with Corporate Leverage +5 and Raven Trust −3. Corporate contacts will speak to you like an old colleague; Raven will spend the first few chapters wondering whose side you are really on.	你开局获得企业筹码 +5，渡鸦信任 −3。企业的联系人会像对老同事一样跟你说话；渡鸦则会在前几章里一直怀疑你到底站在哪一边。
+Wheelman	车手
+Ran getaway cars through the transit stacks.	在交通层之间开过逃亡车。
+Move 12% faster	移动速度 +12%
+Dash recharges in 0.5 s instead of 0.8 s	冲刺冷却 0.5 秒，而不是 0.8 秒
+Sneaking movement 20% slower	潜行移动速度 −20%
+You drove for anyone who paid in cash: smugglers, union organisers, a choir that needed to be somewhere before curfew. The transit stacks of Neon Heights were your racetrack and the city's traffic AI was your rival.	你给任何付现金的人开车：走私犯、工会组织者、一个必须在宵禁前赶到某处的合唱团。霓虹高地的交通层是你的赛道，城市的交通AI是你的对手。
+Driving taught you that hesitation kills. You read gaps before they open, you commit to the line, and you never look back to see who is following.	开车教会了你：犹豫就是死。你在缝隙出现之前就看见它，你认准路线就不回头，也从不回头去看谁在跟着你。
+You move 12% faster on foot, and your dash recharges in half a second instead of 0.8 seconds, so you can chain dodges and cover sprints that other people would not attempt.	你步行时移动速度提高12%，冲刺冷却只要半秒而不是0.8秒，所以你可以连续闪避，做出别人不敢尝试的掩体冲刺。
+The drawback: patience was never your skill. While sneaking you move 20% slower than other couriers, so slow stealth approaches take real discipline.	代价是：耐心从来不是你的长处。潜行时你比其他信使慢20%，慢慢摸进去的潜行路线需要真正的自律。
+You start with Raven Trust +3. Raven grew up around getaway drivers and recognises one; people who need to leave fast will think of you first.	你开局获得渡鸦信任 +3。渡鸦从小在逃亡车手身边长大，一眼就能认出同类；需要赶紧离开的人，第一个会想到你。
+Black-Market Engineer	黑市工程师
+Rebuilt implants in a Gray Market stall.	在灰市的摊位里翻新植入体。
+ICE BREAK sequences are one code shorter	破冰入侵序列少一个代码
+All weapon damage +15%	所有武器伤害 +15%
+Max Integrity −15 (scavenged implants your body rejects)	最大完整度 −15（身体排斥的拼凑植入体）
+Your stall in the Gray Market had no sign, just a queue. You rebuilt stolen implants, unlocked firmware, and once wired a pacemaker into a vending machine because the customer could not afford better.	你在灰市的摊位没有招牌，只有一条长队。你翻新偷来的植入体，解锁固件，有一次还因为顾客付不起更好的，把一个心脏起搏器接进了自动售货机。
+You learned that every system has a seam, and that the people who build machines rarely understand what they have built. Code and copper feel like one material in your hands.	你学到的是：每个系统都有接缝，而造机器的人很少真正理解自己造出了什么。在你手里，代码和铜线就像同一种材料。
+ICE BREAK sequences are one code shorter for you, and your tuning of every weapon you carry adds 15% damage.	对你来说，破冰入侵序列少一个代码；你对随身每一件武器的调校，让伤害提高15%。
+The drawback: you tested most of your work on yourself. Scavenged implants your body never fully accepted lower your maximum Integrity by 15.	代价是：你的大部分作品都是先在自己身上试的。身体从未完全接受的拼凑植入体，让你的最大完整度降低15点。
+You start with AI Sympathy +3. Machines and the people who live through them treat you as a colleague; the Gray Market will remember the name you no longer have.	你开局获得AI同情 +3。机器以及靠机器生活的人会把你当作同行；灰市会记得你已经不再拥有的那个名字。
+Nightglass Washout	夜玻璃淘汰兵
+Trained by the private army, then discharged.	受过私人军队训练，然后被开除。
+Recoil −30%	后坐力 −30%
+Reloads 20% faster	装填速度加快20%
+Weapon damage +10%	武器伤害 +10%
+Enemies notice you 20% faster	敌人发现你的速度加快20%
+Nightglass took you at nineteen, drilled you for eighteen months and discharged you two weeks before your first deployment. The paperwork said "temperament". You still do not know what you did.	夜玻璃在你十九岁时招了你，训练了你十八个月，又在你第一次部署前两周把你开除。文件上写着“性格原因”。你至今不知道自己做错了什么。
+They gave you the habits without the war: weapon discipline, clean reloads, the way to stand when someone might shoot. You have never fully stopped scanning rooftops.	他们给了你习惯，却没有给你战争：武器纪律、干净利落的装填、在可能有人开枪时该怎么站。你从来没有真正停止过扫视楼顶。
+Recoil affects you 30% less, you reload 20% faster, and your weapon damage is 10% higher.	后坐力对你的影响减少30%，装填速度加快20%，武器伤害提高10%。
+The drawback: you move like a soldier, and guards are trained to notice soldiers. Enemies detect you 20% faster.	代价是：你走路像个士兵，而守卫受过专门识别士兵的训练。敌人发现你的速度加快20%。
+You start with Raven Trust +5 and Civilian Hope −2. Raven knows exactly what a Nightglass washout is and respects it; ordinary people see the posture and keep their distance.	你开局获得渡鸦信任 +5，平民希望 −2。渡鸦很清楚夜玻璃淘汰兵是什么，并且尊重这一点；普通人看到你的姿态，只会保持距离。
+Night Courier	夜班信使
+Carried packages nobody else would touch.	送过别人都不敢碰的包裹。
+Max Energy +30	最大能量 +30
+Dash costs 16 Energy instead of 22	冲刺消耗16点能量，而不是22点
+You take 15% more damage (you travel light, no armour)	受到的伤害增加15%（轻装上阵，没有护甲）
+You worked the night routes for a dispatch office that no longer exists: sealed packages, no scanners, no questions, payment on delivery. Most nights you crossed four districts before sunrise.	你为一家早已不存在的调度站跑夜班路线：密封包裹，没有扫描仪，不问问题，货到付款。大多数夜晚，你在日出前要穿过四个街区。
+Speed became the way you think. You know which stairwells connect, which rooftops hold your weight, and how long a door stays open after a security guard yawns.	速度成了你思考的方式。你知道哪些楼梯间是相通的，哪些楼顶撑得住你的体重，以及保安打哈欠之后，一扇门会开多久。
+Your maximum Energy is 30 higher and your dash costs 16 Energy instead of 22, so you can keep moving long after other people stop to breathe.	你的最大能量提高30点，冲刺消耗16点能量而不是22点，所以别人停下来喘气的时候，你还能一直跑。
+The drawback: couriers travel light. Without real armour you take 15% more damage from every hit.	代价是：信使都是轻装上阵。没有真正的护甲，你受到的每一次攻击伤害都增加15%。
+You start with Civilian Hope +2. Shopkeepers and night workers remember the courier who always showed up; dispatchers across the city still know your route by heart.	你开局获得平民希望 +2。店主和夜班工人都记得那个从不爽约的信使；全城的调度员至今还能背出你的路线。
+Lantern Row Hustler	灯笼街混混
+Ran games, debts and favours under paper lanterns.	在纸灯笼下面开赌局、收债、换人情。
+Credits from takedowns, loot and gigs +35%	击倒、搜刮和委托获得的信用点 +35%
+Helix Heat builds 30% faster	螺旋通缉度上升速度加快30%
+You grew up under the paper lanterns of Lantern Row, running card games in the back of noodle bars and collecting debts for people who smiled too much. Everyone owed somebody, and you always knew who.	你在灯笼街的纸灯笼下长大，在面馆后屋开牌局，替那些笑得太多的人收债。每个人都欠着某个人，而你总是知道是谁。
+Hustling taught you that every room has a price and every person has a story they want to hear. You can talk your way into a back office and out of a beating, usually in that order.	混街头教会了你：每个房间都有价码，每个人都有一个想听的故事。你能靠一张嘴混进后台办公室，也能靠一张嘴躲过一顿毒打——通常是按这个顺序。
+You squeeze more out of everything: credits from takedowns, loot and gigs are 35% higher.	你能从一切东西里多榨出一点：击倒、搜刮和委托获得的信用点提高35%。
+The drawback: Helix Civic Response has a long file on Lantern Row operators. Helix Heat builds 30% faster whenever you are spotted.	代价是：螺旋市政应对部对灯笼街的混混有一份很厚的档案。只要你被发现，螺旋通缉度上升速度就加快30%。
+You start with Corporate Leverage −3 and Civilian Hope +2. Street vendors and fixers greet you like family; corporate offices see a hustler and lock the drawers.	你开局获得企业筹码 −3，平民希望 +2。街头小贩和中间人把你当家人；企业办公室看到一个混混，只会把抽屉锁上。
+Signal Ghost	信号幽灵
+Lived half your life inside the city network.	有一半的人生活在城市网络里。
+EMP costs 35 Energy instead of 55	电磁脉冲消耗35点能量，而不是55点
+ICE BREAK trace lasts 40% longer	破冰入侵的追踪时间延长40%
+Reloads take 20% longer	装填时间延长20%
+You were a signal ghost: a netrunner who slept in a pod and spent more hours in the city network than in your own body. You hid inside traffic feeds, advertising loops and municipal maintenance logs.	你曾是一个信号幽灵：一个睡在舱里的网络行者，待在城市网络里的时间比待在自己身体里还长。你藏身于交通信号、广告循环和市政维护日志之中。
+The network taught you that everything is a signal waiting to be interrupted. You think in packets, timings and handshakes, and you hear electronics the way other people hear birds.	网络教会了你：一切都是等待被打断的信号。你用数据包、时序和握手来思考，你听电子设备的声音，就像别人听鸟叫。
+Your EMP pulse costs 35 Energy instead of 55, and the trace on every ICE BREAK lasts 40% longer before it finds you.	你的电磁脉冲只消耗35点能量而不是55点，每一次破冰入侵的追踪也要多40%的时间才能找到你。
+The drawback: your hands are slower than your mind. Physical weapon handling suffers and every reload takes 20% longer.	代价是：你的手比你的脑子慢。实体武器的操作会受影响，每一次装填都要多花20%的时间。
+You start with AI Sympathy +6. ASCENSION fragments, maintenance drones and rogue programs will treat you as one of their own long before they trust anyone else.	你开局获得AI同情 +6。飞升的碎片、维护无人机和失控的程序，会比信任任何人都更早地把你当作自己人。
+Rapid Response	快速响应
+Medkits also restore 30 Energy.	医疗包同时恢复30点能量。
+Deep Diver	深潜者
+ICE BREAK buffer holds one extra code.	破冰入侵缓冲区多容纳一个代码。
+Combat Medic	战地医生
+Medkits restore 20 more Integrity.	医疗包多恢复20点完整度。
+Never Stop Moving	永不停步
+Dash recharges another 20% faster.	冲刺冷却再加快20%。
+Helix vetting and Lantern Row reputations cancel out: nobody would believe both stories.	螺旋的背景审查和灯笼街的名声会互相抵消：没有人会同时相信这两个故事。
+Nightglass trains its recruits to hunt signal ghosts; the network would never have let you in.	夜玻璃训练新兵猎杀信号幽灵；网络永远不会让你进去。
+Civilian Hope +4 at the start	开局平民希望 +4
+Corporate Leverage +5 at the start	开局企业筹码 +5
+Raven Trust −3 at the start	开局渡鸦信任 −3
+Raven Trust +3 at the start	开局渡鸦信任 +3
+AI Sympathy +3 at the start	开局AI同情 +3
+Raven Trust +5 at the start	开局渡鸦信任 +5
+Civilian Hope −2 at the start	开局平民希望 −2
+Civilian Hope +2 at the start	开局平民希望 +2
+Corporate Leverage −3 at the start	开局企业筹码 −3
+AI Sympathy +6 at the start	开局AI同情 +6
+WHO YOU WERE	你曾经是谁
+HOW IT SHAPED YOU	它如何塑造了你
+IN PLAY	游戏中的效果
+THE DRAWBACK	代价
+HOW THE CITY REACTS	城市如何看待你
+CHOOSE THIS BACKGROUND	选择这个背景
+REMOVE THIS BACKGROUND	移除这个背景
+CANNOT COMBINE	无法组合
+CHOSEN	已选择
+CHOOSE TWO BACKGROUNDS	选择两个背景
+SET GHOST'S BACKGROUND	设定幽灵的背景
+Pick two. Who you were changes how you play, and how New Avalon treats you.	选择两个。你曾经是谁，决定了你怎么玩，也决定了新阿瓦隆怎么对待你。
+SET GHOST'S APPEARANCE	设定幽灵的外貌
+In New Avalon your face is your only ID. Make it count.	在新阿瓦隆，你的脸就是你唯一的身份证明。好好设计。
+SET DIFFICULTY	设定难度
+How hard the city pushes back. You can review everything before you begin.	这座城市会怎样反击你。开始之前你可以检查所有设定。
+BACKGROUND	背景
+APPEARANCE	外貌
+DIFFICULTY	难度
+NEXT	下一步
+BEGIN	开始
+SAVE CHARACTER	保存角色
+CANCEL	取消
+BACK	返回
+PRESETS	预设
+SKIN TONE	肤色
+HAIR	发型
+HAIR COLOUR	发色
+EYES	眼睛
+EYE	眼睛
+VISOR	面罩
+CHROME GLOW	义体光
+CYBERWARE	义体
+JACKET	夹克
+VOICE	声音
+Courier Hood	信使兜帽
+Buzz Cut	寸头
+Undercut	削边头
+Mohawk	莫西干
+Bob	波波头
+Long	长发
+Top Knot	顶髻
+Braids	辫子
+Visor	面罩
+Optics	光学义眼
+Shades	墨镜
+None	无
+Cheek Lines	脸颊纹路
+Jaw Plate	下颌装甲
+Temple Port	太阳穴接口
+Full Chrome	全身铬化
+Narrative focus. Enemies hit softly and are slow to notice you; operations can be skipped.	以剧情为主。敌人伤害低、发现你慢；行动可以跳过。
+The intended balance between story and challenge.	剧情与挑战之间的预设平衡。
+Enemies hit 50% harder, take more punishment and see further.	敌人伤害提高50%，更耐打，视野更远。
+YOUR PROGRESS IS KEPT	你的进度会保留
+Choose two backgrounds.	请选择两个背景。
+CHARACTER SYSTEM REBUILT	角色系统已重制
+Neon Veins has a new character creator: eight backgrounds with real strengths and drawbacks, and a full appearance editor (skin tone, hair, eyes, cyberware).	《霓虹血脉》有了新的角色创建器：八种各有真实优势和代价的背景，以及完整的外貌编辑器（肤色、发型、眼睛、义体）。
+Your progress is safe either way: chapter, choices, stats, side quests, weapons and credits all stay.	无论选哪一个，你的进度都是安全的：章节、选择、属性、支线任务、武器和信用点都会保留。
+Keep playing as before	按原样继续游玩
+Your character carries over; you can remake them later from the Journal	你的角色会被保留；之后可以在日志中重新创建
+Remake my character	重新创建我的角色
+Open the new creator, then continue exactly where you left off	打开新的创建器，然后从你离开的地方继续
+REMAKE CHARACTER	重新创建角色
+Your progress is kept.	你的进度会保留。
+CHARACTER	角色
+Updated. Your progress is kept.	已更新。你的进度会保留。
+Credits	制作人员
+Who made New Avalon	是谁创造了新阿瓦隆
+Skip Ahead	快进
