@@ -1,6 +1,18 @@
 {
-  "build": 5,
+  "build": 6,
   "history": [
+    {
+      "build": 6,
+      "version": "1.6",
+      "date": "2026-10-10",
+      "notes": [
+        "First-person hands on every gun and blade, in your jacket colour",
+        "Knife and melee swing animations with a slash trail",
+        "Kills hit harder: bodies fly with the shot, headshots snap back, a beat of hit-stop",
+        "New medkit model",
+        "New heavy weapons: Ghostbreaker Minigun (spins up), Rust Harbor Rail Cannon, Sector 9 Thumper, Iron Angel Breacher Shotcannon"
+      ]
+    },
     {
       "build": 5,
       "version": "1.5",
