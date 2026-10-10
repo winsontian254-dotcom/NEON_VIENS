@@ -7396,6 +7396,18 @@ NV.UI = (() => {
       <h2>WORLD, SYSTEMS &amp; PROGRAMMING</h2><p>Procedural New Avalon · first-person operations · story engine</p>
       <h2>MUSIC &amp; SOUND</h2><p>Real-time synthesized score (WebAudio)</p>
       <h2>CAST</h2>${['Ghost', 'Raven', 'Dr. Elias Voss', 'Elena Cross', 'ASCENSION', 'Marcus', 'Noah', 'Boro', 'Lio Chen', 'Byte', 'Mosaic', 'Isha', 'Nadi', 'Warden-3', 'Dominion'].map(x => `<p>${x}</p>`).join('')}
+      ${(() => { const P = a => a.map(x => `<p>${U.esc(x)}</p>`).join(''), S = (h, a) => `<h2>${h}</h2>` + P(a);
+        let v = []; try { v = [...new Set((speechSynthesis.getVoices() || []).map(x => x.name))].slice(0, 40); } catch (e) { }
+        return S('SPECIAL THANKS', ['Claude', 'DeepSeek', 'Copilot'])
+          + S('VOICE CAST', ['All text-to-speech voices used:'].concat(v.length ? v : ['Your device’s built-in speech voices']))
+          + S('CHARACTER 3D MODELS', ['DeepSeek V4.1 Flash — DeepSeek logo', 'Claude Opus 5.5 — Clawd', 'Claude Haiku 4.5 — more Clawd', 'Copilot — Copilot thinking animation'])
+          + `<h2>LORE &amp; INSPIRATION</h2><p>Anthropic’s YouTube — for the lore:</p><p>Claude 3.5 Sonnet for sparking creativity<br><small>https://www.youtube.com/watch?v=rHqk0ZGb6qo</small></p><p>Claude 3.5 Sonnet as a writing partner<br><small>https://www.youtube.com/watch?v=-dWfl7Dhb0o</small></p>`
+          + S('CODE', ['Claude Opus 5.5 — Claude thinking spinner', 'DeepSeek V4.1 — DeepSeek', 'Copilot — Copilot thinking icon'])
+          + S('ENTIRE SCRIPT', ['Copilot with Claude Opus 5.5', 'Copilot with Claude Sonnet 5', 'Copilot', 'DeepSeek V4.1 Flash'])
+          + S('TRANSLATION', ['Claude Opus 5.5'])
+          + S('CRITICISM', ['People', 'DeepSeek V4.1 Flash', 'Claude Opus 5.5 — self-criticism', 'That Thing in the Claude Prompt Box That Gives Me Suggestions (no, seriously)', 'Qwen Coder'])
+          + S('HOSTING', ['GitHub', 'Cloudflare']) + S('ONLINE', ['Claude Opus 5.5'])
+          + `<h2>&nbsp;</h2><p>NO HUMANS WERE INVOLVED IN CODING WHATSOEVER.</p><p>BIG THANKS TO CLAUDE.</p><p>FUCK YOU, OPENAI.</p>`; })()}
       <h2>&nbsp;</h2><p style="font-style:italic;opacity:.8">“Who is outside the model?”</p><p style="margin-top:60px;font-family:var(--fm);letter-spacing:.3em;color:var(--dim)">THANK YOU FOR PLAYING</p></div>`, 'credits');
     const roll = c.querySelector('.roll'); let y = innerHeight;
     NV.Audio.setMood('ending');
