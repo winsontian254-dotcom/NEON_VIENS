@@ -1,6 +1,16 @@
 {
-  "build": 12,
+  "build": 13,
   "history": [
+    {
+      "build": 13,
+      "version": "1.13",
+      "date": "2026-10-10",
+      "notes": [
+        "Overhauled HUD: implant-level badge, thick health bar with current and max, dash pips, framed minimap with a COMBAT / SUSPICIOUS threat bar, and a quest tracker with one short yellow objective",
+        "Landmark discoveries now open as a card inside the HUD (and are translated), instead of a floating pop-up",
+        "Ammo now reads magazine | reserve with the weapon's silhouette; Reload and Use-item prompts appear when they matter"
+      ]
+    },
     {
       "build": 12,
       "version": "1.12",
