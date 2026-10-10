@@ -4,5 +4,31 @@
     "anims": ["Idle", "Walking", "Running", "Death", "Wave", "Yes", "No"],
     "license": "CC0 1.0",
     "source": "RobotExpressive by Tomás Laulhé (Quaternius), via the three.js examples (github.com/mrdoob/three.js, examples/models/gltf/RobotExpressive)"
+  },
+  "human": {
+    "file": "src/human.glb",
+    "anims": ["Idle", "Walk", "Run", "Hit", "Death"],
+    "license": "Original (Neon Veins)",
+    "source": "Built from scratch by tools/blender/build_models.py (primitives, auto-weighted armature, procedural poses)"
+  },
+  "drone": {
+    "file": "src/drone.glb",
+    "license": "Original (Neon Veins)",
+    "source": "Built from scratch by tools/blender/build_models.py"
+  },
+  "medkit": {
+    "file": "src/medkit.glb",
+    "license": "Original (Neon Veins)",
+    "source": "Built from scratch by tools/blender/build_models.py"
+  },
+  "crate": {
+    "file": "src/crate.glb",
+    "license": "Original (Neon Veins)",
+    "source": "Built from scratch by tools/blender/build_models.py"
+  },
+  "lantern": {
+    "file": "src/lantern.glb",
+    "license": "Original (Neon Veins)",
+    "source": "Built from scratch by tools/blender/build_models.py"
   }
 }
