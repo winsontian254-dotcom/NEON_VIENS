@@ -1570,7 +1570,7 @@ NV.Account = (() => {
 
 /* Condition evaluation for conditional blocks compiled from the script */
 NV.Update = (() => {
-  const NV_BUILD = 9;
+  const NV_BUILD = 10;
   const URL = 'https://winsontian254-dotcom.github.io/NEON_VIENS/version.json', KEY = 'nv_seen_build';
   let info = null, shown = 0, alerted = false;
   const seen = () => { try { return Number(localStorage.getItem(KEY)) || 0; } catch (e) { return 0; } };
@@ -1942,10 +1942,10 @@ NV.windowTex = (scene, seed, hueA, hueB) => NV.tex(scene, 128, 256, (g, w, h) =>
   g.fillStyle = 'rgba(0,0,0,.6)'; for (let y = 0; y < h; y += 64) g.fillRect(0, y, w, 3);
 }, 'win' + seed);
 /* in-game facades: floor slabs, mullions, ribbon or grid windows with blinds and the odd silhouette */
-NV.windowTex2 = (scene, seed, hueA, hueB) => NV.tex(scene, 256, 512, (g, w, h) => {
+NV.windowTex2 = (scene, seed, hueA, hueB, mode) => NV.tex(scene, 256, 512, (g, w, h) => {
   const r = U.rng(seed); g.fillStyle = '#07050d'; g.fillRect(0, 0, w, h);
   for (let x = 0; x < w; x += 32) { g.fillStyle = 'rgba(130,120,190,.08)'; g.fillRect(x, 0, 2, h); }
-  const ribbon = r() < .35;
+  const ribbon = mode ? mode === 'ribbon' : r() < .35;
   for (let y = 0; y < h; y += 16) {
     g.fillStyle = 'rgba(170,160,220,.11)'; g.fillRect(0, y, w, 2);
     const lit = r() < .95, tint = r(), wc = tint > .6 ? '#ffd08a' : tint > .25 ? '#8fb4ff' : '#ff86d8'; // nearly every floor lit
@@ -1962,7 +1962,7 @@ NV.windowTex2 = (scene, seed, hueA, hueB) => NV.tex(scene, 256, 512, (g, w, h) =
       if (r() < .07) { g.fillStyle = 'rgba(0,0,0,.75)'; g.fillRect(x + 5, y + 8, 3, 6); g.beginPath(); g.arc(x + 6.5, y + 7, 1.7, 0, 7); g.fill(); }
     }
   }
-}, 'win2_' + seed);
+}, 'win2_' + seed + (mode || ''));
 /* vertical blade-sign atlas (8 x 2 cells of 128 x 512), drawn in one neon colour */
 NV.BLADE_WORDS = ['ネオン', 'HOTEL', 'RAMEN', '酸素', 'BAR', '24H', 'CLUB', '夢', 'DATA', '薬局', 'SUSHI', 'バー', 'O₂', 'SYNTH', 'カフェ', 'EXIT'];
 NV.bladeAtlas = (scene, col) => {
@@ -2341,41 +2341,103 @@ NV.sceneLoc = heading => {
   if (best && bs >= .6) return { lm: best, d: best.d };
   return { d };
 };
+/* THE CITY, HAND-DRAWN. New Avalon is 32 x 32 blocks.
+   districts: one letter per block (see codes). pattern: how each district lays out its blocks, read in order and wrapping:
+     a-o a block template (see T), . an open plaza, @ a landmark site (named landmarks fill these in reading order), S the safe plaza.
+   over: single blocks placed by hand. T: block templates, each a list of [x, y, w, h, base height, facade] inside the 6 x 6 core. */
+NV.CITY_MAP = {
+  codes: { H: 'helix', C: 'civic', L: 'lantern', N: 'heights', K: 'sky', G: 'gray', M: 'memory', Q: 'quiet', S: 'sector9', B: 'black', V: 'hive', R: 'harbor', A: 'glass', D: 'dryline', W: 'railhold', F: 'furnace' },
+  districts: [
+    'BBBBBBBBBBFFFFFFFFFFVVVVVVVVVVVV',
+    'BBBBBBBBBBFFFFFFFFFFVVVVVVVVVVVV',
+    'BBBBBBBBBBFFFFFFFFFVVVVVVVVVVVVV',
+    'BBBBBBBBBBBFFFFFKKKKVVVVVVVVVVVV',
+    'BBBBBBBBBBFFFKKKKKKKKVVVVVVVVVVV',
+    'BBBBBBBBBBKKKKKKKKKKKVVVVVVVVVVV',
+    'BBBBBBBBBBKKKKKKKKKKKCVVVVVVVVVV',
+    'BBBBBBBBBKKKKKKKKKKKKCCVVVVVVVVV',
+    'BBBBBBBBBNNKKKKKKKKKKCCCVVVVVVVV',
+    'BBBBBBBBNNNNKKKKKKKKCCCCCVVVVVVV',
+    'BBBBBBBNNNNNNNKKKKKKKCCCCCCGGRRR',
+    'BBBBBBNNNNNNNNHHHHCCCCCCCGGGRRRR',
+    'BBBBBBNNNNNNNHHHHHHCCCCCCGGGRRRR',
+    'BBBBBNNNNNNNHHHHHHHHCCCCCGGGRRRR',
+    'BBBBBNNNNNNHHHHHHHHHHCCCCGGGRRRR',
+    'BBBBBNNNNNNHHHHHHHHHHCCCCGGGRRRR',
+    'BBBBBNNNNNNHHHHHHHHHHCCCCGGGRRRR',
+    'BBBBBNNNNNNHHHHHHHHHHCCCCGGGRRRR',
+    'BBBBNNNNNNNNHHHHHHHHMMMMMGGGRRRR',
+    'BBBNNNNNSSSSSHHHHHHMMMMMMGGGRRRR',
+    'BBBNNNSSSSSSSSHHHHMMMMMMMGGGRRRR',
+    'WWWWWSSSSSSSSSLLLLLLMMMMMGGGRRRR',
+    'WWWWWSSSSSSSSLLLLLLLLMMMMRRRRRRR',
+    'WWWWWWSSSSSSSLLLLLLLLMMMAAAAAAAA',
+    'WWWWWWSSSSSSQQQQQQQQAAAAAAAAAAAA',
+    'WWWWWWSSSSSQQQQQQQQQQAAAAAAAAAAA',
+    'WWWWWWWWDDDDQQQQQQQQDDDDAAAAAAAA',
+    'WWWWWWWWDDDDDDDDDDDDDDDDAAAAAAAA',
+    'WWWWWWWWDDDDDDDDDDDDDDDDAAAAAAAA',
+    'WWWWWWWWWDDDDDDDDDDDDDDAAAAAAAAA',
+    'WWWWWWWWWWDDDDDDDDDDDDAAAAAAAAAA',
+    'WWWWWWWWWWWDDDDDDDDDDAAAAAAAAAAA'
+  ],
+  pattern: {
+    helix: 'c@jk@c@@j@@k@e', civic: 'b@h@.@e@', lantern: 'l@o@l@l@', heights: 'c@kgj.gfcb', sky: 'k.g.k@.k.g@k.k.', gray: 'l@m.n@l.', memory: 'c@d@b@',
+    quiet: 'c@d@b@a.', sector9: 'd@c@e@@b@@', black: 'a@b.a@da.@bc@a.d', hive: 'm@mn.mb@mm@n', harbor: 'm@n@m.@n@m@@', glass: 'a.b@a@d.b.a.d@.a',
+    dryline: 'a.b@d.a@b.', railhold: 'm.n@m.bn@m.m', furnace: 'm@n.mb@m'
+  },
+  over: { '14,16': 'S' },
+  T: {
+    a: [[0, 0, 6, 6, 14, 'ribbon']],                                                  // low block
+    b: [[0, 0, 6, 6, 32, 'grid']],                                                    // mid-rise block
+    c: [[0, 0, 6, 6, 62, 'grid']],                                                    // tower block
+    d: [[0, 0, 6, 3, 12, 'ribbon'], [0, 3, 6, 3, 34, 'grid']],                        // low front, mid back
+    e: [[0, 0, 6, 3, 58, 'grid'], [0, 3, 6, 3, 18, 'ribbon']],                        // tall front, low back
+    f: [[0, 0, 3, 6, 34, 'grid'], [3, 0, 3, 6, 26, 'ribbon']],                        // two slabs side by side
+    g: [[0, 0, 3, 3, 44, 'grid'], [3, 0, 3, 3, 20, 'ribbon'], [0, 3, 3, 3, 26, 'grid'], [3, 3, 3, 3, 52, 'grid']], // four mixed towers
+    h: [[0, 0, 6, 3, 30, 'grid'], [0, 3, 3, 3, 18, 'ribbon']],                        // L with a yard
+    i: [[0, 0, 2, 6, 30, 'grid'], [4, 0, 2, 6, 30, 'grid'], [2, 0, 2, 1, 14, 'ribbon']], // U around a court
+    j: [[0, 0, 6, 6, 10, 'ribbon'], [0, 0, 3, 3, 95, 'grid']],                        // podium with a tower
+    k: [[0, 0, 2, 6, 85, 'grid'], [4, 0, 2, 6, 72, 'grid']],                          // twin slabs
+    l: [[0, 0, 6, 2, 9, 'ribbon'], [0, 3, 6, 2, 12, 'ribbon']],                       // shop rows with an alley between
+    m: [[0, 0, 6, 4, 12, 'shed'], [0, 5, 2, 1, 6, 'shed']],                           // warehouse and a hut
+    n: [[0, 0, 2, 2, 6, 'shed'], [3, 0, 2, 2, 6, 'shed'], [0, 3, 2, 2, 6, 'shed'], [3, 3, 2, 2, 9, 'shed']], // container stacks
+    o: [[0, 0, 6, 1, 22, 'ribbon'], [0, 5, 6, 1, 22, 'ribbon'], [0, 1, 1, 4, 22, 'ribbon'], [5, 1, 1, 4, 22, 'ribbon']] // ring around a courtyard
+  }
+};
 /* one city plan shared by the cutscene skyline, free roam, story scenes and operations.
    32x32 blocks (~1.3 km). Each block: a 1-cell sidewalk ring around a 6x6 building core; two-lane streets between. */
 NV.CityPlan = (() => {
   let P = null;
   const N = 32, B = 10, C = (N - 1) / 2, TB = [N / 2 - 1, N / 2];
-  function district(bx, by) {
-    const dx = bx - C, dy = by - C, dc = Math.hypot(dx, dy), a = Math.atan2(dy, dx) * 180 / Math.PI; // 0 = east, 90 = south
-    if (dc < 4.4) return 'helix';
-    const oct = Math.round(((a + 360) % 360) / 45) % 8, quad = Math.round(((a + 360) % 360) / 90) % 4;
-    if (dc < 8.6) return ['civic', 'lantern', 'heights', 'sky'][quad];
-    if (dc < 12.2) return ['gray', 'memory', 'quiet', 'sector9', 'heights', 'black', 'sky', 'hive'][oct];
-    if (bx >= N - 4 && Math.abs(a) < 70) return 'harbor';
-    return ['harbor', 'glass', 'dryline', 'railhold', 'railhold', 'black', 'furnace', 'hive'][oct];
-  }
+  const district = (bx, by) => NV.CITY_MAP.codes[NV.CITY_MAP.districts[by][bx]];
   function make() {
-    const r = U.rng(2098), W = N * B + 3, H = W;
+    const r = U.rng(2098), W = N * B + 3, H = W, CM = NV.CITY_MAP;
     const g = Array.from({ length: H }, (_, y) => Array.from({ length: W }, (_, x) => (x === 0 || y === 0 || x === W - 1 || y === H - 1) ? 1 : 0));
     const buildings = [], plazas = [], inter = [], blocks = [], landmarks = [];
     const tc = { cx: (3 + TB[0] * B + 3 + TB[1] * B + 8) / 2, cy: (3 + TB[0] * B + 3 + TB[1] * B + 8) / 2 };
-    // pick the blocks that hold landmarks: every name gets a block in its district
-    const byD = {};
-    for (let by = 0; by < N; by++) for (let bx = 0; bx < N; bx++) { const d = district(bx, by); if (TB.includes(bx) && TB.includes(by)) continue; if (bx === TB[0] - 1 && by === TB[1]) continue; (byD[d] = byD[d] || []).push(bx + by * N); }
+    // lay out every block: hand-placed overrides first, then the district's own pattern in reading order
+    const lay = new Array(N * N), used = {};
+    for (let by = 0; by < N; by++) for (let bx = 0; bx < N; bx++) {
+      const d = district(bx, by), k = bx + by * N, ov = CM.over[bx + ',' + by];
+      if (TB.includes(bx) && TB.includes(by)) { lay[k] = 'T'; continue; }
+      if (ov) { lay[k] = ov; continue; }
+      const pat = CM.pattern[d], i = used[d] || 0; used[d] = i + 1; lay[k] = pat[i % pat.length];
+    }
+    // every named landmark gets a site in its own district; if the map has too few '@' sites, ordinary blocks make up the rest
     const lmAt = new Map();
     Object.entries(NV.LANDMARKS).forEach(([d, names]) => {
-      const pool = (byD[d] || []).slice(); for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
-      names.forEach((n, i) => { if (i < pool.length) lmAt.set(pool[i], { name: n, d, kind: NV.lmKind(n, d) }); });
+      const slots = []; for (let k = 0; k < N * N; k++) if (lay[k] === '@' && district(k % N, (k / N) | 0) === d) slots.push(k);
+      for (let k = N * N - 1; k >= 0 && slots.length < names.length; k--) if (!'@.ST'.includes(lay[k]) && district(k % N, (k / N) | 0) === d) slots.push(k);
+      names.forEach((n, i) => { if (i < slots.length) lmAt.set(slots[i], { name: n, d, kind: NV.lmKind(n, d) }); });
     });
     const solidRect = (x, y, w, h) => { for (let yy = y; yy < y + h; yy++) for (let xx = x; xx < x + w; xx++) g[yy][xx] = 1; };
     for (let by = 0; by < N; by++) for (let bx = 0; bx < N; bx++) {
-      const x0 = 3 + bx * B, y0 = 3 + by * B, d = district(bx, by), D = NV.REGIONS[d];
+      const x0 = 3 + bx * B, y0 = 3 + by * B, d = district(bx, by), D = NV.REGIONS[d], ch = lay[bx + by * N];
       inter.push({ x: 1 + bx * B, y: 1 + by * B });
-      const blk = { bx, by, x0, y0, d, tower: TB.includes(bx) && TB.includes(by) };
+      const blk = { bx, by, x0, y0, d, tower: ch === 'T' };
       blocks.push(blk);
       if (blk.tower) continue; // Helix Tower plaza
-      const safe = bx === TB[0] - 1 && by === TB[1], dc = Math.hypot(bx - C, by - C);
       const lm = lmAt.get(bx + by * N);
       if (lm) {
         Object.assign(lm, { x: x0, y: y0, cx: x0 + 4, cy: y0 + 4 }); landmarks.push(lm); blk.lm = lm;
@@ -2391,21 +2453,18 @@ NV.CityPlan = (() => {
         if (!['hall', 'factory', 'clinic', 'vault', 'dome', 'cathedral'].includes(k)) plazas.push({ x: x0, y: y0, w: 8, h: 8, cx: x0 + 4, cy: y0 + 4, lm: true });
         continue;
       }
-      if (safe || r() < D[4]) { plazas.push({ x: x0, y: y0, w: 8, h: 8, cx: x0 + 4, cy: y0 + 4, safe, d }); continue; }
-      const sp = r(), ix = x0 + 1, iy = y0 + 1;
-      const rects = D[5] === 'rust' && sp < .6 ? [[0, 0, 6, 6]] : sp < .22 ? [[0, 0, 6, 6]] : sp < .44 ? [[0, 0, 6, 3], [0, 3, 6, 3]] : sp < .66 ? [[0, 0, 3, 6], [3, 0, 3, 6]] : sp < .85 ? [[0, 0, 3, 3], [3, 0, 3, 3], [0, 3, 3, 3], [3, 3, 3, 3]] : [[0, 0, 6, 2], [0, 2, 3, 4], [3, 2, 3, 4]];
-      rects.forEach(([rx, ry, rw, rh]) => {
-        if (D[5] === 'dead' && r() < .25) return; // collapsed lots
-        let w = rw, h = rh;
-        if (rects.length > 1 && r() < .3) { if (rw >= rh) h--; else w--; }
-        const ht = (10 + Math.pow(r(), 1.6) * (50 + Math.max(0, 9 - dc) * 16) + Math.max(0, 6 - dc) * 14) * D[3];
-        solidRect(ix + rx, iy + ry, w, h);
-        buildings.push({ x: ix + rx, y: iy + ry, w, h, ht: Math.max(6, ht), d, tilt: D[5] === 'dead' && r() < .5 ? (r() - .5) * .18 : 0 });
+      const rects = CM.T[ch];
+      if (!rects) { plazas.push({ x: x0, y: y0, w: 8, h: 8, cx: x0 + 4, cy: y0 + 4, safe: ch === 'S', d }); continue; } // '.', 'S' and unused '@' sites are open squares
+      const ix = x0 + 1, iy = y0 + 1, sc = Math.max(.45, Math.min(1.9, .5 + D[3] * .8)), ruin = D[5] === 'dead';
+      rects.forEach(([rx, ry, rw, rh, bh, fx]) => {
+        if (ruin && r() < .2) return; // collapsed lots
+        solidRect(ix + rx, iy + ry, rw, rh);
+        buildings.push({ x: ix + rx, y: iy + ry, w: rw, h: rh, ht: Math.max(5, bh * sc), d, fx, tilt: ruin && r() < .4 ? (r() - .5) * .18 : 0 });
       });
     }
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (Math.hypot(x + .5 - tc.cx, y + .5 - tc.cy) < 6) g[y][x] = 1; // tower footprint
-    const safe = plazas.find(p => p.safe);
     plazas.sort((a, b) => (b.safe ? 1 : 0) - (a.safe ? 1 : 0));
+    const safe = plazas.find(p => p.safe);
     return { W, H, g, N, B, TB, buildings, plazas, inter, blocks, landmarks, district, tower: tc, start: { x: safe.cx, y: safe.cy } };
   }
   return () => P || (P = make());
@@ -5284,12 +5343,13 @@ NV.Level = (() => {
     const mk = (name, m, arr, shape) => { if (!arr.length) return null; const b = shape ? shape() : BABYLON.MeshBuilder.CreateBox(name, { size: 1 }, scene); b.name = name; b.material = m; NV.thin(b, arr); statics.push(b); return b; };
     // buildings: one material per district style and height band (windows tinted by district)
     const bands = {};
-    B.forEach(b => { const st = styleOf(b.d), ci = b.ht < 30 ? 0 : b.ht < 60 ? 1 : 2, k = st + ci; (bands[k] = bands[k] || { st, ci, arr: [] }).arr.push(NV.M(b.w * TILE - .1, b.ht, b.h * TILE - .1, (b.x + b.w / 2) * TILE, b.ht / 2 - (b.tilt ? 1.5 : 0), (b.y + b.h / 2) * TILE, b.tilt ? BABYLON.Quaternion.RotationYawPitchRoll(0, b.tilt, b.tilt * .6) : null)); });
-    Object.values(bands).forEach(({ st, ci, arr }) => {
-      const c = STYLE_COL[st], m = mat(scene, 'bld' + st + ci, '#0a0812'); m.emissiveTexture = NV.windowTex2(scene, 300 + ci * 7 + st.length, c[0], c[1]);
+    B.forEach(b => { const st = styleOf(b.d), ci = b.ht < 30 ? 0 : b.ht < 60 ? 1 : 2, fx = b.fx || '', k = st + fx + ci; (bands[k] = bands[k] || { st, ci, fx, arr: [] }).arr.push(NV.M(b.w * TILE - .1, b.ht, b.h * TILE - .1, (b.x + b.w / 2) * TILE, b.ht / 2 - (b.tilt ? 1.5 : 0), (b.y + b.h / 2) * TILE, b.tilt ? BABYLON.Quaternion.RotationYawPitchRoll(0, b.tilt, b.tilt * .6) : null)); });
+    Object.values(bands).forEach(({ st, ci, fx, arr }) => {
+      const c = STYLE_COL[st], m = mat(scene, 'bld' + st + fx + ci, '#0a0812'); m.emissiveTexture = NV.windowTex2(scene, 300 + ci * 7 + st.length + fx.length * 13, c[0], c[1], fx === 'shed' ? 'grid' : fx || undefined);
       m.emissiveTexture.vScale = [.5, .95, 1.8][ci]; m.emissiveTexture.uScale = 1.3; m.emissiveTexture.anisotropicFilteringLevel = 8; m.specularColor = new BABYLON.Color3(.25, .25, .35);
-      if (st === 'dead') m.emissiveTexture.level = .8; else m.emissiveTexture.level = 1.25;
-      mk('bld' + st + ci, m, arr);
+      if (st === 'dead') m.emissiveTexture.level = .8; else m.emissiveTexture.level = fx === 'shed' ? .55 : fx === 'ribbon' ? 1.45 : 1.25; // sheds are dim, shop fronts glow
+      if (fx === 'ribbon') m.emissiveTexture.vScale *= 1.6; // ribbon floors sit closer together on low shop buildings
+      mk('bld' + st + fx + ci, m, arr);
     });
     // street furniture
     const trim = [], ant = [], pole = [], lamp = [], dash = [], walk = [], zebra = [], stopl = [];
@@ -5399,7 +5459,7 @@ NV.Level = (() => {
         if (ht > 30 && r() < .35) { const at = place(.5, .5); if (at) { const mh = 5 + r() * 6; put('mast', NV.M(.14, mh, .14, at.cx, ht + mh / 2, at.cz)); put('blink', NV.M(.4, .4, .4, at.cx, ht + mh + .2, at.cz)); } }
       }
       // Tokyo-style blade signs sticking out over the sidewalk
-      if (q.signs && ht > 14 && r() < .55) {
+      if (q.signs && ht > 14 && r() < (b.d === 'lantern' || b.d === 'gray' ? .9 : .55)) {
         const sides = streetSides(b);
         if (sides.length) {
           const [dx, dy] = sides[Math.floor(r() * sides.length)], h = Math.min(ht - 4, 6 + r() * 9), y0 = 4 + r() * Math.max(0, Math.min(6, ht - h - 6)), along = r() < .5 ? .14 : .86;
@@ -5410,7 +5470,7 @@ NV.Level = (() => {
         }
       }
       // cables (some strung with lanterns) across the street to the building opposite
-      if (r() < .32 * lodK) {
+      if (r() < (b.d === 'lantern' ? .85 : b.d === 'gray' ? .6 : .32) * lodK) {
         const sides = streetSides(b).filter(([dx, dy]) => dx ? solidC(dx < 0 ? b.x - 5 : b.x + b.w + 4, b.y + (b.h >> 1)) : solidC(b.x + (b.w >> 1), dy < 0 ? b.y - 5 : b.y + b.h + 4));
         if (sides.length) {
           const [dx, dy] = sides[Math.floor(r() * sides.length)], oh = dx ? hAt(dx < 0 ? b.x - 5 : b.x + b.w + 4, b.y + (b.h >> 1)) : hAt(b.x + (b.w >> 1), dy < 0 ? b.y - 5 : b.y + b.h + 4);
@@ -5421,7 +5481,7 @@ NV.Level = (() => {
             if (signSpots.some(sp => [[ax, az], [bx, bz], [(ax + bx) / 2, (az + bz) / 2]].some(([x, z]) => Math.hypot(sp.x - x, sp.z - z) < 4 && Math.min(h0, h1) - 2 < sp.y1))) continue;
             const sag = .8 + r() * .8, mx = (ax + bx) / 2, mz = (az + bz) / 2, my = (h0 + h1) / 2 - sag;
             seg('cable', ax, h0, az, mx, my, mz, .06); seg('cable', mx, my, mz, bx, h1, bz, .06);
-            if (r() < .3) for (let t = 1; t < 8; t++) { const u = t / 8, px = ax + (bx - ax) * u, pz = az + (bz - az) * u, py = h0 + (h1 - h0) * u - sag * 4 * u * (1 - u); put('lantern', NV.M(.34, .44, .34, px, py - .35, pz)); }
+            if (r() < (b.d === 'lantern' ? .95 : b.d === 'gray' ? .6 : .3)) for (let t = 1; t < 8; t++) { const u = t / 8, px = ax + (bx - ax) * u, pz = az + (bz - az) * u, py = h0 + (h1 - h0) * u - sag * 4 * u * (1 - u); put('lantern', NV.M(.34, .44, .34, px, py - .35, pz)); }
           }
         }
       }

@@ -37,3 +37,8 @@ Game-only changes do not need a version bump: installed apps download the new `i
 ## Accounts server
 - `server/` is the account API (Cloudflare Worker + D1 `neon-veins-accounts`, id in `server/wrangler.toml`; schema in `server/schema.sql`). It is deployed at https://neon-veins-api.winsontian254.workers.dev (`cd server && wrangler deploy` from a PC; this cloud session cannot reach Cloudflare).
 - The game reads the API base from `DEFAULT_API` in `NV.Account` (index.html); `NV.Account.DEMO` is the number of chapters playable without an account.
+
+## The city (hand-drawn)
+- `NV.CITY_MAP` (above `NV.CityPlan` in index.html) is the authored map: a 32 x 32 grid of district letters, a block pattern per district (`a-o` templates, `.` plaza, `@` landmark site, `S` safe plaza), hand-placed `over` blocks, and the template library `T` (rects with height and facade `grid` / `ribbon` / `shed`).
+- Landmark names from `NV.LANDMARKS` fill the `@` sites of their own district in reading order; if a district has too few, ordinary blocks make up the rest. Changing the map changes where everything is, so check that every district still has enough `@` sites and that the start plaza stays reachable.
+

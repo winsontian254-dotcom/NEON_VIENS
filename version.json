@@ -1,6 +1,16 @@
 {
-  "build": 9,
+  "build": 10,
   "history": [
+    {
+      "build": 10,
+      "version": "1.10",
+      "date": "2026-10-10",
+      "notes": [
+        "New Avalon is now a hand-drawn city: real district shapes, authored blocks and landmark sites instead of random generation",
+        "New building types: shop rows with alleys, twin slabs, podium towers, courtyards, container yards and warehouses",
+        "Three facade looks (office grid, ribbon shopfronts, dim industrial sheds); Lantern Row and the Gray Market are strung with lanterns and signs"
+      ]
+    },
     {
       "build": 9,
       "version": "1.9",
