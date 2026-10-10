@@ -26,6 +26,10 @@ Game-only changes do not need a version bump: installed apps download the new `i
 - Sources: `i18n/zh/bNN.tsv` (story lines by index into `NV.I18n.storyKeys()`), `i18n/zh/uiN.tsv` (English UI text → Simplified). Traditional is generated with OpenCC.
 - After editing any translation, or the story data (NV_DATA), run `python3 tools/build_zh.py` (needs `pip install opencc-python-reimplemented`); it rewrites the `NV_ZH` block in index.html. New UI strings: add them to a `uiN.tsv`.
 
+## 3D models (embedded)
+- Models live in `assets/src/` with licences in `assets/manifest.json` (CC0 only). `python3 tools/embed_assets.py --slim` (with `GLTF_TRANSFORM_DIR` pointing at a folder with `@gltf-transform/core` + `functions` installed) writes them as base64 into the `NV_ASSETS` block of index.html; then rebuild the APK.
+- `NV.Assets.inst(scene, name)` returns a copy with its own animation groups; every use keeps a code-built fallback.
+
 ## Character data
 - Backgrounds live in `NV.BG` (eight entries: text, `mods`, `start` stats, combos and clashes). Gameplay reads the merged mods from `L.bg` (set in `NV.Level.start`); never check tag ids directly.
 - Appearance is `profile.look` (`jacket, visor, skin, hair, hairCol, eyes, ware`), normalised by `NV.LOOK.norm`. Profiles carry `v: 2`; older saves are converted through `UI.convertProfile` / `NV.State.setProfile` in the main loop.

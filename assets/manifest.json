@@ -1,0 +1,8 @@
+{
+  "robot": {
+    "file": "src/robot.glb",
+    "anims": ["Idle", "Walking", "Running", "Death", "Wave", "Yes", "No"],
+    "license": "CC0 1.0",
+    "source": "RobotExpressive by Tomás Laulhé (Quaternius), via the three.js examples (github.com/mrdoob/three.js, examples/models/gltf/RobotExpressive)"
+  }
+}

@@ -1,6 +1,14 @@
 {
-  "build": 7,
+  "build": 8,
   "history": [
+    {
+      "build": 8,
+      "version": "1.8",
+      "date": "2026-10-10",
+      "notes": [
+        "AI characters now appear as full-body holograms (first embedded 3D model; real human models come next)"
+      ]
+    },
     {
       "build": 7,
       "version": "1.7",
