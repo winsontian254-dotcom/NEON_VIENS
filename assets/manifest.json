@@ -1,34 +1,93 @@
 {
   "robot": {
     "file": "src/robot.glb",
-    "anims": ["Idle", "Walking", "Running", "Death", "Wave", "Yes", "No"],
+    "anims": [
+      "Idle",
+      "Walking",
+      "Running",
+      "Death",
+      "Wave",
+      "Yes",
+      "No"
+    ],
     "license": "CC0 1.0",
-    "source": "RobotExpressive by Tomás Laulhé (Quaternius), via the three.js examples (github.com/mrdoob/three.js, examples/models/gltf/RobotExpressive)"
+    "source": "RobotExpressive by Tom\u00e1s Laulh\u00e9 (Quaternius), via the three.js examples (github.com/mrdoob/three.js, examples/models/gltf/RobotExpressive)"
   },
   "human": {
     "file": "src/human.glb",
-    "anims": ["Idle", "Walk", "Run", "Hit", "Death"],
+    "anims": [
+      "Idle",
+      "Walk",
+      "Run",
+      "Hit",
+      "Death"
+    ],
     "license": "Original (Neon Veins)",
-    "source": "Built from scratch by tools/blender/build_models.py (primitives, auto-weighted armature, procedural poses)"
+    "source": "Built from scratch by tools/blender/build_models.py (primitives, auto-weighted armature, procedural poses)",
+    "embed": false
   },
   "drone": {
     "file": "src/drone.glb",
     "license": "Original (Neon Veins)",
-    "source": "Built from scratch by tools/blender/build_models.py"
+    "source": "Built from scratch by tools/blender/build_models.py",
+    "embed": false
   },
   "medkit": {
     "file": "src/medkit.glb",
     "license": "Original (Neon Veins)",
-    "source": "Built from scratch by tools/blender/build_models.py"
+    "source": "Built from scratch by tools/blender/build_models.py",
+    "embed": false
   },
   "crate": {
     "file": "src/crate.glb",
     "license": "Original (Neon Veins)",
-    "source": "Built from scratch by tools/blender/build_models.py"
+    "source": "Built from scratch by tools/blender/build_models.py",
+    "embed": false
   },
   "lantern": {
     "file": "src/lantern.glb",
     "license": "Original (Neon Veins)",
-    "source": "Built from scratch by tools/blender/build_models.py"
+    "source": "Built from scratch by tools/blender/build_models.py",
+    "embed": false
+  },
+  "w_pistol": {
+    "file": "src/w_pistol.glb",
+    "license": "Original (Neon Veins)",
+    "source": "Built from scratch by tools/blender/build_weapons.py"
+  },
+  "w_knife": {
+    "file": "src/w_knife.glb",
+    "license": "Original (Neon Veins)",
+    "source": "Built from scratch by tools/blender/build_weapons.py"
+  },
+  "w_hand_grip": {
+    "file": "src/w_hand_grip.glb",
+    "license": "Original (Neon Veins)",
+    "source": "Built from scratch by tools/blender/build_weapons.py"
+  },
+  "w_hand_hold": {
+    "file": "src/w_hand_hold.glb",
+    "license": "Original (Neon Veins)",
+    "source": "Built from scratch by tools/blender/build_weapons.py"
+  },
+  "w_smg": {
+    "file": "src/w_smg.glb",
+    "license": "Original (Neon Veins)",
+    "source": "Built from scratch by tools/blender/build_weapons.py"
+  },
+  "w_rifle": {
+    "file": "src/w_rifle.glb",
+    "license": "Original (Neon Veins)",
+    "source": "Built from scratch by tools/blender/build_weapons.py"
+  },
+  "w_shotgun": {
+    "file": "src/w_shotgun.glb",
+    "license": "Original (Neon Veins)",
+    "source": "Built from scratch by tools/blender/build_weapons.py"
+  },
+  "w_sniper": {
+    "file": "src/w_sniper.glb",
+    "license": "Original (Neon Veins)",
+    "source": "Built from scratch by tools/blender/build_weapons.py"
   }
 }

@@ -6,7 +6,7 @@
 
 assets/manifest.json maps a short name to a source file plus its licence:
     { "robot": { "file": "src/robot.glb", "anims": ["Idle", "Walking"], "license": "CC0 1.0", "source": "..." } }
-"anims" (optional) keeps only the listed animation clips.
+"anims" (optional) keeps only the listed animation clips; "embed": false keeps a file in the repo without shipping it.
 
 The models go into one script block, /*NV_ASSETS_BEGIN*/ window.NV_ASSETS = { name: 'base64' } /*NV_ASSETS_END*/,
 placed after the NV_ZH block. NV.Assets in index.html decodes and loads them.
@@ -49,6 +49,8 @@ def main():
     man = json.load(open(os.path.join(ADIR, 'manifest.json'), encoding='utf-8'))
     blob, total = {}, 0
     for name, a in man.items():
+        if a.get('embed') is False:
+            continue  # kept in the repo, not shipped in the game
         path = os.path.join(ADIR, a['file'])
         if not os.path.exists(path):
             print(f'  {name}: missing {a["file"]}, skipped'); continue

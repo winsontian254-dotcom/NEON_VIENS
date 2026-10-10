@@ -1,6 +1,15 @@
 {
-  "build": 13,
+  "build": 14,
   "history": [
+    {
+      "build": 14,
+      "version": "1.14",
+      "date": "2026-10-10",
+      "notes": [
+        "New first-person weapons modelled by hand in Blender: pistol, SMG, rifle, shotgun, sniper rifle and a combat knife, each with real detail and a lit edge or coil strip, carried in gloved fists",
+        "The knife is held tilted so the blade's flat faces you"
+      ]
+    },
     {
       "build": 13,
       "version": "1.13",
