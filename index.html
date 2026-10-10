@@ -1570,7 +1570,7 @@ NV.Account = (() => {
 
 /* Condition evaluation for conditional blocks compiled from the script */
 NV.Update = (() => {
-  const NV_BUILD = 10;
+  const NV_BUILD = 11;
   const URL = 'https://winsontian254-dotcom.github.io/NEON_VIENS/version.json', KEY = 'nv_seen_build';
   let info = null, shown = 0, alerted = false;
   const seen = () => { try { return Number(localStorage.getItem(KEY)) || 0; } catch (e) { return 0; } };
@@ -2469,6 +2469,534 @@ NV.CityPlan = (() => {
   }
   return () => P || (P = make());
 })();
+/* AUTHORED INTERIORS. Every mission, arena and story space that happens indoors is a hand-drawn plan, one character per 4 m cell:
+   # wall  . floor  S start  X exit (scenes: where the cast gathers)  1-9 room centres (patrol points and ceiling lights)
+   T terminal  P pickup  e enemy post  m medkit  v civilian  c crate cover
+   furniture (cover): R shelving  B bed  D desk  C counter  M machine  K server rack  L sofa  Y tank  N planter  U table   r rails (walkable)
+   kind: 'mission' (operations), 'arena' (the 17 x 17 boss / arena / defend rooms) or 'scene' (walkable story spaces). pal overrides the scene colours. */
+NV.LAYOUTS = {
+  office: { kind: 'mission', pal: { a: '#e8f4ff', b: '#4d7dff' }, rows: [
+      '############################',
+      '#.......v#......ev#..DDDD..#',
+      '#..DDDD..#..DDDD..#.....e..#',
+      '#.T...e..#......T.#..eX..T.#',
+      '#...1...K#...2...K#.......K#',
+      '####..#######..#######..####',
+      '#....e..............e......#',
+      '#P....P.....em......P......#',
+      '##..#########..########..###',
+      '#.....##......e.....##.....#',
+      '#.D.D.##.eN......Ne.##.D.D.#',
+      '#..e..##...T.3......##..e..#',
+      '#.......................T..#',
+      '#.D.D.....N..LL..NP....D.D.#',
+      '#.....##.e........e.##.....#',
+      '#..4..######....######..5..#',
+      '#.D.D.######.e..######.D.D.#',
+      '#.....######....######.....#',
+      '#..T..######....######.....#',
+      '#.D.D.####........####.D.D.#',
+      '#.Pe..####...S....####..eP.#',
+      '#.......c..........c.......#',
+      '#.....m....CC..CC....m.....#',
+      '############################'
+  ] },
+  clinic: { kind: 'mission', pal: { a: '#7dfbd6', b: '#e8fff8' }, rows: [
+      '##########################',
+      '##########################',
+      '#.......###.m.#.M.....M.##',
+      '#vB..B......P.#..e......##',
+      '#...1.T..e........DDDD..##',
+      '#.B..B..###.e..........T##',
+      '#P.e....###.c.#....4..e.##',
+      '###########...#.M.....M.##',
+      '#.......###...#.........##',
+      '#.B..B......6.############',
+      '#...2.T..e....#.RR...RR.##',
+      '#.B..B..###.......e...eP##',
+      '#P....e.###.c......5..T.##',
+      '###########...#.RR...RR.##',
+      '#......####.e.############',
+      '#.B.B..####...####....Km##',
+      '#..3...............DD...##',
+      '#vB.Be...N.....e.....X..##',
+      '#...T.m#.LL...LL.#....KP##',
+      '########....S....#..e...##',
+      '########....CC...#########',
+      '##########################'
+  ] },
+  warehouse: { kind: 'mission', pal: { a: '#ffb238', b: '#ff7a2b' }, rows: [
+      '################################',
+      '#......................#########',
+      '#.T..e.......T.......Pe#.....K##',
+      '#......................#.DD.D.##',
+      '#...RRRR.RRRR.e.RR.RRR.#...X..##',
+      '#......................#.e....##',
+      '#m....1...e...cc...2e..#....eT##',
+      '#.............c........###..####',
+      '#...RRRR.RRRR...RR.RRR.........#',
+      '#.............e........m.......#',
+      '#.c.......3..P.....4e.c........#',
+      '#.cc.......e..........c........#',
+      '#...RRRR.RRRR.e.RR.RRR.........#',
+      '#....e......................cc.#',
+      '#.....5...P...cc....Te.........#',
+      '#.P.....................########',
+      '#...RRRR.RRRR...RR.RRR..#....v##',
+      '#.....e.......e.........#.RRR.##',
+      '#...........6.......e......7..##',
+      '#.....cc......MM.....cc...RRR.##',
+      '#.S.....................#v..Pe##',
+      '#............m........T.########',
+      '#..............................#',
+      '################################'
+  ] },
+  factory: { kind: 'mission', pal: { a: '#ffd23d', b: '#ff3b3b' }, rows: [
+      '################################',
+      '#.........##........##........v#',
+      '#vRR..RR..##..r..r..##.......X.#',
+      '#.........##.PrMMr..##.........#',
+      '#...e.........r..rT.##..cc...Y.#',
+      '#....1..e....er..r..##.e.......#',
+      '#.........##..rMMr........5....#',
+      '#.RR...RR.##..r..re............#',
+      '#.........##.3r..r..##.Y...e..P#',
+      '#....c....##..rMMr..##......c..#',
+      '#.T.e......m..r..r..##.........#',
+      '#m...........er..rP.##....DDK..#',
+      '#.RR.2.RR.##..rMMre.##..P....T.#',
+      '#.........##..r..r......e......#',
+      '#....c....##..r..r4.......6....#',
+      '#.......e.##..rMMr..##......c..#',
+      '#............er..r..##..cc.....#',
+      '#..c....c.....r..r..##......e..#',
+      '#.........##.TrMMre.##.......Y.#',
+      '#....e....##..r..r.......e.....#',
+      '#.......P.##..r..r7....Y..T....#',
+      '#.S.......##.erMMr..##........m#',
+      '#.........##........##.........#',
+      '################################'
+  ] },
+  metro: { kind: 'mission', pal: { a: '#3dffa8', b: '#ffb238' }, rows: [
+      '####################################',
+      '#...................cc.............#',
+      '#.S.....e.1.....e.P.......2..e.c...#',
+      '#m..........CCC.......CCC.....P....#',
+      '#..T................e............T.#',
+      '######..####################..######',
+      '######..####################..######',
+      '######..####################..######',
+      '###..LL.....LL.....L....LL....L..###',
+      '###T.e...#.....#..3..#..e..#....P###',
+      '###.........e.....e...........e..###',
+      '#...c.........e....................#',
+      '#.vrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr.m#',
+      '#.................m...e...........v#',
+      '###P....e.......e.4...e.......e.T###',
+      '###..LL..#..LL.#...L.#..LL.#..L..###',
+      '####..########..##########..########',
+      '###.....P..##....6.....##....DDKK###',
+      '###.M..5.e.##.RR...RRR.##.T.e..X.###',
+      '####################################'
+  ] },
+  underdeep: { kind: 'mission', pal: { a: '#19f0c8', b: '#3d6bff' }, rows: [
+      '##############################',
+      '###################.#####..###',
+      '#####...#########.....###.X.##',
+      '####.....########.e..Y##....##',
+      '####v.....#...#......T....e###',
+      '####P.e....T.Y.....3e.......##',
+      '#####c......e...#....c#.....##',
+      '#########.m.....###.###.e..P##',
+      '########P...2e..#######....###',
+      '#####....Y.....#...####..Y####',
+      '####.c....#...#Y....##.....###',
+      '###....e.c####....P....m.T..##',
+      '###....1..####..e...........##',
+      '###..T....###....5......4e..##',
+      '####....c.........eY##....M###',
+      '#####.........##...###....####',
+      '#######...e...########..c#####',
+      '#######.e.....########...#####',
+      '#######...8...M.#####.....####',
+      '####.......rc....#....e....###',
+      '###Y..e.#...r.T........7...###',
+      '##..m....##........#..P.e..###',
+      '##......Y##...e6..###.v..Y####',
+      '##...S...###....Y#####...#####',
+      '###.....#####...##############',
+      '##############################'
+  ] },
+  club: { kind: 'mission', pal: { a: '#ff2bd6', b: '#19f0ff' }, rows: [
+      '############################',
+      '#.......##........##.......#',
+      '#.LL....##....X...##..LLL..#',
+      '#..v5.e.##.TL..L.T##.e6....#',
+      '#.......##........##.......#',
+      '#m...........e............m#',
+      '##..#####...P......#####..##',
+      '##.3#####M..KKKK..M#####.4##',
+      '##..#####....e..e..#####..##',
+      '#.T........................#',
+      '#.L....e....e...e...e...C..#',
+      '#.e....U............U...Ce.#',
+      '#.L.....c....U.....c....C.T#',
+      '#..2.........1..........C..#',
+      '#.L....U.........e..U...C..#',
+      '#.e......e....U.........C..#',
+      '#.L.....P............P..Ce.#',
+      '#.v........e........e......#',
+      '############....############',
+      '#.......##....m...##.......#',
+      '#PRR7RR...............DD.KK#',
+      '#.......##...S....##...T..P#',
+      '##########.CC..CC.##########',
+      '############################'
+  ] },
+  vault: { kind: 'mission', pal: { a: '#c9a36b', b: '#ff3355' }, rows: [
+      '##############################',
+      '##############################',
+      '#####........#################',
+      '#####TR.R..eR.e.....P........#',
+      '#####.R.R...R.......e.T...e..#',
+      '#####..1.e...#########......v#',
+      '#####eR.R..PR#########...5.P.#',
+      '#####.R.R.m.R#########..Y.Y..#',
+      '#########..###.......#.......#',
+      '#######......#.KK.KK.#.RR..RR#',
+      '#...###......#....e..#.......#',
+      '#.S.....c........4......e..X.#',
+      '#....e....3..................#',
+      '#m..###..e.c.#...T.e.#.......#',
+      '#######......#.KK.KK.#.RR..RR#',
+      '#########..###.m.....#....e..#',
+      '#####........#########..Y.Y..#',
+      '#####.R.Re..R#########...6..T#',
+      '#####.R.R..PR#########......v#',
+      '#####.e2.....................#',
+      '#####.R.R...R.e..c..P.e......#',
+      '#####T......e#################',
+      '##############################',
+      '##############################'
+  ] },
+  server: { kind: 'mission', rows: [
+      '##############################',
+      '#............................#',
+      '#..T..........cc...........X.#',
+      '#.m..........................#',
+      '#..KKKK..KKKK....KKKK..KKKK..#',
+      '#....e..1...e.....e...2..eT..#',
+      '#.............P..............#',
+      '#..KKKK..KKKK....KKKK..KKKK..#',
+      '#........e...T...............#',
+      '#.c..eP.....e.........Pe.....#',
+      '#.c.......####..####.........#',
+      '#...K.....#........#.....K...#',
+      '#...K.....#.K...mK.#.....K.v.#',
+      '#...K.....#...3e...#.....K...#',
+      '#.6...........Y............7.#',
+      '#..............Y...........T.#',
+      '#.v.K.....#.....T..#.....K...#',
+      '#...K.....#.K....K.#....eK...#',
+      '#...K.....#........#.....K...#',
+      '#.........####..####.......c.#',
+      '#.P...e....................c.#',
+      '#............e....e..........#',
+      '#..KKKK..KKKK....KKKK..KKKKP.#',
+      '#....e......e.....e......e...#',
+      '#.......4.............5......#',
+      '#..KKKK..KKKK....KKKK..KKKK..#',
+      '#......T...................m.#',
+      '#.S...........cc.............#',
+      '#............................#',
+      '##############################'
+  ] },
+  lattice: { kind: 'mission', rows: [
+      '##############################',
+      '##############..##############',
+      '############...Y...###########',
+      '##########.....T.....#########',
+      '######.T....e..5..e.....######',
+      '######.....###..####..P.######',
+      '######.....###..####.....#####',
+      '######..4..###...##...K6.#####',
+      '#####c..e......P.....#e...####',
+      '#####..###.c.......c####..####',
+      '####.e.###.....e.....###.e.###',
+      '####...###........#.P###...###',
+      '###.m.........Y.Y........Pm###',
+      '###.Y3......e..X..e......7Y.##',
+      '####v..##.....Y.Y.#.e.##..v###',
+      '####.e.###P..........###.e.###',
+      '####...###...#.e#....###...###',
+      '#####..##..c.......c.###..####',
+      '#####...e..#..........e.c.####',
+      '######..K.####...###..K..#####',
+      '######..2..###..####..1..#####',
+      '######.T...###..####...T######',
+      '########...e..m....e...#######',
+      '##########.....S.....#########',
+      '############.......###########',
+      '##############################'
+  ] },
+  station: { kind: 'mission', rows: [
+      '##############################',
+      '############.......###########',
+      '############.KKXKK.###########',
+      '############..m....###########',
+      '############.T.....###########',
+      '##########.e.......e.#########',
+      '#########...Y..P..Y...########',
+      '########.4..##..###..5.#######',
+      '#######...e###.e####e...######',
+      '#######...####..#####...######',
+      '#........#####e..#####.......#',
+      '#vMe.P...####.K.K.####....BM.#',
+      '#.Tc.....................cmT.#',
+      '#.m1...eP...T..3..T...e..c.2.#',
+      '#.M......###.......###....BM.#',
+      '#.e......####.K.K.####...P.ev#',
+      '######...#####.e.#####...#####',
+      '#######...####..#####...######',
+      '#######...e###.e####e...######',
+      '########.6..##..###..7.#######',
+      '#########...Y..P..Y...########',
+      '##########ce.......ec#########',
+      '############.......###########',
+      '############.M.S.M.###########',
+      '############..c.c..###########',
+      '##############################'
+  ] },
+  cargo: { kind: 'mission', rows: [
+      '##############################',
+      '#........#............#.....v#',
+      '#....e...#..e.........#....K.#',
+      '#.T......#.....2....M.#.T..K.#',
+      '#...cc...#...cce......#...e..#',
+      '#........#...c.......e#..M...#',
+      '#.....1..#.T...MM.....#......#',
+      '#m.......#.......e....#..e.X.#',
+      '#........#...cc..............#',
+      '#.P.cc.e.....c...7..P........#',
+      '#...c.........P......m....cc.#',
+      '#..........cc................#',
+      '#.Y..3...e..e..cc..#..5....P.#',
+      '#..............c...#.........#',
+      '#.Y......###.####..#..e..6...#',
+      '#..e...e...........#......e..#',
+      '#............4...e.#..cccc...#',
+      '#.....cc...........#.........#',
+      '#.....c.....cc.....#........Y#',
+      '#.S.......P...e..T.#...e..T..#',
+      '#...........m......#........v#',
+      '##############################'
+  ] },
+  arena_pillars: { kind: 'arena', rows: [
+      '#################',
+      '########.########',
+      '##.............##',
+      '##......X......##',
+      '##......#......##',
+      '##...#.....#...##',
+      '##.............##',
+      '##..c.......c..##',
+      '#.....c...c.....#',
+      '##.............##',
+      '##..c.......c..##',
+      '##...#.....#...##',
+      '##......#......##',
+      '##......S......##',
+      '##.............##',
+      '########.########',
+      '#################'
+  ] },
+  arena_lanes: { kind: 'arena', rows: [
+      '#################',
+      '########.########',
+      '##.............##',
+      '##......X......##',
+      '##......c......##',
+      '##.............##',
+      '##..ccc...ccc..##',
+      '##.............##',
+      '#...............#',
+      '##.............##',
+      '##..ccc...ccc..##',
+      '##.............##',
+      '##......c......##',
+      '##......S......##',
+      '##.............##',
+      '########.########',
+      '#################'
+  ] },
+  arena_bunkers: { kind: 'arena', rows: [
+      '#################',
+      '########.########',
+      '##.............##',
+      '##......X......##',
+      '##..##..c..##..##',
+      '##..#.......#..##',
+      '##....c...c....##',
+      '##.............##',
+      '#...............#',
+      '##.............##',
+      '##....c...c....##',
+      '##..#.......#..##',
+      '##..##..c..##..##',
+      '##......S......##',
+      '##.............##',
+      '########.########',
+      '#################'
+  ] },
+  s_noodle: { kind: 'scene', pal: { a: '#ff5a3d', b: '#ffb238' }, rows: [
+      '################',
+      '#.MM...M.K.#####',
+      '#....1......RR.#',
+      '#..............#',
+      '###CCCCCC..#####',
+      '#.............c#',
+      '#......X.......#',
+      '#...U...U...U..#',
+      '#...........2..#',
+      '#...U...S...U..#',
+      '#.............c#',
+      '################'
+  ] },
+  s_clinic: { kind: 'scene', pal: { a: '#7dfbd6', b: '#e8fff8' }, rows: [
+      '##################',
+      '#.....M.##.....M.#',
+      '#.B.....##.B.....#',
+      '#.......##...1...#',
+      '#.B.X...##.B..DD.#',
+      '#.......##.......#',
+      '#.......##.......#',
+      '###..#######..####',
+      '#N..............N#',
+      '#................#',
+      '#........S....2..#',
+      '#..LL.......LL...#',
+      '#.......CC.......#',
+      '##################'
+  ] },
+  s_club: { kind: 'scene', pal: { a: '#ff2bd6', b: '#19f0ff' }, rows: [
+      '####################',
+      '#LL..#..KKKK..#.LL.#',
+      '#..2.#M......M#....#',
+      '#..U.#........#.U..#',
+      '#....#........#....#',
+      '#..................#',
+      '#.................C#',
+      '#.................C#',
+      '#........1.....X..C#',
+      '#...U.........U...C#',
+      '#.................C#',
+      '#.................C#',
+      '#..................#',
+      '#c.......S........c#',
+      '#..................#',
+      '####################'
+  ] },
+  s_office: { kind: 'scene', pal: { a: '#e8f4ff', b: '#4d7dff' }, rows: [
+      '######################',
+      '###.K............K.###',
+      '###................###',
+      '###...D........D...###',
+      '###..1.DDDDDDDD....###',
+      '###...D........D...###',
+      '###........X.......###',
+      '###N..............N###',
+      '#########....#########',
+      '#....................#',
+      '#....................#',
+      '#.......L.S..L...2...#',
+      '#..CC............CC..#',
+      '######################'
+  ] },
+  s_platform: { kind: 'scene', pal: { a: '#3dffa8', b: '#ffb238' }, rows: [
+      '##########################',
+      '#..LL....L.....L.....LL..#',
+      '#.S...#.....#.....#.....c#',
+      '#.............X.....2....#',
+      '#........................#',
+      '#rrrrrrrrrrrrrrrrrrrrrrrr#',
+      '#........................#',
+      '#........................#',
+      '#.....#..1..#.....#.....c#',
+      '#..LL................LL..#',
+      '##########......##########',
+      '##########################'
+  ] },
+  s_bar: { kind: 'scene', pal: { a: '#ffb238', b: '#ff3355' }, rows: [
+      '##################',
+      '#.LL...###.LL..LL#',
+      '#...1..###.......#',
+      '#......###.......#',
+      '#................#',
+      '#......U...RR.RR.#',
+      '#..U....X..CCCCC.#',
+      '#................#',
+      '#......U.....2...#',
+      '#..U..........U..#',
+      '#........S.......#',
+      '#c.............c.#',
+      '##################'
+  ] },
+  s_flat: { kind: 'scene', pal: { a: '#ff2bd6', b: '#ffb238' }, rows: [
+      '##############',
+      '#.BB..LL..DDK#',
+      '#...........K#',
+      '#............#',
+      '#.....X......#',
+      '#..1........c#',
+      '#C...........#',
+      '#C..........N#',
+      '#.........S..#',
+      '##############'
+  ] }
+};
+
+/* which authored interior an operation plays in (null = out in the city). Chosen from the scene heading and the objective text, never at random. */
+NV.layoutFor = (op, ctx, wantCity) => {
+  const LAY = NV.LAYOUTS;
+  if (op.layout) return LAY[op.layout] ? op.layout : null; // developer override
+  const pal = (ctx && ctx.palette) || {}, th = pal.th, m = op.m, arena = m === 'boss' || m === 'arena' || m === 'defend';
+  const text = [ctx && ctx.scene, op.title, op.d].filter(Boolean).join(' ').toUpperCase().replace(/[’]/g, "'"), h = U.hash(text + '|' + m);
+  let id = null;
+  if (th === 'cyber') id = ['server', 'lattice'][h % 2];
+  else if (th === 'space') id = ['station', 'cargo'][h % 2];
+  else {
+    const RULES = [
+      [/VAULT|ARCHIVE|RECORDS|BUNKER|MILITARY/, 'vault'],
+      [/CLUB|DREAMHOUSE|AUCTION|ENTERTAINMENT|\bBAR\b|BACKSTAGE|GALA/, 'club'],
+      [/CLINIC|\bWARD\b|HOSPITAL|LABORATORY|\bLAB\b|NEURAL|MEMORY POD|BIOSTASIS|CONTAMINATED/, 'clinic'],
+      [/HIVE|FACTORY|\bPLANT\b|FOUNDRY|ASSEMBLY|CRADLE|PRODUCTION/, 'factory'],
+      [/WAREHOUSE|CARGO|CUSTOMS|\bDOCKS?\b/, 'warehouse'],
+      [/UNDERDEEP|UNDERCITY|PIPES|SEWER|FAULT|CAVERN|UNDERGROUND|DRYLINE/, 'underdeep'],
+      [/METRO|PLATFORM|STATION|SECTOR 9|TRANSIT|\bRAIL|TRAIN|TUNNEL|SUBSTATION|CARRIAGE/, 'metro'],
+      [/OFFICE|BOARDROOM|LEVEL 88|FLOOR 87|HELIX|ARCOLOGY|COUNCIL|CIVIC PALACE|EXCHANGE|CHAMBER|CAMPAIGN|CORPORATE|SERVER|TRADING/, 'office']];
+    const hit = RULES.find(([re]) => re.test(text)); id = hit ? hit[1] : null;
+    if (!id && th === 'interior') id = ['office', 'warehouse', 'factory'][h % 3];
+    if (!id && th === 'tunnel') id = 'metro';
+  }
+  if (arena && (th === 'city' || th === 'water' || !th)) id = null; // fights out in the streets stay in the streets, with hand-placed cover
+  if (!id && !wantCity) id = ['office', 'warehouse', 'factory', 'metro'][h % 4]; // the player turned city operations off: still a drawn level, never random rooms
+  if (!id) return null;
+  return arena ? ['arena_pillars', 'arena_lanes', 'arena_bunkers'][h % 3] : id;
+};
+/* the walkable story spaces that have their own interior */
+NV.sceneInterior = heading => {
+  const T = String(heading || '').toUpperCase().replace(/[’]/g, "'");
+  if (/ORBITAL|SKYFALL|OBSERVATION|ROOF|SPIRE|EXTERIOR/.test(T)) return null;
+  const RULES = [
+    [/NOODLE|DANNY|RAMEN/, 's_noodle'],
+    [/CLINIC|\bWARD\b|HOSPITAL|BIOSTASIS|BETTER YESTERDAY|MEMORY POD|PAEDIATRIC/, 's_clinic'],
+    [/CLUB|DREAMHOUSE|\bHALO\b|NEON ARENA|ENTERTAINMENT|AUCTION|GALA/, 's_club'],
+    [/\bBAR\b|LOW TIDE|MERCENARY/, 's_bar'],
+    [/APARTMENT|\bDEN\b|ARI'S ROOM|FRAGMENT ZERO'S ROOM|\bTHE ROOM\b|EDITING BAY|CLASSROOM/, 's_flat'],
+    [/OFFICE|BOARDROOM|LEVEL 88|FLOOR 87|SHAREHOLDER|CIVIC HALL|COUNCIL|WAR ROOM|MAP ROOM|TRADING FLOOR|CAMPAIGN|CONTINUITY CHAMBER/, 's_office'],
+    [/PLATFORM|SUBSTATION|JUNCTION|CARRIAGE|GHOST'S BASE|STATION CALLED|WATER STATION/, 's_platform']];
+  const hit = RULES.find(([re]) => re.test(T)); return hit ? hit[1] : null;
+};
 /* the Helix Tower (same model in cutscenes and free roam) */
 NV.helixTower = (scene, tm, ringM, beaconM, x, z) => {
   let y = 0; const secs = [], rings = [], out = [];
@@ -2834,6 +3362,8 @@ NV.Level = (() => {
       const ox = pl.x - 4, oy = pl.y - 4;
       m.aoff = { x: ox, y: oy }; m.rooms = [{ x: pl.x - 2, y: pl.y - 2, w: 12, h: 12, cx: pl.x + 4, cy: pl.y + 4 }];
       m.start = { x: 8 + ox, y: 13 + oy }; m.exit = { x: 8 + ox, y: 3 + oy };
+      const av = parseLayout(['arena_pillars', 'arena_lanes', 'arena_bunkers'][seed % 3]); m.deco = []; // hand-placed cover, the same plans the indoor arenas use
+      if (av) av.deco.concat(av.inner.map(q => ({ k: 'Q', x: q.x, y: q.y }))).forEach(d => { const x = d.x + ox, y = d.y + oy; if (m.g[y] && m.g[y][x] === 0) { m.g[y][x] = 2; m.deco.push({ k: d.k, x, y }); } });
       return m;
     }
     if (mode === 'scene') {
@@ -2873,9 +3403,80 @@ NV.Level = (() => {
     const byD = (a, b) => Math.hypot(a.x - 8, a.y - 12) - Math.hypot(b.x - 8, b.y - 12), st = cells.slice().sort(byD)[0], ex = cells.slice().sort((a, b) => -byD(a, b))[0];
     return { W, H: W, g, rooms: [{ x: 0, y: 0, w: W, h: W, cx: 8, cy: 8 }], start: st, exit: ex, roof: { tx, tz, y, cx: C, cz: C, shape } };
   }
+  /* ---------------- authored interiors: reading a plan, and the furniture in it ---------------- */
+  // w = length, d = depth, h = height in metres; ax: the long side follows its neighbours or the nearest wall
+  const DECO = {
+    R: { w: 3.4, d: 1.0, h: 3.2, ax: 1 }, B: { w: 2.3, d: 1.2, h: .7, ax: 1 }, D: { w: 2.7, d: 1.3, h: 1.4, ax: 1 }, C: { w: 3.9, d: 1.1, h: 1.7, ax: 1 },
+    M: { w: 2.6, d: 2.3, h: 3.4, ax: 1 }, K: { w: 1.8, d: 1.2, h: 3.3, ax: 1 }, L: { w: 2.9, d: 1.2, h: 1.2, ax: 1 }, Y: { w: 2.0, d: 2.0, h: 3.9, round: 1 },
+    N: { w: 1.7, d: 1.7, h: 2.0, round: 1 }, U: { w: 1.9, d: 1.9, h: 1.0, round: 1 }, Q: { w: 1.5, d: 1.5, h: 4.4 } };
+  function parseLayout(id) {
+    const D = NV.LAYOUTS[id]; if (!D) return null;
+    const rows = D.rows, H = rows.length, W = rows[0].length, g = Array.from({ length: H }, () => new Array(W).fill(1));
+    const map = { W, H, g, rooms: [], start: null, exit: null, authored: true, indoor: true, kind: D.kind, pal: D.pal, id, spawn: { T: [], P: [], e: [], m: [], v: [] }, deco: [], rails: [], inner: [] }, digits = [];
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const ch = rows[y][x];
+      if (ch === '#' || ch === ' ') { if (ch === '#' && x >= 2 && y >= 2 && x <= W - 3 && y <= H - 3) map.inner.push({ x, y }); continue; }
+      g[y][x] = 0;
+      if (ch === 'S') map.start = { x, y }; else if (ch === 'X') map.exit = { x, y };
+      else if (map.spawn[ch]) map.spawn[ch].push({ x, y });
+      else if (ch === 'c' || DECO[ch]) { g[y][x] = 2; map.deco.push({ k: ch, x, y }); }
+      else if (ch === 'r') map.rails.push({ x, y });
+      else if (ch >= '1' && ch <= '9') digits.push({ x, y, n: +ch });
+    }
+    const room = c => { const x0 = Math.max(1, c.x - 2), x1 = Math.min(W - 2, c.x + 2), y0 = Math.max(1, c.y - 2), y1 = Math.min(H - 2, c.y + 2); return { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1, cx: c.x, cy: c.y }; };
+    digits.sort((a, b) => a.n - b.n);
+    map.rooms = [room(map.start), ...digits.map(room), room(map.exit)];
+    return map;
+  }
+  function buildDeco(scene, map, pal, statics, crates) {
+    const list = (map.deco || []).filter(d => d.k !== 'c'), rails = map.rails || [];
+    if (!list.length && !rails.length) return [];
+    const key = (x, y) => x + ',' + y, kinds = new Map((map.deco || []).map(d => [key(d.x, d.y), d.k]));
+    const wallAt = (x, y) => y < 0 || x < 0 || y >= map.H || x >= map.W || map.g[y][x] === 1;
+    const MAT = { dk: ['#1b1726'], md: ['#2f2a44'], wd: ['#3b2a24'], wh: ['#c9ccd8'], rd: ['#7a1f33'], gr: ['#1d5a3c'], mt: ['#4a4c5a'], ga: ['#000', pal.a], gb: ['#000', pal.b] };
+    const mats = {}, mm = k => mats[k] || (mats[k] = (() => { const [c, e] = MAT[k], m = mat(scene, 'dc' + k, c, e); if (e) m.disableLighting = true; return m; })());
+    const bucket = {}, put = (k, mesh) => { mesh.isPickable = false; (bucket[k] = bucket[k] || []).push(mesh); return mesh; };
+    list.forEach(d => {
+      const T = DECO[d.k]; if (!T) return;
+      const c = cellC(d.x, d.y), same = (x, y) => kinds.get(key(x, y)) === d.k;
+      const ax = !T.ax ? 0 : (same(d.x - 1, d.y) || same(d.x + 1, d.y)) ? 0 : (same(d.x, d.y - 1) || same(d.x, d.y + 1)) ? 1 : (wallAt(d.x, d.y - 1) || wallAt(d.x, d.y + 1)) ? 0 : (wallAt(d.x - 1, d.y) || wallAt(d.x + 1, d.y)) ? 1 : 0;
+      const sd = d.x * 7 + d.y * 13;
+      // a box in the piece's own frame: lx along its long side, lz across it
+      const bx = (k, lx, y, lz, w, h, dp) => { const b = BABYLON.MeshBuilder.CreateBox('d', { width: ax ? dp : w, height: h, depth: ax ? w : dp }, scene); b.position.set(c.x + (ax ? lz : lx), y, c.z + (ax ? lx : lz)); return put(k, b); };
+      const cy = (k, dia, h, x, y, z) => { const b = BABYLON.MeshBuilder.CreateCylinder('d', { diameter: dia, height: h, tessellation: 12 }, scene); b.position.set(c.x + x, y, c.z + z); return put(k, b); };
+      switch (d.k) {
+        case 'R': [-1.6, 0, 1.6].forEach(lx => bx('dk', lx, 1.6, 0, .12, 3.2, 1.0));
+          [.2, 1.05, 1.9, 2.75].forEach((y, i) => { bx('mt', 0, y, 0, 3.4, .07, 1.0); [-1.2, -.3, .6, 1.3].forEach((lx, j) => { const q = (sd + i * 5 + j * 3) % 7; if (q < 2) return; const hh = .25 + (q % 4) * .12; bx(q === 6 ? 'ga' : q % 2 ? 'wd' : 'md', lx, y + .035 + hh / 2, 0, .55, hh, .62); }); }); break;
+        case 'B': bx('dk', 0, .3, 0, 2.3, .35, 1.2); bx('wh', 0, .55, 0, 2.2, .18, 1.1); bx('md', -.85, .7, 0, .55, .14, .8); bx('md', .35, .66, 0, 1.4, .07, 1.12); bx('ga', 0, .1, .62, 2.2, .05, .04); break;
+        case 'D': bx('wd', 0, .9, 0, 2.7, .08, 1.3); [-1.25, 1.25].forEach(lx => [-.55, .55].forEach(lz => bx('dk', lx, .45, lz, .08, .9, .08)));
+          [-.6, .6].forEach(lx => { bx('gb', lx, 1.3, -.4, .85, .5, .05); bx('dk', lx, 1.02, -.4, .1, .22, .1); }); bx('dk', 0, .95, .3, .7, .03, .25); break;
+        case 'C': bx('dk', 0, .62, 0, 3.9, 1.25, 1.1); bx('wd', 0, 1.27, 0, 4.0, .08, 1.2); bx('ga', 0, .22, .56, 3.9, .06, .04); [-1.3, 0, 1.3].forEach((lx, j) => bx(j === 1 ? 'gb' : 'ga', lx, 1.5, -.15, .13, .36, .13)); break;
+        case 'M': bx('dk', 0, .7, 0, 2.6, 1.4, 2.3); bx('md', 0, 2.1, 0, 2.2, 1.4, 1.9); bx('gb', 0, 1.25, 1.17, 1.4, .5, .05); [2.5, 2.8].forEach(y => bx('mt', 0, y, 1.0, 2.0, .05, .05)); bx('ga', .9, 3.15, .4, .25, .6, .25); break;
+        case 'K': bx('dk', 0, 1.65, 0, 1.8, 3.3, 1.2); for (let i = 0; i < 6; i++) bx(i % 2 ? 'gb' : 'ga', 0, .5 + i * .5, .61, 1.5, .06, .03); break;
+        case 'L': { const cl = sd % 2 ? 'rd' : 'md'; bx(cl, 0, .25, 0, 2.9, .5, 1.2); bx(cl, 0, .8, -.5, 2.9, .75, .25); [-1.3, 1.3].forEach(lx => bx('dk', lx, .55, 0, .3, .65, 1.2)); break; }
+        case 'Y': cy('md', 2.0, 3.6, 0, 1.8, 0); cy('ga', 2.07, .12, 0, 2.5, 0); cy('ga', 2.07, .12, 0, 1.0, 0); cy('mt', 1.0, .4, 0, 3.8, 0); break;
+        case 'N': { bx('dk', 0, .3, 0, 1.7, .6, 1.7); const sp = BABYLON.MeshBuilder.CreateSphere('d', { diameter: 1.5, segments: 8 }, scene); sp.position.set(c.x, 1.35, c.z); sp.scaling.y = 1.1; put('gr', sp); break; }
+        case 'U': cy('wd', 1.9, .08, 0, .95, 0); cy('dk', .3, .95, 0, .48, 0); [[1.2, 0], [-1.2, 0], [0, 1.2], [0, -1.2]].forEach(([x, z]) => cy('rd', .55, .5, x, .25, z)); break;
+        case 'Q': bx('dk', 0, 2.2, 0, 1.5, 4.4, 1.5); bx('ga', 0, 2.2, .77, .25, 4.0, .04); break;
+      }
+      const half = T.round ? [T.w / 2, T.w / 2] : T.ax ? (ax ? [T.d / 2 + .1, T.w / 2 - .1] : [T.w / 2 - .1, T.d / 2 + .1]) : [T.w / 2, T.d / 2];
+      crates.push({ x: c.x, z: c.z, h: (T.h + .15) / 2, hx: half[0], hz: half[1] });
+    });
+    // rails: two steel lines and sleepers; you can walk across them
+    const railSet = new Set(rails.map(q => key(q.x, q.y)));
+    rails.forEach(q => {
+      const c = cellC(q.x, q.y), along = railSet.has(key(q.x - 1, q.y)) || railSet.has(key(q.x + 1, q.y)) ? 0 : 1;
+      const rb = (k, lx, y, lz, w, h, dp) => { const b = BABYLON.MeshBuilder.CreateBox('rl', { width: along ? dp : w, height: h, depth: along ? w : dp }, scene); b.position.set(c.x + (along ? lz : lx), y, c.z + (along ? lx : lz)); put(k, b); };
+      [-.75, .75].forEach(o => rb('mt', 0, .07, o, 4, .12, .12)); [-1.5, -.5, .5, 1.5].forEach(o => rb('dk', o, .03, 0, .28, .06, 1.9));
+    });
+    const out = [];
+    Object.entries(bucket).forEach(([k, arr]) => { const m = arr.length > 1 ? BABYLON.Mesh.MergeMeshes(arr, true, true) : arr[0]; if (!m) return; m.material = mm(k); m.isPickable = false; statics.push(m); out.push(m); });
+    return out;
+  }
   function gen(mode, seed) {
     if (mode === 'scene' && L.loc && L.loc.roof) return genRoof(L.loc);
     if (mode === 'free') return genCity(seed);
+    if (L.layout) { const lm = parseLayout(L.layout); if (lm) return lm; } // a hand-drawn plan
     if (L.city) return genCityZone(mode, seed);
     if (mode === 'apartment') return genApartment();
     if (mode === 'void') { const W = 41, g = Array.from({ length: W }, () => new Array(W).fill(0)); return { W, H: W, g, rooms: [], start: { x: 20, y: 22 }, exit: { x: 20, y: 18 }, void: true }; }
@@ -2958,15 +3559,15 @@ NV.Level = (() => {
   function buildScene(op, ctx) {
     const engine = NV.G.engine, scene = new BABYLON.Scene(engine), q = NV.Quality.get();
     const pal = ctx.palette, th = pal.th;
-    const cyber = th === 'cyber', outdoor = !!L.map.roof || !L.map.void && (th === 'city' || th === 'water' || th === 'space' || !!L.map.city);
+    const cyber = th === 'cyber', outdoor = !L.map.indoor && (!!L.map.roof || !L.map.void && (th === 'city' || th === 'water' || th === 'space' || !!L.map.city));
     scene.clearColor = BABYLON.Color4.FromColor3(C3(pal.fog).scale(.6), 1);
     scene.fogMode = BABYLON.Scene.FOGMODE_EXP2; scene.fogColor = C3(pal.fog); scene.fogDensity = cyber ? .012 : outdoor ? .014 : .03;
     const cam = new BABYLON.UniversalCamera('fp', V3(0, EYE, 0), scene); cam.minZ = .05; cam.maxZ = q.draw;
     if (L.map.city) { cam.maxZ = Math.max(q.draw, 1500); scene.fogDensity = .0035; }
     if (L.map.roof) { cam.maxZ = 3200; scene.fogDensity = .0009; }
     if (L.map.void) { scene.clearColor = new BABYLON.Color4(0, 0, 0, 1); scene.fogColor = new BABYLON.Color3(0, 0, 0); scene.fogDensity = .02; } cam.fov = NV.Settings.get().fov * Math.PI / 180 * .75; cam.inputs.clear();
-    const hemi = new BABYLON.HemisphericLight('h', V3(.2, 1, .1), scene); hemi.intensity = outdoor ? .75 : .6; hemi.diffuse = C3('#b8b0ff'); hemi.groundColor = C3(pal.fog);
-    const plight = new BABYLON.PointLight('pl', V3(0, 2, 0), scene); plight.range = 16; plight.intensity = .7; plight.diffuse = C3(pal.b);
+    const hemi = new BABYLON.HemisphericLight('h', V3(.2, 1, .1), scene); hemi.intensity = outdoor ? .75 : L.map.authored ? .85 : .6; hemi.diffuse = C3('#b8b0ff'); hemi.groundColor = C3(pal.fog);
+    const plight = new BABYLON.PointLight('pl', V3(0, 2, 0), scene); plight.range = L.map.authored ? 24 : 16; plight.intensity = L.map.authored ? 1.0 : .7; plight.diffuse = C3(pal.b);
     const fx = NV.Quality.setup(scene, cam), glow = fx.glow || { addExcludedMesh() { } };
     L.fx = fx;
     if ((L.map.city || L.map.roof) && BABYLON.ColorCurves) { const cc = new BABYLON.ColorCurves(); cc.globalSaturation = 14; cc.shadowsHue = 192; cc.shadowsDensity = 32; cc.shadowsSaturation = 45; cc.highlightsHue = 318; cc.highlightsDensity = 22; cc.highlightsSaturation = 40; scene.imageProcessingConfiguration.colorCurvesEnabled = true; scene.imageProcessingConfiguration.colorCurves = cc; }
@@ -3039,7 +3640,7 @@ NV.Level = (() => {
     const wm = mat(scene, 'wm', '#ffffff');
     wm.diffuseTexture = NV.tex(scene, 256, 256, (c, w, h) => { c.fillStyle = cyber ? '#140a2a' : '#2c2838'; c.fillRect(0, 0, w, h); c.fillStyle = 'rgba(255,255,255,.08)'; for (let i = 0; i < 4; i++) c.fillRect(0, i * 64 + 60, w, 3); c.fillStyle = 'rgba(0,0,0,.35)'; c.fillRect(0, 0, 4, h); c.fillRect(w - 4, 0, 4, h); const rr = U.rng(11); for (let i = 0; i < 40; i++) { c.fillStyle = `rgba(255,255,255,${rr() * .05})`; c.fillRect(rr() * w, rr() * h, 20 + rr() * 60, 10 + rr() * 30); } c.fillStyle = 'rgba(0,0,0,.28)'; c.fillRect(0, h - 26, w, 26); for (let i = 0; i < 6; i++) { c.fillStyle = 'rgba(255,255,255,.06)'; c.fillRect(20 + i * 40, 30, 3, 90); } }, 'walltex');
     wm.specularColor = new BABYLON.Color3(.25, .25, .3);
-    wm.emissiveColor = C3(pal.a).scale(cyber ? .12 : .035); if (cyber) wm.alpha = .92;
+    wm.emissiveColor = C3(pal.a).scale(cyber ? .12 : L.map.authored ? .09 : .035); if (cyber) wm.alpha = .92;
     walls.material = wm;
     if (trims.length) { const tm = BABYLON.Mesh.MergeMeshes(trims, true, true); tm.material = trimMat; statics.push(tm); }
     const r = U.rng(L.seed + 5);
@@ -3059,7 +3660,7 @@ NV.Level = (() => {
     if (!outdoor && !cyber) {
       const ceil = BABYLON.MeshBuilder.CreatePlane('ceil', { width: W * TILE, height: H * TILE, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene);
       ceil.rotation.x = Math.PI / 2; ceil.position.set(W * TILE / 2, WALLH, H * TILE / 2);
-      ceil.material = mat(scene, 'cm', '#0a0810'); statics.push(ceil);
+      ceil.material = mat(scene, 'cm', L.map.authored ? '#16121f' : '#0a0810', L.map.authored ? U.mixHex('#000000', pal.a, .1) : null); statics.push(ceil);
       const panels = [], cones = [];
       L.map.rooms.forEach(rm => {
         const p = BABYLON.MeshBuilder.CreateBox('lp', { width: 2.4, height: .08, depth: .5 }, scene); p.position.set((rm.cx + .5) * TILE, WALLH - .06, (rm.cy + .5) * TILE); panels.push(p);
@@ -3102,8 +3703,9 @@ NV.Level = (() => {
     }
     // crates / cover (merged into one mesh)
     const crateMat = mat(scene, 'crate', '#221c33'); crateMat.emissiveTexture = NV.tex(scene, 64, 64, (c, w, h) => { c.fillStyle = '#000'; c.fillRect(0, 0, w, h); c.strokeStyle = pal.a; c.lineWidth = 2; c.strokeRect(2, 2, w - 4, h - 4); c.fillStyle = pal.b; c.fillRect(8, h - 14, 20, 4); c.fillStyle = 'rgba(255,255,255,.25)'; c.fillRect(w - 18, 8, 10, 3); }, 'cratetex');
-    const crates = [], crateMeshes = [];
-    L.map.rooms.forEach((rm, i) => {
+    const crates = [], crateMeshes = [], decoCrates = [];
+    L.decoMeshes = buildDeco(scene, L.map, pal, statics, decoCrates); // furniture and rails from the drawn plan
+    (L.map.authored ? [] : L.map.rooms).forEach((rm, i) => {
       if (i === 0) return;
       const n = Math.floor(r() * 3);
       for (let k = 0; k < n; k++) {
@@ -3116,8 +3718,9 @@ NV.Level = (() => {
         crates.push({ x: b.position.x, z: b.position.z, h: s / 2 + .15 });
       }
     });
+    (L.map.deco || []).filter(d => d.k === 'c').forEach(d => { const sz = 1.4 + ((d.x * 7 + d.y * 13) % 5) * .1, c = cellC(d.x, d.y), b = BABYLON.MeshBuilder.CreateBox('cr', { size: sz }, scene); b.position.set(c.x, sz / 2, c.z); b.rotation.y = ((d.x * 3 + d.y) % 7) * .09; crateMeshes.push(b); crates.push({ x: c.x, z: c.z, h: sz / 2 + .15 }); });
     if (crateMeshes.length) { const cm = BABYLON.Mesh.MergeMeshes(crateMeshes, true, true); cm.material = crateMat; statics.push(cm); }
-    L.crates = crates;
+    L.crates = crates.concat(decoCrates);
     // dynamic shadows (directional 'city light' that follows the player)
     L.sg = null; L.sun = null;
     if (q.shadows) {
@@ -3126,6 +3729,7 @@ NV.Level = (() => {
       const sg = new BABYLON.ShadowGenerator(q.shadows, sun); sg.usePercentageCloserFiltering = true; sg.filteringQuality = q.shadows >= 2048 ? BABYLON.ShadowGenerator.QUALITY_HIGH : BABYLON.ShadowGenerator.QUALITY_MEDIUM; sg.bias = .0015; sg.normalBias = .02;
       statics.forEach(m => { m.receiveShadows = true; });
       if (crateMeshes.length) sg.addShadowCaster(statics[statics.length - 1], false);
+      (L.decoMeshes || []).forEach(m => sg.addShadowCaster(m, false));
       L.sg = sg; L.sun = sun;
     }
     NV.freeze(statics);
@@ -3456,14 +4060,24 @@ NV.Level = (() => {
     { const q = solid(ex.x, ex.z) ? nearestFree(ex.x, ex.z) : ex; makeExit(q.x, q.z); }
     const mid = rooms.filter(rm => !(rm.cx === map.start.x && rm.cy === map.start.y) && !(rm.cx === map.exit.x && rm.cy === map.exit.y));
     const shuffled = mid.slice().sort(() => r() - .5);
-    if (mode === 'hack') { const n = Math.min(k, 4, shuffled.length); for (let i = 0; i < n; i++) { const c = cellC(shuffled[i].cx, shuffled[i].cy); addTerminal(c.x, c.z); } L.obj.total = n; L.obj.label = 'Hack the terminals'; }
-    else if (mode === 'retrieve' || mode === 'explore') { const n = Math.min(k, 5, shuffled.length); for (let i = 0; i < n; i++) { const c = freeCell(shuffled[i], false); addPickup(mode === 'explore' ? 'memory' : 'shard', c.x, c.z, ctx.echoes && ctx.echoes[i % Math.max(1, ctx.echoes.length)]); } L.obj.total = n; L.obj.label = mode === 'explore' ? 'Recover the memory fragments' : 'Recover the data shards'; }
+    const A = map.authored ? map.spawn : null, shufA = arr => arr.slice().sort(() => r() - .5); // a drawn plan carries its own terminals, pickups and posts
+    if (mode === 'hack') { const spots = A && A.T.length ? shufA(A.T).map(q => cellC(q.x, q.y)) : shuffled.map(rm => cellC(rm.cx, rm.cy)), n = Math.min(k, 4, spots.length); for (let i = 0; i < n; i++) addTerminal(spots[i].x, spots[i].z); L.obj.total = n; L.obj.label = 'Hack the terminals'; }
+    else if (mode === 'retrieve' || mode === 'explore') { const spots = A && A.P.length ? shufA(A.P).map(q => cellC(q.x, q.y)) : shuffled.map(rm => freeCell(rm, false)), n = Math.min(k, 5, spots.length); for (let i = 0; i < n; i++) { const c = spots[i]; addPickup(mode === 'explore' ? 'memory' : 'shard', c.x, c.z, ctx.echoes && ctx.echoes[i % Math.max(1, ctx.echoes.length)]); } L.obj.total = n; L.obj.label = mode === 'explore' ? 'Recover the memory fragments' : 'Recover the data shards'; }
     else { L.obj.label = 'Reach the extraction point'; L.obj.total = 0; }
     if (L.obj.total === 0) { L.exitReady = true; L.exit.on = true; L.exit.beam.material = L.mats.exit; L.exit.ring.material = L.mats.exit; }
     // civilians
-    if (op.tut || RESCUE_RE.test(op.d || '')) { const n = op.tut ? 2 : 2 + (r() < .5 ? 1 : 0); shuffled.slice(-n).forEach(rm => { const c = freeCell(rm, true); addCivilian(c.x, c.z); }); }
+    if (op.tut || RESCUE_RE.test(op.d || '')) { const n = op.tut ? 2 : 2 + (r() < .5 ? 1 : 0); if (A && A.v.length) shufA(A.v).slice(0, n).forEach(q => { const c = cellC(q.x, q.y); addCivilian(c.x, c.z); }); else shuffled.slice(-n).forEach(rm => { const c = freeCell(rm, true); addCivilian(c.x, c.z); }); }
     // enemies
-    if (mode !== 'explore') {
+    if (mode !== 'explore' && A && A.e.length) {
+      // enemies stand where the plan puts them; later acts fill more of the posts, a third of the guards hold their post
+      const posts = shufA(A.e).filter(q => Math.hypot(q.x - map.start.x, q.y - map.start.y) > 4), want = op.tut ? Math.min(4, posts.length) : Math.min(posts.length, Math.round(posts.length * Math.min(1, .5 + act * .1)) + ((op.k || 3) > 3 ? 2 : 0));
+      const walk = rooms.filter(rm => !(rm.cx === map.start.x && rm.cy === map.start.y));
+      posts.slice(0, want).forEach((q, i) => {
+        const c = cellC(q.x, q.y), near = walk.slice().sort((a, b) => Math.hypot(a.cx - q.x, a.cy - q.y) - Math.hypot(b.cx - q.x, b.cy - q.y))[0] || rooms[0];
+        addEnemy(op.tut && i < 2 ? 'guard' : baseKind(), c.x, c.z, i % 3 === 2 ? [c] : [c, cellC(near.cx, near.cy)]);
+      });
+      A.m.forEach(q => { const c = cellC(q.x, q.y); addPickup('med', c.x, c.z); });
+    } else if (mode !== 'explore') {
       const per = op.tut ? 1 : 1 + Math.floor(act / 2);
       mid.forEach((rm, i) => {
         const n = op.tut && i === 0 ? 1 : Math.min(3, per + (r() < .4 ? 1 : 0));
@@ -4089,7 +4703,7 @@ NV.Level = (() => {
     wpnHud(w);
   }
   function rayBox(o, d, c) {
-    const s = .8, min = [c.x - s, 0, c.z - s], max = [c.x + s, c.h * 2 - .15, c.z + s], oo = [o.x, o.y, o.z], dd = [d.x, d.y, d.z];
+    const sx = c.hx || .8, sz = c.hz || .8, min = [c.x - sx, 0, c.z - sz], max = [c.x + sx, c.h * 2 - .15, c.z + sz], oo = [o.x, o.y, o.z], dd = [d.x, d.y, d.z];
     let t0 = 0, t1 = 1e9; for (let i = 0; i < 3; i++) { if (Math.abs(dd[i]) < 1e-6) { if (oo[i] < min[i] || oo[i] > max[i]) return -1; continue; } let a = (min[i] - oo[i]) / dd[i], b = (max[i] - oo[i]) / dd[i]; if (a > b) [a, b] = [b, a]; t0 = Math.max(t0, a); t1 = Math.min(t1, b); if (t0 > t1) return -1; } return t0;
   }
   // ---- combat feedback: screen projection, floating damage numbers, enemy call-outs ----
@@ -4588,7 +5202,7 @@ NV.Level = (() => {
   function moveCircle(o, dx, dz, rad) {
     const col = (x, z) => {
       for (const [ox, oz] of [[rad, 0], [-rad, 0], [0, rad], [0, -rad], [rad * .7, rad * .7], [-rad * .7, rad * .7], [rad * .7, -rad * .7], [-rad * .7, -rad * .7]]) if (solid(x + ox, z + oz)) return true;
-      for (const c of L.crates) if (Math.abs(x - c.x) < .85 + rad && Math.abs(z - c.z) < .85 + rad) return true;
+      for (const c of L.crates) if (Math.abs(x - c.x) < (c.hx || .85) + rad && Math.abs(z - c.z) < (c.hz || .85) + rad) return true;
       return false;
     };
     const steps = Math.ceil(Math.max(Math.abs(dx), Math.abs(dz)) / .2) || 1;
@@ -5938,6 +6552,43 @@ NV.Level = (() => {
     prop('helmet', 9.4, 18.2, 'EXAMINE THE HELMET');
     box(.6, .38, .3, 10.3, .19, 19.3, mat(s, 'bagm', '#3a2a1a')); box(.62, .05, .32, 10.3, .3, 19.3, mat(s, 'bagseal', '#000', '#ffb238'));
     prop('bag', 10.3, 18.4, 'CHECK YOUR COURIER BAG');
+    // --- a lived-in bedroom: rug, posters, blinds with neon light shafts, a warm lamp, plants and a neon sign ---
+    const wood2 = mat(s, 'wood2', '#3b2a24'), warm = mat(s, 'warmglow', '#000', '#ffb86b'); warm.disableLighting = true;
+    const rug = BABYLON.MeshBuilder.CreateGround('rug', { width: 4.6, height: 3.2 }, s); rug.position.set(11.4, .02, 14.8); rug.isPickable = false;
+    const rugM = mat(s, 'rugm', '#ffffff'); rugM.specularColor = new BABYLON.Color3(0, 0, 0);
+    rugM.diffuseTexture = NV.tex(s, 256, 192, (g, w, h) => { g.fillStyle = '#3a1830'; g.fillRect(0, 0, w, h); g.strokeStyle = '#ffb86b'; g.lineWidth = 6; g.strokeRect(12, 12, w - 24, h - 24); g.strokeStyle = '#19f0ff'; g.lineWidth = 3; g.strokeRect(26, 26, w - 52, h - 52); g.fillStyle = '#ff2bd6'; for (let i = 0; i < 5; i++) { const cx = 48 + i * 40; g.beginPath(); g.moveTo(cx, h / 2 - 26); g.lineTo(cx + 18, h / 2); g.lineTo(cx, h / 2 + 26); g.lineTo(cx - 18, h / 2); g.closePath(); g.fill(); } }, 'rugtex'); rug.material = rugM;
+    // headboard, bedside table and lamp (the lamp really lights the corner)
+    box(2.2, 1.1, .12, 14.7, .8, 18.42, wood2); box(.75, .62, .7, 12.9, .31, 18.1, wood2);
+    const shade = BABYLON.MeshBuilder.CreateCylinder('lampshade', { diameterTop: .34, diameterBottom: .52, height: .42, tessellation: 14 }, s); shade.position.set(12.9, 1.05, 18.1); shade.material = warm; shade.isPickable = false;
+    box(.06, .4, .06, 12.9, .82, 18.1, mat(s, 'lampstem', '#15131c'));
+    const lamp = new BABYLON.PointLight('bedlamp', V3(12.9, 1.2, 18.0), s); lamp.diffuse = C3('#ffb86b'); lamp.intensity = .55; lamp.range = 9;
+    const bulb = BABYLON.MeshBuilder.CreateSphere('ceillamp', { diameter: .5, segments: 8 }, s); bulb.position.set(12, 4.55, 14); bulb.material = warm; bulb.isPickable = false; box(.03, .6, .03, 12, 4.9, 14, mat(s, 'cord', '#15131c'));
+    // plants either side of the window
+    [[8.9, 9.5], [15.1, 9.6]].forEach(([x, z]) => { box(.7, .55, .7, x, .28, z, mat(s, 'pot', '#2a2236')); const lf = BABYLON.MeshBuilder.CreateSphere('leaf', { diameter: 1.1, segments: 8 }, s); lf.position.set(x, 1.15, z); lf.scaling.y = 1.15; lf.material = mat(s, 'leafm', '#1d5a3c', '#06180f'); lf.isPickable = false; });
+    // posters (original art): a band, a film, the metro map
+    const poster = (name, w, h, draw, x, y, z, ry, tw, th) => { const m = screenMat(s, name, draw, tw || 256, th || 340); m.emissiveTexture.level = .85; const pn = panel(s, w, h, m); pn.position.set(x, y, z); pn.rotation.y = ry; return pn; };
+    const bandArt = (g, w, h) => { const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#1a0630'); gr.addColorStop(1, '#4a0a3c'); g.fillStyle = gr; g.fillRect(0, 0, w, h);
+      g.shadowColor = '#ff2bd6'; g.shadowBlur = 22; g.fillStyle = '#ff2bd6'; g.beginPath(); g.moveTo(w / 2, 150); g.bezierCurveTo(w / 2 - 110, 60, w / 2 - 60, 20, w / 2, 90); g.bezierCurveTo(w / 2 + 60, 20, w / 2 + 110, 60, w / 2, 150); g.fill();
+      g.shadowBlur = 0; g.strokeStyle = '#19f0ff'; g.lineWidth = 3; for (let i = 0; i < 6; i++) { g.beginPath(); g.moveTo(10, 170 + i * 6); g.lineTo(w - 10, 170 + i * 6 + (i % 2 ? 4 : -4)); g.stroke(); }
+      g.fillStyle = '#fff'; g.textAlign = 'center'; g.font = 'bold 30px Orbitron, sans-serif'; g.fillText('STATIC', w / 2, 238); g.fillText('HEARTS', w / 2, 272); g.font = '15px Rajdhani, sans-serif'; g.fillStyle = '#ffb86b'; g.fillText('LIVE · LANTERN ROW · ONE NIGHT', w / 2, 306); };
+    const filmArt = (g, w, h) => { g.fillStyle = '#04081a'; g.fillRect(0, 0, w, h); const r = U.rng(31); for (let i = 0; i < 70; i++) { g.fillStyle = 'rgba(255,255,255,' + (.2 + r() * .7) + ')'; g.fillRect(r() * w, r() * 200, 2, 2); }
+      const pg = g.createRadialGradient(150, 130, 10, 150, 130, 70); pg.addColorStop(0, '#ffcf80'); pg.addColorStop(1, '#a8325a'); g.fillStyle = pg; g.beginPath(); g.arc(150, 130, 62, 0, 7); g.fill(); g.strokeStyle = '#19f0ff'; g.lineWidth = 4; g.beginPath(); g.ellipse(150, 130, 100, 22, -.35, 0, 7); g.stroke();
+      g.fillStyle = '#05030a'; g.beginPath(); g.moveTo(70, 250); g.lineTo(84, 190); g.lineTo(98, 250); g.closePath(); g.fill(); g.fillStyle = '#fff'; g.textAlign = 'center'; g.font = 'bold 26px Orbitron, sans-serif'; g.fillText('ORBIT RUNNERS', w / 2, 290); g.font = '15px Rajdhani, sans-serif'; g.fillStyle = '#9bd4ff'; g.fillText('THE LAST LIFT LEAVES AT DAWN', w / 2, 318); };
+    const mapArt = (g, w, h) => { g.fillStyle = '#0a0c14'; g.fillRect(0, 0, w, h); const L2 = [['#ff3355', [[30, 40], [30, 110], [90, 150], [90, 250]]], ['#19f0ff', [[220, 40], [150, 90], [150, 170], [60, 220]]], ['#3dffa8', [[20, 270], [100, 270], [160, 210], [230, 210]]], ['#ffb238', [[120, 30], [120, 120], [200, 160], [230, 300]]]];
+      L2.forEach(([c, pts]) => { g.strokeStyle = c; g.lineWidth = 7; g.lineJoin = 'round'; g.beginPath(); pts.forEach(([x, y], i) => g[i ? 'lineTo' : 'moveTo'](x, y)); g.stroke(); g.fillStyle = '#fff'; pts.forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 5, 0, 7); g.fill(); g.strokeStyle = '#0a0c14'; g.lineWidth = 2; g.stroke(); }); });
+      g.fillStyle = '#fff'; g.font = 'bold 18px Orbitron, sans-serif'; g.textAlign = 'left'; g.fillText('METRO · NEW AVALON', 14, 24); g.font = '12px Rajdhani, sans-serif'; g.fillStyle = '#ff3355'; g.fillText('SECTOR 9 — NO SERVICE', 150, 322); };
+    poster('pstBand', 1.7, 2.25, bandArt, 15.93, 2.9, 16.6, -Math.PI / 2);
+    poster('pstFilm', 1.5, 2.0, filmArt, 9.2, 2.5, 19.93, 0);
+    poster('pstMap', 1.5, 2.0, mapArt, 14.7, 2.5, 19.93, 0);
+    const neon = screenMat(s, 'neonsign', (g, w, h) => { g.fillStyle = '#000'; g.fillRect(0, 0, w, h); g.shadowColor = '#ff2bd6'; g.shadowBlur = 24; g.fillStyle = '#ff6ae0'; g.font = 'bold 72px Orbitron, sans-serif'; g.textAlign = 'center'; g.fillText('STAY', w / 2, 82); g.shadowColor = '#19f0ff'; g.strokeStyle = '#7ff7ff'; g.lineWidth = 5; g.beginPath(); g.moveTo(30, 104); g.lineTo(w - 30, 104); g.stroke(); }, 256, 128);
+    const nsg = panel(s, 1.9, .95, neon); nsg.position.set(8.07, 3.2, 16.1); nsg.rotation.y = Math.PI / 2;
+    // blinds on the big window, and the neon of the street coming through them
+    const slatM = mat(s, 'blindm', '#15121e'); slatM.specularColor = new BABYLON.Color3(.4, .4, .5);
+    for (let k = 0; k < 14; k++) { const sl = BABYLON.MeshBuilder.CreateBox('slat', { width: 7.2, height: .09, depth: .05 }, s); sl.position.set(12, 4.32 - k * .26, 8.3); sl.rotation.x = .5; sl.material = slatM; sl.isPickable = false; }
+    box(7.2, .12, .08, 12, .75 + 14 * 0, 8.3, slatM); [-3.4, 3.4].forEach(x => box(.02, 3.4, .02, 12 + x, 2.55, 8.3, mat(s, 'blindcord', '#2a2438')));
+    const bandTex = NV.tex(s, 8, 128, (g, w, h) => { for (let y = 0; y < h; y += 16) { g.fillStyle = (y / 16) % 2 ? 'rgba(255,43,214,.9)' : 'rgba(25,240,255,.9)'; g.fillRect(0, y, w, 8); } }, 'blindstripes'); bandTex.hasAlpha = true;
+    const lightM = mat(s, 'blindlight', '#000', '#ffffff'); lightM.emissiveColor = new BABYLON.Color3(0, 0, 0); lightM.emissiveTexture = bandTex; lightM.opacityTexture = bandTex; lightM.alpha = .3; lightM.disableLighting = true; lightM.alphaMode = BABYLON.Engine.ALPHA_ADD; lightM.backFaceCulling = false;
+    const patch = BABYLON.MeshBuilder.CreateGround('lightpatch', { width: 7.2, height: 5 }, s); patch.position.set(12, .035, 11.1); patch.material = lightM; patch.isPickable = false; bandTex.vScale = 3; bandTex.uScale = 1; bandTex.wrapV = BABYLON.Texture.WRAP_ADDRESSMODE;
     // door (south wall)
     box(1.5, 2.7, .15, 12, 1.35, 19.9, mat(s, 'doorm', '#221e30'));
     L.doorFrame = mat(s, 'doorf', '#000', '#ff3355');
@@ -6725,20 +7376,23 @@ NV.Level = (() => {
       };
       L.free = op.m === 'free'; if (L.free) L.seed = U.hash('new-avalon');
       const th = (ctx.palette || {}).th;
-      L.city = L.free || (op.m !== 'apartment' && op.m !== 'void' && !op.rooms && th !== 'space' && th !== 'cyber' && NV.Settings.get().cityOps !== 0);
+      const wantCity = L.free || (op.m !== 'apartment' && op.m !== 'void' && !op.rooms && th !== 'space' && th !== 'cyber' && NV.Settings.get().cityOps !== 0);
+      L.layout = L.free || op.m === 'apartment' || op.m === 'void' ? null : op.m === 'scene' ? (op.layout && NV.LAYOUTS[op.layout] ? op.layout : NV.sceneInterior(op.where)) : NV.layoutFor(op, ctx, wantCity); // indoor settings play in a hand-drawn plan
+      L.city = wantCity && !L.layout;
       L.calm = op.m === 'apartment' || op.m === 'scene' || op.m === 'void';
       L.dmgUp = 1; L.enMul = 1; applyUpgrades(); L.p.hp = L.p.max;
       if (op.zone) zone = op.zone;
       L.loc = op.m === 'scene' && L.city && op.where ? NV.sceneLoc(op.where) : null; if (L.loc && L.loc.roof) L.city = false;
       L.netKey = op.netKey || 'solo';
       L.map = gen(op.m, L.seed);
+      if (L.map.pal) { ctx = Object.assign({}, ctx, { palette: Object.assign({}, ctx.palette, L.map.pal) }); L.palette = ctx.palette; } // each space has its own colours
       L.seen = new Uint8Array(L.map.W * L.map.H);
       const built = buildScene(op, ctx); L.scene = built.scene; L.cam = built.cam; L.plight = built.plight;
       populate(op, ctx);
       // Continue puts you back at the exact spot you quit from (same level only)
       L.spotKey = op.m === 'void' || L.netKey !== 'solo' ? null : [op.m, ctx.chapter || '', op.where || op.travel || op.d || ''].join('|');
       const sp = L.spotKey && NV.State.takeSpot(L.spotKey);
-      if (sp && isFinite(sp.x) && isFinite(sp.z)) {
+      if (sp && isFinite(sp.x) && isFinite(sp.z) && sp.x > 0 && sp.z > 0 && sp.x < L.map.W * TILE && sp.z < L.map.H * TILE) { // (a spot saved before this level became a drawn plan can lie outside it)
         L.p.x = sp.x; L.p.z = sp.z; L.p.y = sp.y || 0; L.p.yaw = sp.yaw || 0; L.p.pitch = sp.pitch || 0; if (sp.hp > 0) L.p.hp = Math.min(L.p.max, sp.hp);
         if (!(sp.y > 1) && solid(L.p.x, L.p.z)) { const c = nearestFree(L.p.x, L.p.z); L.p.x = c.x; L.p.z = c.z; }
       }
@@ -8267,7 +8921,7 @@ NV.Story = (() => {
     NV.UI.storyHide(true);
     while (true) {
       await NV.fade(true, 450);
-      const res = await NV.Level.start(n, { act: ctx.act, palette: NV.paletteFor(ctx.scene || ''), chapter: ctx.id, echoes: ctx.echoes.filter(x => x.length < 220).slice(-6), tactic: tacticFrom(ctx.lastChoice), retry });
+      const res = await NV.Level.start(n, { act: ctx.act, palette: NV.paletteFor(ctx.scene || ''), scene: ctx.scene || '', chapter: ctx.id, echoes: ctx.echoes.filter(x => x.length < 220).slice(-6), tactic: tacticFrom(ctx.lastChoice), retry });
       await NV.fade(false, 350);
       if (res.won) {
         S.ops++; if (res.stats.undetected) { S.ghostOps++; NV.State.fact(['stealt', 'undet', 'ghost']); }
@@ -8429,7 +9083,7 @@ NV.Story = (() => {
     const m = dev.get('op'), sc = dev.get('scene') || 'NEON HEIGHTS — ROOFTOP';
     while (true) {
       NV.UI.storyHide(true);
-      const r = await NV.Level.start({ t: 'play', m, k: +(dev.get('k') || 3), d: 'Developer test operation (' + m + ').', where: m === 'scene' ? sc : undefined, title: sc, boss: dev.get('boss') || 'Warden-3', tut: dev.get('tut') ? 1 : 0 }, { act: +(dev.get('act') || 1), palette: NV.paletteFor(sc), chapter: 'dev', echoes: ['A memory echo.'], tactic: {} });
+      const r = await NV.Level.start({ t: 'play', m, k: +(dev.get('k') || 3), d: 'Developer test operation (' + m + ').', where: m === 'scene' ? sc : undefined, title: sc, layout: dev.get('layout') || undefined, boss: dev.get('boss') || 'Warden-3', tut: dev.get('tut') ? 1 : 0 }, { act: +(dev.get('act') || 1), palette: NV.paletteFor(sc), scene: sc, chapter: 'dev', echoes: ['A memory echo.'], tactic: {} });
       window.NV_DEV_RESULT = r;
       if (r.won) await NV.UI.results(r.stats, {});
     }

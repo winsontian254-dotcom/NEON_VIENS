@@ -1,6 +1,17 @@
 {
-  "build": 10,
+  "build": 11,
   "history": [
+    {
+      "build": 11,
+      "version": "1.11",
+      "date": "2026-10-10",
+      "notes": [
+        "Missions, arenas and story scenes that happen indoors now play in hand-drawn levels instead of random rooms: office, clinic, warehouse, factory, metro, underdeep caves, club, records vault, server halls, a network lattice and orbital stations",
+        "Boss, arena and defend fights have hand-placed cover, indoors and out in the streets",
+        "Story scenes in Noah's clinic, clubs, offices, metro platforms, bars and small flats play in their own interiors",
+        "Ghost's apartment is rebuilt as a lived-in bedroom: posters, blinds, a bedside lamp, a rug, plants and a neon sign"
+      ]
+    },
     {
       "build": 10,
       "version": "1.10",
