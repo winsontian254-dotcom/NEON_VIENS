@@ -1,6 +1,14 @@
 {
-  "build": 19,
+  "build": 20,
   "history": [
+    {
+      "build": 20,
+      "version": "1.20",
+      "date": "2026-10-11",
+      "notes": [
+        "The Helix trace is much harder: it climbs faster, barely recovers (not at all right after a hunt), locks harder, and intrusions start earlier with a shorter window"
+      ]
+    },
     {
       "build": 19,
       "version": "1.19",
