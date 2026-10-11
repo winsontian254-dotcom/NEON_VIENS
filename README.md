@@ -68,7 +68,7 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 | Open the Nuallink | `N` | Pause menu |
 | Drive: throttle / reverse, steer | `W`/`S`, `A`/`D` | RT / LT, left stick |
 | Drive: handbrake, boost, horn | `Space`, `Shift`, `H` | A, LB, R3 |
-| Pause · Black Market | `Esc` | Start |
+| Pause menu | `Esc` | Start |
 | Hotbar slot / cycle | `1`–`9` / wheel | RB |
 | Aim down sights (red dot, holo, 2.5× and 6× scopes) | RMB (hold `Shift` to steady a scope) | LT |
 | Chat (multiplayer) | `Enter` | — |
@@ -196,7 +196,7 @@ Missions, arenas and story scenes that happen indoors are hand-drawn plans, not 
 
 ## Hardcore & performance
 
-**Hardcore** is a fourth difficulty (New Game, step 3). Enemies hit twice as hard and have 40% more health, detection is 50% faster, you carry half the ammunition and the HUD shows no markers (the minimap draws streets only; no waypoints, no enemy or pickup dots). If an operation fails the run ends: the save is flagged dead the moment you die (closing the tab does not help), is erased, and a signed-in account's cloud copy is replaced by a tombstone so it cannot be restored. Endings and unlocked chapters stay. There are no chapter snapshots, no retry, no skip and no Black Market. Free roam, story scenes and multiplayer cannot end a hardcore run. A hardcore run cannot be made easier, not even by remaking the character.
+**Hardcore** is a fourth difficulty (New Game, step 3). Enemies hit twice as hard and have 40% more health, detection is 50% faster, you carry half the ammunition and the HUD shows no markers (the minimap draws streets only; no waypoints, no enemy or pickup dots). If an operation fails the run ends: the save is flagged dead the moment you die (closing the tab does not help), is erased, and a signed-in account's cloud copy is replaced by a tombstone so it cannot be restored. Endings and unlocked chapters stay. There are no chapter snapshots, no retry and no skip. Free roam, story scenes and multiplayer cannot end a hardcore run. A hardcore run cannot be made easier, not even by remaking the character.
 
 **Performance.** Large repeated city sets (facade panels, windows, signs) are cut into chunks that draw only near the player (`NV.thinChunks`); pedestrians, guards and cars outside the active radius are switched off instead of simulated. Active triangles in free roam dropped from about 2.5 M to 0.7 M.
 
@@ -283,7 +283,7 @@ Saves from the old eight-background creator fold into a lifepath and attribute p
 
 ## Arsenal & Black Market
 
-Pause (**Esc**) → **Black Market** to buy from the arsenal: 267 weapons, tools, drones, cyberattacks, environmental triggers, boss gear, strategic strikes and legendaries from the script. Pick a hotbar slot and equip; right-click a slot to clear it.
+Walk up to a **Black Market** stall in the alleys of the open city (a pink dot on the minimap; press **E** at the counter) to buy from the arsenal. The pause menu no longer sells anything, and there is no market during an operation, so buy before you go: 267 weapons, tools, drones, cyberattacks, environmental triggers, boss gear, strategic strikes and legendaries from the script. Pick a hotbar slot and equip; right-click a slot to clear it.
 
 - Hotbar: **1–9** or mouse wheel (RB on gamepad). **LMB** uses the selected item, **RMB** aims down the gun's sight: pistols carry a red dot, SMGs and shotguns a holo sight, rifles a 2.5× scope and precision rifles a 6× scope. Aiming tightens spread and recoil and slows you down.
 - Each item's behaviour comes from what it is: smart/predictive guns home in, rail/phase guns pierce, Echo guns repeat their shot, Null/EMP gear stuns and fries drones, nonlethal gear takes enemies down alive, melee is silent and one-shots unaware guards.
@@ -359,7 +359,7 @@ Settings → **VR headset mode** (the page reloads). WebXR can't run on WebGPU, 
 | Vehicle (F) | X |
 | Sprint | Y |
 
-A floating panel in front of you mirrors health, energy, the objective, prompts, dialogue and toasts, because HTML overlays can't be shown inside a headset. Menus (pause, Black Market, settings) still need you to take the headset off.
+A floating panel in front of you mirrors health, energy, the objective, prompts, dialogue and toasts, because HTML overlays can't be shown inside a headset. Menus (pause, settings, the Black Market) still need you to take the headset off.
 
 ## Controllers & touch
 

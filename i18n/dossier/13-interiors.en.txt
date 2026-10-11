@@ -2,12 +2,18 @@
 
 ## Doors
 
-In the open city every building has a door: a glowing frame on a street-facing side, 1,133 of them in all (996 ordinary buildings and the 137 landmarks that have a solid footprint). Walk up to one and press E. The street is put away and the building's own interior is built. When you leave through the glowing door inside, the street is rebuilt and you are standing where you were, facing away from the door. Doors are not offered in co-op.
+In the open city every building has a door: a glowing frame on a street-facing side, 1,133 of them in all (996 ordinary buildings and the 137 landmarks that have a solid footprint). The frame is coloured by what is behind it, so a noodle bar reads differently from a clinic from down the street. Walk up to a door and press E. The street is put away and the building's own interior is built. When you leave through the glowing door inside, the street is rebuilt and you are standing where you were, facing away from the door. Doors are not offered in co-op.
 
 ## What is behind them
 
 A building is the same place every time you enter it. What it is depends on its district and its size: apartments and noodle bars where the heights and the hive crowd together, clinics and clubs in the Memory District, offices and server rooms under Helix, warehouses and workshops along the harbour and the rail yards. The named landmarks keep their names, and a hall, a cathedral, a vault, a dome, a factory or a clinic is laid out as one. The inside is always bigger than the outside: between seven and seventeen four-metre cells wide, with up to four rooms joined by doorways, and every cell of the floor can be reached from the door.
 
+No two are alike. Each type has three layouts, and each building tints its type's colours a little. Shops, bars, noodle bars, clinics and halls have a counter with someone behind it. There are 22 kinds of furniture, from hospital beds with their monitors and vending machines to DJ decks, cubicles, workbenches, pews, boilers and cookers. Every room has its own floor, from checkered tile and carpet to dance-floor panels, raised server floor and a red aisle through stone. The name of the place is on the wall, and some have windows onto the night city. Overhead there are paper lanterns, pipes and turning fans, a mirror ball and beams in a club, blinking lights in a server room, and a ring of candles in a hall.
+
 ## What you find
 
 There are people to talk to, one to three in each building, and they each have a few things to say. There are one or two stashes, and a stash is searched once per save: it pays between 20 and 90 credits, plus a quarter more for each act you have reached. Nobody inside is hostile, and you cannot be hunted there; the way out is always the door you came in by.
+
+## Black markets
+
+The pause menu no longer sells anything. The Black Market is in the alleys: fifteen stalls stand in the narrow passages between buildings, each under a tarp with a neon sign and a dealer behind the counter, and one of them is never far from where you start. A stall is a pink dot on the minimap, and the nearest two within 130 metres get a waypoint. Press E at the counter to open the whole arsenal. There is no market during an operation, so buy before you go: weapons, ammunition, consumables and upgrades all come from a stall. The same stalls stand in co-op.

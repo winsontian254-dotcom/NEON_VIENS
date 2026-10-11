@@ -1,6 +1,15 @@
 {
-  "build": 21,
+  "build": 22,
   "history": [
+    {
+      "build": 22,
+      "version": "1.22",
+      "date": "2026-10-11",
+      "notes": [
+        "The Black Market is no longer in the pause menu: fifteen Black Market stalls now stand in the alleys of the open city (a pink dot on the minimap, E at the counter). There is no market during an operation, so buy before you go",
+        "Interiors are much more detailed and unique: three layouts per type, counters with someone behind them, 12 new kinds of furniture, a different floor in every room, the name of the place on the wall, windows onto the night city, and ceiling fittings that move. Door frames are coloured by what is behind them"
+      ]
+    },
     {
       "build": 21,
       "version": "1.21",
