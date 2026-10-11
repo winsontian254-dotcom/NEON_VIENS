@@ -148,6 +148,20 @@ Laid out like a data-terminal readout: **top-left** an implant-level shield, a t
 
 The pistol, SMG, rifle, shotgun, sniper rifle and the knife are modelled by hand in Blender (bevelled shells, serrations, ejection ports, rails with slots, handguard vents, a lit coil strip, a cutting edge that glows along the blade) and carried in gloved fists. Every weapon of a kind uses the same model in its own faction colours and accent light. The knife is held tilted, tip up and to the left, so you see the broad flat of the blade.
 
+## Mission twists (the Mission Director)
+
+Most operations used to be "walk to the exit". The Mission Director gives each infiltration, hack and retrieval a **twist** with its own rules, HUD rows, markers and way to fail. The briefing shows it under the story text. It is picked from the objective's wording and a seed (so a retry plays the same twist), and stays off in tutorials, co-op and story scenes.
+
+- **Sabotage** — plant 2-3 charges on the machinery (press **E** beside one and stay close until the bar fills; planting is loud), then escape before the fuse burns down.
+- **Assassination** — a heavily armoured Helix officer with bodyguards. They call for backup if they spot you. Take them down, then extract.
+- **Keycard** — the exit is locked and one officer carries the card; it drops when they go down.
+- **Hostage** — free a prisoner (hold **E**), who then follows you; they must be near the exit when you extract.
+- **Lockdown** — stepping into the exit seals the building: hold the ring while reinforcements arrive.
+- **Hold-out** / **Overload** (hack operations) — the last breach starts an upload you must stay beside, or overloads the reactor and starts a fuse.
+- **Ambush** — taking a recovered piece can trip a squad.
+
+Reinforcements arrive from out of sight and head for you. Developer hook: `#dev&allowgl&op=infiltrate&twist=sabotage` forces a twist (`sabotage assassin keycard hostage lockdown upload overload ambush`).
+
 ## Hand-drawn levels & interiors
 Missions, arenas and story scenes that happen indoors are hand-drawn plans, not random rooms: an office floor, a clinic, a warehouse, the Hive factory line, a metro station, the Underdeep caves, a nightclub and a records vault, plus server halls, a network lattice and orbital stations for the digital and space chapters. Each plan has its own furniture (shelving, beds, desks, counters, machines, server racks, sofas, tanks, planters, tables), cover, rails, patrol routes, terminals, pickups and enemy posts, and the layout an operation uses is picked from its scene heading and objective, so the same mission always plays in the same place. Fights out in the streets stay outdoors, with hand-placed barricades and pillars. Story scenes in Noah's clinic, clubs, offices, boardrooms, metro platforms, bars and small flats play in their own interiors, and Ghost's apartment is a lived-in bedroom with posters, blinds and neon light coming through them.
 

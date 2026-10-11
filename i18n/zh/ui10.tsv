@@ -1,0 +1,74 @@
+SABOTAGE	破坏
+ASSASSINATION	刺杀
+KEYCARD	门禁卡
+HOSTAGE	人质
+LOCKDOWN	封锁
+HOLD-OUT	坚守
+OVERLOAD	过载
+AMBUSH	伏击
+TWIST	变数
+Plant the charges and get out	安装炸药并撤离
+Eliminate the target	清除目标
+Take the keycard	拿到门禁卡
+Free the hostage and extract	解救人质并撤离
+Reach the exit and hold it	抵达出口并守住
+Hack the terminals and hold the upload	入侵终端并守住上传
+Hack the terminals and get out	入侵终端并撤离
+Recover the pieces	回收碎片
+Plant the charges on the machinery, then escape before the fuse burns down.	把炸药装在机器上，然后趁引信烧完之前撤离。
+A Helix officer is the target. Take them down, then extract.	目标是一名螺旋军官。放倒目标，然后撤离。
+The exit is locked. One officer carries the card.	出口已锁死。门禁卡在一名军官身上。
+Free the hostage, then bring them to the exit.	先解救人质，再把人质带到出口。
+Reaching the exit seals the building. Hold the ring until the lock gives.	一到出口，整栋楼就会封锁。守住圆环，直到锁止解除。
+The last breach starts an upload. Stay near that terminal until it finishes.	最后一次入侵会启动上传。留在那台终端附近，直到上传完成。
+The last breach overloads the reactor. Run for the exit before it goes.	最后一次入侵会让反应堆过载。在它爆炸之前冲向出口。
+Every piece you take can trip a squad. Watch your back.	你每拿一块碎片都可能引来一支小队。小心背后。
+Charges planted	已安装炸药
+Fuse	引信
+ALIVE	存活
+ELIMINATED	已清除
+TAKEN	已拿到
+DROPPED	已掉落
+ON AN OFFICER	在军官身上
+FOLLOWING	跟随中
+BOUND	被绑着
+ARMED	待命
+LIFTED	已解除
+Upload	上传
+Reactor	反应堆
+PLANT CHARGE	安装炸药
+FREE THE HOSTAGE	解救人质
+PLANTING CHARGE	正在安装炸药
+CUTTING THE HOSTAGE FREE	正在割断绑缚
+HOLD THE RING	守住圆环
+RETURN TO THE RING	回到圆环内
+RETURN TO THE TERMINAL	回到终端旁
+WAIT FOR THE HOSTAGE	等一等人质
+PLANT	安装
+OFFICER	军官
+CHARGE PLANTED	炸药已安装
+One more to plant.	还差一个。
+Two more to plant.	还差两个。
+Keep going.	继续。
+FUSE LIT	引信已点燃
+Get to the extraction point before it burns down.	趁引信烧完之前赶到撤离点。
+HOSTAGE FREE	人质已获救
+Stay close. They will follow you to the exit.	跟紧点。他们会一路跟你走到出口。
+TARGET CALLS FOR BACKUP	目标呼叫支援
+Reinforcements are inbound.	援军正在赶来。
+The building is sealing. Hold the ring until the lock gives.	整栋楼正在封锁。守住圆环，直到锁止解除。
+LOCK RELEASED	锁止已解除
+Step into the beam.	踏入光柱。
+UPLOAD STARTED	上传已开始
+Stay near the terminal while it runs.	上传期间请留在终端附近。
+UPLOAD COMPLETE	上传完成
+Extract now.	现在撤离。
+REACTOR OVERLOAD	反应堆过载
+Get out before it goes.	在它爆炸之前出去。
+TARGET DOWN	目标已倒下
+Extraction is open.	撤离点已开启。
+KEYCARD DROPPED	门禁卡已掉落
+Pick it up.	把它捡起来。
+A squad is closing in.	一支小队正在逼近。
+The charges went off with you inside.	炸药爆炸时你还在里面。
+The reactor went critical with you inside.	反应堆临界爆炸时你还在里面。
