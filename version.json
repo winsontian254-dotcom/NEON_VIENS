@@ -1,6 +1,15 @@
 {
-  "build": 20,
+  "build": 21,
   "history": [
+    {
+      "build": 21,
+      "version": "1.21",
+      "date": "2026-10-11",
+      "notes": [
+        "Every building in the open city now has a door: press E to go inside. Apartments, noodle bars, clinics, offices, warehouses, server rooms, clubs and every named landmark, each generated from its district and size",
+        "People inside have something to say, stashes can be searched once for credits, and the glowing door takes you back to the street where you stood"
+      ]
+    },
     {
       "build": 20,
       "version": "1.20",

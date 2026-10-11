@@ -188,6 +188,9 @@ Ghost's implant is a **Nuallink** node: the link that carries calls, messages an
 
 The numbers are in the Dossier ("The Nuallink").
 
+## Inside every building
+Every building in the open city has a glowing door (1,133 of them). Press **E** at one to go inside: apartments, noodle bars, clinics, offices, warehouses, server rooms, clubs, and the named landmarks (halls, cathedrals, vaults, domes, factories). What a building is depends on its district and size, and it is the same place every visit. Inside you can talk to the people, search a stash for credits (once per save) and walk out through the glowing door back to the street.
+
 ## Hand-drawn levels & interiors
 Missions, arenas and story scenes that happen indoors are hand-drawn plans, not random rooms: an office floor, a clinic, a warehouse, the Hive factory line, a metro station, the Underdeep caves, a nightclub and a records vault, plus server halls, a network lattice and orbital stations for the digital and space chapters. Each plan has its own furniture (shelving, beds, desks, counters, machines, server racks, sofas, tanks, planters, tables), cover, rails, patrol routes, terminals, pickups and enemy posts, and the layout an operation uses is picked from its scene heading and objective, so the same mission always plays in the same place. Fights out in the streets stay outdoors, with hand-placed barricades and pillars. Story scenes in Noah's clinic, clubs, offices, boardrooms, metro platforms, bars and small flats play in their own interiors, and Ghost's apartment is a lived-in bedroom with posters, blinds and neon light coming through them.
 
