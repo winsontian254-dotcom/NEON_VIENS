@@ -162,6 +162,20 @@ Most operations used to be "walk to the exit". The Mission Director gives each i
 
 Reinforcements arrive from out of sight and head for you. Developer hook: `#dev&allowgl&op=infiltrate&twist=sabotage` forces a twist (`sabotage assassin keycard hostage lockdown upload overload ambush`).
 
+### Complications and new enemies
+
+From act 2 on (act 1 on Hard), a mission can also carry **complications**, shown in the briefing and as chips at the top of the HUD: none in act 1, now and then in act 2, usually one afterwards and sometimes two (Hard and Hardcore add one, Story removes one). The same mission always rolls the same ones.
+
+- **Reinforcements** — the first alarm calls squads in from out of sight (twice at most).
+- **Blackout** — the lights drop and enemies see less, but their visors still glow.
+- **Snipers** — marksmen on far posts. A red laser tracks you, locks for a quarter second (your moment to sidestep), then one fast shot.
+- **Turrets** — fixed guns beside the objectives; an EMP stuns them.
+- **Alarm tripped** — the guards start searching for you and a squad arrives every ~18 seconds until you leave (never combined with a timer twist).
+- **Rushers** — fast, gunless melee units that wind up for a third of a second and lunge.
+- **Shield troops** — a riot shield takes 88% off shots from the front (headshots take 65% off); go around the back, take them down from behind, or EMP them.
+
+Developer hooks: `&comp=blackout,snipers` forces complications (`&comp=none` clears them) and `&kind=sniper|shield|rusher|turret` puts three of that kind in front of you.
+
 ## Hand-drawn levels & interiors
 Missions, arenas and story scenes that happen indoors are hand-drawn plans, not random rooms: an office floor, a clinic, a warehouse, the Hive factory line, a metro station, the Underdeep caves, a nightclub and a records vault, plus server halls, a network lattice and orbital stations for the digital and space chapters. Each plan has its own furniture (shelving, beds, desks, counters, machines, server racks, sofas, tanks, planters, tables), cover, rails, patrol routes, terminals, pickups and enemy posts, and the layout an operation uses is picked from its scene heading and objective, so the same mission always plays in the same place. Fights out in the streets stay outdoors, with hand-placed barricades and pillars. Story scenes in Noah's clinic, clubs, offices, boardrooms, metro platforms, bars and small flats play in their own interiors, and Ghost's apartment is a lived-in bedroom with posters, blinds and neon light coming through them.
 

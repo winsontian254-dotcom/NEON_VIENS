@@ -1,6 +1,16 @@
 {
-  "build": 16,
+  "build": 17,
   "history": [
+    {
+      "build": 17,
+      "version": "1.17",
+      "date": "2026-10-11",
+      "notes": [
+        "Missions get complications from act 2 on (act 1 on Hard): blackouts, reinforcements on the first alarm, a tripped alarm that keeps sending squads, turrets, and snipers whose red laser gives you a moment to sidestep",
+        "Four new enemy types: snipers, shield troops (shots bounce off their shield from the front), rushers that lunge, and fixed turrets that an EMP stuns",
+        "Complications show in the briefing and as chips at the top of the screen; fast enemy shots can no longer skip past you between frames"
+      ]
+    },
     {
       "build": 16,
       "version": "1.16",
