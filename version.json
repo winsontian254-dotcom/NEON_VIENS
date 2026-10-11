@@ -1,6 +1,14 @@
 {
-  "build": 18,
+  "build": 19,
   "history": [
+    {
+      "build": 19,
+      "version": "1.19",
+      "date": "2026-10-11",
+      "notes": [
+        "The Helix trace is harder: it climbs faster, falls slower, locks harder and its intrusions come earlier and give you less time"
+      ]
+    },
     {
       "build": 18,
       "version": "1.18",
