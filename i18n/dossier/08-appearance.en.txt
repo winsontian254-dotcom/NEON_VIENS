@@ -1,0 +1,20 @@
+# APPEARANCE, VOICE AND CYBERWARE
+
+## What you can change
+
+The second screen of the Suite is the only one with no numbers in it, and it is the one that most people spend longest on. You can start from one of six presets or build a face from nothing. There are twelve skin tones, from the palest to the deepest, and eight hairstyles: the Courier Hood, Buzz Cut, Undercut, Mohawk, Bob, Long, Top Knot and Braids. Ten hair colours run from natural black to colours that never occur in nature. Your eyes can be a Visor, a pair of Optics or Shades. Five levels of cyberware, from None through Cheek Lines, a Jaw Plate and a Temple Port to Full Chrome, add lit lines and plates to your face in your glow colour. The glow colour itself is one of eight, and it appears again in the visor, in the lit seams of your gloves and on every cuff. Finally, the jacket is one of eight colours, and it is the colour that every sleeve in the first-person view wears.
+
+Voice is the last row. Low, Mid and High change the pitch of Ghost's speech when the game reads dialogue aloud and the pitch of the small chirp that accompanies each line of text. It does not change what is said or how people respond to it.
+
+## What it does, and what it doesn't
+
+Nothing on this screen changes a number. Your look does not make guards notice you more or less, it does not change how much Integrity you have and it does not change how the story treats you. This is a rule of the Suite and not a limitation: the Bureau decided long ago that the face is the one thing that must never be a tactical choice, because the moment it is, everyone's face becomes the same one.
+
+What it does do is appear. Your portrait is drawn from your look, in every conversation, in the Journal and on the character screen. In multiplayer, other operators see you wearing it. In the first-person view, your sleeves and the light on your gloves come from the jacket and the glow colour, so that the arms you see in the middle of a firefight are recognisably yours. And in a few quiet scenes, where the camera lingers on you rather than the situation, there is a small pleasure in finding that the person on the screen looks the way you meant.
+
+## Presets and the grid
+
+The six presets on the left are good starting points rather than fixed characters; picking one fills every row at once, and you can change anything afterwards. The rows on the right can be clicked on either arrow, or moved with the keyboard or controller. The grid between the arrows, on rows that offer a choice of colours, opens the full set so that you can pick the one you want without stepping through the others. Pick a colour and the grid closes.
+
+You can change your look at any time by remaking the character from the Journal. It never affects progress, and it is the cheapest change in the game: nothing is reset, nothing is lost, and nothing about the story notices.
+

@@ -1,0 +1,24 @@
+# THE FIRST HOUR: ADVICE FOR NEW OPERATORS
+
+## Before the first door
+
+The first operation of any story is a teacher in disguise. It will show you what the city is willing to put in front of you and how you respond, and it is gentle enough that almost any build can finish it. Treat it as a laboratory. Walk the whole length of the first level before you attempt it for real. Try the dash on every surface, fire a few rounds at a wall to feel the recoil, and open the pause menu to read the weapon in your hand. Learning what your lifepath feels like costs nothing in the first level and a lot in the fourth.
+
+Read your own numbers before you trust them. The lifepath sections of this handbook quote exact values, and those are right to the decimal, but the feel of a number is not the same as the number. A dash recharge of 0.55 seconds sounds like nothing until you discover you can cross a plaza in three dashes; a detection rate of 63 percent sounds like a statistic until a guard stares at you for an extra second and you realise you are still unseen. Play with the numbers until they are habits.
+
+## What to do in the first hour
+
+Take every medkit and every shard. Both are small, both are rarely out of the way and both pay back in the second hour. Learn the takedown early: it is the most efficient action in the game, because it ends a threat in one press, costs nothing and pays full credits. Learn to listen. Guards talk, drones whine before they appear and footsteps carry; half of stealth is hearing a patrol turn a corner before you can see it. Learn the map: the minimap on the right turns with you, the bar beneath it tells you what the guards think, and the yellow marks tell you where to go. On Hardcore, the marks are gone and the map shows streets only, so it is best to have the habit of looking by then.
+
+Spend your credits on the Black Market early rather than late. The first weapon upgrade is the best value the game offers, and the first ammunition conversion changes what a rifle is for. If your lifepath earns extra credits, this is the moment it shows; if it does not, the first hour is when you learn what you can afford.
+
+Use the Journal. It remembers what you have been told and by whom, and it is where the Suite lives: if the first hour tells you that your build is wrong, you can open the Journal, remake the character with your progress intact, spend the points differently and be back at the door in a minute. Nobody should finish a first hour with a build they dislike when the Suite is two clicks away.
+
+## What not to do
+
+Do not fight a patrol you could have avoided, if you are a Contractor. Do not hoard medkits, if you are a Kid. Do not stop moving, if you are a Courier. Do not spend every point on the thing you are already good at in the first hour, because you do not know yet which of your weaknesses you will meet most. And do not ignore the Heat meter. The diamonds at the top of the screen are not decoration. At one diamond the squads are looking for you; at three they are coming; at five, you are not going to win the fight you are in, so you should be leaving it.
+
+## A word about trust
+
+The story in New Avalon keeps five ledgers: Raven Trust, Voss Integrity, Civilian Hope, Corporate Leverage and AI Sympathy. Your lifepath gives you a head start in some of them and a deficit in others, and the starting values are listed in each lifepath section. They matter most in the first third of the story, when the people around you have not yet decided what you are. After that, your own choices take over. Do not choose a lifepath for its trust bonuses alone. A few points are not the story. They are a nudge, and the story will take its own direction regardless.
+

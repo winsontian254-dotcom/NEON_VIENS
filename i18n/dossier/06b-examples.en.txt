@@ -1,0 +1,14 @@
+# THREE FINISHED CHARACTERS
+
+## The Patcher
+
+A Lantern Row Kid who spent their free points on two levels of Body and two of Technical Ability. The levels end at Body 5, Reflexes 3, Intelligence 3, Technical Ability 6 and Cool 5. The numbers: medkits restore 54 Integrity, the Analogue Kit restores 74.5 percent of your maximum, you have 114 Integrity and take four percent less damage, regeneration is still 1.5 per second, credits are still ×1.30, weapon damage is now ×1.007, so the Kid's penalty has more than repaid itself, guards notice you at 94 percent of their normal rate, you sneak eight percent faster and Heat builds at ×1.196. In play, this character walks into a firefight, takes a few hits, ducks behind a crate and is back at nearly full health thirty seconds later with a pocket full of credits. It is not a thrilling build. It is an extremely hard one to put down.
+
+## The Quiet Hand
+
+A Helix Contractor who spent three points on Cool and one on Body. The levels end at Body 4, Reflexes 3, Intelligence 5, Technical Ability 3 and Cool 7. The numbers: guards notice you at 57 percent of their normal rate, you sneak sixteen percent faster, Heat builds at ×1.05, so most of the lifepath's penalty is gone, ICE sequences are one code shorter, the EMP pulse costs 34 Energy, the ICE trace lasts 40 percent longer, credits are ×1.10, maximum Energy is 106 and maximum Integrity is 97 after the Contractor's ten-point loss is partly repaid. In play, this character is rarely noticed at all, and on the occasions when it is, the first few seconds of a bad situation are almost always long enough to leave. It is the closest thing the Suite offers to a ghost in the traditional sense.
+
+## The Rushdown
+
+A Glass Wastes Courier who spent all four points on Reflexes. The levels end at Body 4, Reflexes 8, Intelligence 3, Technical Ability 3 and Cool 3. The numbers: movement speed ×1.155, dash recharge of 0.48 seconds, dash cost of 17 Energy, maximum Energy 120, recoil ×0.72, reload time ×0.807, maximum Integrity 107, damage taken ×1.078 and sneaking speed ×0.80. In play, this character cannot sneak and does not try. It crosses an open street in four dashes, fires from the hip between them and reloads while moving. It is the fastest thing in the city, and it is one mistake away from needing a medkit it did not bring. If you want a build that feels like a stunt, this is it.
+

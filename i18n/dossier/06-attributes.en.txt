@@ -1,0 +1,46 @@
+# ATTRIBUTES
+
+## How points work
+
+Five attributes describe what you trained, as opposed to who you were: Body, Reflexes, Intelligence, Technical Ability and Cool. Each starts at 3, the level of an ordinary healthy adult who has never been asked to do anything difficult. Your lifepath raises two of them to a minimum, and those minimums cannot be lowered; the Suite marks them MIN LEVEL as a reminder. You then have four free points to spend in any combination, up to a ceiling of 8 in any one attribute. You cannot spend more than four, and you cannot carry unspent points into the game, but you do not have to spend them all. The badge on the right of the screen counts what is left. RESET TO DEFAULT puts every attribute back to its minimum and returns all four points.
+
+Every attribute works the same way. The effects are counted per level above 3, so an attribute at level 3 does nothing, at level 4 does one step, at level 8 does five steps. The steps are small on purpose. No single attribute can make you invincible, and none of them replaces the lifepath. What they do is shave and add at the edges: a few percent on your dash here, a few points of Integrity there, until the sum of a good spread feels like a different person.
+
+Because the minimums are part of the lifepath, the quoted figures in each lifepath section already include them. The rest of this section lists only what each attribute does, level by level, so that you can reason about what four more points will buy.
+
+## Body
+
+Body is the length of time you stay standing. Each level above 3 adds seven points to your maximum Integrity and reduces the damage you take by two percent. At level 4 that is 107 Integrity and one fewer percent in every ten that lands on you; at level 6 it is 121 and six percent; at the maximum, level 8, it is 135 Integrity and ten percent less damage from everything, which together make you about half again as hard to kill as someone with Body 3.
+
+Body matters most to the lifepaths that heal and the lifepaths that run. For a Lantern Row Kid, every extra point of maximum Integrity is a point that regeneration, medkits and the Analogue Kit all scale against, because the Kit restores a share of your total. For a Courier, Body is the answer to the lifepath's drawback: it offsets the extra damage you take, and a few levels of it turn a glass cannon into a fast, durable skirmisher. For a Contractor it is the cheapest cure for the ten points of Integrity the lifepath takes away.
+
+## Reflexes
+
+Reflexes is the gap between deciding and doing. Each level above 3 makes your dash recharge four percent faster, reduces your weapon recoil by four percent, shortens reloads by three percent and raises your walking and running speed by one percent. They compound with whatever the lifepath already gave you, so a Courier at Reflexes 8 stacks a lifepath dash recharge of 75 percent with a further twenty percent from the attribute, which comes to a cooldown of about 0.48 seconds.
+
+It is the easiest attribute to feel. Recoil and reload are the two numbers a shooter notices most, and dash recharge is the number that decides how often you can leave a bad position. If you are unsure where to put a free point, put it here. It helps every lifepath, and it helps the Lantern Row Kid most, because that lifepath is the one that does not touch movement at all.
+
+## Intelligence
+
+Intelligence is your capacity in a network. Each level above 3 reduces the cost of your EMP pulse by three Energy, extends the ICE trace by six percent and adds three to your maximum Energy. Two thresholds sit on top of that. At level 6 your ICE buffer, the number of wrong codes you can hold before the network rejects the attempt, grows by one. At level 7 every ICE sequence is one code shorter, stacking with any other shortening you already have, although no sequence can drop below one code.
+
+The attribute pays most to a Contractor, who gains on every axis at once, and to anyone who has made hacking the centre of their play. It pays least to a Courier who never touches a terminal. Remember, though, that the EMP pulse is a combat tool as well as a hacking tool: it stuns every enemy within ten metres for about three and a half seconds (five for drones, which also take damage) and wipes hostile projectiles out of the air, and at Intelligence 8 it costs 15 Energy less than baseline. A low-Intelligence character who still wants to use the pulse should plan on spending more of a dash bar to do it.
+
+## Technical Ability
+
+Technical Ability is the ability to make machines do more than they were built to. Each level above 3 adds two percent to the damage of every weapon you fire, adds three points to every medkit you pick up and adds one and a half percentage points to the amount that Noah's Analogue Kit restores. At the maximum level, that is ten percent more damage, fifteen more points from a medkit and seven and a half more percentage points from the Kit, on top of whatever your lifepath already gave.
+
+It is the quiet attribute, and it is the best place for a free point when you are not sure what you need. The damage bonus applies to everything, including melee, thrown weapons and drone fire, and the healing bonus is exactly what a long operation wears down. It is also the only attribute that gives back what the Lantern Row Kid's lifepath takes away in weapon damage: the Kid's five percent penalty is more than repaid at Technical Ability 6.
+
+## Cool
+
+Cool is poise. Each level above 3 makes guards notice you three percent more slowly, makes you move four percent faster while sneaking and reduces how quickly Helix Heat builds by four percent. At level 8, guards fill their detection meters at 85 percent of the normal rate, your sneaking speed is twenty percent higher and Heat builds at four fifths of the usual pace.
+
+Cool is the only attribute that reduces the cost of being seen, which is why the drawbacks of two of the three lifepaths point directly at it. A Kid or a Contractor, both of whom are punished by Heat, will find that three or four levels of Cool offset a substantial part of the penalty. A Courier, whose sneaking is the weakest in the Suite, will find that the same levels bring it most of the way back to normal. It is also the best partner for the stealthy weapons and the quiet takedowns, because everything about a successful sneak is a matter of seconds.
+
+## Spending four points
+
+There is no wrong spread, but there are a few honest ones. The generalist puts one point into each of four attributes and leaves the fifth at its minimum; this is the safest way to learn the game and is never a mistake. The specialist puts all four into one attribute and goes to level 7 or 8 in it, picking up the thresholds and the biggest stacking bonuses; the Reflexes specialist and the Intelligence specialist are the two most distinctive builds. The patcher spends two points on Body and two on Technical Ability, and does not die very often. The ghost spends all four on Cool and then spends the game proving to the guards that they could not see you; Contractors and Couriers are the best at this.
+
+Two warnings. First, the minimums are a gift and a trap: a lifepath's two floors are the things it is already good at, and adding to them has diminishing returns compared with adding to an attribute at 3, where the first extra level costs one point and does one full step. Second, it is easy to spend all four on what feels exciting and none on what keeps you alive. Whatever else you choose, make sure that at least one point goes into Body or Reflexes. You can always remake the character from the Journal, with all of your progress intact, once you know what you wish you had chosen.
+

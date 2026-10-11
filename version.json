@@ -1,6 +1,16 @@
 {
-  "build": 14,
+  "build": 15,
   "history": [
+    {
+      "build": 15,
+      "version": "1.15",
+      "date": "2026-10-11",
+      "notes": [
+        "New character creator laid out like a civic-records terminal: three lifepaths on animated cards, appearance rows with presets, attribute points and a difficulty window, with boot, scan and sealing animations",
+        "Backgrounds are now three lifepaths (Lantern Row Kid, Helix Contractor, Glass Wastes Courier) plus five attributes; older characters are converted automatically and no progress is lost",
+        "New Dossier: a searchable 10,800-word handbook (title menu, Journal, or H in the creator) that explains every number; extract passages as notes, save the whole text, or export your own character record (opens the share sheet in the Android app)"
+      ]
+    },
     {
       "build": 14,
       "version": "1.14",

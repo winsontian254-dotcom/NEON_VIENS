@@ -2,6 +2,7 @@ package com.neonveins.game;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -24,7 +25,7 @@ import java.io.InputStream;
  * Hosts the single-file game (assets/index.html) in a full-screen WebView.
  * The page is served from https://appassets.androidplatform.net so it runs in a secure context
  * (needed for gyroscope head tracking, storage and WebGPU/WebGL2). CDN files come from WebCache, so it plays offline.
- * JS bridge "NVAndroid" lets the game read/persist the Normal/Cardboard mode and handle the Back button.
+ * JS bridge "NVAndroid" lets the game read/persist the Normal/Cardboard mode, handle the Back button and hand text to the share sheet.
  */
 public class GameActivity extends Activity {
     private static final String HOST = "appassets.androidplatform.net";
@@ -101,6 +102,19 @@ public class GameActivity extends Activity {
         @JavascriptInterface public void setMode(String m) { mode = "cardboard".equals(m) ? "cardboard" : "normal"; prefs().edit().putString(LauncherActivity.KEY_MODE, mode).apply(); }
         @JavascriptInterface public void exitToLauncher() { runOnUiThread(new Runnable() { @Override public void run() { finish(); } }); }
         @JavascriptInterface public String version() { return "1.0"; }
+        /** Hands text to the Android share sheet (save it to Drive or Notes, or send it to yourself). The Dossier uses it for its extracts, because a file download goes nowhere inside a WebView. */
+        @JavascriptInterface public void share(final String name, final String text) {
+            runOnUiThread(new Runnable() { @Override public void run() {
+                try {
+                    Intent i = new Intent(Intent.ACTION_SEND);
+                    i.setType("text/plain");
+                    i.putExtra(Intent.EXTRA_SUBJECT, name);
+                    i.putExtra(Intent.EXTRA_TITLE, name);
+                    i.putExtra(Intent.EXTRA_TEXT, text);
+                    startActivity(Intent.createChooser(i, name));
+                } catch (Exception e) { android.util.Log.w("NeonVeins", "share failed: " + e); }
+            } });
+        }
     }
 
     @Override

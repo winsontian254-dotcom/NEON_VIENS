@@ -1,0 +1,26 @@
+# REFERENCE: THE NUMBERS ON ONE PAGE
+
+## Lifepaths, as written
+
+Lantern Row Kid: credits ×1.30; medkits restore 45 Integrity; Noah's Analogue Kit restores 70 percent; regeneration of 1.5 Integrity per second after four seconds undamaged; weapon damage ×0.95; Helix Heat ×1.30. Starts with Civilian Hope +4 and Corporate Leverage −3. Minimums: Technical Ability 4, Cool 5.
+
+Helix Contractor: guards notice you at ×0.65 of the normal rate; ICE sequences one code shorter; EMP pulse costs 40 Energy; ICE trace ×1.25; credits ×1.10; Helix Heat ×1.25; maximum Integrity −10. Starts with Corporate Leverage +5, Raven Trust −3 and AI Sympathy +2. Minimums: Intelligence 5, Cool 4.
+
+Glass Wastes Courier: movement speed ×1.10; dash recharge ×0.75; dash costs 17 Energy; maximum Energy +20; recoil ×0.90; reload time ×0.95; sneaking speed ×0.80; damage taken ×1.10. Starts with Raven Trust +3 and Civilian Hope +2. Minimums: Reflexes 5, Body 4.
+
+## Attributes, per level above 3
+
+Body: maximum Integrity +7; damage taken −2 percent. Reflexes: dash recharge −4 percent; recoil −4 percent; reload time −3 percent; movement speed +1 percent. Intelligence: EMP cost −3 Energy; ICE trace +6 percent; maximum Energy +3; at level 6, ICE buffer +1; at level 7, ICE sequences one code shorter. Technical Ability: weapon damage +2 percent; medkits +3 Integrity; Noah's Analogue Kit +1.5 percentage points. Cool: guard detection rate −3 percent; sneaking speed +4 percent; Helix Heat −4 percent.
+
+## At the start, before the four free points
+
+Lantern Row Kid: credits ×1.30; medkits 48; Analogue Kit 71.5 percent; regeneration 1.5 per second; weapon damage ×0.969; detection ×0.94; sneaking ×1.08; Heat ×1.196.
+
+Helix Contractor: detection ×0.63; ICE sequences one shorter; EMP 34 Energy; ICE trace ×1.40; credits ×1.10; maximum Energy 106; maximum Integrity 90; sneaking ×1.04; Heat ×1.2.
+
+Glass Wastes Courier: movement ×1.122; dash recharge about 0.55 seconds; dash cost 17; maximum Energy 120; maximum Integrity 107; recoil ×0.828; reload ×0.893; sneaking ×0.8; damage taken ×1.078.
+
+## Ceilings
+
+Every attribute stops at level 8. Four free points are available on top of the lifepath minimums. A ninth attribute does not exist; the Suite will not invent one for you. Difficulty multipliers: Story damage ×0.45, health ×0.7, detection ×0.7; Operative ×1 on all three; Ghost Protocol damage ×1.5, health ×1.3, detection ×1.3; Hardcore damage ×2, health ×1.4, detection ×1.5, half the ammunition, no markers and a mortal save.
+

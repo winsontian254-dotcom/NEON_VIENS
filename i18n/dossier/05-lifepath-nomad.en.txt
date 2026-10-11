@@ -1,0 +1,44 @@
+# LIFEPATH III · GLASS WASTES COURIER
+
+## Who you were
+
+Past the last transit stack, the city simply stops. There is no wall, no checkpoint and no sign; there is a final ring of dark towers, and then a flat grey plain stretching to the horizon, and the plain is made of glass. It is not a metaphor. Something happened in the old war, and the sand fused, and the wind that crosses it picks up signals nobody owns: dead radio, ghost transmissions, drifting fragments of other people's messages. The people of the Wastes call it the Glass, and they call themselves nothing at all, because anyone who needs a name is someone who expects to be found.
+
+You rode freight rails through it. You rode the night trains that crossed between the Railhold depots and the city's outer ring, in the gaps between scheduled services, where the cargo was never listed and the crew never asked. You rode in the back of vans with the lights off. You rode on foot when the trains stopped and the vans broke down, crossing twenty kilometres of fused sand with a pack on your back and a glass-cutter's knife in your boot. What you carried varied; why you carried it never mattered. All that mattered was that it arrived.
+
+The people who hired you valued three things: that you were quick, that you were quiet about where you had been and that you never opened the box. The Bureau's file on you lists a single employer, a dispatch office that does not exist, and a record of deliveries that stops on the night you were erased. Nobody in the Wastes has asked where you went. In the Wastes, going is what people do.
+
+## How it shaped you
+
+Roads teach urgency. You do not spend time deciding; you spend time moving. You read the gap before it opens and commit to the line, because the one lesson the Glass has for everybody is that hesitation kills, and the body that learns it does not forget. You move quickly on foot, you recover from a dodge faster than most people can finish a thought, and your hands, used to holding a cargo strap through a long hard bend, stay steady when you fire.
+
+Roads also teach you to travel light. You never carried armour because armour is weight and weight is fuel, and the habit has not left you. You are quicker than anyone you will meet in the city and you take more from every hit, which is the whole logic of a courier in one line.
+
+And roads teach you that being quiet is not the same as being slow. You were never trained to creep; you were trained to disappear by outrunning whoever was looking. The Suite will tell you the truth, which is that you are a poor sneak. You are a very good runner.
+
+## What it does: the numbers
+
+Movement first. You walk and run ten percent faster than the standard speed. Your dash, the burst of speed on the Space key, recharges in three quarters of the normal time, 0.6 seconds instead of 0.8, so you can chain dashes where others have to wait. Each dash costs 17 Energy rather than 22, which is more than a fifth cheaper, and your maximum Energy is twenty points higher. The combination is hard to appreciate until you play it: a Courier can dash, fire, dash again and still have enough left over for an EMP pulse, where a stranger would be standing at an empty meter and a locked door.
+
+Then the gun hand. Recoil affects you ten percent less than normal, and you reload five percent faster. These sound small, and they are small, but both are multiplied by the Reflexes bonuses, which for a Courier start well above the baseline.
+
+The minimum attributes are where the lifepath gains most. A Glass Wastes Courier starts with Reflexes 5 and Body 4. Two levels of Reflexes cut dash recharge by a further eight percent, recoil by eight percent and reload time by six percent, and add two percent to your movement speed. One level of Body adds seven to your maximum Integrity and reduces the damage you take by two percent. Put together, here is what you actually hold at the start: movement speed ×1.122, a dash recharge of about 0.55 seconds, a dash cost of 17 Energy, maximum Energy 120, recoil ×0.828, reload time ×0.893, maximum Integrity 107, sneaking speed ×0.8 and damage taken ×1.078.
+
+## What it costs
+
+The last two figures in that list are the price. Sneaking speed is twenty percent lower than anyone else's. In an operation where the stealth route runs along a narrow corridor, you will take longer to cover it, and the longer a patrol has to find you, the likelier it is that one will. A Courier's answer is not to fix the sneak but to avoid it: move at full speed, break the sight line and treat every corridor as a place to run through rather than to hide in.
+
+And you take more damage. A raw ten percent more from every hit, reduced to about 7.8 percent by the Body minimum, because you carry no armour and have no reason to. It adds up: a heavy rifle that would take five hits from a Contractor takes four hits from you. This is the other reason you have to move. The only defence you carry is not being where the bullets are.
+
+## How the city treats you
+
+You start with Raven Trust +3 and Civilian Hope +2. Raven runs with drivers and runners, the kind of people who owe their lives to somebody who got there fast, and recognises a courier by the way they stand. You begin with warmth you did not earn, which is the warmest start the Suite offers. Ordinary people, the dock workers, the night-shift clerks and the stallholders, meet you with a small nod for the same reason: everyone in New Avalon has been saved, once, by a package that arrived on time.
+
+Corporate Leverage, Voss Integrity and AI Sympathy start at the usual level. Helix has never heard of you, which is its own kind of luxury: the cameras do not know your face and Civic Response does not know your name.
+
+## Playing it well
+
+A Courier wins by tempo. Never stand still. Dash into cover, fire three rounds, dash out, reload while moving, re-enter from the other side. Pick weapons with high rates of fire, because your recoil and reload bonuses give you more of them, and pick shotguns and short-range tools, because your dash gets you in close and your Integrity gets you through it. Use the open: wide plazas, long streets and rooftops are your ground. Treat tight stealth corridors as a last resort, and where you have to take them, take them with the takedown rather than the long creep.
+
+For your free attribute points, the lifepath asks for Cool. Each level of Cool makes guards notice you three percent more slowly, adds four percent to your sneak and shaves four percent off Helix Heat, which compensates directly for the lifepath's weakest area. If you would rather fix the body, Body is the other good choice: each level above 3 adds seven Integrity and cuts damage by another two percent. If you would rather lean into the lifepath, put everything into Reflexes. At level 8 you will dash on a cooldown of about half a second, hold a sight picture through a rotary gun, and reload as fast as anyone alive.
+

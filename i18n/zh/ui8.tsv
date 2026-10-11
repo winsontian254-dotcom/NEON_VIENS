@@ -1,0 +1,82 @@
+SET GHOST'S LIFEPATH	设定幽灵的生命轨迹
+CUSTOMIZE ATTRIBUTES	自定义属性
+Select Ghost's lifepath. Some events and dialogue options in the game will be different depending on your choice.	选择幽灵的生命轨迹。游戏中的部分事件和对话选项会因你的选择而不同。
+In New Avalon, looks are everything.	在新阿瓦隆，外表就是一切。
+Choose the core attributes you want to begin with.	选择你想从哪些核心属性起步。
+How hard the city pushes back. Select a difficulty level.	城市会以多大的力度反击你。请选择难度等级。
+IDENTITY RECONSTRUCTION SUITE v4.12	身份重建套件 v4.12
+MOUNTING CIVIC RECORD .......... NOT FOUND	正在挂载市政记录 .......... 未找到
+SCANNING NEURAL LACE .......... OK	正在扫描神经织网 .......... 正常
+OPERATOR CONSENT .......... LOGGED	操作员同意 .......... 已记录
+OPENING LIFEPATH INDEX .......... 3 ENTRIES	正在打开生命轨迹索引 .......... 3 项
+WRITING CIVIC RECORD	正在写入市政记录
+LIFEPATH	生命轨迹
+RECORD CREATED	记录已建立
+Lantern Row Kid	灯笼街少年
+Glass Wastes Courier	玻璃荒原信使
+Debts, favours and patched-up friends.	人情债、帮手和被你包扎过的朋友。
+A lanyard, a smile and a file Helix still keeps.	一条挂绳、一副笑脸，和螺旋仍留着的一份档案。
+Rails, wastes and cargo nobody asked about.	铁轨、荒原，和没人过问的货物。
+VOICE TONE	嗓音音调
+HAIRSTYLE	发型
+GLOW COLOUR	发光颜色
+In New Avalon your face is your only civic ID. Make it count.	在新阿瓦隆，你的脸是唯一的市政身份证明。好好利用它。
+Muscle, bone and the stubbornness to stay on your feet. Body decides how much punishment you can take, and how much of it you shrug off.	肌肉、骨骼，以及站稳脚跟的倔强。体质决定你能承受多少打击，又能把其中多少一笑置之。
+The gap between deciding and doing. Reflexes shape how fast you dash, how cleanly you reload and how quickly your aim settles after a shot.	从决定到动手之间的那道空隙。反应影响你冲刺有多快、换弹有多干净，以及开火后准星多快稳住。
+Raw processing power. It governs how deep and how long you can work inside a hostile network, and how cheaply you can burn one down.	纯粹的运算能力。它决定你能在敌对网络里潜得多深、撑得多久，以及烧毁一个网络要付出多少代价。
+Hands that understand machines. Technical ability tunes the weapons you carry and makes every patch and medkit work harder.	懂得机器的双手。技术能力会调校你随身的武器，让每一次修补和急救包都更有效。
+Nerve, poise and the knack of looking like you belong. Cool decides how long guards believe you, how quietly you move and how loudly the city notices you.	胆量、沉着，以及看起来理所当然的本事。冷静决定守卫会相信你多久、你移动时有多安静，以及城市对你的注意有多响亮。
+RESET TO DEFAULT	恢复默认
+POINTS AVAILABLE	可用点数
+ATTRIBUTE	属性
+LEVEL	等级
+Exact numbers live in the Dossier: the long document behind the DOSSIER button is the only place that spells out what a point does.	确切的数值都在档案里：“档案”按钮背后的那份长文件，是唯一说明一个点数到底有什么作用的地方。
+Select Difficulty Level	选择难度等级
+DOSSIER	档案
+The Reconstruction Handbook	重建手册
+search it, extract from it	检索并摘录
+Query the record: a word, a number, a lifepath	查询档案：一个词、一个数字、一条生命轨迹
+CLEAR	清除
+COPY	复制
+EXTRACTED NOTES	已摘录笔记
+DOWNLOAD DOSSIER	下载档案
+EXPORT MY RECORD	导出我的记录
+Type in the query line to search the whole record. EXTRACT PASSAGE keeps a paragraph as a note. DOWNLOAD DOSSIER saves the full document as a text file, and EXPORT MY RECORD saves your own character and progress.	在查询栏中输入内容即可检索整份档案。“摘录段落”会把一段话保存为笔记。“下载档案”会把完整文件存为文本文件，“导出我的记录”则会保存你自己的角色和进度。
+EXTRACT PASSAGE	摘录段落
+EXTRACTED ✓	已摘录 ✓
+EXTRACTED	已摘录
+JUMP TO PASSAGE	跳转到段落
+COPY ALL NOTES	复制全部笔记
+DOWNLOAD NOTES	下载笔记
+CLEAR NOTES	清空笔记
+EXTRACT ALL RESULTS	摘录全部结果
+QUERY	查询
+RESULTS	结果
+passages found	个匹配的段落
+Nothing in the record matches that query.	档案中没有匹配此查询的内容。
+No notes yet. Press EXTRACT PASSAGE beside any paragraph to keep it here.	还没有笔记。点击任意段落旁的“摘录段落”即可保存到这里。
+Clear every extracted note?	清空所有已摘录的笔记吗？
+COPIED	已复制
+It is on your clipboard.	已复制到剪贴板。
+This browser would not copy.	此浏览器无法复制。
+DOWNLOADED	已下载
+NO RECORD	没有记录
+Start a game first: there is no character record on this device yet.	请先开始游戏：这台设备上还没有角色记录。
+CIVIC RECORD EXPORT	市政记录导出
+IDENTITY	身份
+PROGRESS	进度
+Chapter	章节
+Chapters complete	已完成章节
+Paper stars	纸星
+STANDING	声望
+MEMORY FRAGMENTS	记忆碎片
+RAW SAVE DATA	原始存档数据
+IN PROGRESS	进行中
+CHARACTER UPDATED	角色已更新
+Your backgrounds became a lifepath and attributes. Remake your character from the Journal any time.	你的背景已转换为一条生命轨迹和一组属性。随时可以在日志里重新创建角色。
+Neon Veins has a new character creator: three lifepaths, five attributes and a full appearance editor (skin tone, hair, eyes, cyberware). What each choice does is explained in the Dossier.	《霓虹血脉》有了全新的角色创建器：三条生命轨迹、五项属性，以及完整的外貌编辑器（肤色、发型、眼睛、义体）。每个选择的具体作用，都在“档案”里有说明。
+Under the paper lanterns of Lantern Row nobody is a stranger, only a debt not yet collected. The lower city raised you, and it still keeps your tab.	在灯笼街的纸灯笼下，没有陌生人，只有还没收回的人情。下城区把你养大，至今还替你记着账。
+Never an employee, only a lanyard on a stranger's clipboard. You know how to look like you belong in a room you were never invited to.	从来不是员工，只是陌生人写字板上的一条挂绳。你懂得如何在一间从没邀请过你的房间里装作理所当然。
+Past the last transit stack the road turns to glass. You rode the freight rails between the Wastes and the city, and never asked what you carried.	过了最后一座换乘塔，公路就变成了玻璃。你在荒原与城市之间的货运铁轨上奔驰，从不问自己运的是什么。
+Enemies hit harder, take more punishment and see further.	敌人伤害更高，更耐打，视野更远。
+Scarce ammo, no markers on the screen or the minimap, and enemies that hit brutally hard. Fail an operation and this save is erased for good.	弹药稀缺，屏幕和小地图上没有任何标记，敌人的攻击凶狠无比。行动一旦失败，这个存档会被永久抹除。

@@ -225,17 +225,18 @@ City-only moves, built on the climbing system:
 - **Slide**: press crouch while sprinting.
 - **Roll**: land a 12–27 m/s drop while sprinting or crouching to roll out instead of ragdolling.
 
-## Your character: backgrounds & appearance
+## Your character: lifepath, appearance & attributes
 
-New Game opens a three-step creator styled after a corporate ID terminal.
+New Game opens a four-screen creator laid out like a civic-records terminal. It boots, types its headings, sweeps scan lines over the art and flips values with a glitch (all of it switches off under reduced motion or the "no glitch" setting).
 
-1. **Background — pick two of eight.** Each has a five-part write-up (who you were, how it shaped you, what it does in play, its drawback, how the city reacts), real effects with numbers, and a starting change to your standing:
-   Street Medic · Helix Contractor · Wheelman · Black-Market Engineer · Nightglass Washout · Night Courier · Lantern Row Hustler · Signal Ghost.
-   Some pairs combine into a bonus (Rapid Response, Deep Diver, Combat Medic, Never Stop Moving); two pairs can't be combined.
-2. **Appearance** — presets, 12 skin tones, 8 hair styles and 10 hair colours, visor / optics / shades, glow colour, cyberware lines and jacket. Ghost's dialogue portrait and 3D body both use them.
-3. **Difficulty and voice.**
+1. **Lifepath — pick one of three** from tall animated cards: **Lantern Row Kid** (street), **Helix Contractor** (corpo) and **Glass Wastes Courier** (nomad). Each carries its own numbers, a starting change to your standing with the city and two attribute minimums.
+2. **Appearance** — presets, 12 skin tones, 8 hair styles and 10 hair colours, visor / optics / shades, glow colour, cyberware lines and jacket, as rows of arrows with swatch grids. Ghost's dialogue portrait and 3D body both use them.
+3. **Attributes** — Body, Reflexes, Intelligence, Technical Ability, Cool. Each starts at 3, the lifepath raises two to a minimum, and you have four free points (level 8 at most).
+4. **Difficulty** — a window onto the city and four buttons.
 
-Saves from before this system ask once whether to keep the old character or remake it; either way all progress is kept. The Journal has a **Remake character** button.
+The creator never shows what a choice does in numbers. That lives only in the **Dossier**, a searchable, 10,800-word handbook (`DOSSIER` button in the creator or **H**, the title menu, and the Journal). It also works as a small database: **EXTRACT PASSAGE** keeps a paragraph as a note (kept on the device under `nv_extract_v1`), **EXTRACT ALL RESULTS** keeps everything a query found, **DOWNLOAD DOSSIER** / **DOWNLOAD NOTES** save plain text, and **EXPORT MY RECORD** writes a readable report of your own save (lifepath, attributes, progress, standing, journal, side quests, memories) with the raw save underneath. In the Android app these open the share sheet. The text lives in `i18n/dossier/NN-name.en.txt` with a Chinese twin `.zh.txt`; run `python3 tools/build_dossier.py` and then `python3 tools/build_zh.py`.
+
+Saves from the old eight-background creator fold into a lifepath and attribute points by themselves (with a notice); older saves ask once whether to keep the character or remake it. Either way all progress is kept. The Journal has a **Remake character** button.
 
 ## Arsenal & Black Market
 

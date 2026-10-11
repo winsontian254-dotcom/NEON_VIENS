@@ -1,0 +1,46 @@
+# QUESTIONS THE BUREAU IS ASKED MOST OFTEN
+
+## Can I change my lifepath later?
+
+Yes. Open the Journal and choose Remake Character. The four screens open with your current choices filled in. You can change any of them, and your progress is kept. The one limit is Hardcore, which cannot be lowered.
+
+## Do the minimums count against my four points?
+
+No. The minimums are free; they belong to the lifepath. The four points are always yours to spend, and RESET TO DEFAULT returns you to the minimums with all four points available.
+
+## Why are the effects so small?
+
+Because they add up, and because the game is meant to be about the person in the room rather than the file in the cabinet. A good spread of attributes is the difference between a build that survives and one that does not, but no spread makes an operation trivial.
+
+## What happens if I never open this document?
+
+Nothing, apart from the possibility that you will never know why your guards seem so patient. The game does not require the dossier. It only declines to repeat it anywhere else.
+
+## Does multiplayer use my lifepath?
+
+No. In shared sessions everyone fights with the same numbers, so that nobody meets a stranger who is simply better than they are. Your look is shared, because faces are the one thing you should always be able to recognise.
+
+## Can I take this document with me?
+
+Yes. The buttons at the top of the reader save the whole dossier, only the passages you have extracted, or your own character record as a plain text file. On a phone running the Android app they open the share sheet instead, so you can send the file to Drive, Notes or mail. The game uploads nothing: the file is built on your device and handed to you.
+
+## What does Export My Record contain?
+
+A readable report of the character and save on this device: your lifepath and attributes, the difficulty, how far through the story you are, your standing with each faction, your balance, shards, stars and endings, your journal entries, side quests, memory fragments and mysteries, and then the raw save data underneath. It is your own data in a form you can keep, print or compare, and it is built on your device without being uploaded anywhere.
+
+# DESIGN NOTES
+
+## What this terminal borrows
+
+The Suite is built to look like a civic-records kiosk: a red-black field, a cyan title, a thin line across the top, a column of tiny numbers down one edge and a button in each lower corner. That grammar is shared by a whole family of games and films about cities of neon and bureaucracy, and it is borrowed here on purpose, because it works. A character screen that looks like a terminal feels like a place where something official is about to be decided about you, and a chair in front of it feels like a seat in a waiting room.
+
+Everything on the screen is original to this game. The three cards, the alley, the glass canyon and the road are painted in code, on the fly, with no photographs and no stolen frames; the lanterns sway and the van's tail-lights pulse because a few lines of drawing instructions say so. The icons, the words and the numbers belong to Neon Veins. If the layout reminds you of another game's creation screen, that is because it is built on the same idea: a handful of large choices, each given room to breathe, each with a short paragraph of mood and nothing more.
+
+## Why the numbers hide
+
+Most character creators put the numbers on the screen, and most players read the numbers before they read anything else. The designers of this one wanted people to choose the way the Bureau's clients choose: by what the life sounds like. Then, afterwards, to look it up. The dossier is the second step. It is long on purpose, because the numbers deserve a justification, and because the people who read to the end are the people who will appreciate that the Courier's twenty percent sneaking penalty is the exact weight of an unlit corridor.
+
+## A last word
+
+The record in the Suite is not you. It is a coat you put on for the length of the story, and you can take it off at any time. Ghost, the one at the centre of all of this, is whatever you choose to do next. The Bureau thanks you for your patience and reminds you that your civic record is currently NOT FOUND.
+

@@ -1,0 +1,42 @@
+# LIFEPATH I · LANTERN ROW KID
+
+## Who you were
+
+Lantern Row does not appear on the Bureau's tourist maps because it is not one street. It is a knot of lanes, stairwells and covered passages tied together by strings of paper lanterns, and the lanterns are older than the towers that now loom over them. Under the lanterns, noodle bars share walls with card rooms, card rooms share walls with clinics that have no names, and the clinics share walls with the homes of the people who run all three. Nobody on the Row has a surname they use in public. Everybody has a tab.
+
+You grew up in the back rooms. At eight you were carrying bowls. At eleven you were running messages between the card rooms, and learned that a message delivered fast and unread was worth more than the same message delivered slowly with a comment. At fourteen you were sitting at the foot of a folding table while someone older stitched a stranger's arm under a hanging lamp, and you were told to hold the light steady and not to ask who he was. You held the light. You did not ask. By sixteen you were the person who knew which door to knock on when something needed to be fixed, found, patched or forgotten.
+
+What you were, in the end, was useful. Not powerful, not rich, not feared, but useful in a thousand small ways to a thousand small people, which is the only kind of power the lower city lets anyone keep. When the Bureau scrubbed your name, the Row did not notice for a week. When it noticed, it quietly set out a bowl for you anyway.
+
+## How it shaped you
+
+The Row teaches three things, and they are the three things this lifepath gives you. The first is that money is a kind of attention. Every credit that passes through your hands is a person agreeing, for a moment, to pay you more heed than they pay the next fellow, and you have never been bad at making them pay. The second is that bodies are machines that complain, and that most of the people you love are one bad night from needing someone to hold the light. You learned to stay calm with your hands in other people's worst moments, and the calm never left. The third is that you are always being watched by the people who own the Row's debts. Helix has a long file on Lantern Row operators, and the file has your face in it, so when you get noticed, you get noticed hard.
+
+None of this makes you a fighter. The Row prizes the person who can get a favour done without anybody swinging at anybody, and the habits it gave you reflect that: you are good at living, better at recovering and mediocre at killing. That trade-off is the spine of the lifepath.
+
+## What it does: the numbers
+
+Credits first. Every credit you earn from takedowns, loot and gigs is multiplied by 1.30. That is thirty percent more, applied to the amount before any other bonus, and it applies to everything you can sell or take: a guard's pockets, a crate in a back room, the fee for a courier run, the payout at the end of a bounty. Over a long game, this is the single biggest effect of the lifepath. The Black Market stops being a place where you ration purchases and becomes a place where you shop.
+
+Healing second, and there are three separate pieces. Medkits that you pick up in an operation restore 45 Integrity instead of the usual 35. Noah's Analogue Kit, the consumable that restores a share of your total Integrity at once, heals 70 percent of your maximum instead of 60. And you regenerate passively: once four full seconds have passed without anything damaging you, your Integrity climbs by one and a half points every second until you are hurt again or you are full. It is a slow climb, and a single stray bullet resets the clock, but between fights in a quiet room it is the difference between needing a medkit and not.
+
+Those are the lifepath's own numbers. The minimum attributes add to them. A Lantern Row Kid starts with Technical Ability 4 and Cool 5, and each level above 3 contributes a little: one level of Technical Ability adds two percent to your weapon damage, three Integrity to every medkit and one and a half percentage points to the Analogue Kit; two levels of Cool make guards notice you six percent more slowly, make your sneaking speed eight percent higher and make Helix Heat build eight percent more slowly. Put together, here is what you actually hold at the start of the game, before you spend a single free point: credits ×1.30, medkits restore 48 Integrity, the Analogue Kit restores 71.5 percent, passive regeneration of 1.5 per second, guards at 94 percent of their normal detection speed, sneaking speed ×1.08, weapon damage ×0.969 and Helix Heat at ×1.196 its normal rate.
+
+## What it costs
+
+Two things, both of which show up in the sums above. Your weapons hit five percent softer than other people's. The Row did not teach you to shoot, only to shoot when it could not be avoided, and the Suite remembers: every weapon you carry deals ninety-five percent of its listed damage, before upgrades and attribute bonuses. Over a long game with an unfavourable matchup, this is the difference between two shots and three.
+
+And Helix Heat builds thirty percent faster. Heat is the city's measure of how loudly you have broken things, from one diamond to five; a higher rate means the Civic Response squads arrive sooner after you are noticed, and stay longer. Because the Row is on Helix's old files, the rate is high from the start and your Cool attribute only partly pays it back. Plan around it: if you intend to make noise, make it fast and leave.
+
+## How the city treats you
+
+You start with Civilian Hope +4 and Corporate Leverage −3. Hope is the ledger the story reads when ordinary people decide whether you are one of them. At the start of the story you are already three notches ahead of the other lifepaths, and the vendors, the night workers and the medics will say so in the dialogue they give you. Corporate Leverage is the opposite: it is how much a corporation is willing to bend for you, and you start with less than anyone. Corporate characters will be cooler and shorter with you, and a few doors that open easily to a Helix Contractor will stay closed to you until you have earned them another way.
+
+Raven, Voss and the machines are neutral on you at the start. That is good news in its way: nobody has a prior opinion, and the story is free to give you whichever one you earn.
+
+## Playing it well
+
+A Lantern Row Kid wins by not losing. Take every medkit, and use them early rather than hoarding them, because the regeneration will top you up afterwards. Fight from cover, retreat to cool down and let the clock run down before you step back out. Because your damage is a little low, pick up weapons that reward patience and accuracy, and consider the quieter options: a takedown from behind pays the same credits as a firefight and costs nothing. Keep the Black Market in mind. Thirty percent more credits means the better weapons and the ammunition conversions come sooner, so shop early and shop often.
+
+For your four free attribute points, the sensible choices are Body and Reflexes. Body makes your regeneration go further, because there is more Integrity to refill and less of it is lost in each hit. Reflexes cover the thing the lifepath does worst: movement and recoil. If you would rather lean into the lifepath, put two more levels in Cool and two in Technical Ability, and you will be a stealthier, tougher, richer version of what you already are. If you would rather push against it, put them all into Reflexes and learn to fight.
+

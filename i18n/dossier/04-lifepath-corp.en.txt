@@ -1,0 +1,44 @@
+# LIFEPATH II · HELIX CONTRACTOR
+
+## Who you were
+
+Helix does not employ most of the people who work for it. It contracts them: through agencies, through agencies' agencies, through three layers of consultancies whose only function is to make sure that the person carrying the coffee has never signed anything with the company that owns the coffee. You were one of those people. Your lanyard was a different colour from the staff's, your elevators were the service ones, and your name appeared on no directory, which was convenient for everybody and made you, in a way nobody had planned, nearly invisible.
+
+You spent years inside the tower anyway. You learned the rhythm of the place: the cascade of catered stand-ups at nine, the mandatory optimism seminars at eleven, the long grey hour after lunch when the security desks thinned and the badge readers were most likely to forgive a stranger. You learned where the cameras overlapped and where, by the tired logic of facilities management, they did not. You learned the seventeen different ways a Helix employee says "I think you're in the wrong meeting" and the single posture that makes them stop saying it. You learned that there is a floor between eighty-seven and eighty-eight that the lift announces and the plans deny, and that the polite thing to do about it is nothing.
+
+Then one night the file closed. It was a clean erasure: no flash, no sirens, only an automated message to a mailbox you no longer had. The company that never knew your name has not forgotten your face, and it is the face, not the name, that the cameras remember.
+
+## How it shaped you
+
+The tower teaches a way of standing. You walk like someone who is already late for something important and does not want to be stopped. You carry a tablet whether or not it is switched on. You look at security the way a stranger looks at a menu, as if you are only waiting for the right option to catch your eye. Guards read you as part of the furniture of authority, and for a few seconds longer than they should, they do not decide what you are.
+
+It also teaches how the machines are meant to be used. Corporate networks are built by people who assume that anyone who gets in has already been vetted, and you watched those people vet each other every morning. You have seen the diagrams. You know where the seams are because you have eaten lunch next to the engineers who put them there. Hacking, for you, is not an act of violence. It is a conversation with a system that has already decided to let you speak.
+
+The price of all that polish is that you never had to be tough. Helix keeps its contractors comfortable, which means that you are somewhat softer than people who learned to take hits in lanes and alleys and on the long roads, and Helix keeps their faces, which means that when you stop being polite, the whole company hears.
+
+## What it does: the numbers
+
+Start with the thing Helix taught you best. Guards notice you at 65 percent of the normal rate. Every enemy in the game has a detection meter that fills while you are in their sight; a Helix Contractor's meter fills at roughly two thirds of the usual speed, so you can stand in a doorway, cross a lit room or wait beside a camera for noticeably longer before anyone raises an alarm. This is not invisibility. It is time, and in a stealth operation time is the only currency that matters.
+
+Second, hacking. Every terminal you break into requires a sequence of codes, normally three; you need two. The sequence is one code shorter, which is a third less work and a third less exposure while the trace is running. If you have ever failed an ICE BREAK because the network found you halfway through, this is the lifepath that makes that happen less. The trace itself, the countdown that tells you how long you have before the network finds you, also lasts 25 percent longer. Your EMP pulse is cheaper: it costs 40 Energy instead of 55, so you can fire one and still have enough left to dash out of trouble. And every credit you earn is worth ten percent more, because you know what a cheque looks like.
+
+The minimum attributes add to this. A Helix Contractor starts with Intelligence 5 and Cool 4. Two levels of Intelligence take another six Energy off the EMP pulse, add twelve percent to the trace and add six to your maximum Energy. One level of Cool makes guards notice you three percent more slowly, makes you sneak four percent faster and makes Helix Heat build four percent more slowly. Put together, here is what you actually hold at the start: guards notice you at 63 percent of their normal speed, ICE sequences are one code shorter, the EMP pulse costs 34 Energy, the ICE trace lasts 40 percent longer, credits are ×1.10, your maximum Energy is 106, sneaking speed is ×1.04 and Helix Heat builds at ×1.2.
+
+## What it costs
+
+You are softer. Your maximum Integrity is ten points lower than anyone else's: 90 instead of 100 at the start of the game, before any paper stars or Black Market upgrades. It does not sound like much, and in a firefight it is a stray bullet and a half, but it means that mistakes cost more than they would cost a Nomad or a Kid, and a Contractor who is spotted in the open has to leave rather than fight.
+
+And Helix Heat builds twenty-five percent faster. At the start, with the minimum Cool already counted, the rate is 1.2 times normal. The company has your face on file. The cameras recognise you without being told to, the Civic Response squads are quicker to take an interest and every escalation climbs faster than it would for a stranger. This is the reason a Contractor needs to be careful: your stealth is genuinely better than other people's, but your failure is genuinely worse.
+
+## How the city treats you
+
+You start with Corporate Leverage +5, Raven Trust −3 and AI Sympathy +2. The first is the biggest swing in the Suite: Corporate Leverage is how far a corporate character will bend, and starting with 55 instead of 50 puts you among the few people in the lower city for whom a Helix door will occasionally open from the inside. The second is the price. Raven, who runs with the people the company squeezes, takes one look at your lanyard-shaped posture and starts the story three notches cooler, and you will spend the early chapters earning back the trust that the Street and the Road were handed for free. The third comes from the networks themselves: the machines you work beside do not judge you for what you were, and a small AI sympathy is the reward.
+
+Civilian Hope and Voss Integrity start untouched.
+
+## Playing it well
+
+A Helix Contractor wins by arriving unnoticed. Move at walking pace, use doorways, let your detection meter rise slowly to the edge and then back off. Pick weapons with silencers and use the takedown whenever you can reach it; you do not need to fight, and you cannot afford to. Hack everything in sight. Terminals are quicker for you, the trace gives you more room, and the EMP is cheap enough to use as an emergency brake: one press stuns everyone within ten metres for several seconds, which is usually long enough to walk away from a mistake.
+
+Spend your four free points where the lifepath is thin. Body is the obvious answer: each level above 3 adds seven to your maximum Integrity, so three levels of Body will repay the ten you gave up and put you ahead of where you started. Reflexes help with the other weakness, the time between being seen and being gone. If you would rather lean into the lifepath, a sixth level of Intelligence adds an extra code to the ICE buffer, and a seventh shortens every sequence by one more code; with those, an ICE BREAK becomes a short, comfortable formality.
+
