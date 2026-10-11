@@ -1,0 +1,31 @@
+# THE NUALLINK: A NOTE ON THE IMPLANT THAT LISTENS
+
+## What the link is
+
+Every courier of your generation carries a civic implant, and since the erasure yours has been registered as a Nuallink node. It takes calls and messages, it carries anything Helix wants to push into your head, and it is the one place where ASCENSION and Clawd can speak to you without a key or a terminal. Open it from the pause menu, from the Journal, or by pressing N during an operation.
+
+The link is only live in solo play, and only in operations and the open city. It is switched off in tutorials, in co-op and in story scenes. Messages arrive by story position: a letter belongs to the start or the end of a chapter, and an older save simply receives everything it missed the first time it is opened.
+
+## The trace
+
+In infiltrations, hacks, explorations and retrievals, Helix watches the link while enemies hunt you. The TRACE meter on the HUD runs from 0 to 100. While a hostile is alerted to you it climbs by 4.5 a second, scaled by your detection multiplier (a steady Cool score and the Corporate lifepath slow it) and by the difficulty. While one is merely suspicious it climbs by half a point a second. While nobody has you it falls by 2.2 a second.
+
+At 100, Helix locks the line. The trace drops to 40, every hostile that is not holding a post learns where you are, two reinforcements arrive (three from Act 3 on), and ASCENSION is cut off for twenty seconds. Nothing else happens, and a locked link recovers by itself. The way to play it is to treat the lock as a fine for being seen too long.
+
+## Intrusions
+
+When the trace is at 60 or more and someone is hunting you, Helix starts pushing code through the link. An intrusion opens a window of three seconds with the words HELIX INTRUSION on screen. Press V inside it to raise a firewall: it costs twenty energy, lowers the trace by 12, and the next intrusion is held off for 24 seconds. If you miss, your map and markers go to static for six seconds, and the next one waits 22 seconds. A Somatic Firewall Patch stops intrusions by itself while it lasts.
+
+## ASCENSION
+
+ASCENSION speaks on the link after Chapter 4. In the ASCENSION tab you choose one of two assists and press V in an operation to use it (R3 on a pad, the LINK button on a touch screen). Pathfinder marks every hostile near you for twelve seconds. Scramble freezes every hostile within fourteen metres for three seconds (a drone for four and a half). You get one assist per operation, or two if your AI Sympathy is 60 or higher; in the open city the only limit is a thirty-second recovery.
+
+Each assist adds 25 to the trace (it can raise it to 99 but never push it into a lock on its own) and a little to your AI Sympathy. Its answers in the tab change with that standing: wary below 35, listening up to 65, trusting above. Nothing it says changes the story, but it will remember how you spoke to it.
+
+## Ghost Mode and the scrubber
+
+In the HELIX tab you can switch the link off. In Ghost Mode there is no trace and there are no intrusions, but also no briefing, no live calls and no ASCENSION in an operation. Your inbox still fills. A Signal Scrubber does the opposite job for thirty seconds: it sets the trace to 0, lifts a lock, and makes the trace fall at 3.5 a second whatever is hunting you, with no intrusions at all.
+
+## Clawd and CrustAI
+
+At the start of an operation Clawd reads out what the director has planned for you: the twist, and any complications. It does this the first time with a short note about the trace. Clawd speaks through CrustAI, which translates what you cannot read. Encrypted messages decode when you open them and keep their text afterwards; if your game is not in English, every message carries the same label, TRANSLATED BY CRUSTAI. The CLAWD tab explains the link in plain words and has three intercepts you can decode for practice.

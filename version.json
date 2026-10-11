@@ -1,6 +1,17 @@
 {
-  "build": 17,
+  "build": 18,
   "history": [
+    {
+      "build": 18,
+      "version": "1.18",
+      "date": "2026-10-11",
+      "notes": [
+        "Nuallink: Ghost's implant is now a link with an inbox of calls and messages from the cast (press N, or open it from the pause menu or the Journal)",
+        "Helix now traces your link while enemies hunt you: at full trace it locks the line and sends a squad; press V to raise a firewall against its intrusions",
+        "ASCENSION speaks on the link after Chapter 4 and can mark or freeze nearby hostiles on V; Clawd briefs every operation, translated by CrustAI",
+        "Ghost Mode switches the link off; the Dossier has a new section on the numbers"
+      ]
+    },
     {
       "build": 17,
       "version": "1.17",

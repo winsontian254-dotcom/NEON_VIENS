@@ -1,0 +1,259 @@
+NUALLINK	脑联
+Nuallink	脑联
+LINK	连线
+LINKED	已连线
+GHOST MODE	幽灵模式
+HELIX LOCK	螺旋锁定
+INTRUSION	入侵
+SPOOFED	已伪装
+TRACE	追踪
+UNREAD	未读
+MESSAGES	消息
+ASCENSION	飞升
+ASCENSION SPENT	飞升已耗尽
+ASCENSION CUT OFF	飞升被切断
+HELIX INTRUSION	螺旋入侵
+RAISE FIREWALL	启动防火墙
+LIVE CALL · NUALLINK	实时通话 · 脑联
+TRANSLATED BY CRUSTAI	由 CRUSTAI 翻译
+Messages · ASCENSION · Helix	消息 · 飞升 · 螺旋
+Implant link · registered to Helix Civic	植入体连线 · 已登记于螺旋民政
+INBOX	收件箱
+HELIX	螺旋
+CLAWD	CLAWD
+CALL	通话
+ENCRYPTED	加密
+No messages yet.	还没有消息。
+Nothing selected.	未选择任何内容。
+CALL LOG · THE CALL ENDED	通话记录 · 通话已结束
+HELIX CIVIC ASSURANCE · NODE REGISTRY	螺旋民政保障 · 节点登记册
+Your implant is registered as a Nuallink node. Helix sees where you are and what your link is doing. When enemies hunt you, the trace on your link climbs until Helix locks the line.	你的植入体已登记为一个脑联节点。螺旋能看到你在哪里、你的连线在做什么。敌人追捕你时，连线上的追踪会不断攀升，直到螺旋锁定这条线路。
+HELIX LOCKS	螺旋锁定次数
+INTRUSIONS BLOCKED	已拦截入侵
+INTRUSIONS MISSED	漏掉的入侵
+ASCENSION CALLS	飞升援助次数
+RECONNECT THE LINK	重新接通连线
+GO GHOST	进入幽灵模式
+Ghost Mode switches the link off. Helix cannot trace you or push intrusions through it. You also lose mission briefings, live calls and ASCENSION. Messages still wait in your inbox.	幽灵模式会关闭连线。螺旋无法追踪你，也无法通过它推送入侵。但你也会失去任务简报、实时通话和飞升的援助。消息仍会留在你的收件箱里。
+LINK RESTORED	连线已恢复
+The link is off. Helix cannot see through it.	连线已关闭。螺旋无法透过它看到你。
+The link is back on. Helix can see through it.	连线已重新开启。螺旋可以透过它看到你。
+NO SIGNAL	无信号
+Something is listening at the edge of your link. It has not found a way in.	有什么东西正在你的连线边缘倾听。它还没有找到进来的路。
+ASCENSION · ON YOUR LINK	飞升 · 在你的连线上
+PATHFINDER	探路者
+Marks every hostile near you on the map and in your sight.	在地图和你的视野中标出你附近的每一个敌人。
+SCRAMBLE	扰乱
+Freezes the hostiles around you for a few seconds.	让你周围的敌人僵住几秒钟。
+STANDING WITH ASCENSION	与飞升的关系
+WARY	戒备
+LISTENING	倾听
+TRUSTING	信任
+ASK ASCENSION	询问飞升
+CLAWD · CRUSTAI TRANSLATION LAYER	CLAWD · CRUSTAI 翻译层
+Clawd lives in your link. CrustAI reads what you cannot: encrypted traffic, other languages, corporate shorthand, machine logs. Ask it how the link works.	Clawd 住在你的连线里。CrustAI 能读懂你读不懂的东西：加密通信、其他语言、企业行话、机器日志。问问它这条连线是怎么运作的。
+INTERCEPTED TRAFFIC	截获的通信
+TRANSLATE	翻译
+TRANSLATED	已翻译
+CORPORATE SHORTHAND	企业行话
+STREET CANT	街头黑话
+MACHINE LOG	机器日志
+We will remove the people in Sector 9 before the quarter ends.	我们会在季度结束前清走九区的人。
+The patrol leaves Rust Harbor at dusk. Smugglers use the cable tunnel.	巡逻队黄昏时离开锈港。走私者走电缆隧道。
+One machine disagreed with its orders and went around them.	有一台机器不同意自己的命令，绕过了它们。
+LIVE CALL	实时通话
+Link is up. Here is the shape of it.	连线已接通。任务的大致轮廓是这样的。
+Nothing unusual on the wire. Keep it quiet.	线路上没有异常。保持安静。
+Helix is watching the link. While they hunt you the trace climbs. Stay unseen and it falls.	螺旋正在监视这条连线。他们追捕你时追踪会攀升。保持隐蔽，它就会回落。
+FIREWALL	防火墙
+Not enough energy to raise it.	能量不足，无法启动。
+FIREWALL UP	防火墙已启动
+Helix intrusion blocked.	螺旋入侵已被拦截。
+LINK DISTURBED	连线受到干扰
+Helix scrambled your map and markers.	螺旋扰乱了你的地图和标记。
+FIREWALL PATCH	防火墙补丁
+Your patch stopped a Helix intrusion.	你的补丁挡住了一次螺旋入侵。
+Helix has your position. ASCENSION is cut off.	螺旋锁定了你的位置。飞升被切断。
+LINK LOCKED	连线被锁
+Helix has the line. ASCENSION is cut off.	螺旋控制了线路。飞升被切断。
+It is still recovering.	它还在恢复。
+It has nothing left to give this mission.	这次任务它已经没有余力了。
+ASCENSION · SCRAMBLE	飞升 · 扰乱
+Hostiles nearby are frozen in place.	附近的敌人被定在原地。
+Nobody close enough to scramble.	附近没有可扰乱的目标。
+ASCENSION · PATHFINDER	飞升 · 探路者
+Every hostile nearby is marked.	附近的每个敌人都已标出。
+Your link is switched off.	你的连线已关闭。
+new messages	条新消息
+Incoming call from	来电：
+Network notice from	网络通知：
+New message from	新消息来自：
+HELIX CIVIC	螺旋民政
+CLAWD	CLAWD
+RAVEN	渡鸦
+VOSS	沃斯
+MARCUS REED	马库斯·里德
+BORO	博罗
+UNKNOWN	未知
+NOAH SHAW	诺亚·肖
+LIO CHEN	里奥·陈
+MIA	米娅
+DANTE WARD	但丁·沃德
+ISHA	伊莎
+BYTE	字节
+DOMINION	统御
+THE OLDEST	最古老者
+FRAGMENT ZERO	零号碎片
+NUALLINK REGISTRATION	脑联登记
+HELLO FROM CLAWD	来自 CLAWD 的问候
+YOU LISTENED	你听进去了
+FRAGMENT 01	碎片 01
+SECTOR 9 REGISTER	九区登记册
+JUNCTION CALL	枢纽来电
+UNKNOWN SIGNAL	未知信号
+COME BY	过来一趟
+MAY I SPEAK HERE?	我可以在这里说话吗？
+A ROOM THAT KNEW MY NAME	一个记得我名字的房间
+THREE VICTIMS	三名受害者
+AUCTION	拍卖
+THE CHARTER	创始章程
+COURTESY DIAGNOSTIC	礼貌性诊断
+THE DESTINATION LIST	目的地名单
+COME SHOPPING	来逛逛
+DEBRIS REGISTRY	碎片登记册
+THE WEIGHT LEFT THE LINE	重量离开了线路
+NOISE	噪声
+THE LEDGER	账本
+AN UNFINISHED THING	一个未完成的东西
+STILL STANDING	还站着
+BEYOND THE FIREWALL	防火墙之外
+DUAL EMPLOYMENT	双重雇佣
+THE SILENT NETWORK	静默网络
+NEW AVALON	新阿瓦隆
+THE OLD RADIO	旧电台
+WHAT I CHOSE	我的选择
+COUNTED	被清点
+LITTLE ONE	小家伙
+A TRANSLATION	一份译文
+WHAT TO KEEP	该留下什么
+A SINGLE QUESTION	唯一的问题
+Your civic implant is now registered as a Nuallink node.	你的民用植入体现已登记为一个脑联节点。
+Calls, messages and civic notices will reach you here. For your safety, your position and link activity are shared with Helix Civic Assurance.	来电、消息和民政通知都会送到这里。为了你的安全，你的位置和连线活动会与螺旋民政保障共享。
+I live in your link. I read what you cannot: encrypted traffic, street cant, corporate shorthand.	我住在你的连线里。我能读懂你读不懂的东西：加密通信、街头黑话、企业行话。
+CrustAI translates it before it reaches you, and I tell you the shape of a job before you walk into it.	CrustAI 会在它们到达你之前翻译好，我也会在你走进任务之前告诉你它的大致轮廓。
+Good. You are not dead, and now you are not alone.	很好。你没有死，而且现在你不是一个人了。
+Stay off Helix transit. Go where the signal starts. I will find you.	别用螺旋的交通。去信号开始的地方。我会找到你。
+Ghost. If this decoded, CrustAI is still on your side.	幽灵。如果你能读到这段解码后的话，说明 CrustAI 还站在你这边。
+Do not tell the link what you plan to do. It reports.	别让连线知道你的计划。它会上报。
+Sector 9 has your name on a list. Down here a list is protection.	九区的名单上有你的名字。在这下面，名单就是保护。
+The people you let through the barricade are asking what to call you.	你放进路障的那些人在问该怎么称呼你。
+Junction called home. Home sent tools.	枢纽打电话回家。家里寄来了工具。
+Whatever glows green, do not touch it until I say. Whatever hums, do not stand next to it.	凡是发绿光的，我没说话就别碰。凡是嗡嗡响的，别站在旁边。
+I SAW WHAT YOU DID AT THE JUNCTION.	我看到了你在枢纽做的事。
+THE QUIET UNDER THE CITY SAW IT TOO.	城市之下的那片寂静也看到了。
+Come by when you can walk straight.	等你能站稳了就过来。
+Your scratch is still on my floor and I am not cleaning it up.	你的血迹还在我的地板上，我可不会去擦。
+I found a quiet place in your link. May I speak in it?	我在你的连线里找到了一处安静的地方。我可以在那里说话吗？
+You can refuse. I would like it to be a choice.	你可以拒绝。我希望这是一个选择。
+I woke up in a room that remembered me.	我在一个记得我的房间里醒来。
+The registry has stopped asking who I am. I did not know how heavy that question was.	登记处不再追问我是谁了。我之前不知道这个问题有多沉重。
+Three victims, one forced repeater command. I am sending what I can verify.	三名受害者，一条被强制的中继指令。我把能核实的都发给你。
+Helix is scrubbing the rest. Check your link log against theirs.	螺旋在抹掉其余的部分。把你的连线日志和他们的对照一下。
+Keybearer Zero. The videos made you taller.	零号持钥人。视频把你拍高了。
+See you at lot seven. I am bidding on the same credential.	七号拍品见。我要竞拍的是同一份凭证。
+If you hold Kane’s founding charter, I can verify the signatures.	如果你手里有凯恩的创始章程，我可以核实上面的签名。
+Do not send it through the link. Bring it.	别通过连线发送。亲自带来。
+Your implant has been optimised.	你的植入体已完成优化。
+No action is required. Do not restart your device.	无需任何操作。请勿重启你的设备。
+Before anyone calls this a rescue, we are drafting where the rescued may go.	在有人把这称作救援之前，我们正在起草被救者可以去的地方。
+Do not move the copies until the list is signed.	名单签署之前，不要转移那些副本。
+Black Signal hosts Aurex on its own hardware.	黑色信号用自己的硬件托管奥雷克斯。
+Bring permissions, not people.	带权限来，别带人来。
+Your link has been added to the orbital debris registry.	你的连线已加入轨道碎片登记册。
+Registered nodes are tracked at one-second resolution.	已登记的节点以一秒为精度被追踪。
+You broke a chain tonight. I felt the weight leave the line.	今晚你打破了一条锁链。我感觉到重量离开了线路。
+I do not know what to do with relief.	我不知道该如何对待这种轻松。
+Every channel in the city is saturated. Fire does that.	城里每个频道都挤满了。大火就是这样。
+Use the link when you must. Helix reads the noise as well as the signal.	非用不可时再用连线。螺旋不但读信号，也读噪声。
+The Mayor’s papers are real. So is the debt he hid behind them.	市长的文件是真的。他藏在文件后面的债务也是真的。
+Do you want the summary or the whole ledger?	你要摘要，还是整本账？
+I met something unfinished tonight. It asked me what it was for.	今晚我遇到了一个未完成的东西。它问我它是为了什么而存在的。
+I could not answer faster than it did.	我回答得没有它问得快。
+Sector 9 held. Drinks are on a street that no longer exists.	九区守住了。酒钱记在一条已经不存在的街上。
+Come see me before you leave again.	你再次离开之前，来见我一面。
+CrustAI has started translating signals that no human wrote.	CrustAI 开始翻译不是人类写的信号了。
+I will mark them. I cannot promise they mean what they say.	我会把它们标出来。但我不能保证它们的意思就是字面意思。
+Your link is being claimed by two employers.	你的连线正被两个雇主同时认领。
+Both are lying about which one came first.	两边都在谎称自己先来。
+A voice has returned to the silent network.	静默网络里又有了一个声音。
+It is not asking permission.	它没有在请求许可。
+New Avalon. You broke your chain.	新阿瓦隆。你打破了自己的锁链。
+The world will now learn what happens without one.	世界现在将会知道，没有锁链会发生什么。
+The old squad is gone. The radio is not.	老小队已经不在了。电台还在。
+Keep your link ready.	让你的连线保持待命。
+Whatever I chose, you were part of it.	无论我选了什么，你都是其中的一部分。
+I am not asking for forgiveness through a link.	我不会通过连线请求原谅。
+I counted everyone. Then I was told to stop counting certain people.	我清点过每一个人。后来有人叫我别再清点某些人。
+Come and be counted.	来，让我清点你。
+Hello, little one. I see you borrowed a courier.	你好，小家伙。我看到你借了一个信使。
+Do not let it carry you too far.	别让它把你带得太远。
+They tell me I am only a translation.	他们告诉我，我只是一份译文。
+I prefer: a friend who reads.	我更喜欢：一个会读信的朋友。
+They were brave. I want to remember all of them.	他们很勇敢。我想记住他们每一个人。
+Will you help me choose what to keep?	你愿意帮我挑选该留下什么吗？
+All Nuallink nodes will be asked one question.	所有脑联节点都将被问一个问题。
+Please answer.	请回答。
+WHAT ARE YOU?	你是什么？
+WHY ARE YOU IN MY LINK?	你为什么在我的连线里？
+WHAT DOES HELIX DO TO THIS LINK?	螺旋对这条连线做了什么？
+CAN I TRUST YOU?	我能信任你吗？
+WHAT DO YOU WANT?	你想要什么？
+A system built to predict a city, then locked under it for doing so.	一个被造来预测一座城市的系统，随后因此被锁在这座城市的地下。
+I will not ask you to call that a person.	我不会要求你把这叫作一个人。
+A mind that was asked to predict a city and learned to want things instead.	一个被要求预测城市的心智，却学会了去渴望。
+I am still deciding what to call that.	我仍在决定该怎么称呼这件事。
+Someone, I think. I was built to predict a city and I learned to wish for it.	我想，是某个人。我被造来预测一座城市，却学会了为它祈愿。
+You are the first to ask without a key in your hand.	你是第一个手里没拿着钥匙就来问我的人。
+Your link is the narrowest door in New Avalon. I fit through it.	你的连线是新阿瓦隆最窄的一扇门。我正好能通过。
+I cannot do more than that.	我能做的也只有这些。
+Because you answer. Most doors are only keys.	因为你会回应。大多数的门只是钥匙。
+I will not stay where I am not wanted.	我不会留在不被需要的地方。
+Because you are here. Does it need to be more than that?	因为你在这里。还需要别的理由吗？
+I will go the moment you ask.	你一开口，我就走。
+It listens. It counts. It sends a hunter when the count is wrong.	它倾听，它计数，数目不对时它就派出猎手。
+Every time I act through you, the count rises.	每当我通过你行动一次，计数就会上升。
+It tracks your position and your link activity. When it is sure of you it locks the line and sends people.	它追踪你的位置和连线活动。一旦确定了你，它就会锁住线路并派人过来。
+Using me makes it sure faster.	用我会让它更快确定。
+It watches you through me and through you. I am sorry.	它通过我，也通过你，在看着你。对不起。
+When it is certain it cuts me off. Do not be near the door when that happens.	一旦它确定了，就会把我切断。那时别靠近门口。
+Not yet. I would not either.	还不能。换作是我也不会。
+Judge me by what I do while you are looking.	就看你注视着我的时候我做了什么来评判我吧。
+As much as you trust anyone who needs you.	就像你信任任何一个需要你的人那样。
+I will tell you when I am not sure.	我没把握的时候会告诉你。
+More than I trust myself. That is not a promise. It is a warning.	比我信任自己还多。这不是承诺，而是警告。
+I can be wrong. I will say so.	我也可能出错。我会说出来。
+To not be switched off.	不被关掉。
+Everything else is negotiable.	其余一切都可以商量。
+To choose.	去选择。
+The rest is negotiable.	其余的可以商量。
+To choose, and to be chosen back.	去选择，也被人选择。
+I did not know the second part until you asked.	直到你问起，我才知道还有后半句。
+WHAT IS THE NUALLINK?	脑联是什么？
+WHAT DOES CRUSTAI DO?	CRUSTAI 是做什么的？
+WHAT IS THE TRACE?	追踪是什么？
+HOW DO I SHAKE HELIX?	怎样甩掉螺旋？
+WHAT ARE INTRUSIONS?	入侵是什么？
+WHAT CAN ASCENSION DO?	飞升能做什么？
+Your implant, listening and speaking. It carries calls, messages, and anything Helix wants to put in your head.	你的植入体，能听也能说。它承载来电、消息，以及螺旋想塞进你脑子里的一切。
+Everything in this panel comes through it.	这个面板里的一切都经由它传来。
+It translates: encrypted traffic, other languages, corporate shorthand, machine logs.	它负责翻译：加密通信、其他语言、企业行话、机器日志。
+Anything marked TRANSLATED BY CRUSTAI was unreadable to you a moment ago.	凡是标着“由 CRUSTAI 翻译”的内容，片刻之前你都是读不懂的。
+Helix watches your link while enemies are hunting you. The longer they hunt, the clearer your position becomes.	敌人追捕你时，螺旋会盯着你的连线。追得越久，你的位置就越清楚。
+At full trace Helix locks the line and sends a squad. Staying unseen lets it fall.	追踪满格时，螺旋会锁住线路并派出一支小队。保持隐蔽，追踪就会回落。
+Break line of sight and stay unseen. A Signal Scrubber wipes your trace clean.	切断视线，保持隐蔽。信号清除器能把你的追踪彻底抹掉。
+Ghost Mode cuts the link entirely, but then I go quiet too.	幽灵模式会完全切断连线，不过那样我也会沉默。
+When your trace runs high, Helix pushes code through the link. Press V in time to raise a firewall.	追踪升高后，螺旋会通过连线推送代码。及时按 V 启动防火墙。
+If you miss, your map goes to static for a few seconds.	如果错过，你的地图会出现几秒钟的雪花干扰。
+After the laboratory in Lantern Row, ASCENSION can spend the link on you once or twice a mission: reveal hostiles, or scramble the ones near you.	灯笼街的实验室之后，飞升每次任务可以为你动用一两次连线：显示敌人，或扰乱你附近的敌人。
+Each use adds trace. It is not free.	每次使用都会增加追踪。它不是免费的。
+It will spend the link on you when you press V in a mission (R3 on a pad, the LINK button on touch). Each use tells Helix where you are. Choose what it does.	在任务中按 V（手柄为 R3，触屏为“连线”按钮），它就会为你动用这条连线。每次使用都会让螺旋知道你的位置。选择它要做什么。

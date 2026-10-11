@@ -64,6 +64,8 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 | EMP pulse | `Q` | Y |
 | Reload | `R` | Select |
 | Enter / exit vehicle (free roam) | `F` | X |
+| ASCENSION assist / raise the firewall (Nuallink) | `V` | R3 |
+| Open the Nuallink | `N` | Pause menu |
 | Drive: throttle / reverse, steer | `W`/`S`, `A`/`D` | RT / LT, left stick |
 | Drive: handbrake, boost, horn | `Space`, `Shift`, `H` | A, LB, R3 |
 | Pause · Black Market | `Esc` | Start |
@@ -175,6 +177,16 @@ From act 2 on (act 1 on Hard), a mission can also carry **complications**, shown
 - **Shield troops** — a riot shield takes 88% off shots from the front (headshots take 65% off); go around the back, take them down from behind, or EMP them.
 
 Developer hooks: `&comp=blackout,snipers` forces complications (`&comp=none` clears them) and `&kind=sniper|shield|rusher|turret` puts three of that kind in front of you.
+
+## The Nuallink
+Ghost's implant is a **Nuallink** node: the link that carries calls, messages and everything Helix pushes into your head. Open it from the pause menu, the Journal, or press **N** during an operation.
+
+- **Inbox:** about 35 calls, messages and Helix notices from the story's cast (Raven, Noah, Mia, Boro, Dominion, ...), delivered by story position. Encrypted ones decode when opened ("TRANSLATED BY CRUSTAI"). A call that arrives between chapters rings as a card under the minimap in your next level.
+- **Helix:** while enemies hunt you in an operation the **TRACE** meter climbs; at 100 Helix locks the line (hostiles learn where you are, a squad arrives, ASCENSION is cut off for 20 s). At 60+ Helix pushes **intrusions**: press **V** within 3 s to raise a firewall (20 energy) or the map goes to static. **Ghost Mode** switches the link off. A Signal Scrubber wipes the trace.
+- **ASCENSION:** after chapter 4 it speaks on the link. Press **V** (R3 on a pad, the LINK button on touch) for its assist: *Pathfinder* marks every hostile for 12 s, *Scramble* freezes the ones within 14 m. Once per operation (twice at AI Sympathy 60+); each use adds trace. Its answers change with how you stand with it.
+- **Clawd and CrustAI:** at the start of an operation Clawd reads out the twist and complications; CrustAI translates anything you cannot read.
+
+The numbers are in the Dossier ("The Nuallink").
 
 ## Hand-drawn levels & interiors
 Missions, arenas and story scenes that happen indoors are hand-drawn plans, not random rooms: an office floor, a clinic, a warehouse, the Hive factory line, a metro station, the Underdeep caves, a nightclub and a records vault, plus server halls, a network lattice and orbital stations for the digital and space chapters. Each plan has its own furniture (shelving, beds, desks, counters, machines, server racks, sofas, tanks, planters, tables), cover, rails, patrol routes, terminals, pickups and enemy posts, and the layout an operation uses is picked from its scene heading and objective, so the same mission always plays in the same place. Fights out in the streets stay outdoors, with hand-placed barricades and pillars. Story scenes in Noah's clinic, clubs, offices, boardrooms, metro platforms, bars and small flats play in their own interiors, and Ghost's apartment is a lived-in bedroom with posters, blinds and neon light coming through them.
