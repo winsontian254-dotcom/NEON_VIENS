@@ -43,6 +43,7 @@ Game-only changes do not need a version bump: installed apps download the new `i
 ## Accounts server
 - `server/` is the account API (Cloudflare Worker + D1 `neon-veins-accounts`, id in `server/wrangler.toml`; schema in `server/schema.sql`). It is deployed at https://neon-veins-api.winsontian254.workers.dev (`cd server && wrangler deploy` from a PC; this cloud session cannot reach Cloudflare).
 - The game reads the API base from `DEFAULT_API` in `NV.Account` (index.html); `NV.Account.DEMO` is the number of chapters playable without an account.
+- Admin export: `GET /api/admin/export?table=summary|users|friends|sessions|invites|saves` (`limit`, `offset`, `full=1` for save data, `redact=1` for users) exists only when the Worker secret `ADMIN_TOKEN` (24+ characters) is set; `python3 server/export.py` pages through it and writes private JSON/CSV files. It must never return `pass_hash`, `salt`, `iters`, session `token_hash`, invite codes or the `attempts` table. The owner sets the secret from a PC (`wrangler secret put ADMIN_TOKEN`); never ask the user to paste it into the chat. Test changes against a local fake D1 (Node's `node:sqlite`) since this session cannot reach Cloudflare.
 
 ## The city (hand-drawn)
 - `NV.CITY_MAP` (above `NV.CityPlan` in index.html) is the authored map: a 32 x 32 grid of district letters, a block pattern per district (`a-o` templates, `.` plaza, `@` landmark site, `S` safe plaza), hand-placed `over` blocks, and the template library `T` (rects with height and facade `grid` / `ribbon` / `shed`).

@@ -280,6 +280,47 @@ route('DELETE', '/api/saves/:slot', async (req, env, p) => {
   return json({ ok: true });
 });
 
+/* ---------------- admin export (off unless the ADMIN_TOKEN secret is set) ---------------- */
+// For whoever owns this deployment: a read-only dump of the account tables, sent with `Authorization: Bearer <ADMIN_TOKEN>`
+// (python3 server/export.py does the paging and writes the files). It never includes password hashes, salts, session token
+// hashes, invite codes or the rate-limit table, and cloud saves come as metadata unless full=1 (20 rows a page).
+const EXPORTS = {
+  users: { cols: 'id, username, email, color, bio, allow_requests, show_online, created, last_seen, activity', pub: 'id, username, color, created, last_seen', order: 'id' },
+  friends: { cols: 'a, b, state, requester, created', order: 'created, a, b' },
+  sessions: { cols: 'user_id, created, expires, device', order: 'created DESC, user_id' },
+  invites: { cols: 'from_id, to_id, created', order: 'id' },
+  saves: { cols: 'user_id, slot, summary, updated, length(data) AS size', full: 'user_id, slot, summary, updated, length(data) AS size, data', order: 'user_id, slot' },
+};
+const adminJson = data => new Response(JSON.stringify(data), { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
+async function adminAuth(req, env) {
+  const secret = typeof env.ADMIN_TOKEN === 'string' ? env.ADMIN_TOKEN : '';
+  if (secret.length < 24) throw new HttpError(404, 'Not found.');   // not configured (or too short to trust): the route does not exist
+  const key = 'admin:' + (req.headers.get('CF-Connecting-IP') || 'x'), row = await env.DB.prepare('SELECT n, since FROM attempts WHERE k = ?').bind(key).first();
+  if (row && Date.now() - row.since <= 900000 && row.n >= 10) throw new HttpError(429, 'Too many attempts. Try again in a few minutes.');
+  const h = req.headers.get('Authorization') || '', given = h.startsWith('Bearer ') ? h.slice(7).trim() : '';
+  if (!safeEq(await sha256(given), await sha256(secret))) { await limit(env, key, 10, 900000); throw new HttpError(401, 'Wrong admin token.'); }
+}
+route('GET', '/api/admin/export', async (req, env) => {
+  await adminAuth(req, env);
+  const q = new URL(req.url).searchParams, table = q.get('table') || 'summary', now = Date.now();
+  if (table === 'summary') {
+    const one = async (sql, ...b) => (await env.DB.prepare(sql).bind(...b).first()).n;
+    return adminJson({
+      exported: now, users: await one('SELECT COUNT(*) AS n FROM users'), friends: await one('SELECT COUNT(*) AS n FROM friends'), sessions: await one('SELECT COUNT(*) AS n FROM sessions'),
+      invites: await one('SELECT COUNT(*) AS n FROM invites'), saves: await one('SELECT COUNT(*) AS n FROM saves'),
+      new_users_7d: await one('SELECT COUNT(*) AS n FROM users WHERE created > ?', now - 7 * DAY), new_users_30d: await one('SELECT COUNT(*) AS n FROM users WHERE created > ?', now - 30 * DAY),
+      active_users_24h: await one('SELECT COUNT(*) AS n FROM users WHERE last_seen > ?', now - DAY), active_users_7d: await one('SELECT COUNT(*) AS n FROM users WHERE last_seen > ?', now - 7 * DAY),
+    });
+  }
+  const def = Object.prototype.hasOwnProperty.call(EXPORTS, table) ? EXPORTS[table] : null;
+  if (!def) bad('table must be one of: summary, ' + Object.keys(EXPORTS).join(', '));
+  const full = q.get('full') === '1' && !!def.full, cap = full ? 20 : 5000;
+  const lim = Math.max(1, Math.min(Math.floor(Number(q.get('limit'))) || 1000, cap)), off = Math.max(0, Math.floor(Number(q.get('offset'))) || 0);
+  const cols = table === 'users' && q.get('redact') === '1' ? def.pub : full ? def.full : def.cols;   // redact=1: no email, bio or activity
+  const rows = await env.DB.prepare('SELECT ' + cols + ' FROM ' + table + ' ORDER BY ' + def.order + ' LIMIT ? OFFSET ?').bind(lim, off).all();
+  return adminJson({ table, offset: off, limit: lim, count: rows.results.length, rows: rows.results });
+});
+
 route('GET', '/api/health', async () => json({ ok: true, service: 'neon-veins-api' }));
 
 export default {
