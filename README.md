@@ -283,7 +283,7 @@ Saves from the old eight-background creator fold into a lifepath and attribute p
 
 ## Arsenal & Black Market
 
-Walk up to a **Black Market** stall in the alleys of the open city (a pink dot on the minimap; press **E** at the counter) to buy from the arsenal. The pause menu no longer sells anything, and there is no market during an operation, so buy before you go: 267 weapons, tools, drones, cyberattacks, environmental triggers, boss gear, strategic strikes and legendaries from the script. Pick a hotbar slot and equip; right-click a slot to clear it.
+Walk up to a **Black Market** stall in the alleys of the open city (hidden deep in the alleys: pink diamonds and edge arrows on the minimap point to them; press **E** at the counter) to buy from the arsenal. The pause menu no longer sells anything, and there is no market during an operation, so buy before you go: 267 weapons, tools, drones, cyberattacks, environmental triggers, boss gear, strategic strikes and legendaries from the script. Pick a hotbar slot and equip; right-click a slot to clear it.
 
 - Hotbar: **1–9** or mouse wheel (RB on gamepad). **LMB** uses the selected item, **RMB** aims down the gun's sight: pistols carry a red dot, SMGs and shotguns a holo sight, rifles a 2.5× scope and precision rifles a 6× scope. Aiming tightens spread and recoil and slows you down.
 - Each item's behaviour comes from what it is: smart/predictive guns home in, rail/phase guns pierce, Echo guns repeat their shot, Null/EMP gear stuns and fries drones, nonlethal gear takes enemies down alive, melee is silent and one-shots unaware guards.

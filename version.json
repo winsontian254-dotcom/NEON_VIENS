@@ -1,6 +1,14 @@
 {
-  "build": 22,
+  "build": 23,
   "history": [
+    {
+      "build": 23,
+      "version": "1.23",
+      "date": "2026-10-11",
+      "notes": [
+        "Black Markets are now hidden: ten stalls in the middle of the alleys, out of sight of the streets and not marked in the world, with the nearest a long walk from your start. The minimap points the way with pink diamonds and edge arrows"
+      ]
+    },
     {
       "build": 22,
       "version": "1.22",
