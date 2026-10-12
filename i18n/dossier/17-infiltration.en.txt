@@ -1,0 +1,19 @@
+# GETTING IN: SUSPICION, UNIFORMS, INTERROGATIONS, ALARMS AND VENTS
+
+## Reading the guards
+
+Every guard who is growing suspicious, searching or hunting wears a ring above their head, up to the 8 nearest within 32 metres. The ring fills as their suspicion climbs: a yellow question mark while they are unsure, an orange one while they search, and a flashing red exclamation mark when they know. The rings are a HUD marker, so hardcore difficulty hides them.
+
+## Uniforms
+
+Searching a guard or a heavy trooper, which tying them or picking up their body does, takes their uniform. For 75 seconds guards see you from 30 percent of the usual distance, and cameras from 40 percent. The disguise breaks if you fire a weapon, if any guard raises the alarm, if you sprint within 10 metres of a guard, or if you start a chokehold while another guard within 14 metres could see you. Guards who are already hunting you are not fooled, because the disguise only changes how far away you are noticed.
+
+## Interrogation
+
+A guard who is knocked out and zip-tied can be questioned once: press E on them for 2.5 seconds. They give up one of three things. Roughly four times in ten, the location of every patrol, marked for 45 seconds. A little over a third of the time, if the operation has any of them, the position of its cameras, breaker boxes, alarm panels and vents, which stay on your map and markers for the rest of the level. Otherwise an access code: your next terminal hack costs no RAM and needs one code fewer.
+
+## Alarm panels and vents
+
+Each operation has an alarm panel on a wall, two from Act 2. A guard who becomes alerted within 18 metres of a working panel runs for it three times in four, at 1.35 times their normal speed and for up to 9 seconds, instead of fighting. If they reach it the panel is spent, 2 reinforcements arrive (3 from Act 3), your Helix trace rises by 25 and every other guard goes to search where you are. Knock the runner down, stun them, or hold E at the panel for 1.5 seconds to disable it, and nothing happens. A power cut at a breaker box stops the runners too.
+
+Every operation also has a pair of vents at least 28 metres apart. Press E at one and you crawl through for 1.6 seconds, safe and unseen, and come out of the other. You cannot crawl while carrying a body. The minimap shows cameras, breakers, alarms and vents once you have passed within 16 metres of them, been told about them in an interrogation, or scanned them.

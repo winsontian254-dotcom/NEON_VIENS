@@ -214,6 +214,15 @@ The numbers are in the Dossier ("Silent Work").
 
 The numbers are in the Dossier ("Tools of the Trade").
 
+## Getting in: suspicion, uniforms, interrogation, alarms, vents
+- **Awareness rings** float over guards who are getting suspicious, searching or hunting (hidden in hardcore).
+- **Uniforms:** searching (tying or picking up) a guard takes their uniform: guards see you from 30% of the distance for 75 s, until you shoot, run near them or get spotted.
+- **Interrogation:** press E on a zip-tied guard for patrol locations, the security layout, or a free hack.
+- **Alarm panels:** an alerted guard near a panel runs to raise the alarm (reinforcements, trace +25). Knock them down or hold E at the panel to disable it.
+- **Vents:** paired crawl spaces: E to crawl through unseen.
+
+The numbers are in the Dossier ("Getting In").
+
 ## Inside every building
 Every building in the open city has a glowing door (1,133 of them). Press **E** at one to go inside: apartments, noodle bars, clinics, offices, warehouses, server rooms, clubs, and the named landmarks (halls, cathedrals, vaults, domes, factories). What a building is depends on its district and size, and it is the same place every visit. Inside you can talk to the people, search a stash for credits (once per save) and walk out through the glowing door back to the street.
 

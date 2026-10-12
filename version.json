@@ -1,6 +1,17 @@
 {
-  "build": 26,
+  "build": 27,
   "history": [
+    {
+      "build": 27,
+      "version": "1.27",
+      "date": "2026-10-12",
+      "notes": [
+        "Awareness rings over suspicious guards",
+        "Take a guard's uniform to walk past patrols, and interrogate tied guards for intel",
+        "Guards can run to alarm panels to call reinforcements: stop them or disable the panel",
+        "Vents let you crawl between two points unseen"
+      ]
+    },
     {
       "build": 26,
       "version": "1.26",
@@ -237,15 +248,6 @@
         "Cutscenes overhauled: characters face each other and the camera films them like a movie — over-the-shoulder shots and close-ups that cut on each speaker, two-shots and establishing shots for narration",
         "Story dialogue in cutscenes is shown as subtitles in the letterbox; the camera eases in and out of first person",
         "No more random vehicles, billboards and props popping up during story scenes; the camera frames around walls and street poles"
-      ]
-    },
-    {
-      "build": 2,
-      "version": "1.2",
-      "date": "2026-10-09",
-      "notes": [
-        "The game now asks which language you use the first time you start it (English, 简体中文, 繁體中文); change it any time in Settings",
-        "Title menu no longer shows a scrollbar; sign-in screens tidied"
       ]
     }
   ]
