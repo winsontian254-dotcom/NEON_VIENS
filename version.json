@@ -1,6 +1,14 @@
 {
-  "build": 34,
+  "build": 35,
   "history": [
+    {
+      "build": 35,
+      "version": "1.35",
+      "date": "2026-10-12",
+      "notes": [
+        "Training Zone: a melee round in the live-fire drills — close in with a heavy hammer against holding gunners and rushers (six rounds now)"
+      ]
+    },
     {
       "build": 34,
       "version": "1.34",
@@ -232,16 +240,6 @@
         "Boss, arena and defend fights have hand-placed cover, indoors and out in the streets",
         "Story scenes in Noah's clinic, clubs, offices, metro platforms, bars and small flats play in their own interiors",
         "Ghost's apartment is rebuilt as a lived-in bedroom: posters, blinds, a bedside lamp, a rug, plants and a neon sign"
-      ]
-    },
-    {
-      "build": 10,
-      "version": "1.10",
-      "date": "2026-10-10",
-      "notes": [
-        "New Avalon is now a hand-drawn city: real district shapes, authored blocks and landmark sites instead of random generation",
-        "New building types: shop rows with alleys, twin slabs, podium towers, courtyards, container yards and warehouses",
-        "Three facade looks (office grid, ribbon shopfronts, dim industrial sheds); Lantern Row and the Gray Market are strung with lanterns and signs"
       ]
     }
   ]
