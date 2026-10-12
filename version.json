@@ -1,6 +1,18 @@
 {
-  "build": 27,
+  "build": 28,
   "history": [
+    {
+      "build": 28,
+      "version": "1.28",
+      "date": "2026-10-12",
+      "notes": [
+        "Press Y to scan: devices, caches and lamps show through walls",
+        "Lamps and shadow: guards see you from less far in the dark, shoot lamps out",
+        "Hackable devices: decoy speakers, overload panels, vending machines",
+        "Choose a daemon bonus after every terminal hack",
+        "Grab an alerted guard as a hostage: the others hold fire"
+      ]
+    },
     {
       "build": 27,
       "version": "1.27",
@@ -238,16 +250,6 @@
         "Every gun now has a sight: red dots on pistols, holo sights on SMGs and shotguns, a 2.5× scope on rifles and a 6× scope on precision rifles",
         "Right-click (LT) to aim down sights: the gun swings up to your eye, scopes close in to a lens view; aiming tightens your shots — hold Shift to steady a scope",
         "New hacking: ICE BREAK — pick codes along alternating rows and columns to upload the sequence before the trace runs out"
-      ]
-    },
-    {
-      "build": 3,
-      "version": "1.3",
-      "date": "2026-10-09",
-      "notes": [
-        "Cutscenes overhauled: characters face each other and the camera films them like a movie — over-the-shoulder shots and close-ups that cut on each speaker, two-shots and establishing shots for narration",
-        "Story dialogue in cutscenes is shown as subtitles in the letterbox; the camera eases in and out of first person",
-        "No more random vehicles, billboards and props popping up during story scenes; the camera frames around walls and street poles"
       ]
     }
   ]

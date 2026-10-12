@@ -69,6 +69,7 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 | PING (1 RAM: mark hostiles in range for 8 s) | `Z` | Touch: PING |
 | Whistle (lures nearby patrols) | `T` | Touch: WHISTLE |
 | Reflex Booster slow-motion (implant) | `B` | LB + RB · Touch: SLOW |
+| Scan (1 RAM: devices, caches and lamps through walls) | `Y` | LB + Y · Touch: SCAN |
 | Drive: throttle / reverse, steer | `W`/`S`, `A`/`D` | RT / LT, left stick |
 | Drive: handbrake, boost, horn | `Space`, `Shift`, `H` | A, LB, R3 |
 | Pause menu | `Esc` | Start |
@@ -222,6 +223,15 @@ The numbers are in the Dossier ("Tools of the Trade").
 - **Vents:** paired crawl spaces: E to crawl through unseen.
 
 The numbers are in the Dossier ("Getting In").
+
+## The floor as a system: scans, light, devices, daemons, hostages
+- **Scanner (Y):** marks devices, caches, lamps and medkits through walls and maps every security device.
+- **Light and shadow:** lamps light the floor; outside them guards see you from 60% of the distance. Shoot a lamp or cut the power.
+- **Smart devices:** hack a decoy speaker (lures guards), an overload panel (stuns the room) or a vending machine for 1 RAM.
+- **Daemons:** every hacked terminal offers a choice of three bonuses (camera loop, blackout, RAM, heal, trace scrub, ...).
+- **Hostages:** grab an alerted guard in reach (E): the others hold fire for up to 8 s; E throws him.
+
+The numbers are in the Dossier ("The Floor as a System").
 
 ## Inside every building
 Every building in the open city has a glowing door (1,133 of them). Press **E** at one to go inside: apartments, noodle bars, clinics, offices, warehouses, server rooms, clubs, and the named landmarks (halls, cathedrals, vaults, domes, factories). What a building is depends on its district and size, and it is the same place every visit. Inside you can talk to the people, search a stash for credits (once per save) and walk out through the glowing door back to the street.

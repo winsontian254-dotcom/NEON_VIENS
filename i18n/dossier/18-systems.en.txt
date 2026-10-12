@@ -1,0 +1,21 @@
+# THE FLOOR AS A SYSTEM: SCANS, LIGHT, DEVICES, DAEMONS AND HOSTAGES
+
+## The scanner
+
+Press Y, or LB with Y on a pad, or the SCAN button on a phone. It costs 1 RAM and has an 8 second cooldown. For 10 seconds every device, locked cache, working lamp and medkit within 60 metres is marked through the walls, and everything it finds, cameras and breakers and alarm panels and vents and lamps and devices, is put on your minimap for the rest of the level.
+
+## Light and shadow
+
+An operation hangs 6 lamps on its walls, each lighting a pool of floor 8 metres across, drawn as a pale disc. While you stand outside every working lamp you are in shadow, and guards see you only 60 percent as far; crouching, a disguise and a power cut stack with that. A chip on the HUD says IN SHADOW. Shoot a lamp to put it out for good, or cut the power at a breaker box and every lamp goes dark for the 25 seconds of the blackout.
+
+## Smart devices
+
+Four devices on the walls can be hacked for 1 RAM and a second of work. A decoy speaker blares, and every patrolling or suspicious guard within 24 metres goes to it. An overload panel stuns everyone within 9 metres for 6 seconds. A vending machine pays 15 credits plus 8 for every act, and drops a Trauma Patch, Noisemaker, grenade or Exploit Shard 6 times in 10. Each works once.
+
+## Daemons
+
+Every terminal you hack, except a boss pylon, offers a choice of three daemons for 9 seconds: press 1, 2 or 3, or click one. They are drawn from nine. Camera Loop blinds every camera for 40 seconds. Blackout cuts the lamps and cameras and shortens everyone's sight for 25 seconds. RAM Surge refills 3 RAM. Datamap marks every hostile for 30 seconds. Siphon pays 40 credits plus 25 for every act. Alarm Kill disables every alarm panel. Patch heals 30 percent of your health. Trace Scrub drops the Helix trace by 40. Master Key gives 2 lockpicks. A daemon that would do nothing, such as Camera Loop on a floor without cameras, is never offered.
+
+## Hostages
+
+A guard who is alerted, close enough to reach (within 1.7 metres) and not a heavy or a shield trooper can be grabbed with E, in place of a chokehold. For up to 8 seconds you hold them in front of you. You walk at 55 percent of your speed and cannot sprint, but you can shoot, and your shots pass the hostage by. Every human guard who sees you holds their fire and shouts about it, while drones and turrets do not care. Press E to throw the hostage: they are knocked out for 30 seconds and anyone within 3.5 metres of them is staggered for 2.5 seconds. If the 8 seconds run out they tear free and the shooting starts again.
