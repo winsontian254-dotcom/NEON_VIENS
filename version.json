@@ -1,6 +1,15 @@
 {
-  "build": 29,
+  "build": 30,
   "history": [
+    {
+      "build": 30,
+      "version": "1.30",
+      "date": "2026-10-12",
+      "notes": [
+        "New: Training Zone on the title menu — a practice facility that walks you through every mechanic, never touches your save",
+        "Every weapon in the Training Zone is yellow and black practice gear wearing the Training Zone logo"
+      ]
+    },
     {
       "build": 29,
       "version": "1.29",
@@ -240,18 +249,6 @@
         "Kills hit harder: bodies fly with the shot, headshots snap back, a beat of hit-stop",
         "New medkit model",
         "New heavy weapons: Ghostbreaker Minigun (spins up), Rust Harbor Rail Cannon, Sector 9 Thumper, Iron Angel Breacher Shotcannon"
-      ]
-    },
-    {
-      "build": 5,
-      "version": "1.5",
-      "date": "2026-10-09",
-      "notes": [
-        "Guns have real magazines: when they run dry they click — reload with R (Select on a controller, RELOAD on touch)",
-        "Recoil kicks the view up and now settles back to where you were aiming",
-        "Fast travel removed",
-        "SKIP SCENE button (or Tab) fast-forwards dialogue to the next choice or gameplay",
-        "Characters now match their dialogue portraits; brighter jacket colours, and the courier profile screen fits on phones"
       ]
     }
   ]

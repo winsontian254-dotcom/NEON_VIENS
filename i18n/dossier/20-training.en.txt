@@ -1,0 +1,13 @@
+# THE TRAINING ZONE
+
+## What it is
+
+The Training Zone is a practice facility opened from the title menu. It uses a temporary character, so it never reads or changes your save: your credits, parts, perks and progress stay exactly as they were, and nothing you do in there is kept. Every weapon in the facility is yellow and black practice gear wearing the TRAINING ZONE logo, and the facility lends you the whole arsenal, every attachment, every implant, every vest, a full cyberdeck and plenty of credits and lockpicks, so you can try anything.
+
+## The six rooms
+
+The rooms form a loop, and a step list at the top of the screen walks you through it in fifteen steps. Movement: cross the hall, then dash. Armory: press E at the ARMORY board to open the free shop, then close it. Range: knock down three targets, then reload. Stealth: knock out the dummy from behind (a short hold keeps it down briefly, a long hold keeps it down longer, a hold that is too long kills it), zip-tie it and hide it. Netrunning: hack three terminals, each of a different kind, then use PING and SCAN. Security: break the camera or the breaker box, pick the locked cache, disable the alarm panel and crawl through the vent to the exit hall. Step into the green beam when all fifteen steps are done.
+
+## Dummies
+
+Dummies are guards that never shoot, take a great deal of damage and stand up again a few seconds after they go down, as long as you are more than four metres away (fourteen seconds if you hid the body). Nothing a dummy does can hurt you.
