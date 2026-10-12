@@ -1,0 +1,51 @@
+RAM	内存
+PING	探测
+NOT ENOUGH RAM	内存不足
+It recovers over time. Neural Coolant refills it.	内存会随时间恢复。神经冷却剂可将其补满。
+RECURSION	递归
+2 RAM returned.	返还 2 点内存。
+DATAMINE	数据挖掘
+Hostiles within range are marked for 8 seconds.	范围内的敌人会被标记 8 秒。
+HEX SEQUENCE	十六进制序列
+COMMAND PROMPT	命令提示符
+ENTER IN THIS ORDER	按此顺序输入
+MISTAKES	失误
+FIND EACH CODE IN THE GRID	在网格中找出每个代码
+TOO MANY ERRORS — REROUTING	错误过多——重新路由
+ARROWS	方向键
+HELP	帮助
+SCAN	扫描
+HINT	提示
+−12 S	−12 秒
+Cyberdeck	赛博甲板
+Every hack and cyberattack burns RAM. It trickles back while you play.	每次黑入和网络攻击都会消耗内存。内存会在游戏过程中慢慢恢复。
+RECOVERY	恢复
+MOD SLOTS	改装槽位
+MARK	型号
+NEXT MARK	下一型号
+SLOTS	槽位
+DECK	甲板
+MODS	改装
+MAX MARK	已达最高型号
+UPGRADE	升级
+BUY	购买
+EQUIP	装备
+Clears neural heat, refills your deck's RAM and cuts hack and cyberattack costs by 25% for twelve seconds	清除神经过热，补满甲板内存，并让黑入和网络攻击的消耗降低 25%，持续十二秒
+Overclock Rig	超频装置
+RAM recovers 60% faster.	内存恢复速度加快 60%。
+Cryo Coolant	低温冷却剂
+RAM recovers twice as fast while you crouch.	蹲下时内存恢复速度翻倍。
+Buffer Extender	缓冲扩展器
+One more mistake allowed in every hack (two more codes in a breach buffer).	每次黑入多容许一次失误（破冰入侵缓冲区多两个代码）。
+Ice Pick	冰锥
+Every hack and cyberattack costs 1 less RAM, never below 1.	每次黑入和网络攻击少消耗 1 点内存，最低为 1。
+Recursion	递归
+A successful terminal hack gives 2 RAM back.	成功黑入终端后返还 2 点内存。
+Echo Chamber	回声腔
+A cyberattack also hits one more hostile within 8 m, or reaches 4 m further.	网络攻击会多命中 8 米内的一名敌人，或范围扩大 4 米。
+Failed hacks make no noise, and cyberattacks leave no trace.	黑入失败不会发出噪音，网络攻击不留痕迹。
+Datamine	数据挖掘
+A successful terminal hack pays credits, and sometimes parts.	成功黑入终端会获得信用点，有时还有零件。
+Helix Spoofer	Helix 欺骗器
+The Helix trace on your Nuallink climbs 40% slower.	你 Nuallink 上的 Helix 追踪攀升速度慢 40%。
+Ammo & Workbench	弹药与工作台

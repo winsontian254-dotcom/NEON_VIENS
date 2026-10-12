@@ -1,0 +1,29 @@
+# THE CYBERDECK: RAM, HEX GRIDS AND A COMMAND PROMPT
+
+## What the deck is
+
+Ghost's deck is the part of the implant that does the hacking. It has a bank of RAM, shown on the HUD as violet pips under the dash energy, and every hack spends some of it. RAM is full at the start of every level and trickles back while you play. The deck is switched off in story scenes and in the apartment.
+
+Three things spend RAM. A terminal hack costs 2 for ICE BREAK, 2 for HEX SEQUENCE and 3 for COMMAND PROMPT. A cyberattack from the hotbar costs 3 for the sensor cloak, 2 for the firewall, 2 for the reveal, 4 for turn, 4 for overload, 2 for blind, 3 for gravity, 3 for chain and 1 for anything else. And PING, on Z (a touch button on phones), costs 1 and marks every hostile in range for 8 seconds. Without enough RAM you get a warning and nothing happens, and a cyberattack that finds no target costs nothing. Walk away from a terminal before you have entered anything and the RAM comes back. Neural Coolant refills the whole bank, and makes every hack and cyberattack 25% cheaper (rounded up) for twelve seconds.
+
+## Three ways in
+
+Every terminal is one of three games, fixed by the level, so a terminal is always the same game. In Act 1 it is 55% ICE BREAK, 30% HEX SEQUENCE and 15% COMMAND PROMPT. In Act 2 it is 40, 35 and 25. From Act 3 on it is about a third each. Override pylons on boss levels are always ICE BREAK, and so is everything in Cardboard.
+
+ICE BREAK is the code matrix from the first chapters: walk the lit row and column and upload the sequence before the trace finishes. HEX SEQUENCE is a grid of two-digit hex codes, 4 by 4 (5 by 5 from Act 3). A row above it shows the codes to enter, as many as the terminal's length plus two. Click them in that order, or move with the arrow keys or the d-pad and press Enter. The trace lasts the larger of 9 and 17 minus the act number, plus 1.7 seconds for every code, scaled by your trace multiplier. A wrong code costs 2.2 seconds and counts as a mistake. Three mistakes, or four with a Buffer Extender, burn the session: it makes noise within 16 m (unless you run Ghost Protocol) and the grid shuffles again.
+
+COMMAND PROMPT is a shell on someone else's machine. It understands help, ls, cat, scan, login, knock, open, decrypt, hint and exit. Tab completes a file name, the up arrow repeats a command, and clicking a file name reads it. Each machine is one of three puzzles at random. On a gateway you log in as the administrator, whose name is in one file and whose password is the pet's name followed by the year of hire, spelled out in two others. On a firewalled host you knock three ports in order and then run open. On a vault you glue two key fragments together in the order a note gives and decrypt. Three wrong attempts, or four with a Buffer Extender, burn the session, and so does the trace running out: the larger of 55 and 100 minus 6 for every act, in seconds, scaled by your trace multiplier. Typing hint gives a clearer clue each time and takes 12 seconds off the trace.
+
+## Upgrading the deck
+
+The deck has five marks, bought at any Black Market stall in the new Cyberdeck tab. Mark I has 6 RAM, recovers 1 every 14 seconds and has 1 mod slot. Mark II has 8, 1 every 11 seconds, 2 slots, and costs 900 credits and 6 Parts. Mark III has 10, 1 every 9 seconds, 2 slots, and costs 2,200 credits, 12 Parts and 1 Military Component. Mark IV has 12, 1 every 7 seconds, 3 slots, and costs 5,000 credits, 20 Parts and 3 Military Components. Mark V has 15, 1 every 5 seconds, 4 slots, and costs 11,000 credits, 30 Parts, 6 Military Components and 1 Quantum Fragment.
+
+Mods are bought in the same tab, one time each, and equipped into the slots. A new mod goes straight into a free slot, and you can swap them freely at any stall. The deck is part of your save and travels with you into free roam.
+
+## The nine mods
+
+Overclock Rig (700 credits, 6 Parts) makes RAM recover 60% faster. Cryo Coolant (900 credits, 6 Parts) doubles recovery while you crouch, and the two stack. Recursion (2,400 credits, 12 Parts, 2 Military Components) gives 2 RAM back for every terminal you hack. It does not work on boss pylons.
+
+Buffer Extender (600 credits, 5 Parts) allows one more mistake in HEX SEQUENCE and COMMAND PROMPT, and two more codes in the ICE BREAK buffer. Ice Pick (1,800 credits, 10 Parts, 1 Military Component) takes 1 off every RAM cost, never below 1. Datamine (800 credits, 4 Parts) pays credits for every terminal you hack, 18 plus 12 for every act (1.5 times that for COMMAND PROMPT), and a quarter of the time two Parts as well.
+
+Ghost Protocol (1,500 credits, 8 Parts, 1 Military Component) makes failed hacks silent, and cyberattacks leave no sound at the target. Echo Chamber (1,200 credits, 8 Parts) makes a single-target cyberattack hit the nearest other hostile within 8 m too, and area attacks reach 4 m further. Helix Spoofer (1,400 credits, 8 Parts, 1 Military Component) makes the Helix trace on your Nuallink climb 40% slower.

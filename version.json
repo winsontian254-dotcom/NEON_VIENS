@@ -1,6 +1,17 @@
 {
-  "build": 23,
+  "build": 24,
   "history": [
+    {
+      "build": 24,
+      "version": "1.24",
+      "date": "2026-10-12",
+      "notes": [
+        "Cyberdeck: every hack now spends RAM from your deck",
+        "Two new hacking games: a HEX SEQUENCE grid and a COMMAND PROMPT",
+        "Upgrade your deck and buy nine mods at a Black Market stall",
+        "Press Z to PING and mark hostiles nearby"
+      ]
+    },
     {
       "build": 23,
       "version": "1.23",

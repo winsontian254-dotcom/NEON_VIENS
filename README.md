@@ -66,6 +66,7 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 | Enter / exit vehicle (free roam) | `F` | X |
 | ASCENSION assist / raise the firewall (Nuallink) | `V` | R3 |
 | Open the Nuallink | `N` | Pause menu |
+| PING (1 RAM: mark hostiles in range for 8 s) | `Z` | Touch: PING |
 | Drive: throttle / reverse, steer | `W`/`S`, `A`/`D` | RT / LT, left stick |
 | Drive: handbrake, boost, horn | `Space`, `Shift`, `H` | A, LB, R3 |
 | Pause menu | `Esc` | Start |
@@ -187,6 +188,15 @@ Ghost's implant is a **Nuallink** node: the link that carries calls, messages an
 - **Clawd and CrustAI:** at the start of an operation Clawd reads out the twist and complications; CrustAI translates anything you cannot read.
 
 The numbers are in the Dossier ("The Nuallink").
+
+## The Cyberdeck
+Every hack spends **RAM** from Ghost's cyberdeck (violet pips on the HUD, full at the start of a level, trickling back as you play; off in story scenes).
+
+- **Three hacking games.** Each terminal is one of them, fixed by the level: **ICE BREAK** (the code matrix, 2 RAM), **HEX SEQUENCE** (a grid of two-digit hex codes to click in the order shown, 2 RAM) and **COMMAND PROMPT** (a real shell: `ls`, `cat`, `scan`, `login`, `knock`, `open`, `decrypt`, `hint`; read the files, find the way in, 3 RAM). A wrong move burns the session: noise nearby and a fresh start.
+- **Cyberattacks and PING.** Cyberattacks from the hotbar cost 1-4 RAM by effect (a miss costs nothing); **Z** is a PING for 1 RAM that marks every hostile in range for 8 s. Neural Coolant refills the bank.
+- **Upgrade and mods.** The Black Market's new **Cyberdeck** tab sells five deck marks (more RAM, faster recovery, more mod slots) and nine mods: Overclock Rig, Cryo Coolant, Buffer Extender, Ice Pick, Recursion, Echo Chamber, Ghost Protocol, Datamine and Helix Spoofer.
+
+The numbers are in the Dossier ("The Cyberdeck").
 
 ## Inside every building
 Every building in the open city has a glowing door (1,133 of them). Press **E** at one to go inside: apartments, noodle bars, clinics, offices, warehouses, server rooms, clubs, and the named landmarks (halls, cathedrals, vaults, domes, factories). What a building is depends on its district and size, and it is the same place every visit. Inside you can talk to the people, search a stash for credits (once per save) and walk out through the glowing door back to the street.

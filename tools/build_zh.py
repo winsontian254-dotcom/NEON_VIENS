@@ -31,6 +31,8 @@ PATTERNS = [
     (r'^(\d+) objective\(s\) left$', '', r'剩余 $1 个目标'),
     (r'^Find (.+) and talk to them \[E\]\. Follow the yellow beam\.$', '', r'找到$1并与其交谈 [E]。跟随黄色光柱。'),
     (r'^Head to the red beam to start: (.+)\.$', '', r'前往红色光柱开始：$1。'),
+    (r'^(\d+) Parts$', '', r'$1 零件'), (r'^\+(\d+) Parts$', '', r'+$1 零件'), (r'^(\d+) Military$', '', r'$1 军用部件'), (r'^(\d+) Quantum$', '', r'$1 量子碎片'), (r'^(\d+) Cipher$', '', r'$1 密码线'),
+    (r'^BUY (\d+) ¢$', '', r'购买 $1 ¢'), (r'^EQUIP → (\d+)$', '', r'装备 → $1'), (r'^IN SLOT (\d+)$', '', r'在槽位 $1'),
 ]
 
 
