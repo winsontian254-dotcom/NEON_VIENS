@@ -68,6 +68,7 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 | Open the Nuallink | `N` | Pause menu |
 | PING (1 RAM: mark hostiles in range for 8 s) | `Z` | Touch: PING |
 | Whistle (lures nearby patrols) | `T` | Touch: WHISTLE |
+| Reflex Booster slow-motion (implant) | `B` | LB + RB · Touch: SLOW |
 | Drive: throttle / reverse, steer | `W`/`S`, `A`/`D` | RT / LT, left stick |
 | Drive: handbrake, boost, horn | `Space`, `Shift`, `H` | A, LB, R3 |
 | Pause menu | `Esc` | Start |
@@ -205,6 +206,13 @@ The numbers are in the Dossier ("The Cyberdeck").
 - **Distractions.** **T** whistles (lures patrols within 12 m); the new quick-slot **Noisemaker** clatters where you aim.
 
 The numbers are in the Dossier ("Silent Work").
+
+## Cameras, locks, implants and the workbench
+- **Security cameras** sweep a cone in operations and call the nearest guards when they see you (and raise the Helix trace). Shoot one to destroy it, or throw a **breaker box** (E): every camera goes dark for 45 s and guards see less for 25 s.
+- **Locked caches** (and some interior stashes) open with a **lockpick game**: set each pin while the needle is in the green arc. You start with 3 lockpicks.
+- **Cyberware** (Black Market tab, 3 slots): Reflex Booster (B = slow-motion), Subdermal Plating, Tendon Boosters, Cyberoptic Scanner, Nanite Repair, Silent Steps. The **Crafting** tab turns Weapon Parts into lockpicks, Noisemakers and other consumables.
+
+The numbers are in the Dossier ("Tools of the Trade").
 
 ## Inside every building
 Every building in the open city has a glowing door (1,133 of them). Press **E** at one to go inside: apartments, noodle bars, clinics, offices, warehouses, server rooms, clubs, and the named landmarks (halls, cathedrals, vaults, domes, factories). What a building is depends on its district and size, and it is the same place every visit. Inside you can talk to the people, search a stash for credits (once per save) and walk out through the glowing door back to the street.

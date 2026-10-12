@@ -1,6 +1,17 @@
 {
-  "build": 25,
+  "build": 26,
   "history": [
+    {
+      "build": 26,
+      "version": "1.26",
+      "date": "2026-10-12",
+      "notes": [
+        "Security cameras and breaker boxes in operations: shoot a camera or cut the power",
+        "Locked caches and stashes: a lockpick minigame",
+        "Cyberware at the Black Market, including the Reflex Booster slow-motion on B",
+        "A Crafting tab turns Weapon Parts into lockpicks and consumables"
+      ]
+    },
     {
       "build": 25,
       "version": "1.25",
@@ -235,20 +246,6 @@
       "notes": [
         "The game now asks which language you use the first time you start it (English, 简体中文, 繁體中文); change it any time in Settings",
         "Title menu no longer shows a scrollbar; sign-in screens tidied"
-      ]
-    },
-    {
-      "build": 1,
-      "version": "1.1",
-      "date": "2026-10-04",
-      "notes": [
-        "Free accounts: sign up with email, username and password; friends, co-op invites and cloud saves",
-        "Without an account you get a 2-chapter demo; multiplayer needs an account",
-        "Full Chinese translation (Simplified and Traditional)",
-        "Continue resumes at the exact line and spot you quit from",
-        "NPCs can be hit; weapon panel hides when you have no weapon or are in dialogue",
-        "Multiplayer is co-op only",
-        "New version alerts with this change log"
       ]
     }
   ]

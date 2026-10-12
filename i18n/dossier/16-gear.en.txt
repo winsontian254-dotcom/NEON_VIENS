@@ -1,0 +1,23 @@
+# TOOLS OF THE TRADE: CAMERAS, BREAKERS, LOCKS AND IMPLANTS
+
+## Cameras and breaker boxes
+
+Operations (not tutorials, arenas, boss fights or the open city) now hang security cameras on the walls: 2 in Act 1, 3 in Acts 2 and 3, 4 from Act 4. They prefer a spot with a clear line to a terminal or the exit, and they show on your minimap as orange dots. A camera sweeps back and forth across 0.9 radians either side of where it points and sees a cone about 29 degrees to each side of its lens, 15 metres out (70 percent of that while you crouch, less in a blackout). A Black Sun cloak blinds it. You are safe while you stay out of the cone, behind cover or out of range.
+
+A camera that keeps you in its cone for 1.1 seconds, a little less if your detection multiplier is high, sets off an alarm. Every guard within 32 metres who is not already hunting you or holding a post goes to where you are standing, your Helix trace rises by 20 and the alert counts against your score. The camera then needs 10 seconds before it can call again. One shot from any gun destroys a camera for good, with a bang that carries 10 metres.
+
+Each pair of cameras comes with a breaker box on a wall, found on the minimap as a yellow dot. Press E and throw the breaker, 1.2 seconds. Every camera goes dark for 45 seconds, and for 25 seconds every guard sees only 60 percent as far. The throw is loud for 8 metres, and the box takes 90 seconds to recharge.
+
+## Locks
+
+Every operation has a locked cache, two from Act 2, and two stashes in every five inside buildings are locked. Press E to open the lockpick game: a needle sweeps round a dial, and you set each pin by pressing E, Enter, or clicking the dial while the needle is inside the green arc. There are 3 pins, 4 from Act 4. The first arc is 0.5 radians either side of its centre and each pin narrows it by 0.07 down to a floor of 0.26, while the needle starts at 2 radians a second and gains 0.6 for every pin. A miss snaps a pick and costs you one; if you run out the lock jams and you walk away with your picks gone and your cache shut.
+
+You begin with 3 lockpicks. The workbench makes 2 for 2 Parts, or sells 1 for 45 credits. An opened cache pays 60 credits plus 25 for every act plus up to 60 more, times your credit multiplier, 3 to 5 Parts, a Military Component one time in five, and a consumable (grenade, Trauma Patch, EMP, Noisemaker, Exploit Shard or Neural Coolant) more than half the time. A locked stash pays 2.2 times what an open one does.
+
+## Cyberware
+
+Three implants can be active at once, bought and equipped in the Cyberware tab of any Black Market stall. The Reflex Booster (3,000 credits, 10 Parts, 3 Military Components) slows the world to 30 percent for 4 seconds when you press B, LB with RB on a pad or the SLOW button on a phone. It costs 45 energy and has a 14 second cooldown. You, your energy and your timers keep their own speed, so you can walk a gun's length past a guard who is hardly moving. Subdermal Plating (1,800 credits, 10 Parts) takes 12 percent off all damage. Tendon Boosters (1,200 credits, 8 Parts) make you 8 percent faster. The Cyberoptic Scanner (1,500 credits, 6 Parts, 1 Military Component) marks hostiles within 12 metres through walls. Nanite Repair (2,200 credits, 12 Parts, 2 Military Components) heals you 1.5 a second while you are below half health and have been unhurt for 4 seconds. Silent Steps (1,000 credits, 6 Parts) stops your sprint making noise and makes you 15 percent faster while crouched.
+
+## The workbench
+
+The Crafting tab turns Weapon Parts into tools. Lockpicks come 2 for 2 Parts or 1 for 45 credits. A Noisemaker costs 3 Parts, a Trauma Patch 4, a fragmentation grenade 5 and an Exploit Shard 3. An EMP grenade takes 6 Parts and 1 Military Component, and a Neural Coolant 8 Parts and 1 Military Component. Nothing can be crafted past the amount you can carry.

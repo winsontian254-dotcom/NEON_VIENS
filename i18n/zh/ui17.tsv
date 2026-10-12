@@ -1,0 +1,52 @@
+CUT POWER	切断电源
+LOCKED CACHE	上锁的储物箱
+THROWING THE BREAKER	正在拉闸
+POWER CUT	断电
+LOCKED STASH	上锁的藏匿处
+CAMERA ALERT	摄像头警报
+Guards are heading to your position.	守卫正赶往你的位置。
+CAMERA DESTROYED	摄像头已损毁
+It will not see anything again.	它再也看不到任何东西了。
+POWER RESTORED	电力恢复
+The cameras are coming back online.	摄像头正在恢复上线。
+Reflex Booster	反射增强器
+Recharging.	正在充能。
+NO LOCKPICKS	没有开锁器
+Craft or buy lockpicks at a Black Market stall.	在黑市摊位制作或购买开锁器。
+LOCKPICK	开锁
+PICKS	开锁器
+PINS	锁销
+SET PIN	定位锁销
+SET THE PIN WHEN THE NEEDLE IS IN THE GREEN	指针进入绿色区域时定位锁销
+PIN SET	锁销已定位
+LOCK OPEN	锁已打开
+PICK SNAPPED	开锁器断了
+LOCK JAMMED	锁卡死了
+You are out of lockpicks.	你的开锁器用完了。
+CACHE OPENED	储物箱已打开
++1 Military	+1 军用部件
++1 EMP Grenade	+1 EMP 手雷
++1 Exploit Shard	+1 漏洞碎片
++1 Neural Coolant	+1 神经冷却剂
+Crafting	制作
+IMPLANTS	植入体
+WORKBENCH	工作台
+Turn Weapon Parts into tools. Lockpicks open locked caches and stashes.	把武器零件变成工具。开锁器可以打开上锁的储物箱和藏匿处。
+CRAFT	制作
+HELD	持有
+MAKES	产出
+Lockpicks	开锁器
+B slows the world to 30% for 4 seconds: 45 energy, 14 second cooldown. You keep your own speed.	B 键将世界减速到 30%，持续 4 秒：消耗 45 点能量，冷却 14 秒。你自己的速度不变。
+Subdermal Plating	皮下装甲
+Damage taken is 12% lower.	受到的伤害降低 12%。
+Tendon Boosters	腱肌增强器
+You move 8% faster.	你的移动速度加快 8%。
+Cyberoptic Scanner	义眼扫描仪
+Hostiles within 12 m are marked, even through walls.	12 米内的敌人会被标记，即使隔着墙。
+Nanite Repair	纳米修复
+Below half health, you heal 1.5 a second once you have been out of harm for 4 seconds.	生命值低于一半时，脱离险境 4 秒后每秒恢复 1.5 点。
+Silent Steps	无声步伐
+Sprinting makes no noise, and you crouch-walk 15% faster.	冲刺不发出声响，蹲行速度加快 15%。
+EMP Grenade	EMP 手雷
+Restores 35% health over six seconds; interrupted by heavy damage	六秒内恢复 35% 生命值；受到重创时会中断
+Disables drones, shields, smart weapons and cameras for ten seconds	使无人机、护盾、智能武器和摄像头失效十秒
