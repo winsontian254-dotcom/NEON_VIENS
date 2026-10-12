@@ -33,6 +33,7 @@ PATTERNS = [
     (r'^Head to the red beam to start: (.+)\.$', '', r'前往红色光柱开始：$1。'),
     (r'^(\d+) Parts$', '', r'$1 零件'), (r'^\+(\d+) Parts$', '', r'+$1 零件'), (r'^(\d+) Military$', '', r'$1 军用部件'), (r'^(\d+) Quantum$', '', r'$1 量子碎片'), (r'^(\d+) Cipher$', '', r'$1 密码线'),
     (r'^BUY (\d+) ¢$', '', r'购买 $1 ¢'), (r'^EQUIP → (\d+)$', '', r'装备 → $1'), (r'^IN SLOT (\d+)$', '', r'在槽位 $1'),
+    (r'^Out cold for (\d+) s\.$', '', r'昏迷 $1 秒。'),
 ]
 
 

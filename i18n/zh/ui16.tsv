@@ -1,0 +1,47 @@
+CHOKEHOLD	锁喉
+HOLD	按住
+ZIP-TIE	扎带捆绑
+PICK UP BODY	背起身体
+HIDE BODY	藏匿身体
+DROP BODY	放下身体
+ZIP-TYING	正在捆绑
+KNOCKOUT	击晕
+EXECUTE	处决
+KEEP HOLDING	继续按住
+LET GO OR HE DIES	松手，否则他会死
+RELEASE TO KNOCK OUT	松开以击晕
+KEEP HOLDING TO KILL	继续按住则致死
+Let go for a knockout: the longer you hold, the longer they stay down. Hold to the end and they die.	松手即可击晕：按得越久，对方昏迷越久。一直按到底，对方就会死亡。
+BROKE FREE	挣脱了
+He tore loose and raised the alarm.	他挣脱后拉响了警报。
+LET GO	松手
+He slipped free and is suspicious.	他挣脱了，起了疑心。
+KNOCKED OUT	已击晕
+STRANGLED	已勒毙
+A silent kill.	无声击杀。
+BODY SEARCHED	已搜身
++1 Noisemaker	+1 噪音装置
++1 Trauma Patch	+1 创伤贴片
++1 Fragmentation Grenade	+1 破片手雷
+TIED UP	已捆绑
+He will not wake up.	他不会醒来了。
+CARRYING	背负中
+Find cover to hide the body, or press E to drop it.	找个掩体藏好身体，或按 E 放下。
+BODY HIDDEN	身体已藏好
+Nobody will find it. Until it wakes up.	没人会发现它，直到他醒来。
+Nobody will find it.	没人会发现。
+BODY FOUND	发现尸体
+A guard has spotted a body. Expect a search.	一名守卫发现了尸体。准备迎接搜查。
+WAKING UP	苏醒中
+A knocked-out guard is coming round.	一名被击晕的守卫正在苏醒。
+WE HAVE A BODY!	这里有具尸体！
+SOMEONE IS HERE!	有人闯进来了！
+WHAT... WHO?	什么……谁？
+MY HEAD...	我的头……
+I WAS OUT?	我昏过去了？
+WHAT WAS THAT?	那是什么？
+I HEARD SOMETHING.	我听到了什么。
+CHECK IT OUT.	去看看。
+Noisemaker	噪音装置
+Throw it where you aim: it clatters, and nearby guards go to investigate	投向瞄准处：它会发出响动，附近的守卫会前去查看
+WHISTLE	口哨

@@ -1,0 +1,27 @@
+# SILENT WORK: CHOKEHOLDS, KNOCKOUTS AND BODIES
+
+## The chokehold
+
+Get behind a guard who has not noticed you (within 2.4 m, not alerted, and either in the arc behind them or still unsuspicious, under 30 percent) and hold E. On a pad hold X, on a phone hold USE. A guard who is stunned can be taken from any side, and a shield trooper only from behind or while stunned. You cannot move or shoot while you hold, and the HUD shows a bar with a marker at the point where the grab lands.
+
+Let go before 0.6 seconds and the guard slips free, suspicious but not alerted. Let go later and they go out cold. How long they stay down depends on how long you held: about 6 seconds at the grab, 12 at one second, 35 at two, 61 at three and 87 at the end of the bar, with a ceiling of 90. Hold to the end of the bar, 4 seconds, and the guard dies. The last fifth of the bar is red as a warning. Heavy troopers take 1.4 times as long, 5.6 seconds. Story targets, such as an assassin's mark or an officer carrying a keycard, can only be killed, take 3.2 seconds and slip free if you let go early. If anything hurts you while you hold, the guard tears loose and raises the alarm.
+
+Co-op, arena and defence modes keep the old instant takedown. Weapons that are nonlethal knock out too: a stun round that would have killed leaves the target down for 30 seconds, and a stun blade on an unaware guard for 45.
+
+## Waking and tying
+
+A knocked-out guard wakes when the timer runs out. They wake searching for 8 seconds and with at least half their health, and they say so. Zip-tie them (press E on the body, 2 seconds) and they stay down for the rest of the level. A guard is paid for, and looted, only the first time they go down: 14 credits times your credit multiplier, plus the usual drop. Tying also searches the body.
+
+## Searching, carrying and hiding
+
+Searching a body, which tying and picking up both do, pays 10 credits plus 4 for every act plus up to 10 more, times your credit multiplier. More than a third of the time, 35 percent, it also finds an item: 15 percent a Noisemaker, 11 percent a Trauma Patch, 9 percent a grenade. A body pays once.
+
+Press E on a dead or tied body to pick it up. You carry it at 60 percent of your speed, you cannot sprint, shoot or use weapons, and E drops it. To get it out of sight, put it in a waste bin, the green bins that stand against walls in open floor (4 in a mission, up to 36 across the city), or behind any cover between 0.35 and 1.5 metres tall: crates and furniture. Market stalls do not count. A guard who is only knocked out will wake inside the bin and climb out, so tie them first.
+
+## Bodies are found
+
+Every third of a second, every guard who is on patrol, suspicious or searching checks for bodies in plain sight: within 12 metres, within about 57 degrees of where they face, or within 3 metres in any direction, with a clear line. A blackout cuts the range. A body you are carrying counts. The guard who finds one goes to look, and patrols within 10 metres join in. When the guard reaches the body they raise the alarm, and if the body was knocked out and not tied they wake it. Guards who die while hunting you count as already known, and arena and defence modes do not use any of this.
+
+## Making noise
+
+T whistles: every patrolling or suspicious guard within 12 metres comes to where you stand. It has a 3 second cooldown. A Noisemaker, a quick-slot item that costs 80 credits, carries 5 and you start with 2, clatters where you aim, up to 16 metres away or the first wall, and pulls in every patrolling or suspicious guard within 22 metres. Wait behind a corner and the guard who comes to look hands you a chokehold.

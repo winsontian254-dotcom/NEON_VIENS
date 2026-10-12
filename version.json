@@ -1,6 +1,17 @@
 {
-  "build": 24,
+  "build": 25,
   "history": [
+    {
+      "build": 25,
+      "version": "1.25",
+      "date": "2026-10-12",
+      "notes": [
+        "Silent work: hold E behind a guard to choke them. Let go for a knockout, hold too long and they die",
+        "Zip-tie, search, carry and hide bodies. Guards who find a body raise the alarm",
+        "Press T to whistle, and throw Noisemakers to lure patrols",
+        "Nonlethal weapons now knock out instead of killing"
+      ]
+    },
     {
       "build": 24,
       "version": "1.24",

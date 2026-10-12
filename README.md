@@ -60,13 +60,14 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 | Sneak | `C` / `Ctrl` | LB |
 | Fire | Left click | RT |
 | Dash | `Space` | A |
-| Interact / Takedown / Hack | `E` | X |
+| Interact / Hack / Chokehold (hold) | `E` | X |
 | EMP pulse | `Q` | Y |
 | Reload | `R` | Select |
 | Enter / exit vehicle (free roam) | `F` | X |
 | ASCENSION assist / raise the firewall (Nuallink) | `V` | R3 |
 | Open the Nuallink | `N` | Pause menu |
 | PING (1 RAM: mark hostiles in range for 8 s) | `Z` | Touch: PING |
+| Whistle (lures nearby patrols) | `T` | Touch: WHISTLE |
 | Drive: throttle / reverse, steer | `W`/`S`, `A`/`D` | RT / LT, left stick |
 | Drive: handbrake, boost, horn | `Space`, `Shift`, `H` | A, LB, R3 |
 | Pause menu | `Esc` | Start |
@@ -197,6 +198,13 @@ Every hack spends **RAM** from Ghost's cyberdeck (violet pips on the HUD, full a
 - **Upgrade and mods.** The Black Market's new **Cyberdeck** tab sells five deck marks (more RAM, faster recovery, more mod slots) and nine mods: Overclock Rig, Cryo Coolant, Buffer Extender, Ice Pick, Recursion, Echo Chamber, Ghost Protocol, Datamine and Helix Spoofer.
 
 The numbers are in the Dossier ("The Cyberdeck").
+
+## Silent work: chokeholds, knockouts and bodies
+- **Hold E behind an unaware guard** for a chokehold. Let go after 0.6 s and they are knocked out for 6-90 s (the longer you held, the longer they stay down); hold to the end of the bar (4 s) and they die. Zip-tie a knocked-out guard (E on the body) or they wake up. Nonlethal weapons knock out instead of killing. Co-op and arena modes keep the instant takedown.
+- **Bodies matter.** Search one (credits and sometimes an item), pick it up (E, you move at 60% speed) and hide it in a waste bin or behind cover. Guards who see a body go and look, then raise the alarm, and wake a knocked-out guard who is not tied.
+- **Distractions.** **T** whistles (lures patrols within 12 m); the new quick-slot **Noisemaker** clatters where you aim.
+
+The numbers are in the Dossier ("Silent Work").
 
 ## Inside every building
 Every building in the open city has a glowing door (1,133 of them). Press **E** at one to go inside: apartments, noodle bars, clinics, offices, warehouses, server rooms, clubs, and the named landmarks (halls, cathedrals, vaults, domes, factories). What a building is depends on its district and size, and it is the same place every visit. Inside you can talk to the people, search a stash for credits (once per save) and walk out through the glowing door back to the street.
