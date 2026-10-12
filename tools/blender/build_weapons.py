@@ -80,6 +80,15 @@ class Model:
         self.bm = {}
         self.bevel = {}
         self.M = None            # optional 3x3 matrix applied to every point of ball()/limb() (game axes)
+        self.part = None         # while set, new geometry goes to separate '<role>.<part>' nodes (see part_on)
+
+    def part_on(self, name):
+        """Geometry from here to part_off() becomes its own node(s) named '<role>.<name>': the game animates them
+        (mag = magazine, slide = pistol slide, bolt = charging handle / bolt handle, pump = shotgun forend)."""
+        self.part = name
+
+    def part_off(self):
+        self.part = None
 
     def pt(self, x, y, z):
         v = Vector((x, y, z))
@@ -132,9 +141,10 @@ class Model:
             self.ball(role, tuple(b), r1, seg, 4)
 
     def _b(self, role):
-        if role not in self.bm:
-            self.bm[role] = bmesh.new()
-        return self.bm[role]
+        key = role if not self.part else role + '.' + self.part
+        if key not in self.bm:
+            self.bm[key] = bmesh.new()
+        return self.bm[key]
 
     # ---- primitives (all dimensions in game axes) ----
     def box(self, role, size, at, rot=(0, 0, 0), taper=None):
@@ -245,14 +255,15 @@ class Model:
         self.bevel.setdefault('acc', 0)
         self.bevel.setdefault('heat', 0)
         self.bevel.setdefault('glass', 0)
-        for role, bm in self.bm.items():
+        for key, bm in self.bm.items():
+            role = key.split('.')[0]
             if not bm.faces:
                 continue
             bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
-            me = bpy.data.meshes.new(self.name + '_' + role)
+            me = bpy.data.meshes.new(self.name + '_' + key)
             bm.to_mesh(me)
             bm.free()
-            ob = bpy.data.objects.new(role, me)  # mesh node named by role
+            ob = bpy.data.objects.new(key, me)  # mesh node named by role (and part)
             bpy.context.collection.objects.link(ob)
             ob.data.materials.append(mat(role))
             bv = self.bevel.get(role, bevel)
@@ -275,7 +286,7 @@ class Model:
             except Exception:
                 bpy.ops.object.shade_smooth()
             objs.append(ob)
-            print('   ', role, len(ob.data.polygons), 'faces')
+            print('   ', key, len(ob.data.polygons), 'faces')
         self.bm = {}
         return objs
 
@@ -300,6 +311,7 @@ def pistol():
     m = Model('pistol')
     W = 0.040  # slide width
     # slide: chamfered top, angled muzzle end, open underside
+    m.part_on('slide')
     m.prism('body', [(-0.118, 0.034), (-0.118, 0.086), (-0.112, 0.094), (0.190, 0.094), (0.222, 0.086), (0.232, 0.070), (0.232, 0.040), (0.222, 0.034)], W)
     # ejection port on the right face: a dark opening with a steel chamber lip
     m.box('dark', (0.0016, 0.022, 0.056), (W / 2 - 0.0002, 0.066, 0.046))
@@ -325,6 +337,7 @@ def pistol():
     m.cyl('metal', 0.0125, 0.034, (0, 0.063, 0.236), 'z', seg=20)
     m.cyl('dark', 0.0072, 0.036, (0, 0.063, 0.2365), 'z', seg=14)
     m.cyl('acc', 0.0138, 0.003, (0, 0.063, 0.2265), 'z', seg=20)
+    m.part_off()
     # frame / dust cover with rail slots and the coil strip
     m.prism('grip', [(-0.108, 0.034), (-0.108, 0.004), (0.050, -0.002), (0.056, 0.018), (0.176, 0.018), (0.196, 0.026), (0.196, 0.034)], 0.034)
     for i in range(3):
@@ -347,7 +360,10 @@ def pistol():
         rear, front = PN[0][0] + (PN[1][0] - PN[0][0]) * t, PN[3][0] + (PN[2][0] - PN[3][0]) * t
         for sx in (-1, 1):
             m.box('dark', (0.0017, 0.0016, (front - rear) * 0.78), (sx * 0.0188, y, (rear + front) / 2))
+    m.part_on('mag')      # the magazine: a black body hidden in the grip, and the base plate under it
+    m.prism('dark', [(-0.121, -0.020), (-0.158, -0.176), (-0.086, -0.176), (-0.049, -0.030)], 0.028)
     m.prism('metal', [(-0.169, -0.178), (-0.166, -0.194), (-0.078, -0.194), (-0.080, -0.178)], 0.038)
+    m.part_off()
     for sx in (-1, 1):
         m.box('acc', (0.0012, 0.060, 0.006), (sx * 0.0190, -0.098, -0.056))
     m.build()
@@ -487,12 +503,16 @@ def smg():
     # grip, trigger guard and a curved magazine with a lit window
     grip_raked(m, -0.142, -0.178, -0.044, -0.200, 0.036, front=0.074)
     guard(m, -0.040, 0.050)
+    m.part_on('mag')
     m.prism('grip', [(0.030, -0.046), (0.092, -0.046), (0.108, -0.214), (0.050, -0.230)], 0.036)
     m.prism('metal', [(0.049, -0.230), (0.109, -0.214), (0.110, -0.226), (0.050, -0.242)], 0.040)
     for sx in (-1, 1):
         m.box('acc', (0.0012, 0.100, 0.007), (sx * 0.0186, -0.130, 0.083), rot=(-0.13, 0, 0))
+    m.part_off()
     # charging handle and selector
+    m.part_on('bolt')
     m.box('metal', (0.022, 0.010, 0.016), (0, 0.083, -0.150))
+    m.part_off()
     m.box('metal', (0.006, 0.014, 0.014), (-W / 2 - 0.002, 0.004, -0.120))
     m.box('acc', (0.0016, 0.004, 0.004), (-W / 2 - 0.0046, 0.010, -0.120))
     m.build()
@@ -534,11 +554,15 @@ def rifle():
     # grip, guard, magazine
     grip_raked(m, -0.215, -0.255, -0.050, -0.215, 0.038, front=0.082)
     guard(m, -0.100, 0.060, y0=-0.050, dy=0.050)
+    m.part_on('mag')
     m.prism('grip', [(0.020, -0.050), (0.110, -0.050), (0.150, -0.240), (0.074, -0.256)], 0.040)
     m.prism('metal', [(0.073, -0.256), (0.151, -0.240), (0.152, -0.252), (0.076, -0.268)], 0.044)
     for sx in (-1, 1):
         m.box('acc', (0.0012, 0.110, 0.007), (sx * 0.0206, -0.150, 0.110), rot=(-0.19, 0, 0))
+    m.part_off()
+    m.part_on('bolt')
     m.box('metal', (0.024, 0.012, 0.020), (0, 0.090, -0.230))               # charging handle
+    m.part_off()
     m.box('metal', (0.006, 0.016, 0.016), (-W / 2 - 0.002, -0.020, -0.130))
     m.box('acc', (0.0016, 0.004, 0.004), (-W / 2 - 0.0046, -0.014, -0.130))
     m.build()
@@ -565,12 +589,14 @@ def shotgun():
     m.cyl('acc', 0.0268, 0.004, (0, 0.050, 0.800), 'z', seg=16)
     m.box('metal', (0.006, 0.014, 0.010), (0, 0.104, 0.800))
     # pump forend
+    m.part_on('pump')
     m.prism('grip', [(0.250, -0.082), (0.250, 0.012), (0.470, 0.012), (0.470, -0.082)], 0.080)
     for i in range(8):
         for sx in (-1, 1):
             m.box('dark', (0.0018, 0.070, 0.0045), (sx * 0.0405, -0.035, 0.272 + i * 0.026))
     for sx in (-1, 1):
         m.box('heat', (0.0015, 0.0055, 0.190), (sx * 0.0407, -0.010, 0.360))
+    m.part_off()
     # stock with a cheek rest, a pad and a pistol grip
     m.prism('grip', [(-0.250, 0.060), (-0.560, 0.050), (-0.640, 0.016), (-0.650, -0.100), (-0.560, -0.082), (-0.250, -0.030)], 0.050)
     m.prism('metal', [(-0.650, 0.016), (-0.664, 0.010), (-0.664, -0.104), (-0.650, -0.100)], 0.056)
@@ -621,10 +647,14 @@ def sniper():
         m.prism('metal', [(z - 0.020, 0.066), (z - 0.016, 0.102), (z + 0.016, 0.102), (z + 0.020, 0.066)], 0.034)
         m.cyl('metal', 0.0400, 0.020, (0, 0.140, z), 'z', seg=20)
     # bolt handle, magazine, bipod legs folded under the chassis
+    m.part_on('bolt')
     m.prism('metal', [(-0.100, 0.026), (-0.080, 0.026), (-0.080, 0.014), (-0.100, 0.014)], 0.050, 0.056)
     m.cyl('body', 0.0130, 0.026, (0.082, 0.020, -0.090), 'x', seg=10)
+    m.part_off()
+    m.part_on('mag')
     m.prism('grip', [(0.040, -0.050), (0.120, -0.050), (0.126, -0.150), (0.054, -0.150)], 0.034)
     m.prism('metal', [(0.053, -0.150), (0.127, -0.150), (0.128, -0.160), (0.055, -0.160)], 0.038)
+    m.part_off()
     for sx in (-1, 1):
         m.box('metal', (0.008, 0.012, 0.200), (sx * 0.020, -0.056, 0.440))
     # stock: cheek riser, adjustable butt pad, grip

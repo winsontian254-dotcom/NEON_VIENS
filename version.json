@@ -1,6 +1,16 @@
 {
-  "build": 35,
+  "build": 36,
   "history": [
+    {
+      "build": 36,
+      "version": "1.36",
+      "date": "2026-10-12",
+      "notes": [
+        "Weapon overhaul: spring recoil, working slides, bolts and pumps, flying casings, muzzle smoke, a different report for every gun",
+        "Animated reloads: magazine out, support hand brings the next one in, rack the slide; the shotgun loads shell by shell",
+        "Gun sway, sprint pose, landing dip and a raise animation when you swap weapons; the ammo counter animates through a reload"
+      ]
+    },
     {
       "build": 35,
       "version": "1.35",
@@ -229,17 +239,6 @@
         "New difficulty: Hardcore — half the ammo, no map markers, and a failed operation ends the run for good (endings stay unlocked)",
         "Much lighter city: far buildings, pedestrians, guards and cars are culled, so free roam runs faster",
         "Ammunition now has a carry limit per type"
-      ]
-    },
-    {
-      "build": 11,
-      "version": "1.11",
-      "date": "2026-10-10",
-      "notes": [
-        "Missions, arenas and story scenes that happen indoors now play in hand-drawn levels instead of random rooms: office, clinic, warehouse, factory, metro, underdeep caves, club, records vault, server halls, a network lattice and orbital stations",
-        "Boss, arena and defend fights have hand-placed cover, indoors and out in the streets",
-        "Story scenes in Noah's clinic, clubs, offices, metro platforms, bars and small flats play in their own interiors",
-        "Ghost's apartment is rebuilt as a lived-in bedroom: posters, blinds, a bedside lamp, a rug, plants and a neon sign"
       ]
     }
   ]
