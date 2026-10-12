@@ -1,6 +1,15 @@
 {
-  "build": 30,
+  "build": 31,
   "history": [
+    {
+      "build": 31,
+      "version": "1.31",
+      "date": "2026-10-12",
+      "notes": [
+        "Training Zone: live-fire drills — bots that shoot back, five rounds that get harder (stationary gunners, movers, a heavy, a riot shield with a sniper and a drone, then everything with grenades and a rusher)",
+        "You cannot die in the drills: a fall restarts the round a little easier, and three falls wave you through"
+      ]
+    },
     {
       "build": 30,
       "version": "1.30",
@@ -237,18 +246,6 @@
         "New character creator: eight backgrounds with real strengths, drawbacks, combos and a five-part story each; full appearance editor (skin tone, hair, eyes, cyberware)",
         "Old saves ask once: keep your character or remake it — all progress is kept",
         "Skip Ahead [TAB] in scenes; Credits on the title screen"
-      ]
-    },
-    {
-      "build": 6,
-      "version": "1.6",
-      "date": "2026-10-10",
-      "notes": [
-        "First-person hands on every gun and blade, in your jacket colour",
-        "Knife and melee swing animations with a slash trail",
-        "Kills hit harder: bodies fly with the shot, headshots snap back, a beat of hit-stop",
-        "New medkit model",
-        "New heavy weapons: Ghostbreaker Minigun (spins up), Rust Harbor Rail Cannon, Sector 9 Thumper, Iron Angel Breacher Shotcannon"
       ]
     }
   ]

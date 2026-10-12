@@ -6,8 +6,12 @@ The Training Zone is a practice facility opened from the title menu. It uses a t
 
 ## The six rooms
 
-The rooms form a loop, and a step list at the top of the screen walks you through it in fifteen steps. Movement: cross the hall, then dash. Armory: press E at the ARMORY board to open the free shop, then close it. Range: knock down three targets, then reload. Stealth: knock out the dummy from behind (a short hold keeps it down briefly, a long hold keeps it down longer, a hold that is too long kills it), zip-tie it and hide it. Netrunning: hack three terminals, each of a different kind, then use PING and SCAN. Security: break the camera or the breaker box, pick the locked cache, disable the alarm panel and crawl through the vent to the exit hall. Step into the green beam when all fifteen steps are done.
+The rooms form a loop, and a step list at the top of the screen walks you through it in sixteen steps. Movement: cross the hall, then dash. Armory: press E at the ARMORY board to open the free shop, then close it. Range: knock down three targets, reload, then fight the live-fire drills. Stealth: knock out the dummy from behind (a short hold keeps it down briefly, a long hold keeps it down longer, a hold that is too long kills it), zip-tie it and hide it. Netrunning: hack three terminals, each of a different kind, then use PING and SCAN. Security: break the camera or the breaker box, pick the locked cache, disable the alarm panel and crawl through the vent to the exit hall. Step into the green beam when all sixteen steps are done.
 
 ## Dummies
 
 Dummies are guards that never shoot, take a great deal of damage and stand up again a few seconds after they go down, as long as you are more than four metres away (fourteen seconds if you hid the body). Nothing a dummy does can hurt you.
+
+## Live fire
+
+The live-fire drills are five rounds in the range, and the bots in them shoot back. Round 1 is two bots that stand still and miss a lot, and they deal 30 percent of normal damage. Round 2 is three bots that move between cover (50 percent). Round 3 adds a heavy gunner (70 percent). Round 4 is a riot shield, a sniper and a drone (85 percent): shoot the shield bot in the back, and break line of sight when the sniper's red laser appears. Round 5 is everything at full strength, with grenades and a rusher. Every round, the bots fire faster and aim better than in the one before, they always know where you are, and their visors glow yellow so you can tell them from the dummies. You cannot die in here: if you go down, you stand up again with full health and the round starts over, a little easier each time, and after three falls in one round the instructor waves you through. Clearing a round restores your health and armor.
