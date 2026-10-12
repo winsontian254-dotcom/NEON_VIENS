@@ -1,6 +1,14 @@
 {
-  "build": 31,
+  "build": 32,
   "history": [
+    {
+      "build": 32,
+      "version": "1.32",
+      "date": "2026-10-12",
+      "notes": [
+        "Training Zone: a graduation-exam boss — THE INSTRUCTOR guards the exit with a pylon-powered shield and three phases (easier each time you fall)"
+      ]
+    },
     {
       "build": 31,
       "version": "1.31",
@@ -235,17 +243,6 @@
       "date": "2026-10-10",
       "notes": [
         "AI characters now appear as full-body holograms (first embedded 3D model; real human models come next)"
-      ]
-    },
-    {
-      "build": 7,
-      "version": "1.7",
-      "date": "2026-10-10",
-      "notes": [
-        "New look for every menu and the HUD: red data panels, cyan selection, yellow quest markers; a square minimap with a clock, a quest tracker and Cyberpunk-style subtitles",
-        "New character creator: eight backgrounds with real strengths, drawbacks, combos and a five-part story each; full appearance editor (skin tone, hair, eyes, cyberware)",
-        "Old saves ask once: keep your character or remake it — all progress is kept",
-        "Skip Ahead [TAB] in scenes; Credits on the title screen"
       ]
     }
   ]
