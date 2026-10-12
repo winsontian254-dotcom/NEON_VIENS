@@ -34,7 +34,7 @@ PATTERNS = [
     (r'^(\d+) Parts$', '', r'$1 零件'), (r'^\+(\d+) Parts$', '', r'+$1 零件'), (r'^(\d+) Military$', '', r'$1 军用部件'), (r'^(\d+) Quantum$', '', r'$1 量子碎片'), (r'^(\d+) Cipher$', '', r'$1 密码线'),
     (r'^BUY (\d+) ¢$', '', r'购买 $1 ¢'), (r'^EQUIP → (\d+)$', '', r'装备 → $1'), (r'^IN SLOT (\d+)$', '', r'在槽位 $1'),
     (r'^Out cold for (\d+) s\.$', '', r'昏迷 $1 秒。'),
-    (r'^Cameras are down for (\d+) s, and the guards can barely see\.$', '', r'摄像头关闭 $1 秒，守卫几乎什么也看不见。'), (r'^Needs (\d+) energy\.$', '', r'需要 $1 点能量。'), (r'^Every guard is marked for (\d+) s\.$', '', r'每名守卫被标记 $1 秒。'), (r'^Devices, caches and lamps are marked through the walls for (\d+) s\.$', '', r'设备、储物箱和灯具会被隔墙标记 $1 秒。'), (r'^(\d+) stunned for 6 s\.$', '', r'$1 人眩晕 6 秒。'), (r'^\+(\d+) Military$', '', r'+$1 军用部件'),
+    (r'^Cameras are down for (\d+) s, and the guards can barely see\.$', '', r'摄像头关闭 $1 秒，守卫几乎什么也看不见。'), (r'^Needs (\d+) energy\.$', '', r'需要 $1 点能量。'), (r'^Every guard is marked for (\d+) s\.$', '', r'每名守卫被标记 $1 秒。'), (r'^Devices, caches and lamps are marked through the walls for (\d+) s\.$', '', r'设备、储物箱和灯具会被隔墙标记 $1 秒。'), (r'^(\d+) stunned for 6 s\.$', '', r'$1 人眩晕 6 秒。'), (r'^\+(\d+) XP$', '', r'+$1 经验'), (r'^\+(\d+) Military$', '', r'+$1 军用部件'),
 ]
 
 

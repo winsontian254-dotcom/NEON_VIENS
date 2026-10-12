@@ -233,6 +233,15 @@ The numbers are in the Dossier ("Getting In").
 
 The numbers are in the Dossier ("The Floor as a System").
 
+## Progression: armor, attachments, perks, dodges, medals
+- **Armor:** buy and equip a vest (30 / 60 / 100 armor): an armor bar under your health soaks up 65% of every hit; Armor Plates restore it.
+- **Attachments:** two per gun (suppressor, extended magazine, laser sight, recoil stabilizer, hollow points), fitted at the Black Market.
+- **Experience and perks:** takedowns, hacks, caches and finished operations earn XP; every 150 XP is a perk point for nine perks in three trees (Ghost, Netrunner, Gunner).
+- **Perfect dodge:** dash through an enemy shot for a moment of slow-motion and 25 energy.
+- **Medals:** winning an operation pays medals (Ghost, No Lethal Force, Flawless Hacker, Scavenger, Untouched, Swift, Clean) in credits and XP.
+
+The numbers are in the Dossier ("Progression").
+
 ## Inside every building
 Every building in the open city has a glowing door (1,133 of them). Press **E** at one to go inside: apartments, noodle bars, clinics, offices, warehouses, server rooms, clubs, and the named landmarks (halls, cathedrals, vaults, domes, factories). What a building is depends on its district and size, and it is the same place every visit. Inside you can talk to the people, search a stash for credits (once per save) and walk out through the glowing door back to the street.
 

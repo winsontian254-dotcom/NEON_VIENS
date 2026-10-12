@@ -1,6 +1,18 @@
 {
-  "build": 28,
+  "build": 29,
   "history": [
+    {
+      "build": 29,
+      "version": "1.29",
+      "date": "2026-10-12",
+      "notes": [
+        "Body armor: buy a vest for an armor bar that soaks up damage",
+        "Gun attachments: suppressor, extended magazine, laser sight, stabilizer, hollow points",
+        "Experience and nine perks in three trees",
+        "Dash through a shot for a perfect dodge",
+        "Medals and XP after every operation"
+      ]
+    },
     {
       "build": 28,
       "version": "1.28",
@@ -240,16 +252,6 @@
         "Fast travel removed",
         "SKIP SCENE button (or Tab) fast-forwards dialogue to the next choice or gameplay",
         "Characters now match their dialogue portraits; brighter jacket colours, and the courier profile screen fits on phones"
-      ]
-    },
-    {
-      "build": 4,
-      "version": "1.4",
-      "date": "2026-10-09",
-      "notes": [
-        "Every gun now has a sight: red dots on pistols, holo sights on SMGs and shotguns, a 2.5× scope on rifles and a 6× scope on precision rifles",
-        "Right-click (LT) to aim down sights: the gun swings up to your eye, scopes close in to a lens view; aiming tightens your shots — hold Shift to steady a scope",
-        "New hacking: ICE BREAK — pick codes along alternating rows and columns to upload the sequence before the trace runs out"
       ]
     }
   ]

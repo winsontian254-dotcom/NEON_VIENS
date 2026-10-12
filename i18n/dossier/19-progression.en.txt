@@ -1,0 +1,21 @@
+# PROGRESSION: ARMOR, ATTACHMENTS, PERKS, DODGES AND MEDALS
+
+## Armor
+
+A vest, bought and equipped in the Armor tab of a Black Market stall, gives you an armor bar under your health. The Kevlar Vest has 30 armor (900 credits, 6 Parts), the Plate Carrier 60 (2,400 credits, 12 Parts, 1 Military Component) and the Helix Exo-Frame 100 (6,000 credits, 20 Parts, 4 Military Components). While you have armor, it soaks up 65 percent of every hit, point for point, until it is gone, and it is full again at the start of every operation. An Armor Plate (140 credits, or 5 Parts at the workbench, quick-slot item, carry 4) restores 40 armor in the field, and Repair Foam restores 25 as well as its old work.
+
+## Attachments
+
+Every gun, not beams or melee, takes two attachments, fitted in the Attachments tab to the weapon in the selected hotbar slot. A Suppressor (600 credits, 6 Parts) cuts the noise of a shot to a 3 metre radius and costs 8 percent of the damage. An Extended Magazine (400 credits, 4 Parts) holds 40 percent more rounds. A Laser Sight (500 credits, 5 Parts) tightens spread by 35 percent. A Recoil Stabilizer (500 credits, 5 Parts) cuts recoil by 35 percent. Hollow Points (450 credits, 4 Parts) add 12 percent damage. Removing an attachment is free, but the money is not refunded.
+
+## Experience and perks
+
+You earn experience for what you do: 4 for a kill, 3 for a drone, 8 for a silent takedown or a first knockout, 10 for a terminal hack (15 for a boss pylon), 12 for opening a cache, 10 for an interrogation, 6 for an alarm panel or a device, 4 for a camera, and 60 for finishing an operation, plus 20 for every medal. Every 150 experience gives a perk point, spent in the Perks tab on nine perks in three trees. Ghost: Quiet Hands (knockouts last 25 percent longer and zip-ties take 1.2 seconds), Shadow Walker (guards see you from 15 percent less far) and Cold Blood (guards grow suspicious 25 percent more slowly). Netrunner: Deep Cache (2 more RAM), Fast Cycle (RAM recovers 25 percent faster) and Daemon Lord (four daemons to choose from). Gunner: Quick Hands (reloading takes 20 percent less time), Marksman (spread 15 percent tighter) and Adrenaline (below 35 percent health you move 15 percent faster and take 10 percent less damage).
+
+## Perfect dodge
+
+Dash so that an enemy shot passes within 1.3 metres of you and the world slows to 35 percent for 1.2 seconds and you get 25 energy back. It can happen once every 3 seconds.
+
+## Medals
+
+A won operation pays medals, credits and experience on the results screen. GHOST (150 credits): never spotted. NO LETHAL FORCE (120): nobody died, and you spent more than 20 seconds. FLAWLESS HACKER (100): the operation had a terminal and you never burned a hack. SCAVENGER (100): every locked cache was opened, and there was at least one. UNTOUCHED (120): not a point of damage. SWIFT (100): finished in under 120 seconds plus 30 for every act. CLEAN (80): no body was found while you made at least one silent takedown.
