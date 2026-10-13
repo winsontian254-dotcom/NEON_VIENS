@@ -1,0 +1,23 @@
+# DRIVING AND DRIFTING
+
+## Getting in
+
+Press F next to a parked car, or take one that is moving in traffic (that adds 0.6 heat as Carjacking). W and S accelerate and brake, A and D steer, Space is the handbrake (the DASH button on a phone, A on a pad), Shift boosts and spends energy, H is the horn and F gets you out. The weapon panel hides while you drive. Cars come in three bodies, a low coupe, a sedan and a van, and the front wheels turn with the steering while all four spin with the road.
+
+## Speed and gears
+
+Top speed is 30 m/s (108 km/h), boost lifts it to 44 and a mini-turbo adds 6 more. A car reaches 30 m/s from a standstill in about 3.3 seconds, brakes from 28 m/s to a stop in under a second, and reverses up to 10 m/s. Five gears change at 7, 14, 21 and 28 m/s: the rev bar drops at every shift and turns red close to the limit, and the engine note follows it.
+
+## Grip and drifting
+
+The car carries its own velocity, separate from the way its nose points. The tyres take sideways speed away at 9 per second while they grip. Steering hard at speed lowers that, braking into a corner above 12 m/s lowers it to 4.2, and the handbrake lowers it to 1.7. The nose then swings round while the car slides on: a drift. A slide angle above about 17 degrees at more than 10 m/s counts as one.
+
+To hold a drift keep the throttle down and steer into the slide, which keeps the grip near 1.9; to end it ease off, steer the other way and the car straightens. The camera follows where the car is going rather than where it points, so a drift shows the car side-on. Slides leave tyre smoke and dark skid marks on the road and the tyres squeal.
+
+## Scoring
+
+Every second of drift adds speed times slide angle times 6 points, and the multiplier grows by one every two seconds up to x5. When the slide ends (after 0.8 seconds of grace) the points are banked as credits at one for every 20 points. A drift worth 150 points or more also gives a mini-turbo of points divided by 250 seconds, from 0.8 to 2.5: extra thrust, a higher top speed and flames from the exhausts. Hitting anything harder than 8 m/s loses the drift and pays nothing.
+
+## Damage
+
+A car has 100 health. A hit over 6 m/s costs (speed minus 5) times 4.2 points of it, so a wall at about 29 m/s or more destroys the car and slower hits do not. Scraping along a wall costs speed, not health. The health bar turns amber below 65 and red below 35, the engine smokes below 45 and throws sparks below 20. Two cars that meet above 22 m/s both blow up; slower and both take damage and bounce apart. Guards and pedestrians are hit as before.

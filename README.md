@@ -242,6 +242,9 @@ The numbers are in the Dossier ("The Floor as a System").
 
 The numbers are in the Dossier ("Progression").
 
+## Cars and drifting
+Cars (press **F** by a parked one, or commandeer one in traffic) now have a real handling model: the car keeps its own velocity, so the tyres can lose grip and it slides. Steer hard at speed, brake into a corner or pull the **Space** handbrake (the DASH button on a phone) to break traction, then hold the throttle and steer into the slide to keep a **drift**. Drifts score points (speed x slide angle, a multiplier up to x5 for long slides) that pay out as credits, and a good drift earns a **mini-turbo** with exhaust flames. Cars come as a coupe, a sedan or a van, with steering and spinning wheels, brake lights, five gears with a rev bar, tyre smoke, skid marks and tyre squeal. A car has 100 health: scrapes only cost speed, hard hits damage it (smoke, sparks) and a full-speed wall destroys it. The Dossier has a "Driving and Drifting" section.
+
 ## Weapon feel
 Every gun now moves like a gun. Recoil is a spring: the weapon kicks back and up with a little roll and sideways twist, then settles with overshoot, harder for the shotgun, sniper and rail cannon, and the camera climbs over a burst. The slide, bolt or pump works on every shot (an empty pistol locks its slide open), brass casings fly out and bounce on the floor, the muzzle puffs smoke, and the flash and report are different for every weapon type (pistol crack, SMG chatter, rifle bark, shotgun boom, sniper thunder, suppressed pfft). The gun lags behind when you turn, rolls into strafes, dips on landings, drops across your body when you sprint and is raised when you swap weapons.
 

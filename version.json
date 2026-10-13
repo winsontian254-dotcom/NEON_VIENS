@@ -1,6 +1,17 @@
 {
-  "build": 37,
+  "build": 38,
   "history": [
+    {
+      "build": 38,
+      "version": "1.38",
+      "date": "2026-10-13",
+      "notes": [
+        "Cars rebuilt: real grip and sliding, so you can drift with the handbrake or by cornering hard",
+        "Drift scoring pays credits and a mini-turbo (combo up to x5)",
+        "Coupe, sedan and van bodies with turning wheels, brake lights, five gears, tyre smoke and skid marks",
+        "Cars take damage: smoke and sparks, and a full-speed wall still blows them up"
+      ]
+    },
     {
       "build": 37,
       "version": "1.37",
@@ -228,16 +239,6 @@
       "notes": [
         "New first-person weapons modelled by hand in Blender: pistol, SMG, rifle, shotgun, sniper rifle and a combat knife, each with real detail and a lit edge or coil strip, carried in gloved fists",
         "The knife is held tilted so the blade's flat faces you"
-      ]
-    },
-    {
-      "build": 13,
-      "version": "1.13",
-      "date": "2026-10-10",
-      "notes": [
-        "Overhauled HUD: implant-level badge, thick health bar with current and max, dash pips, framed minimap with a COMBAT / SUSPICIOUS threat bar, and a quest tracker with one short yellow objective",
-        "Landmark discoveries now open as a card inside the HUD (and are translated), instead of a floating pop-up",
-        "Ammo now reads magazine | reserve with the weapon's silhouette; Reload and Use-item prompts appear when they matter"
       ]
     }
   ]

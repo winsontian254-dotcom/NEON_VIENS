@@ -24,6 +24,7 @@ PATTERNS = [
     (r'^ENDING (\w+)$', 'i', r'结局 $1'),
     (r'^MISSION (\d+)$', 'i', r'任务 $1'),
     (r'^ROUND (\d+)$', '', r'第 $1 轮'),
+    (r'^(\d+) pts · \+(\d+) ¢$', '', r'$1 分 · +$2 ¢'), (r'^(\d+) pts$', '', r'$1 分'),
     (r'^(\d+) CHAPTERS$', 'i', r'$1 章'),
     (r'^Implant level (\d+)$', '', r'植入体等级 $1'),
     (r'^Paper stars (\S+)$', '', r'纸星星 $1'),
