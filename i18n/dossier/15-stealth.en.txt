@@ -25,3 +25,7 @@ Every third of a second, every guard who is on patrol, suspicious or searching c
 ## Making noise
 
 T whistles: every patrolling or suspicious guard within 12 metres comes to where you stand. It has a 3 second cooldown. A Noisemaker, a quick-slot item that costs 80 credits, carries 5 and you start with 2, clatters where you aim, up to 16 metres away or the first wall, and pulls in every patrolling or suspicious guard within 22 metres. Wait behind a corner and the guard who comes to look hands you a chokehold.
+
+## Melee cooldown
+
+A melee weapon needs a moment to recover after every swing: at least 0.6 seconds for blades and batons, and the heavy hammers keep their own slower pace. The weapon panel shows the wait as a time and a row of pips that fills until you can swing again, and a click that comes too early only flashes the row red. A swing at someone who has not noticed you still drops them in one blow.

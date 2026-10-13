@@ -1,6 +1,15 @@
 {
-  "build": 36,
+  "build": 37,
   "history": [
+    {
+      "build": 37,
+      "version": "1.37",
+      "date": "2026-10-13",
+      "notes": [
+        "Melee weapons now have a cooldown: at least 0.6 s between swings, shown as a time and a filling bar on the weapon panel",
+        "The Training Zone no longer shows a minimap"
+      ]
+    },
     {
       "build": 36,
       "version": "1.36",
@@ -229,16 +238,6 @@
         "Overhauled HUD: implant-level badge, thick health bar with current and max, dash pips, framed minimap with a COMBAT / SUSPICIOUS threat bar, and a quest tracker with one short yellow objective",
         "Landmark discoveries now open as a card inside the HUD (and are translated), instead of a floating pop-up",
         "Ammo now reads magazine | reserve with the weapon's silhouette; Reload and Use-item prompts appear when they matter"
-      ]
-    },
-    {
-      "build": 12,
-      "version": "1.12",
-      "date": "2026-10-10",
-      "notes": [
-        "New difficulty: Hardcore — half the ammo, no map markers, and a failed operation ends the run for good (endings stay unlocked)",
-        "Much lighter city: far buildings, pedestrians, guards and cars are culled, so free roam runs faster",
-        "Ammunition now has a carry limit per type"
       ]
     }
   ]
