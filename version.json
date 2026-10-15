@@ -1,6 +1,14 @@
 {
-  "build": 38,
+  "build": 39,
   "history": [
+    {
+      "build": 39,
+      "version": "1.39",
+      "date": "2026-10-15",
+      "notes": [
+        "Fixed a black 3D view (only the HUD showing) in browsers that use WebGPU"
+      ]
+    },
     {
       "build": 38,
       "version": "1.38",
@@ -230,15 +238,6 @@
         "New character creator laid out like a civic-records terminal: three lifepaths on animated cards, appearance rows with presets, attribute points and a difficulty window, with boot, scan and sealing animations",
         "Backgrounds are now three lifepaths (Lantern Row Kid, Helix Contractor, Glass Wastes Courier) plus five attributes; older characters are converted automatically and no progress is lost",
         "New Dossier: a searchable 10,800-word handbook (title menu, Journal, or H in the creator) that explains every number; extract passages as notes, save the whole text, or export your own character record (opens the share sheet in the Android app)"
-      ]
-    },
-    {
-      "build": 14,
-      "version": "1.14",
-      "date": "2026-10-10",
-      "notes": [
-        "New first-person weapons modelled by hand in Blender: pistol, SMG, rifle, shotgun, sniper rifle and a combat knife, each with real detail and a lit edge or coil strip, carried in gloved fists",
-        "The knife is held tilted so the blade's flat faces you"
       ]
     }
   ]

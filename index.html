@@ -2183,7 +2183,7 @@ NV.Account = (() => {
 
 /* Condition evaluation for conditional blocks compiled from the script */
 NV.Update = (() => {
-  const NV_BUILD = 38;
+  const NV_BUILD = 39;
   const URL = 'https://winsontian254-dotcom.github.io/NEON_VIENS/version.json', KEY = 'nv_seen_build';
   let info = null, shown = 0, alerted = false;
   const seen = () => { try { return Number(localStorage.getItem(KEY)) || 0; } catch (e) { return 0; } };
@@ -2466,7 +2466,7 @@ NV.thinChunks = (mesh, mats, far, cell) => {
   const groups = new Map();
   mats.forEach(m4 => { const k = Math.floor(m4.m[12] / cell) * 1e4 + Math.floor(m4.m[14] / cell), g = groups.get(k); if (g) g.push(m4); else groups.set(k, [m4]); });
   const arrs = [...groups.values()], meshes = [mesh];
-  for (let i = 1; i < arrs.length; i++) meshes.push(mesh.clone(mesh.name)); // clone before any buffer is set: the geometry and material are shared
+  for (let i = 1; i < arrs.length; i++) { const c = mesh.clone(mesh.name); c.makeGeometryUnique(); meshes.push(c); } // clone before any buffer is set: the material is shared, but each chunk needs its own geometry, because the thin-instance buffer lives on the geometry (WebGPU rejects the frame when chunks overwrite each other's buffer)
   return meshes.map((m, i) => finish(m, arrs[i]));
 };
 NV.M = (sx, sy, sz, x, y, z, q) => BABYLON.Matrix.Compose(V3(sx, sy, sz), q || BABYLON.Quaternion.Identity(), V3(x, y, z));
@@ -8837,7 +8837,7 @@ NV.Level = (() => {
     const sw = (name, m, arr) => { if (!arr.length) return null; const cell = 200, keyOf = m4 => Math.floor(m4.m[12] / cell) * 1e4 + Math.floor(m4.m[14] / cell), groups = new Map(), ch = new Int32Array(arr.length), li = new Int32Array(arr.length);
       arr.forEach((m4, n) => { const k = keyOf(m4); let g = groups.get(k); if (!g) groups.set(k, g = { mats: [], ci: groups.size }); ch[n] = g.ci; li[n] = g.mats.length; g.mats.push(m4); });
       const proto = BABYLON.MeshBuilder.CreateBox(name, { size: 1 }, scene); proto.material = m; proto.isPickable = false;
-      const lists = [...groups.values()], meshes = [proto]; for (let i = 1; i < lists.length; i++) meshes.push(proto.clone(name));
+      const lists = [...groups.values()], meshes = [proto]; for (let i = 1; i < lists.length; i++) { const c = proto.clone(name); c.makeGeometryUnique(); meshes.push(c); }
       const bases = lists.map(g => { const b = new Float32Array(g.mats.length * 16); g.mats.forEach((m4, k) => m4.copyToArray(b, k * 16)); return b; }), bufs = bases.map(b => b.slice());
       meshes.forEach((b, i) => { b.thinInstanceSetBuffer('matrix', bufs[i], 16, false); b.thinInstanceRefreshBoundingInfo(false); b.alwaysSelectAsActiveMesh = false; b.addLODLevel(360, null); });
       return { mesh: proto, meshes, bases, bufs, ch, li, dirty: new Set() }; };
