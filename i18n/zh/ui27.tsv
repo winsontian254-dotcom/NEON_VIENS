@@ -5,3 +5,5 @@ DRIFT BOOST	漂移加速
 DRIFT LOST	漂移中断
 CAR DAMAGED	车辆受损
 Smoke from the engine. One more hard hit and it goes up.	引擎冒烟了。再来一次重撞，它就会爆炸。
+NEON VEINS needs 3D graphics (WebGL).	《霓虹血脉》需要 3D 图形支持（WebGL）。
+Use an up-to-date Chrome, Edge, Firefox or Safari and make sure hardware acceleration is turned on in your browser settings.	请使用最新版的 Chrome、Edge、Firefox 或 Safari，并确认浏览器设置中已开启硬件加速。

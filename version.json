@@ -1,6 +1,15 @@
 {
-  "build": 39,
+  "build": 40,
   "history": [
+    {
+      "build": 40,
+      "version": "1.40",
+      "date": "2026-10-15",
+      "notes": [
+        "Graphics now start in WebGL, which draws every level correctly; this fixes the black 3D view (only the HUD showing) in the apartment and the city on some computers",
+        "WebGPU is optional now: add #webgpu to the address to try it (add #gl to go back); a red notice appears if it misbehaves"
+      ]
+    },
     {
       "build": 39,
       "version": "1.39",
@@ -228,16 +237,6 @@
       "notes": [
         "Missions now have twists: plant charges and outrun the fuse, assassinate an armoured officer, hunt a keycard, free a hostage who follows you out, hold a lockdown ring against waves, hold an upload or outrun a reactor overload, and survive ambushes at pickups",
         "The briefing, objective panel, markers, prompts and timers show each twist; reinforcements arrive from out of sight when you trip one"
-      ]
-    },
-    {
-      "build": 15,
-      "version": "1.15",
-      "date": "2026-10-11",
-      "notes": [
-        "New character creator laid out like a civic-records terminal: three lifepaths on animated cards, appearance rows with presets, attribute points and a difficulty window, with boot, scan and sealing animations",
-        "Backgrounds are now three lifepaths (Lantern Row Kid, Helix Contractor, Glass Wastes Courier) plus five attributes; older characters are converted automatically and no progress is lost",
-        "New Dossier: a searchable 10,800-word handbook (title menu, Journal, or H in the creator) that explains every number; extract passages as notes, save the whole text, or export your own character record (opens the share sheet in the Android app)"
       ]
     }
   ]
