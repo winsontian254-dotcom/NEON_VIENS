@@ -11,7 +11,7 @@
       "No"
     ],
     "license": "CC0 1.0",
-    "source": "RobotExpressive by Tom\u00e1s Laulh\u00e9 (Quaternius), via the three.js examples (github.com/mrdoob/three.js, examples/models/gltf/RobotExpressive)"
+    "source": "RobotExpressive by Tomás Laulhé (Quaternius), via the three.js examples (github.com/mrdoob/three.js, examples/models/gltf/RobotExpressive)"
   },
   "human": {
     "file": "src/human.glb",
@@ -93,7 +93,13 @@
   "human_kit": {
     "file": "src/human_kit.glb",
     "license": "Original (Neon Veins)",
-    "source": "Built from scratch by tools/blender/build_humans.py (smooth anatomy, sculpted head, hair sheets; vertex colour = baked ambient occlusion)",
+    "source": "Built by tools/blender/build_humans.py: torso, legs, arms, boots, hair and hoods are original; the head, hands and eyes are built from the CC0 MakeHuman base mesh and high-poly eyes in assets/src/makehuman by tools/blender/mh_import.py",
     "keep_attributes": true
+  },
+  "eye_brown": {
+    "file": "src/makehuman/eye_brown.jpg",
+    "license": "CC0 1.0 (MakeHuman)",
+    "source": "MakeHuman system assets (assets/src/makehuman/eyes/brown_eye.png), scaled to 512 x 512 and saved as JPEG",
+    "image": true
   }
 }

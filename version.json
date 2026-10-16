@@ -1,6 +1,16 @@
 {
-  "build": 43,
+  "build": 44,
   "history": [
+    {
+      "build": 44,
+      "version": "1.44",
+      "date": "2026-10-16",
+      "notes": [
+        "Characters rebuilt around a real human head: proper eyes with an iris and pupil, brows, lashes, lips, ears and a neck",
+        "Realistic relaxed hands that come out of the sleeves, and fitted hair, hood and braids",
+        "Pedestrians now have eyes too"
+      ]
+    },
     {
       "build": 43,
       "version": "1.43",
@@ -229,14 +239,6 @@
       "date": "2026-10-11",
       "notes": [
         "The Helix trace is much harder: it climbs faster, barely recovers (not at all right after a hunt), locks harder, and intrusions start earlier with a shorter window"
-      ]
-    },
-    {
-      "build": 19,
-      "version": "1.19",
-      "date": "2026-10-11",
-      "notes": [
-        "The Helix trace is harder: it climbs faster, falls slower, locks harder and its intrusions come earlier and give you less time"
       ]
     }
   ]

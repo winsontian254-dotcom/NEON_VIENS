@@ -42,7 +42,7 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 **Presentation**
 - Cinematic title screen with animated skyline, flying traffic, holo signs, rain, searchlight beams
 - Film-style cutscenes: the cast is blocked facing each other, the camera keeps to one side of the conversation (180° rule) and cuts on speaker changes between over-the-shoulder shots, close-ups, two-shots and establishing moves; it frames around walls and street props, eases in and out of first person, and shows dialogue as subtitles in the letterbox
-- Realistic people: every character is built from one Blender-made human kit (smooth anatomy, a sculpted head, hair, jackets) with skin, eyes, brows, lips, pores and hair strands painted in code from the chosen look; the character creator shows a live 3D preview you can turn
+- Realistic people: every character is built from one human kit (smooth anatomy and jackets made in Blender; the head, hands and eyes come from the CC0 MakeHuman base mesh, with its CC0 iris photo recoloured to the chosen eyes) with skin, brows, lashes, lips, pores and hair strands painted in code from the chosen look; the character creator shows a live 3D preview you can turn
 - Procedural character portraits (2D canvas)
 - Procedural WebAudio score — 8 moods (title, story, stealth, combat, boss, explore, tense, ending) with adaptive layering
 - Volumetric-looking light shafts, glow layer, chromatic aberration + film grain on high tier
@@ -584,6 +584,7 @@ Single HTML file, currently around 1MB (grows with script rebuilds). It has been
 ## Credits
 
 - **Engine:** Babylon.js
+- **Human head, hands and eyes:** the MakeHuman community's base mesh and eye texture (CC0, see `assets/src/makehuman/README.md`)
 - **Story & script:** copilot in word
 - **Music & sound:** real-time WebAudio synthesis
 - **All code:** claude opus 5.5, deepseek v4.1 flash

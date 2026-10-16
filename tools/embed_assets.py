@@ -7,7 +7,8 @@
 assets/manifest.json maps a short name to a source file plus its licence:
     { "robot": { "file": "src/robot.glb", "anims": ["Idle", "Walking"], "license": "CC0 1.0", "source": "..." } }
 "anims" (optional) keeps only the listed animation clips; "embed": false keeps a file in the repo without shipping it;
-"keep_attributes": true stops --slim from dropping UV sets that no material texture uses (the game paints its own textures onto them).
+"keep_attributes": true stops --slim from dropping UV sets that no material texture uses (the game paints its own textures onto them);
+"image": true embeds a small image (jpg/png) as a data URI in window.NV_IMGS instead of a model (NV.Human reads the eye texture from there).
 
 The models go into one script block, /*NV_ASSETS_BEGIN*/ window.NV_ASSETS = { name: 'base64' } /*NV_ASSETS_END*/,
 placed after the NV_ZH block. NV.Assets in index.html decodes and loads them.
@@ -48,7 +49,7 @@ def slim(src, keep, attrs=False):
 
 def main():
     man = json.load(open(os.path.join(ADIR, 'manifest.json'), encoding='utf-8'))
-    blob, total = {}, 0
+    blob, imgs, total = {}, {}, 0
     for name, a in man.items():
         if a.get('embed') is False:
             continue  # kept in the repo, not shipped in the game
@@ -57,6 +58,10 @@ def main():
             print(f'  {name}: missing {a["file"]}, skipped'); continue
         if not a.get('license'):
             sys.exit(f'{name}: no licence recorded in manifest.json')
+        if a.get('image'):
+            mime = 'image/png' if path.endswith('.png') else 'image/jpeg'
+            imgs[name] = 'data:' + mime + ';base64,' + base64.b64encode(open(path, 'rb').read()).decode('ascii')
+            print(f'  {name}: image {os.path.getsize(path) // 1024} KB ({a["license"]})'); continue
         data = slim(path, a.get('anims'), a.get('keep_attributes')) if '--slim' in sys.argv else open(path, 'rb').read()
         blob[name] = base64.b64encode(data).decode('ascii'); total += len(blob[name])
         print(f'  {name}: {os.path.getsize(path) // 1024} KB -> {len(data) // 1024} KB ({a["license"]})')
@@ -68,6 +73,13 @@ def main():
     else:
         a = html.index('</script>', html.index('/*NV_ZH_END*/')) + len('</script>')
         html = html[:a] + '\n' + block + html[a:]
+    iblock = '<script>/*NV_IMGS_BEGIN*/window.NV_IMGS=' + json.dumps(imgs, separators=(',', ':')) + ';/*NV_IMGS_END*/</script>'
+    if '/*NV_IMGS_BEGIN*/' in html:
+        a = html.index('<script>/*NV_IMGS_BEGIN*/'); b = html.index('/*NV_IMGS_END*/</script>') + len('/*NV_IMGS_END*/</script>')
+        html = html[:a] + iblock + html[b:]
+    else:
+        a = html.index('/*NV_ASSETS_END*/</script>') + len('/*NV_ASSETS_END*/</script>')
+        html = html[:a] + '\n' + iblock + html[a:]
     open(HTML, 'w', encoding='utf-8').write(html)
     print(f'[embed_assets] {len(blob)} models · {total // 1024} KB embedded')
     if total > BUDGET:

@@ -24,6 +24,8 @@ with the skin / cloth colour, and every skin part has UVs so the game can lay a 
 import math, os, sys
 import numpy as np
 import bpy, bmesh
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import mh_import as MHI     # the head, hands and eyes come from the CC0 MakeHuman base mesh (assets/src/makehuman)
 from mathutils import Vector
 from mathutils.bvhtree import BVHTree
 
@@ -239,7 +241,7 @@ def torso():
     prof = [
         (-0.250, .180, .121, 0, 0.002), (-0.170, .181, .122, 0, 0.005), (-0.050, .176, .118, 0, 0.009), (0.060, .190, .126, 0, 0.013),
         (0.160, .204, .131, 0, 0.016), (0.240, .214, .128, 0, 0.012), (0.292, .210, .118, 0, 0.004), (0.330, .168, .101, 0, -0.004),
-        (0.364, .106, .088, 0, -0.009), (0.394, .076, .076, 0, -0.011), (0.414, .074, .074, 0, -0.011)]
+        (0.364, .106, .088, 0, -0.020), (0.394, .090, .068, 0, -0.038), (0.414, .092, .068, 0, -0.044)]      # the collar sits round the neck, which leans back of the head centre
     prof = [(t, a * (0.86 if t < 0.35 else 0.92), b, c1, c2) for (t, a, b, c1, c2) in prof]      # narrower shoulders: the head reads at the right size
 
     def mod(th, y, u, v):
@@ -385,13 +387,13 @@ def arm_u():
 
 def arm_l():
     pt = Part('arm_l')
-    prof = [(-0.215, .037, .039, 0, 0.0), (-0.150, .031, .032, 0, 0.0), (-0.100, .034, .036, 0, 0.0), (-0.020, .042, .044, 0, 0.002),
+    prof = [(-0.175, .046, .048, 0, 0.0), (-0.115, .036, .038, 0, 0.0), (-0.070, .036, .038, 0, 0.0), (-0.020, .042, .044, 0, 0.002),
             (0.080, .049, .052, 0, 0.002), (0.160, .046, .049, 0, -0.002), (0.215, .044, .047, 0, 0.0)]
 
     def mod(th, y, u, v):
         k = 1.0
         col = [1.0, 1.0, 1.0]
-        cuff = band(y, -0.205, -0.135, .006)
+        cuff = band(y, -0.170, -0.105, .006)
         k += .0075 * cuff
         col = [c * (1 - .40 * cuff) for c in col]
         k += .004 * front_lobe(th, 270, 40) * math.exp(-((y - 0.15) ** 2) / (2 * .02 ** 2))          # elbow point
@@ -401,8 +403,8 @@ def arm_l():
     return loft(pt, prof, n=26, p=2.1, mod=mod, rows=18, cap0=0.0, cap1=0.0)
 
 
-def hand():
-    """a relaxed right hand hanging from the wrist: the palm faces the thigh (-x), the thumb is forward (+z), the fingers lie side by side
+def hand_procedural():
+    """(superseded by the MakeHuman hand, see hand() below) a relaxed right hand hanging from the wrist: the palm faces the thigh (-x), the thumb is forward (+z), the fingers lie side by side
     and curl a little toward the palm, more toward the little finger. Origin: the wrist centre is at y = +.05; the knuckle line is at -.062."""
     pt = Part('hand')
     # the palm: thin along x, wide along z, a little thicker on the thumb side
@@ -437,7 +439,41 @@ def hand():
     return pt
 
 
-BODY = [torso, pelvis, neck, leg_u, leg_l, foot, arm_u, arm_l, hand]
+# ---------------------------------------------------------------------------------------------------------------------------
+#  head, hands and eyes from the MakeHuman base mesh
+# ---------------------------------------------------------------------------------------------------------------------------
+MHDATA = None
+
+
+def mhdata():
+    global MHDATA
+    if MHDATA is None:
+        MHDATA = MHI.MH()
+    return MHDATA
+
+
+def mh_part(name, geo, subdiv=0):
+    pt = Part(name)
+    pt.v = np.asarray(geo['pos'], float)
+    pt.uv = np.asarray(geo['uv'], float)
+    pt.f = [tuple(f) for f in geo['faces']]
+    pt.col = np.ones((len(pt.v), 3))
+    pt.orient = 'centroid'          # to_object() decides the winding from the shape (these meshes come from another handedness)
+    pt.subdiv = subdiv
+    # the ambient occlusion rays follow the face normals of the Part, so wind the faces outward here too
+    nrm = pt.normals()
+    cen = pt.v.mean(axis=0)
+    if float(np.sum(np.einsum('ij,ij->i', nrm, pt.v - cen))) < 0:
+        pt.f = [tuple(reversed(f)) for f in pt.f]
+    return pt
+
+
+def hand():
+    """the relaxed right hand (the left one is this mesh mirrored): MakeHuman's hand, posed hanging with the fingers curled a little"""
+    return mh_part('hand', MHI.hand_geometry(mhdata()), subdiv=0)
+
+
+BODY = [torso, pelvis, leg_u, leg_l, foot, arm_u, arm_l, hand]
 
 # ---------------------------------------------------------------------------------------------------------------------------
 #  the head: an ellipsoid skull, sculpted with anatomical bumps (brow ridge, cheekbones, nose, lips, chin, jaw)
@@ -654,6 +690,17 @@ def hair_sheet(part, psis, theta0, y_end, drop, thick0=0.004, thick1=0.012, flar
         ye = float(y_end(psi) if callable(y_end) else y_end)
         th0 = float(theta0(psi) if callable(theta0) else theta0)
         th1 = math.acos(np.clip(ye / HB, -0.99, 0.99))
+        if head_pos is head_pos_surface and SURF_R is not None:                     # on the real head the polar angle that reaches height ye is found by bisection
+            lo_t, hi_t = max(0.05, th0 + 0.05), math.pi - 0.03
+            ph_ = np.array([math.pi + psi])
+            if head_pos(ph_, np.array([lo_t]))[0][1] > ye > head_pos(ph_, np.array([hi_t]))[0][1]:
+                for _ in range(22):
+                    mid = 0.5 * (lo_t + hi_t)
+                    if head_pos(ph_, np.array([mid]))[0][1] > ye:
+                        lo_t = mid
+                    else:
+                        hi_t = mid
+                th1 = 0.5 * (lo_t + hi_t)
         dr = float(drop(psi) if callable(drop) else drop) + rng.normal() * rnd
         t0 = float(thick0(psi) if callable(thick0) else thick0)
         t1 = float(thick1(psi) if callable(thick1) else thick1)
@@ -663,12 +710,12 @@ def hair_sheet(part, psis, theta0, y_end, drop, thick0=0.004, thick1=0.012, flar
             s = k / (ns - 1)
             th = th0 + (th1 - th0) * s
             p = head_pos(np.array([math.pi + psi]), np.array([th]))[0]
-            nrm = unit(p / np.array([HA, HB, HC]) ** 2)
+            nrm = hnorm(p)
             t = (t0 + (t1 - t0) * smooth(s)) * jitter
             pos[k, c] = p + nrm * t
             col[k, c] = dark_root + (1 - dark_root) * 0.5 * s
         pb = head_pos(np.array([math.pi + psi]), np.array([th1]))[0]
-        nb = unit(pb / np.array([HA, HB, HC]) ** 2)
+        nb = hnorm(pb)
         nh = unit(np.array([nb[0], 0.0, nb[2]]))
         for i in range(1, nd + 1):
             s = i / nd
@@ -738,7 +785,7 @@ def hair_mohawk():
         thv = 0.9 - 1.8 * t if t < 0.5 else 1.8 * t - 0.9
         thv = abs(thv) * 0.9 + 0.12
         base = head_pos(np.array([math.pi + (0.0 if t < 0.5 else math.pi)]), np.array([thv]))[0]
-        nrm = unit(base / np.array([HA, HB, HC]) ** 2)
+        nrm = hnorm(base)
         h = 0.070 * math.sin(math.pi * min(1, 0.12 + t * 0.98)) ** 0.8 + 0.012
         tilt = (0.5 - t) * 0.7
         lean = np.array([0.0, math.cos(tilt), math.sin(tilt) * 1.0]) * 1.0
@@ -754,9 +801,9 @@ def hair_bob():
     pt = Part('hair_bob')
     nc = 84
     psis = np.concatenate([np.linspace(-math.pi, -0.82, 44), np.linspace(0.82, math.pi, 44)])
-    hair_sheet(pt, psis, 0.10, lambda ps: (-0.092 + 0.015 * math.sin(ps * 9)) * smooth((abs(ps) - 0.82) / 0.55) + 0.030 * (1 - smooth((abs(ps) - 0.82) / 0.55)), 0.0, 0.012, 0.024, flare=0.006, stripe=0.14, ns=22, nd=2, seed=7, rnd=0.004, tuck=0.012)
+    hair_sheet(pt, psis, 0.10, lambda ps: (-0.092 + 0.015 * math.sin(ps * 9)) * smooth((abs(ps) - 0.82) / 0.55) + 0.030 * (1 - smooth((abs(ps) - 0.82) / 0.55)), 0.0, 0.012, 0.024, flare=0.006, stripe=0.14, ns=22, nd=2, seed=7, rnd=0.004, tuck=0.003)
     # the fringe over the forehead
-    fr = np.linspace(-1.1, 1.1, 36)
+    fr = np.linspace(-0.81, 0.81, 28)                      # stops where the side sheets start: two sheets over each other would cut through one another in a row of teeth
     hair_sheet(pt, fr, 0.10, lambda ps: 0.056 + 0.03 * abs(ps) ** 2, 0.0, 0.012, 0.016, stripe=0.18, ns=12, nd=2, seed=8)
     top = np.linspace(-math.pi, math.pi, 72)
     hair_sheet(pt, top, 0.0, lambda ps: 0.045 + 0.02 * smooth((np.abs(ps) - 0.5) / 1.5), 0.0, 0.008, 0.010, stripe=0.10, ns=8, nd=1, seed=9)
@@ -766,8 +813,8 @@ def hair_bob():
 def hair_long():
     pt = Part('hair_long')
     psis = np.concatenate([np.linspace(-math.pi, -0.86, 50), np.linspace(0.86, math.pi, 50)])
-    hair_sheet(pt, psis, 0.10, lambda ps: (-0.02 + 0.03 * math.sin(ps * 7)) * smooth((abs(ps) - 0.86) / 0.55) + 0.030 * (1 - smooth((abs(ps) - 0.86) / 0.55)), lambda ps: (0.36 + 0.05 * math.sin(ps * 11) + 0.04 * (1 - abs(abs(ps) - math.pi) / math.pi)) * (0.35 + 0.65 * smooth((abs(ps) - 0.86) / 0.6)), 0.012, 0.024, flare=0.016, stripe=0.14, ns=18, nd=14, seed=10, rnd=0.012, wave=0.006, lat=lambda ps: 0.045 * (1 - smooth((abs(ps) - 0.86) / 0.75)))
-    fr = np.linspace(-1.14, 1.14, 40)
+    hair_sheet(pt, psis, 0.10, lambda ps: (-0.02 + 0.03 * math.sin(ps * 7)) * smooth((abs(ps) - 0.86) / 0.55) + 0.030 * (1 - smooth((abs(ps) - 0.86) / 0.55)), lambda ps: (0.36 + 0.05 * math.sin(ps * 11) + 0.04 * (1 - abs(abs(ps) - math.pi) / math.pi)) * (0.62 + 0.38 * smooth((abs(ps) - 0.86) / 0.6)), 0.012, 0.024, flare=0.016, stripe=0.14, ns=18, nd=14, seed=10, rnd=0.012, wave=0.006, lat=lambda ps: 0.03 * (1 - smooth((abs(ps) - 0.86) / 0.75)))
+    fr = np.linspace(-0.85, 0.85, 30)
     hair_sheet(pt, fr, 0.10, lambda ps: 0.056 + 0.03 * abs(ps) ** 2, 0.0, 0.012, 0.016, stripe=0.18, ns=12, nd=2, seed=11)
     top = np.linspace(-math.pi, math.pi, 72)
     hair_sheet(pt, top, 0.0, lambda ps: 0.04 + 0.02 * smooth((np.abs(ps) - 0.5) / 1.5), 0.0, 0.008, 0.010, stripe=0.10, ns=8, nd=1, seed=12)
@@ -797,11 +844,10 @@ def hair_braids():
 
 def hood():
     pt = Part('hood')
-    # a hood pulled up: it hugs the skull, hangs a little over the nape and the sides of the neck, and has a rolled front edge above the eyes; no brim
-    side = np.concatenate([np.linspace(-math.pi, -0.88, 48), np.linspace(0.88, math.pi, 48)])
-    hair_sheet(pt, side, 0.0, lambda ps: -0.020 - 0.060 * smooth((abs(ps) - 1.2) / 1.6), lambda ps: 0.030 + 0.020 * smooth((abs(ps) - 1.6) / 1.2), 0.016, 0.022, flare=0.006, stripe=0.0, ns=18, nd=8, seed=15, dark_root=0.9, wave=0.002, vspan=0.9, tuck=0.004)
-    fr = np.linspace(-0.92, 0.92, 32)
-    hair_sheet(pt, fr, 0.0, lambda ps: 0.070 - 0.010 * (1 - np.cos(ps * 2.2)), 0.0, 0.016, 0.030, stripe=0.0, ns=14, nd=2, seed=16, dark_root=0.9, vspan=0.9)
+    # a hood pulled up: one shell that hugs the skull, frames the face (edge above the brows, down in front of the ears) and hangs round the neck; no brim
+    psis = np.linspace(-math.pi, math.pi, 112)
+    edge = lambda ps: np.interp(abs(ps), [0.0, 0.55, 0.85, 1.15, 1.5, 2.2, math.pi], [0.066, 0.062, 0.040, -0.020, -0.072, -0.092, -0.100])
+    hair_sheet(pt, psis, 0.0, edge, lambda ps: 0.010 * smooth((abs(ps) - 1.2) / 1.0), lambda ps: 0.015, lambda ps: 0.016 + 0.010 * (1 - smooth((abs(ps) - 0.3) / 0.7)), flare=0.007, stripe=0.0, ns=26, nd=3, seed=15, dark_root=0.9, wave=0.002, vspan=0.9, tuck=0.004)
     return pt
 
 
@@ -831,13 +877,169 @@ def cap():
 HAIR_STYLES = [hair_buzz, hair_undercut, hair_mohawk, hair_bob, hair_long, hair_bun, hair_braids, hood, cap]
 
 
+SURF_BVH = None
+SURF_R = None
+SURF_C = np.array([0.0, 0.004, -0.004])          # the skull centre: rays for the hair go out from here
+_head_pos_ellipsoid = head_pos
+
+
+def _neighbours(src, faces, n):
+    nb = [set() for _ in range(n)]
+    for f in faces:
+        for a_, b_ in zip(f, list(f[1:]) + [f[0]]):
+            nb[a_].add(b_)
+            nb[b_].add(a_)
+    return nb
+
+
+def smooth_scalar(vals, nb, passes=2):
+    v = vals.copy()
+    for _ in range(passes):
+        v = np.array([0.5 * v[i] + 0.5 * (np.mean([v[j] for j in nb[i]]) if nb[i] else v[i]) for i in range(len(v))])
+    return v
+
+
+def build_head_surface(geo):
+    """a smoothed copy of the head (no ears, nose and lips relief) used to fit hair, hoods and caps to the real head"""
+    global SURF_BVH
+    src = geo['src']
+    uniq, inv = np.unique(src, return_inverse=True)
+    P0 = np.zeros((len(uniq), 3))
+    P0[inv] = geo['pos']
+    faces = [tuple(inv[i] for i in f) for f in geo['faces']]
+    nb = _neighbours(inv, faces, len(uniq))
+    bnd = set()
+    edge_count = {}
+    for f in faces:
+        for a_, b_ in zip(f, list(f[1:]) + [f[0]]):
+            k = (min(a_, b_), max(a_, b_))
+            edge_count[k] = edge_count.get(k, 0) + 1
+    for (a_, b_), c in edge_count.items():
+        if c == 1:
+            bnd.add(a_)
+            bnd.add(b_)
+    Q = P0.copy()
+    for it in range(60):                                          # Taubin smoothing: smooths without shrinking the skull
+        lam = 0.5 if it % 2 == 0 else -0.53
+        new = Q.copy()
+        for i in range(len(Q)):
+            if i in bnd or not nb[i]:
+                continue
+            new[i] = Q[i] + lam * (np.mean([Q[j] for j in nb[i]], axis=0) - Q[i])
+        Q = new
+    # the ears: flatten them into a smooth membrane over the skull, then raise it into a low dome, so hair and cloth go over the ear instead of round every fold of it
+    em = np.zeros(len(uniq))
+    em[inv] = geo['masks']['ears']
+    ear = [i for i in range(len(Q)) if em[i] > 0.03 and i not in bnd]
+    if ear:
+        eset = set(ear)
+        for it in range(200):
+            for i in ear:
+                Q[i] = np.mean([Q[j] for j in nb[i]], axis=0)
+        c0 = Q.mean(axis=0)
+        for i in ear:
+            d = Q[i] - np.array([0.0, Q[i][1], 0.0])
+            d = d / max(np.linalg.norm(d), 1e-9)
+            Q[i] = Q[i] + d * 0.008 * min(1.0, em[i] * 2.5)
+    tris = []
+    for f in faces:
+        for k in range(1, len(f) - 1):
+            tris.append((int(f[0]), int(f[k]), int(f[k + 1])))
+    SURF_BVH = BVHTree.FromPolygons([tuple(map(float, q)) for q in Q], tris, epsilon=0.0)
+    # radius of the surface seen from the skull centre on a (longitude, polar angle) grid, blurred a little: the hair columns read it instead of casting a ray each, so a fold of the
+    # ear or a dip beside the eye cannot make neighbouring columns jump
+    global SURF_R
+    nph, nth = 360, 181
+    R = np.zeros((nph, nth))
+    for a in range(nph):
+        ph = TAU * a / nph
+        for b in range(nth):
+            th = math.pi * b / (nth - 1)
+            dd = Vector((math.sin(th) * math.sin(ph), math.cos(th), -math.sin(th) * math.cos(ph)))
+            hit = SURF_BVH.ray_cast(Vector(SURF_C), dd, 1.0)
+            R[a, b] = (Vector(hit[0]) - Vector(SURF_C)).length if hit[0] is not None else 0.1
+    for _ in range(3):
+        R = 0.25 * np.roll(R, 1, axis=0) + 0.5 * R + 0.25 * np.roll(R, -1, axis=0)
+        Rp = np.pad(R, ((0, 0), (1, 1)), mode='edge')
+        R = 0.25 * Rp[:, :-2] + 0.5 * Rp[:, 1:-1] + 0.25 * Rp[:, 2:]
+    SURF_R = R
+
+
+def head_pos_surface(phi, theta, features=True):
+    """a point on the (smoothed) real head for polar coordinates (phi around, theta from the top; phi = pi looks at the face), like head_pos()"""
+    phi = np.asarray(phi, float)
+    theta = np.asarray(theta, float)
+    shape = np.broadcast(phi, theta).shape
+    ph = np.broadcast_to(phi, shape).ravel()
+    th = np.broadcast_to(theta, shape).ravel()
+    d = np.stack([np.sin(th) * np.sin(ph), np.cos(th), -np.sin(th) * np.cos(ph)], axis=-1)
+    nph, nth = SURF_R.shape
+    fa = (ph % TAU) / TAU * nph
+    fb = np.clip(th, 0.0, math.pi) / math.pi * (nth - 1)
+    a0 = np.floor(fa).astype(int)
+    b0 = np.minimum(np.floor(fb).astype(int), nth - 2)
+    ta, tb = fa - a0, fb - b0
+    a0 %= nph
+    a1 = (a0 + 1) % nph
+    r = (SURF_R[a0, b0] * (1 - ta) * (1 - tb) + SURF_R[a1, b0] * ta * (1 - tb) + SURF_R[a0, b0 + 1] * (1 - ta) * tb + SURF_R[a1, b0 + 1] * ta * tb)
+    out = SURF_C + d * r[:, None]
+    return out.reshape(tuple(shape) + (3,))
+
+
+def hnorm(p):
+    """outward unit normal of the head surface near the point p"""
+    if SURF_BVH is None:
+        return unit(p / np.array([HA, HB, HC]) ** 2)
+    hit = SURF_BVH.find_nearest(Vector(np.asarray(p, float)))
+    n = np.array(hit[1])
+    n = n if np.dot(n, np.asarray(p, float) - SURF_C) > 0 else -n
+    rad = unit(np.asarray(p, float) - SURF_C)
+    return unit(0.8 * rad + 0.2 * n)                 # mostly radial: the surface normal alone jumps about over the ear and the jaw, and hair laid along it came out in shards
+
+
+LIPS = np.array([1.0, 0.70, 0.68])
+BROWS = np.array([0.80, 0.76, 0.74])
+EARS = np.array([1.0, 0.86, 0.84])
+NOSE = np.array([1.0, 0.90, 0.88])
+
+
+def mh_head_parts():
+    global head_pos
+    mh = mhdata()
+    geo = MHI.head_geometry(mh)
+    src = geo['src']
+    uniq, inv = np.unique(src, return_inverse=True)
+    nb = _neighbours(inv, [tuple(inv[i] for i in f) for f in geo['faces']], len(uniq))
+    col = np.ones((len(src), 3))
+    for name, tint, amt in (('lips', LIPS, 1.0), ('brows', BROWS, 0.8), ('ears', EARS, 1.0), ('nose', NOSE, 0.7)):
+        m = np.zeros(len(uniq))
+        m[inv] = geo['masks'][name]
+        m = smooth_scalar(m, nb, 2)[inv] * amt
+        col = col * (1 - m[:, None]) + (col * tint) * m[:, None]
+    head = mh_part('head', geo, subdiv=1)
+    head.col = col
+    lo = mh_part('head_lo', geo, subdiv=0)          # (decimated to about 4 thousand triangles at export: DECIMATE_PARTS)
+    lo.col = col
+    lo2 = mh_part('head_lo2', geo, subdiv=0)        # the far version, about a thousand triangles
+    lo2.col = col
+    build_head_surface(geo)
+    head_pos = head_pos_surface
+    # the eyeballs, fitted to the head the same way
+    pts, esrc, euv, efaces = MHI.eyes_geometry(mh)
+    eyes = Part('eyes')
+    eyes.v = geo['to_head'](pts[esrc])
+    eyes.uv = euv
+    eyes.f = [tuple(f) for f in efaces]
+    eyes.col = np.ones((len(eyes.v), 3))
+    eyes.orient = 'centroid'
+    return head, lo, lo2, eyes
+
+
 def HEAD_PARTS(only=None):
     if only and not (only & {'head', 'body'}):
         return {}
-    head = head_part()
-    sc, ir = eyes_parts(head)
-    ear = ear_part(head)
-    out = {'head': head, 'ear': ear, 'head_lo': head_part(30, 12, 28, 'head_lo')}
+    head, lo, lo2, eyes = mh_head_parts()
+    out = {'head': head, 'eyes': eyes, 'head_lo': lo, 'head_lo2': lo2}
     if not only or 'hair' in only or 'body' in only:
         for fn in HAIR_STYLES:
             h = fn()
@@ -903,7 +1105,8 @@ def smooth_by_position(part, ao, passes=2):
 
 
 def bake_ao(parts, rays=24, dist=0.11, lo=0.38, skip_names=()):
-    bvh = assembled_bvh(parts)
+    # the occluders are the body, the head and the eyes: hair, hoods, caps and the coarse duplicates of the head must not shade the skin under them
+    bvh = assembled_bvh(parts, skip=set(LOD_HAIR) | {'head_lo', 'head_lo2'})
     for name, part in parts.items():
         if name not in MOUNT or not len(part.v):
             continue
@@ -966,7 +1169,12 @@ def to_object(part):
                         seen.add(g.index)
                         stack.append(g)
         closed = all(not e.is_boundary for f in island for e in f.edges)
-        if closed:
+        if getattr(part, 'orient', None) == 'centroid':
+            bmesh.ops.recalc_face_normals(bm, faces=island)
+            cen = sum((v.co for f in island for v in f.verts), Vector()) / max(1, sum(len(f.verts) for f in island))
+            if sum(f.normal.dot(f.calc_center_median() - cen) for f in island) < 0:
+                bmesh.ops.reverse_faces(bm, faces=island)
+        elif closed:
             bmesh.ops.recalc_face_normals(bm, faces=island)
         else:
             bmesh.ops.reverse_faces(bm, faces=island)       # open shells are authored outward in game space; the axis change P() mirrors that
@@ -995,6 +1203,11 @@ def to_object(part):
     mt = bpy.data.materials.new(part.name)
     mt.use_nodes = True
     ob.data.materials.append(mt)
+    if getattr(part, 'subdiv', 0):                       # smooth the base mesh once (Catmull-Clark): rounder silhouettes, UVs and colours follow
+        bpy.context.view_layer.objects.active = ob
+        md = ob.modifiers.new('sub', 'SUBSURF')
+        md.levels = md.render_levels = part.subdiv
+        bpy.ops.object.modifier_apply(modifier=md.name)
     return ob
 
 
@@ -1009,11 +1222,18 @@ def clear():
 LOD_BODY = ('torso', 'pelvis', 'neck', 'leg_u', 'leg_l', 'foot', 'arm_u', 'arm_l', 'hand', 'ear')
 LOD_HAIR = ('hair_buzz', 'hair_undercut', 'hair_mohawk', 'hair_bob', 'hair_long', 'hair_bun', 'hair_braids', 'hood', 'cap')
 LOD_RATIO = 0.2
+DECIMATE_PARTS = {'head_lo': 0.5, 'head_lo2': 0.12}      # parts that are exported as their own coarse versions
 
 
 def export(parts, path):
     clear()
     objs = [to_object(p) for p in parts.values() if len(p.v)]
+    for o in objs:
+        if o.name in DECIMATE_PARTS:
+            md = o.modifiers.new('lod', 'DECIMATE')
+            md.ratio = DECIMATE_PARTS[o.name]
+            bpy.context.view_layer.objects.active = o
+            bpy.ops.object.modifier_apply(modifier=md.name)
     # coarse copies of the body parts for distant people (crowds, enemies): about a fifth of the triangles
     for o in list(objs):
         if o.name in LOD_BODY or o.name in LOD_HAIR:
