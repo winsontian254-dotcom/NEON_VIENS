@@ -1,6 +1,16 @@
 {
-  "build": 42,
+  "build": 43,
   "history": [
+    {
+      "build": 43,
+      "version": "1.43",
+      "date": "2026-10-16",
+      "notes": [
+        "Faces are left blank (plain smooth skin, no painted eyes, nose or mouth) instead of the uncanny painted faces; Ghost's courier hood is now a proper draped hood instead of a cap with a brim",
+        "New human hands with separate fingers and a thumb, bare skin for everyone except soldiers; narrower hips and legs",
+        "Hair has more strand detail and soft ends, long hair now falls clear of the face"
+      ]
+    },
     {
       "build": 42,
       "version": "1.42",
@@ -227,17 +237,6 @@
       "date": "2026-10-11",
       "notes": [
         "The Helix trace is harder: it climbs faster, falls slower, locks harder and its intrusions come earlier and give you less time"
-      ]
-    },
-    {
-      "build": 18,
-      "version": "1.18",
-      "date": "2026-10-11",
-      "notes": [
-        "Nuallink: Ghost's implant is now a link with an inbox of calls and messages from the cast (press N, or open it from the pause menu or the Journal)",
-        "Helix now traces your link while enemies hunt you: at full trace it locks the line and sends a squad; press V to raise a firewall against its intrusions",
-        "ASCENSION speaks on the link after Chapter 4 and can mark or freeze nearby hostiles on V; Clawd briefs every operation, translated by CrustAI",
-        "Ghost Mode switches the link off; the Dossier has a new section on the numbers"
       ]
     }
   ]

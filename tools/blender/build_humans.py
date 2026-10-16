@@ -264,6 +264,7 @@ def pelvis():
     pt = Part('pelvis')
     prof = [(-0.165, .148, .106, 0, -0.004), (-0.100, .178, .118, 0, -0.006), (-0.020, .190, .122, 0, -0.008), (0.050, .180, .115, 0, 0.0),
             (0.092, .172, .110, 0, 0.0)]
+    prof = [(t, a * 0.88, b * 0.96, c1, c2) for (t, a, b, c1, c2) in prof]        # hips no wider than the jacket
 
     def mod(th, y, u, v):
         k = 1.0
@@ -301,6 +302,7 @@ def leg_u():
     pt = Part('leg_u')
     prof = [(-0.285, .056, .060, 0, 0.000), (-0.225, .060, .066, 0, 0.002), (-0.140, .073, .080, 0, 0.004), (-0.020, .089, .099, 0, 0.006),
             (0.100, .098, .108, 0, 0.004), (0.200, .100, .105, 0, 0.002), (0.255, .084, .088, 0, 0.0), (0.285, .050, .052, 0, 0.0)]
+    prof = [(t, a * 0.86, b * 0.88, c1, c2) for (t, a, b, c1, c2) in prof]
 
     def mod(th, y, u, v):
         k = 1.0
@@ -319,6 +321,7 @@ def leg_l():
     pt = Part('leg_l')
     prof = [(-0.265, .044, .048, 0, 0.002), (-0.235, .043, .047, 0, 0.0), (-0.160, .040, .045, 0, -0.004), (-0.060, .050, .057, 0, -0.008),
             (0.040, .057, .066, 0, -0.010), (0.120, .060, .068, 0, -0.004), (0.215, .062, .066, 0, 0.002), (0.275, .058, .062, 0, 0.0)]
+    prof = [(t, a * 0.9, b * 0.9, c1, c2) for (t, a, b, c1, c2) in prof]
 
     def mod(th, y, u, v):
         k = 1.0
@@ -399,35 +402,38 @@ def arm_l():
 
 
 def hand():
-    """relaxed right hand hanging from the wrist, palm toward the thigh (-x), thumb forward (+z), fingers curled toward the palm"""
+    """a relaxed right hand hanging from the wrist: the palm faces the thigh (-x), the thumb is forward (+z), the fingers lie side by side
+    and curl a little toward the palm, more toward the little finger. Origin: the wrist centre is at y = +.05; the knuckle line is at -.062."""
     pt = Part('hand')
-    prof = [(0.040, .026, .018, 0, 0.0), (0.0, .031, .019, 0, 0.0), (-0.040, .038, .021, 0, 0.0), (-0.078, .043, .022, 0, 0.0), (-0.100, .042, .021, 0, 0.0)]
-    loft(pt, prof, n=22, axis='y', p=2.6, rows=8, cap0=0.0, cap1=0.0)
-    # knuckle row
-    zs = (0.030, 0.010, -0.010, -0.028)
-    lens = ((.078, (30, 55, 40)), (.086, (28, 58, 42)), (.080, (30, 56, 40)), (.064, (32, 55, 36)))
-    for z, (L, ang) in zip(zs, lens):
-        ellipsoid(pt, (0.0, -0.100, z), (.0125, .010, .0112), 10, 6)
-        base = np.array([0.0, -0.100, z])
+    # the palm: thin along x, wide along z, a little thicker on the thumb side
+    prof = [(0.050, .0150, .0290, 0.0, 0.000), (0.020, .0155, .0305, -.001, 0.002), (-0.010, .0160, .0365, -.002, 0.004), (-0.040, .0143, .0412, -.001, 0.001), (-0.062, .0118, .0428, 0.0, 0.000)]
+    loft(pt, prof, n=26, axis='y', p=2.3, rows=12, cap0=0.0, cap1=0.012)
+    zs = (0.0295, 0.0105, -0.0085, -0.0255)
+    lens = ((.043, .026, .021), (.047, .029, .023), (.044, .027, .022), (.035, .021, .019))
+    curl = ((16, 28, 12), (22, 36, 14), (28, 42, 18), (34, 48, 22))
+    rad = ((.0090, .0082, .0074, .0067), (.0092, .0084, .0076, .0069), (.0088, .0080, .0072, .0065), (.0078, .0071, .0064, .0057))
+    for z, L, cv, rr in zip(zs, lens, curl, rad):
+        base = np.array([-0.001, -0.060, z])
+        ellipsoid(pt, base + np.array([0.0, -0.004, 0.0]), (rr[0] * 1.02, 0.010, rr[0] * 1.02), 10, 6)
         path = [base]
         cur = base.copy()
         th = 0.0
-        segs = (L * 0.44, L * 0.30, L * 0.26)
-        radii = [0.0105, 0.0095, 0.0085, 0.0074]
-        for s, a in zip(segs, ang):
+        for seg, a in zip(L, cv):
             th += math.radians(a)
-            cur = cur + np.array([-math.sin(th), -math.cos(th), 0.0]) * s
+            cur = cur + np.array([-math.sin(th), -math.cos(th), 0.0]) * seg
             path.append(cur.copy())
-        ellipsoid(pt, path[-1], (.0075, .0075, .0072), 8, 5)
-        tube(pt, path, radii, n=10, ratio=1.0)
-    # thumb: from the base of the palm, forward and down, bending in
-    tp = [np.array([-0.006, -0.012, 0.030]), np.array([-0.004, -0.040, 0.048]), np.array([-0.012, -0.066, 0.056]), np.array([-0.026, -0.084, 0.052])]
-    tube(pt, tp, [0.0135, 0.0120, 0.0105, 0.0088], n=10, ratio=1.0)
-    ellipsoid(pt, tp[-1], (.0088, .0088, .0085), 8, 5)
-    # thenar pad
-    ellipsoid(pt, (-0.002, -0.040, 0.030), (.020, .030, .014), 12, 8)
-    # back of the hand and wrist tendons: mild ridge
-    ellipsoid(pt, (0.018, -0.050, 0.0), (.010, .042, .030), 10, 8)
+            # a joint bulge
+            ellipsoid(pt, cur, (rr[min(len(path) - 1, 3)] * 1.0,) * 3, 8, 5)
+        tube(pt, path, list(rr), n=12, ratio=1.0)
+        ellipsoid(pt, path[-1], (rr[3] * 1.02,) * 3, 8, 5)
+        ellipsoid(pt, (0.008, -0.063, z), (0.0060, 0.0065, 0.0085), 8, 5)           # the knuckle on the back of the hand
+    # the thumb: from the thenar pad, forward and down, lying against the index finger
+    tp = [np.array([-0.004, -0.012, 0.036]), np.array([-0.006, -0.036, 0.048]), np.array([-0.010, -0.058, 0.050]), np.array([-0.015, -0.080, 0.047]), np.array([-0.019, -0.094, 0.043])]
+    tube(pt, tp, [0.0118, 0.0106, 0.0096, 0.0086, 0.0078], n=12, ratio=1.0)
+    ellipsoid(pt, tp[-1], (.0080, .0080, .0078), 8, 5)
+    ellipsoid(pt, (-0.007, -0.022, 0.036), (.010, .028, .016), 12, 8)                 # thenar pad
+    ellipsoid(pt, (-0.005, -0.028, -0.032), (.008, .026, .010), 10, 6)                # the heel of the little-finger side
+    ellipsoid(pt, (0.010, -0.030, 0.002), (.006, .036, .026), 10, 8)                  # the back of the hand
     return pt
 
 
@@ -458,6 +464,9 @@ FEATURES = [
     ('temple_r', 0.066, 0.042, 0.050, .020, .030, .03, -.0040), ('temple_l', -0.066, 0.042, 0.050, .020, .030, .03, -.0040),
     ('undereye_r', 0.0325, -0.008, 0.100, .016, .005, .02, -.0015), ('undereye_l', -0.0325, -0.008, 0.100, .016, .005, .02, -.0015),
 ]
+BLANK_FACE = 0.22          # the face is left a smooth blank surface: facial detail (brows, eyes, nose, lips) keeps only this share of its relief
+STRUCT = ('forehead', 'cheek_r', 'cheek_l', 'chin', 'jaw_r', 'jaw_l', 'temple_r', 'temple_l')
+FEATURES = [f if f[0] in STRUCT else f[:7] + (f[7] * BLANK_FACE,) for f in FEATURES]
 FEAT = {f[0]: f for f in FEATURES}
 
 
@@ -633,7 +642,7 @@ def hairline_y(psi):
     return np.interp(a, [0.0, 0.5, 1.0, 1.45, 1.9, 2.5, math.pi], [0.074, 0.062, 0.040, 0.022, 0.0, -0.045, -0.078])
 
 
-def hair_sheet(part, psis, theta0, y_end, drop, thick0=0.004, thick1=0.012, flare=0.0, stripe=0.10, ns=16, nd=8, rnd=0.0, wave=0.0, seed=1, dark_root=0.55, tuck=0.0, vspan=None, ucols=0.14):
+def hair_sheet(part, psis, theta0, y_end, drop, thick0=0.004, thick1=0.012, flare=0.0, stripe=0.10, ns=16, nd=8, rnd=0.0, wave=0.0, seed=1, dark_root=0.55, tuck=0.0, vspan=None, ucols=0.14, lat=0.0):
     """one column per longitude: from near the crown down over the scalp to y_end, then hanging `drop` metres straight down"""
     rng = np.random.default_rng(seed)
     psis = np.asarray(psis, float)
@@ -648,6 +657,7 @@ def hair_sheet(part, psis, theta0, y_end, drop, thick0=0.004, thick1=0.012, flar
         dr = float(drop(psi) if callable(drop) else drop) + rng.normal() * rnd
         t0 = float(thick0(psi) if callable(thick0) else thick0)
         t1 = float(thick1(psi) if callable(thick1) else thick1)
+        lt = float(lat(psi) if callable(lat) else lat)
         jitter = 1.0 + stripe * math.sin(psi * 83.0 + 1.7) + 0.5 * stripe * math.sin(psi * 37.0)
         for k in range(ns):
             s = k / (ns - 1)
@@ -664,10 +674,12 @@ def hair_sheet(part, psis, theta0, y_end, drop, thick0=0.004, thick1=0.012, flar
             s = i / nd
             q = pb + np.array([0.0, -dr * s, 0.0]) + nh * (t1 * jitter + flare * s) - nh * tuck * s * s
             q[0] += wave * math.sin(s * 5.5 + psi * 3.0) * s
+            q[0] += math.copysign(1.0, pb[0] + 1e-9) * lt * s                 # hair that falls beside the face is swept outward and back, clear of the cheek
+            q[2] -= 0.8 * lt * s
             pos[ns - 1 + i, c] = q
             col[ns - 1 + i, c] = 0.82 + 0.18 * s + 0.06 * math.sin(psi * 60 + s * 9)
     flat = pos.reshape(-1, 3)
-    vs = (1.0 if nd > 2 else 0.5) if vspan is None else vspan
+    vs = 0.95 if vspan is None else vspan
     uv = np.stack([np.tile(np.arange(nc) * ucols, rows), np.repeat(np.linspace(0, 1, rows), nc) * vs], axis=1)
     i0 = part.add(flat, uv, col.reshape(-1, 3))
     part.grid(i0, rows, nc)
@@ -754,7 +766,7 @@ def hair_bob():
 def hair_long():
     pt = Part('hair_long')
     psis = np.concatenate([np.linspace(-math.pi, -0.86, 50), np.linspace(0.86, math.pi, 50)])
-    hair_sheet(pt, psis, 0.10, lambda ps: (-0.02 + 0.03 * math.sin(ps * 7)) * smooth((abs(ps) - 0.86) / 0.55) + 0.030 * (1 - smooth((abs(ps) - 0.86) / 0.55)), lambda ps: (0.36 + 0.05 * math.sin(ps * 11) + 0.04 * (1 - abs(abs(ps) - math.pi) / math.pi)) * (0.35 + 0.65 * smooth((abs(ps) - 0.86) / 0.6)), 0.012, 0.024, flare=0.016, stripe=0.14, ns=18, nd=14, seed=10, rnd=0.012, wave=0.006)
+    hair_sheet(pt, psis, 0.10, lambda ps: (-0.02 + 0.03 * math.sin(ps * 7)) * smooth((abs(ps) - 0.86) / 0.55) + 0.030 * (1 - smooth((abs(ps) - 0.86) / 0.55)), lambda ps: (0.36 + 0.05 * math.sin(ps * 11) + 0.04 * (1 - abs(abs(ps) - math.pi) / math.pi)) * (0.35 + 0.65 * smooth((abs(ps) - 0.86) / 0.6)), 0.012, 0.024, flare=0.016, stripe=0.14, ns=18, nd=14, seed=10, rnd=0.012, wave=0.006, lat=lambda ps: 0.045 * (1 - smooth((abs(ps) - 0.86) / 0.75)))
     fr = np.linspace(-1.14, 1.14, 40)
     hair_sheet(pt, fr, 0.10, lambda ps: 0.056 + 0.03 * abs(ps) ** 2, 0.0, 0.012, 0.016, stripe=0.18, ns=12, nd=2, seed=11)
     top = np.linspace(-math.pi, math.pi, 72)
@@ -785,10 +797,11 @@ def hair_braids():
 
 def hood():
     pt = Part('hood')
-    side = np.concatenate([np.linspace(-math.pi, -0.90, 44), np.linspace(0.90, math.pi, 44)])
-    hair_sheet(pt, side, 0.0, lambda ps: -0.035 + 0.03 * (1 - smooth((abs(ps) - 0.9) / 0.9)), lambda ps: 0.06 * smooth((abs(ps) - 0.9) / 0.5) * (0.4 + 0.6 * abs(abs(ps) - math.pi) / math.pi), 0.020, 0.026, flare=0.045, stripe=0.0, ns=18, nd=8, seed=15, dark_root=0.9, wave=0.003)
-    fr = np.linspace(-0.92, 0.92, 30)
-    hair_sheet(pt, fr, 0.0, lambda ps: 0.082 - 0.006 * (1 - np.cos(ps * 2.2)), 0.0, 0.020, 0.030, stripe=0.0, ns=14, nd=2, seed=16, dark_root=0.9)
+    # a hood pulled up: it hugs the skull, hangs a little over the nape and the sides of the neck, and has a rolled front edge above the eyes; no brim
+    side = np.concatenate([np.linspace(-math.pi, -0.88, 48), np.linspace(0.88, math.pi, 48)])
+    hair_sheet(pt, side, 0.0, lambda ps: -0.020 - 0.060 * smooth((abs(ps) - 1.2) / 1.6), lambda ps: 0.030 + 0.020 * smooth((abs(ps) - 1.6) / 1.2), 0.016, 0.022, flare=0.006, stripe=0.0, ns=18, nd=8, seed=15, dark_root=0.9, wave=0.002, vspan=0.9, tuck=0.004)
+    fr = np.linspace(-0.92, 0.92, 32)
+    hair_sheet(pt, fr, 0.0, lambda ps: 0.070 - 0.010 * (1 - np.cos(ps * 2.2)), 0.0, 0.016, 0.030, stripe=0.0, ns=14, nd=2, seed=16, dark_root=0.9, vspan=0.9)
     return pt
 
 
@@ -842,8 +855,8 @@ MOUNT = {
     'head_lo': [((0, 1.80, 0), False)],
     'torso': [((0, 1.26, 0), False)], 'pelvis': [((0, .96, 0), False)], 'neck': [((0, 1.67, 0), False)],
     'head': [((0, 1.80, 0), False)], 'eyes': [((0, 1.80, 0), False)], 'iris': [((0, 1.80, 0), False)], 'ear': [((0, 1.80, 0), False)],
-    'leg_u': [((-.12, .70, 0), False), ((.12, .70, 0), False)], 'leg_l': [((-.12, .25, 0), False), ((.12, .25, 0), False)],
-    'foot': [((-.12, .04, .06), True), ((.12, .04, .06), False)],
+    'leg_u': [((-.105, .70, 0), False), ((.105, .70, 0), False)], 'leg_l': [((-.105, .25, 0), False), ((.105, .25, 0), False)],
+    'foot': [((-.105, .04, .06), True), ((.105, .04, .06), False)],
     'arm_u': [((-.228, 1.34, 0), True), ((.228, 1.34, 0), False)], 'arm_l': [((-.228, 1.01, 0), True), ((.228, 1.01, 0), False)],
     'hand': [((-.228, .83, 0), True), ((.228, .83, 0), False)],
 }
@@ -865,7 +878,7 @@ def assembled_bvh(parts, skip=()):
     return BVHTree.FromPolygons(verts, tris, epsilon=0.0)
 
 
-AO_SETTINGS = {'head': (48, 0.05, 0.55), 'head_lo': (24, 0.05, 0.55), 'ear': (32, 0.04, 0.5), 'neck': (32, 0.08, 0.45), 'hand': (32, 0.04, 0.45)}
+AO_SETTINGS = {'head': (48, 0.05, 0.55), 'head_lo': (24, 0.05, 0.55), 'ear': (32, 0.04, 0.5), 'neck': (32, 0.08, 0.45), 'hand': (32, 0.03, 0.62)}
 
 
 def smooth_by_position(part, ao, passes=2):
