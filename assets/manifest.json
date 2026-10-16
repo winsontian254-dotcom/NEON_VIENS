@@ -89,5 +89,11 @@
     "file": "src/w_sniper.glb",
     "license": "Original (Neon Veins)",
     "source": "Built from scratch by tools/blender/build_weapons.py"
+  },
+  "human_kit": {
+    "file": "src/human_kit.glb",
+    "license": "Original (Neon Veins)",
+    "source": "Built from scratch by tools/blender/build_humans.py (smooth anatomy, sculpted head, hair sheets; vertex colour = baked ambient occlusion)",
+    "keep_attributes": true
   }
 }

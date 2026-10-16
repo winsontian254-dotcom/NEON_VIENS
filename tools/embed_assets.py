@@ -6,7 +6,8 @@
 
 assets/manifest.json maps a short name to a source file plus its licence:
     { "robot": { "file": "src/robot.glb", "anims": ["Idle", "Walking"], "license": "CC0 1.0", "source": "..." } }
-"anims" (optional) keeps only the listed animation clips; "embed": false keeps a file in the repo without shipping it.
+"anims" (optional) keeps only the listed animation clips; "embed": false keeps a file in the repo without shipping it;
+"keep_attributes": true stops --slim from dropping UV sets that no material texture uses (the game paints its own textures onto them).
 
 The models go into one script block, /*NV_ASSETS_BEGIN*/ window.NV_ASSETS = { name: 'base64' } /*NV_ASSETS_END*/,
 placed after the NV_ZH block. NV.Assets in index.html decodes and loads them.
@@ -23,20 +24,20 @@ BUDGET = 8 * 1024 * 1024
 SLIM = r"""
 import { NodeIO } from '@gltf-transform/core';
 import { prune, dedup, quantize, weld } from '@gltf-transform/functions';
-const [src, dst, keep] = process.argv.slice(2);
+const [src, dst, keep, attrs] = process.argv.slice(2);
 const io = new NodeIO(); const doc = await io.read(src);
 const want = keep ? keep.split('|') : null;
 if (want) doc.getRoot().listAnimations().forEach(a => { if (!want.includes(a.getName())) a.dispose(); });
-await doc.transform(dedup(), weld(), prune(), quantize());
+await doc.transform(dedup(), weld(), prune(attrs === '1' ? { keepAttributes: true } : {}), quantize());
 await io.write(dst, doc);
 """
 
 
-def slim(src, keep):
+def slim(src, keep, attrs=False):
     with tempfile.TemporaryDirectory() as td:
         js = os.path.join(os.environ.get('GLTF_TRANSFORM_DIR', td), '_nv_slim.mjs'); out = os.path.join(td, 'out.glb')
         open(js, 'w').write(SLIM)
-        r = subprocess.run(['node', js, src, out, '|'.join(keep or [])], capture_output=True, text=True)
+        r = subprocess.run(['node', js, src, out, '|'.join(keep or []), '1' if attrs else '0'], capture_output=True, text=True)
         try: os.remove(js)
         except OSError: pass
         if r.returncode:
@@ -56,7 +57,7 @@ def main():
             print(f'  {name}: missing {a["file"]}, skipped'); continue
         if not a.get('license'):
             sys.exit(f'{name}: no licence recorded in manifest.json')
-        data = slim(path, a.get('anims')) if '--slim' in sys.argv else open(path, 'rb').read()
+        data = slim(path, a.get('anims'), a.get('keep_attributes')) if '--slim' in sys.argv else open(path, 'rb').read()
         blob[name] = base64.b64encode(data).decode('ascii'); total += len(blob[name])
         print(f'  {name}: {os.path.getsize(path) // 1024} KB -> {len(data) // 1024} KB ({a["license"]})')
     html = open(HTML, encoding='utf-8').read()

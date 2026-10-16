@@ -1,6 +1,16 @@
 {
-  "build": 40,
+  "build": 41,
   "history": [
+    {
+      "build": 41,
+      "version": "1.41",
+      "date": "2026-10-16",
+      "notes": [
+        "Realistic people: enemies, civilians, pedestrians, story characters, Ghost and other players now have smooth human bodies, a sculpted face with painted eyes, brows, lips and skin pores, real hair and proper jackets instead of the old low-poly blocks",
+        "Ghost's look drives the 3D body: skin tone, hair style and colour, jacket, visor, shades, glowing optics and cyberware all show on the model",
+        "The character creator now shows a live 3D preview of Ghost that you can drag to turn"
+      ]
+    },
     {
       "build": 40,
       "version": "1.40",
@@ -228,15 +238,6 @@
         "Missions get complications from act 2 on (act 1 on Hard): blackouts, reinforcements on the first alarm, a tripped alarm that keeps sending squads, turrets, and snipers whose red laser gives you a moment to sidestep",
         "Four new enemy types: snipers, shield troops (shots bounce off their shield from the front), rushers that lunge, and fixed turrets that an EMP stuns",
         "Complications show in the briefing and as chips at the top of the screen; fast enemy shots can no longer skip past you between frames"
-      ]
-    },
-    {
-      "build": 16,
-      "version": "1.16",
-      "date": "2026-10-11",
-      "notes": [
-        "Missions now have twists: plant charges and outrun the fuse, assassinate an armoured officer, hunt a keycard, free a hostage who follows you out, hold a lockdown ring against waves, hold an upload or outrun a reactor overload, and survive ambushes at pickups",
-        "The briefing, objective panel, markers, prompts and timers show each twist; reinforcements arrive from out of sight when you trip one"
       ]
     }
   ]
