@@ -1,6 +1,16 @@
 {
-  "build": 41,
+  "build": 42,
   "history": [
+    {
+      "build": 42,
+      "version": "1.42",
+      "date": "2026-10-16",
+      "notes": [
+        "Faces and clothes look much more natural: reworked head proportions (eyes, nose, mouth and chin in the right places, a firmer jaw), calmer matte skin, softer hairlines and better hair shapes",
+        "Clothes are real garments now: a zip jacket with pockets, collar, seams and a ribbed hem, woven fabric on sleeves and trousers, leather boots and gloves, and narrower shoulders so heads are the right size",
+        "Cybernetic eyes now glow from the eye itself instead of a flat glowing slab"
+      ]
+    },
     {
       "build": 41,
       "version": "1.41",
@@ -228,16 +238,6 @@
         "Helix now traces your link while enemies hunt you: at full trace it locks the line and sends a squad; press V to raise a firewall against its intrusions",
         "ASCENSION speaks on the link after Chapter 4 and can mark or freeze nearby hostiles on V; Clawd briefs every operation, translated by CrustAI",
         "Ghost Mode switches the link off; the Dossier has a new section on the numbers"
-      ]
-    },
-    {
-      "build": 17,
-      "version": "1.17",
-      "date": "2026-10-11",
-      "notes": [
-        "Missions get complications from act 2 on (act 1 on Hard): blackouts, reinforcements on the first alarm, a tripped alarm that keeps sending squads, turrets, and snipers whose red laser gives you a moment to sidestep",
-        "Four new enemy types: snipers, shield troops (shots bounce off their shield from the front), rushers that lunge, and fixed turrets that an EMP stuns",
-        "Complications show in the briefing and as chips at the top of the screen; fast enemy shots can no longer skip past you between frames"
       ]
     }
   ]

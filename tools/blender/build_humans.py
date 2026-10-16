@@ -234,36 +234,29 @@ def front_lobe(th, centre_deg, width_deg):
 
 def torso():
     pt = Part('torso')
-    # a hip-length jacket: hem at the belt, waist, chest, sloping shoulders and a stand collar that leaves a little neck showing (y is local to the mount at 1.26)
+    # a loose hip-length jacket: flat chest, boxy waist, sloping shoulders and a high stand collar (y is local to the mount at 1.26).
+    # All the cloth detail (zip, pockets, seams, collar, rib hem) is painted into the jacket texture by NV.Human; only soft folds and the baked occlusion live here.
     prof = [
-        (-0.240, .170, .114, 0, 0.002), (-0.160, .176, .118, 0, 0.006), (-0.050, .167, .111, 0, 0.011), (0.060, .182, .126, 0, 0.016),
-        (0.160, .200, .138, 0, 0.020), (0.240, .216, .136, 0, 0.014), (0.292, .214, .122, 0, 0.004), (0.332, .176, .104, 0, -0.004),
-        (0.360, .100, .082, 0, -0.009), (0.382, .068, .068, 0, -0.010)]
+        (-0.250, .180, .121, 0, 0.002), (-0.170, .181, .122, 0, 0.005), (-0.050, .176, .118, 0, 0.009), (0.060, .190, .126, 0, 0.013),
+        (0.160, .204, .131, 0, 0.016), (0.240, .214, .128, 0, 0.012), (0.292, .210, .118, 0, 0.004), (0.330, .168, .101, 0, -0.004),
+        (0.364, .106, .088, 0, -0.009), (0.394, .076, .076, 0, -0.011), (0.414, .074, .074, 0, -0.011)]
+    prof = [(t, a * (0.86 if t < 0.35 else 0.92), b, c1, c2) for (t, a, b, c1, c2) in prof]      # narrower shoulders: the head reads at the right size
 
     def mod(th, y, u, v):
         k = 1.0
-        col = [1.0, 1.0, 1.0]
         front = front_lobe(th, 90, 38)
         back = front_lobe(th, 270, 34)
         side = max(front_lobe(th, 0, 25), front_lobe(th, 180, 25))
-        k += .040 * front * math.exp(-((y - 0.14) ** 2) / (2 * .07 ** 2))                                # pectorals
-        k -= .016 * front_lobe(th, 90, 5) * band(y, -0.24, 0.30, .02)                                    # zip channel
-        k += .030 * back * math.exp(-((y - 0.17) ** 2) / (2 * .07 ** 2))                                  # shoulder blades
-        k -= .018 * front_lobe(th, 270, 5) * band(y, -0.20, 0.26, .04)                                    # spine groove
-        k += .022 * side * math.exp(-((y - 0.08) ** 2) / (2 * .09 ** 2))                                  # lats
-        k += .010 * band(y, -0.235, -0.205, .004)                                                          # hem band
-        k += .016 * band(y, 0.318, 0.385, .012)                                                            # stand collar
-        for sx in (-1, 1):                                                                                 # chest pockets: flap ridges
-            pk = front_lobe(th, 90 - sx * 28, 9) * band(y, 0.045, 0.105, .004)
-            k += .012 * pk
-            col = [c * (1 - .30 * pk) for c in col]
-        zp = front_lobe(th, 90, 3.2) * band(y, -0.24, 0.36, .01)
-        col = [c * (1 - .55 * zp) for c in col]
-        hem = band(y, -0.235, -0.205, .004)
-        col = [c * (1 - .28 * hem) for c in col]
-        return k, tuple(col)
+        k += .008 * front * math.exp(-((y - 0.14) ** 2) / (2 * .07 ** 2))                                # chest
+        k += .007 * front_lobe(th, 90, 7) * band(y, -0.25, 0.33, .03)                                    # the zip placket stands a little proud
+        k += .006 * back * math.exp(-((y - 0.17) ** 2) / (2 * .08 ** 2))                                  # back
+        k += .008 * side * math.exp(-((y - 0.08) ** 2) / (2 * .09 ** 2))                                  # sides
+        k += .014 * band(y, -0.250, -0.215, .012)                                                          # the rib hem blouses out a little
+        k += .012 * band(y, 0.330, 0.414, .02)                                                             # collar
+        k += .005 * math.sin(th * 5 + y * 9) * band(y, -0.2, 0.05, .06)                                    # soft cloth folds at the waist
+        return k, (1.0, 1.0, 1.0)
 
-    loft(pt, prof, n=40, p=2.4, mod=mod, cap0=0.0, cap1=0.0, rows=40)
+    loft(pt, prof, n=48, p=2.4, mod=mod, cap0=0.0, cap1=0.0, rows=44)
     return pt
 
 
@@ -371,6 +364,7 @@ def arm_u():
     pt = Part('arm_u')
     prof = [(-0.235, .042, .045, 0, 0.0), (-0.190, .044, .047, 0, 0.0), (-0.120, .048, .052, 0, 0.002), (-0.040, .054, .058, 0, 0.002),
             (0.060, .060, .064, 0, 0.0), (0.150, .070, .072, 0, -0.002), (0.205, .068, .072, 0, 0.0), (0.228, .056, .060, 0, 0.0)]
+    prof = [(t, a * 0.9, b * 0.9, c1, c2) for (t, a, b, c1, c2) in prof]
 
     def mod(th, y, u, v):
         k = 1.0
@@ -442,27 +436,27 @@ BODY = [torso, pelvis, neck, leg_u, leg_l, foot, arm_u, arm_l, hand]
 # ---------------------------------------------------------------------------------------------------------------------------
 #  the head: an ellipsoid skull, sculpted with anatomical bumps (brow ridge, cheekbones, nose, lips, chin, jaw)
 # ---------------------------------------------------------------------------------------------------------------------------
-HA, HB, HC = 0.087, 0.114, 0.099          # skull half width, half height, half depth (head centre = origin, face toward +z)
-EYE_X, EYE_Y, EYE_R, EYE_Z = 0.0325, 0.016, 0.0108, 0.0735     # eyeball centre (x is mirrored), radius and depth
+HA, HB, HC = 0.084, 0.113, 0.099          # skull half width, half height, half depth (head centre = origin, face toward +z)
+EYE_X, EYE_Y, EYE_R, EYE_Z = 0.0325, 0.010, 0.0108, 0.0735     # eyeball centre (x is mirrored), radius and depth
 
 # (cx, cy, cz, sx, sy, sz, amplitude): a gaussian blob pushed along the surface normal; + out, - in
 FEATURES = [
-    ('forehead', 0.0, 0.070, 0.095, .060, .036, .05, +.0040), ('brow_r', 0.031, 0.038, 0.100, .027, .0095, .03, +.0085), ('brow_l', -0.031, 0.038, 0.100, .027, .0095, .03, +.0085),
-    ('glabella', 0.0, 0.038, 0.102, .013, .014, .03, +.0045),
-    ('socket_r', 0.0325, 0.016, 0.098, .017, .012, .03, -.0040), ('socket_l', -0.0325, 0.016, 0.098, .017, .012, .03, -.0040),
-    ('lid_r', 0.0325, 0.027, 0.098, .015, .0055, .03, +.0030), ('lid_l', -0.0325, 0.027, 0.098, .015, .0055, .03, +.0030),
-    ('cheek_r', 0.052, -0.014, 0.080, .026, .021, .04, +.0095), ('cheek_l', -0.052, -0.014, 0.080, .026, .021, .04, +.0095),
-    ('bridge', 0.0, 0.004, 0.108, .0058, .032, .03, +.0110), ('tip', 0.0, -0.040, 0.118, .0110, .0105, .026, +.0225),
-    ('wing_r', 0.0160, -0.044, 0.108, .0082, .0100, .02, +.0095), ('wing_l', -0.0160, -0.044, 0.108, .0082, .0100, .02, +.0095),
-    ('nostril_r', 0.0085, -0.0525, 0.110, .0055, .0045, .015, -.0070), ('nostril_l', -0.0085, -0.0525, 0.110, .0055, .0045, .015, -.0070),
-    ('philtrum', 0.0, -0.061, 0.108, .0035, .0075, .02, -.0025),
-    ('lip_up', 0.0, -0.0735, 0.1055, .0190, .0068, .02, +.0080), ('lip_lo', 0.0, -0.0905, 0.1045, .0185, .0078, .02, +.0070),
-    ('mouth', 0.0, -0.0820, 0.1035, .0260, .0022, .02, -.0075), ('corner_r', 0.0255, -0.0820, 0.098, .0055, .0065, .02, -.0045), ('corner_l', -0.0255, -0.0820, 0.098, .0055, .0065, .02, -.0045),
-    ('nasolab_r', 0.0275, -0.060, 0.098, .0050, .024, .02, -.0035), ('nasolab_l', -0.0275, -0.060, 0.098, .0050, .024, .02, -.0035),
-    ('chin', 0.0, -0.1115, 0.088, .0220, .0160, .03, +.0100), ('chinlip', 0.0, -0.1005, 0.100, .0140, .0035, .02, -.0035),
-    ('jaw_r', 0.062, -0.075, 0.010, .020, .030, .05, +.0045), ('jaw_l', -0.062, -0.075, 0.010, .020, .030, .05, +.0045),
+    ('forehead', 0.0, 0.066, 0.095, .060, .036, .05, +.0040), ('brow_r', 0.031, 0.033, 0.100, .027, .0095, .03, +.0085), ('brow_l', -0.031, 0.033, 0.100, .027, .0095, .03, +.0085),
+    ('glabella', 0.0, 0.032, 0.102, .013, .014, .03, +.0045),
+    ('socket_r', 0.0325, 0.010, 0.098, .017, .012, .03, -.0040), ('socket_l', -0.0325, 0.010, 0.098, .017, .012, .03, -.0040),
+    ('lid_r', 0.0325, 0.021, 0.098, .015, .0055, .03, +.0030), ('lid_l', -0.0325, 0.021, 0.098, .015, .0055, .03, +.0030),
+    ('cheek_r', 0.052, -0.016, 0.080, .026, .021, .04, +.0095), ('cheek_l', -0.052, -0.016, 0.080, .026, .021, .04, +.0095),
+    ('bridge', 0.0, -0.002, 0.108, .0058, .032, .03, +.0090), ('tip', 0.0, -0.038, 0.118, .0110, .0105, .026, +.0190),
+    ('wing_r', 0.0160, -0.042, 0.108, .0082, .0100, .02, +.0085), ('wing_l', -0.0160, -0.042, 0.108, .0082, .0100, .02, +.0085),
+    ('nostril_r', 0.0085, -0.0495, 0.110, .0055, .0045, .015, -.0065), ('nostril_l', -0.0085, -0.0495, 0.110, .0055, .0045, .015, -.0065),
+    ('philtrum', 0.0, -0.056, 0.108, .0035, .0075, .02, -.0025),
+    ('lip_up', 0.0, -0.0645, 0.1055, .0190, .0068, .02, +.0085), ('lip_lo', 0.0, -0.0795, 0.1045, .0185, .0078, .02, +.0085),
+    ('mouth', 0.0, -0.0715, 0.1035, .0260, .0022, .02, -.0075), ('corner_r', 0.0255, -0.0715, 0.098, .0055, .0065, .02, -.0045), ('corner_l', -0.0255, -0.0715, 0.098, .0055, .0065, .02, -.0045),
+    ('nasolab_r', 0.0275, -0.052, 0.098, .0050, .024, .02, -.0035), ('nasolab_l', -0.0275, -0.052, 0.098, .0050, .024, .02, -.0035),
+    ('chin', 0.0, -0.1115, 0.088, .0220, .0160, .03, +.0100), ('chinlip', 0.0, -0.0915, 0.100, .0140, .0035, .02, -.0035),
+    ('jaw_r', 0.062, -0.075, 0.010, .020, .030, .05, +.0085), ('jaw_l', -0.062, -0.075, 0.010, .020, .030, .05, +.0085),
     ('temple_r', 0.066, 0.042, 0.050, .020, .030, .03, -.0040), ('temple_l', -0.066, 0.042, 0.050, .020, .030, .03, -.0040),
-    ('undereye_r', 0.0325, -0.004, 0.100, .016, .005, .02, -.0015), ('undereye_l', -0.0325, -0.004, 0.100, .016, .005, .02, -.0015),
+    ('undereye_r', 0.0325, -0.008, 0.100, .016, .005, .02, -.0015), ('undereye_l', -0.0325, -0.008, 0.100, .016, .005, .02, -.0015),
 ]
 FEAT = {f[0]: f for f in FEATURES}
 
@@ -476,7 +470,7 @@ def head_pos(phi, theta, features=True):
     y = p[..., 1]
     front = smooth((p[..., 2] + 0.01) / 0.05)
     # jaw: narrower below the cheekbones, chin forward
-    kx = 1.0 - 0.085 * smooth((-0.010 - y) / 0.105)
+    kx = 1.0 - 0.034 * smooth((-0.010 - y) / 0.105)
     p[..., 0] *= kx
     p[..., 2] += 0.0215 * smooth((-0.022 - y) / 0.085) * front
     p[..., 2] += -0.004 * smooth((y - 0.04) / 0.07) * front                                         # the forehead leans back a little
@@ -692,7 +686,7 @@ def mask_top(part, y_min):
 def hair_cap(name, thick=0.004, stripe=0.10, seed=2, higher=0.0, nc=72, cover=None):
     pt = Part(name)
     psis = np.linspace(-math.pi, math.pi, nc)
-    hair_sheet(pt, psis, 0.0, lambda ps: hairline_y(ps) + higher, 0.0, thick, thick, stripe=stripe, ns=16, nd=0 + 1, seed=seed)
+    hair_sheet(pt, psis, 0.0, lambda ps: hairline_y(ps) + higher, 0.0, thick, thick, stripe=stripe, ns=16, nd=0 + 1, seed=seed, vspan=0.9)
     return pt
 
 
@@ -704,10 +698,10 @@ def hair_undercut():
     pt = Part('hair_undercut')
     # sides and back: a short shell that stops higher up
     psis = np.linspace(-math.pi, math.pi, 72)
-    hair_sheet(pt, psis, 0.0, lambda ps: hairline_y(ps) + 0.022 * smooth((np.abs(ps) - 0.4) / 0.9), 0.0, 0.0045, 0.0045, stripe=0.10, ns=14, nd=1, seed=4)
+    hair_sheet(pt, psis, 0.0, lambda ps: hairline_y(ps) + 0.022 * smooth((np.abs(ps) - 0.4) / 0.9), 0.0, 0.0045, 0.0045, stripe=0.10, ns=14, nd=1, seed=4, vspan=0.9)
     # the long top: a swept block from the forehead to the crown
     top = np.linspace(-1.0, 1.0, 21)
-    hair_sheet(pt, top, 0.0, lambda ps: 0.052 + 0.03 * abs(ps), 0.0, 0.022, 0.034, stripe=0.18, ns=14, nd=5, seed=5, flare=0.012, wave=0.003)
+    hair_sheet(pt, top, 0.0, lambda ps: 0.068 + 0.02 * abs(ps), 0.012, 0.014, 0.022, stripe=0.18, ns=14, nd=3, seed=5, flare=0.004, wave=0.002)
     return pt
 
 
@@ -747,8 +741,8 @@ def hair_mohawk():
 def hair_bob():
     pt = Part('hair_bob')
     nc = 84
-    psis = np.concatenate([np.linspace(-math.pi, -1.08, 40), np.linspace(1.08, math.pi, 40)])
-    hair_sheet(pt, psis, 0.10, lambda ps: -0.092 + 0.015 * math.sin(ps * 9), 0.0, 0.012, 0.024, flare=0.006, stripe=0.14, ns=22, nd=2, seed=7, rnd=0.004, tuck=0.012)
+    psis = np.concatenate([np.linspace(-math.pi, -0.82, 44), np.linspace(0.82, math.pi, 44)])
+    hair_sheet(pt, psis, 0.10, lambda ps: (-0.092 + 0.015 * math.sin(ps * 9)) * smooth((abs(ps) - 0.82) / 0.55) + 0.030 * (1 - smooth((abs(ps) - 0.82) / 0.55)), 0.0, 0.012, 0.024, flare=0.006, stripe=0.14, ns=22, nd=2, seed=7, rnd=0.004, tuck=0.012)
     # the fringe over the forehead
     fr = np.linspace(-1.1, 1.1, 36)
     hair_sheet(pt, fr, 0.10, lambda ps: 0.056 + 0.03 * abs(ps) ** 2, 0.0, 0.012, 0.016, stripe=0.18, ns=12, nd=2, seed=8)
@@ -759,8 +753,8 @@ def hair_bob():
 
 def hair_long():
     pt = Part('hair_long')
-    psis = np.concatenate([np.linspace(-math.pi, -1.12, 46), np.linspace(1.12, math.pi, 46)])
-    hair_sheet(pt, psis, 0.10, lambda ps: -0.02 + 0.03 * math.sin(ps * 7), lambda ps: 0.36 + 0.05 * math.sin(ps * 11) + 0.04 * (1 - abs(abs(ps) - math.pi) / math.pi), 0.012, 0.024, flare=0.016, stripe=0.14, ns=18, nd=14, seed=10, rnd=0.012, wave=0.006)
+    psis = np.concatenate([np.linspace(-math.pi, -0.86, 50), np.linspace(0.86, math.pi, 50)])
+    hair_sheet(pt, psis, 0.10, lambda ps: (-0.02 + 0.03 * math.sin(ps * 7)) * smooth((abs(ps) - 0.86) / 0.55) + 0.030 * (1 - smooth((abs(ps) - 0.86) / 0.55)), lambda ps: (0.36 + 0.05 * math.sin(ps * 11) + 0.04 * (1 - abs(abs(ps) - math.pi) / math.pi)) * (0.35 + 0.65 * smooth((abs(ps) - 0.86) / 0.6)), 0.012, 0.024, flare=0.016, stripe=0.14, ns=18, nd=14, seed=10, rnd=0.012, wave=0.006)
     fr = np.linspace(-1.14, 1.14, 40)
     hair_sheet(pt, fr, 0.10, lambda ps: 0.056 + 0.03 * abs(ps) ** 2, 0.0, 0.012, 0.016, stripe=0.18, ns=12, nd=2, seed=11)
     top = np.linspace(-math.pi, math.pi, 72)
@@ -850,8 +844,8 @@ MOUNT = {
     'head': [((0, 1.80, 0), False)], 'eyes': [((0, 1.80, 0), False)], 'iris': [((0, 1.80, 0), False)], 'ear': [((0, 1.80, 0), False)],
     'leg_u': [((-.12, .70, 0), False), ((.12, .70, 0), False)], 'leg_l': [((-.12, .25, 0), False), ((.12, .25, 0), False)],
     'foot': [((-.12, .04, .06), True), ((.12, .04, .06), False)],
-    'arm_u': [((-.255, 1.34, 0), True), ((.255, 1.34, 0), False)], 'arm_l': [((-.255, 1.01, 0), True), ((.255, 1.01, 0), False)],
-    'hand': [((-.255, .83, 0), True), ((.255, .83, 0), False)],
+    'arm_u': [((-.228, 1.34, 0), True), ((.228, 1.34, 0), False)], 'arm_l': [((-.228, 1.01, 0), True), ((.228, 1.01, 0), False)],
+    'hand': [((-.228, .83, 0), True), ((.228, .83, 0), False)],
 }
 
 
