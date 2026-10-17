@@ -47,7 +47,8 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 - Procedural WebAudio score — 8 moods (title, story, stealth, combat, boss, explore, tense, ending) with adaptive layering, kick-ducked pads, a seeded lead hook and risers
 - Spatial sound design, all synthesised: gunfire per weapon family with distance, air absorption, occlusion and a delay-based arrival; surface-aware footsteps; reloads, impacts, explosions, bullet whizz; per-level ambience beds (rain, sirens, thunder, machinery, crowd, servers); a heartbeat at low health, alarm siren and win/fail stingers
 - Volumetric-looking light shafts, glow layer, chromatic aberration + film grain on high tier
-- Quality auto-detection for weak hardware (Chromebooks, iGPUs, phones)
+- Quality auto-detection for weak hardware (Chromebooks, iGPUs, phones); resolution and preset changes are applied between frames so they never flash the screen
+- Customisable crosshair (six styles, colours, size, outline, spread) and menu pointer (Settings, Crosshair & cursor)
 - Dynamic resolution scaling — trades pixels for frame time to hold ~50-60 FPS
 
 ---
@@ -61,7 +62,8 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 | Sprint | `Shift` | LT |
 | Sneak | `C` / `Ctrl` | LB |
 | Fire | Left click | RT |
-| Dash | `Space` | A |
+| Jump (onto low cover; climb and wall-run in the city) | `Space` | A |
+| Dash | `Alt` | B |
 | Interact / Hack / Chokehold (hold) | `E` | X |
 | EMP pulse | `Q` | Y |
 | Reload | `R` | Select |
@@ -79,7 +81,6 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 | Aim down sights (red dot, holo, 2.5× and 6× scopes) | RMB (hold `Shift` to steady a scope) | LT |
 | Chat (multiplayer) | `Enter` | — |
 | Volume down / up, mute | `-` / `=`, `M` | — |
-| Jump (the void after the ending) | `Space` | A |
 | Advance dialogue | `Space` / click | A |
 | Choose option | `1-4` / click | dpad + A |
 | Auto-advance dialogue | `A` | — |

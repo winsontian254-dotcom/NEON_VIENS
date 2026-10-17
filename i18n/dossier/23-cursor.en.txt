@@ -1,0 +1,11 @@
+# CROSSHAIR AND CURSOR
+
+## The crosshair
+
+Settings, then Crosshair & cursor, lets you make the crosshair your own. There are six styles (the classic cross, a dot, a ring, corner brackets, a T and a long precision cross), eight colours, four sizes, four line thicknesses, an optional centre dot with its own colour, a dark outline for bright scenes, and an opacity from 30 to 100 percent. The preview at the top of the screen moves the way the real one does.
+
+With Spread while moving and firing on, the gap in the cross opens as your aim gets worse: a little when you walk or jump, more while you fire, most with a gun that is naturally loose. Turn it off and the crosshair stays still, which some players prefer. The precision cross always keeps its gap tight. The hit marker that flashes when you land a shot, and the red one when you finish an enemy, are not affected by these settings.
+
+## The menu pointer
+
+The pointer you see in menus, in the hacking and lockpicking screens and anywhere else the mouse is free can be changed too: the system arrow, a neon arrow, a reticle or a dot, in any of the eight colours. It applies at once. On a phone or a tablet there is no pointer to change.

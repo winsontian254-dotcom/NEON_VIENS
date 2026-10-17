@@ -18,7 +18,7 @@ And roads teach you that being quiet is not the same as being slow. You were nev
 
 ## What it does: the numbers
 
-Movement first. You walk and run ten percent faster than the standard speed. Your dash, the burst of speed on the Space key, recharges in three quarters of the normal time, 0.6 seconds instead of 0.8, so you can chain dashes where others have to wait. Each dash costs 17 Energy rather than 22, which is more than a fifth cheaper, and your maximum Energy is twenty points higher. The combination is hard to appreciate until you play it: a Courier can dash, fire, dash again and still have enough left over for an EMP pulse, where a stranger would be standing at an empty meter and a locked door.
+Movement first. You walk and run ten percent faster than the standard speed. Your dash, the burst of speed on the Alt key, recharges in three quarters of the normal time, 0.6 seconds instead of 0.8, so you can chain dashes where others have to wait. Each dash costs 17 Energy rather than 22, which is more than a fifth cheaper, and your maximum Energy is twenty points higher. The combination is hard to appreciate until you play it: a Courier can dash, fire, dash again and still have enough left over for an EMP pulse, where a stranger would be standing at an empty meter and a locked door.
 
 Then the gun hand. Recoil affects you ten percent less than normal, and you reload five percent faster. These sound small, and they are small, but both are multiplied by the Reflexes bonuses, which for a Courier start well above the baseline.
 

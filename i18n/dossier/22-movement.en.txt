@@ -1,0 +1,13 @@
+# MOVEMENT: JUMPING AND DASHING
+
+## Jump
+
+Space jumps, anywhere you can move: on missions, in interiors and arenas, on the street (the JUMP button on a phone, A on a pad). A jump lifts you about 1.2 metres and takes just over half a second, you can steer a little in the air, and you cannot dash in mid-air. Press Space slightly early and the jump fires the moment you land; press it a hair late after stepping off an edge and it still counts (about a tenth of a second of grace each way).
+
+Low cover is something to stand on. A crate, a counter or a piece of furniture whose top is within half a metre of your feet lets you climb onto it, so a jump toward a crate puts you on top of it, and walking off the far side drops you down. Taller things still block you. In the open city the full climbing system applies as well: hold forward against a wall to climb, run and jump to wall-run, and Space kicks you off the wall.
+
+Jumping is not silent. Taking off carries 4 metres, and a hard landing, from a high crate or a ledge, carries 6. Guards beyond that do not hear it. While you are in the air an enemy aims at where you are: a shot that passes under your feet misses.
+
+## Dash
+
+Dash is the Alt key (the DASH button on a phone, B on a pad). It is a burst of speed in the direction you are moving, it costs Energy and has a short recharge (both set by your lifepath and your Reflexes), and the instant of the dash is a window in which you cannot be hurt. A dash that carries you through an enemy shot is a perfect dodge.

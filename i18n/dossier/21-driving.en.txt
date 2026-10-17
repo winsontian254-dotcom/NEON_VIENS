@@ -2,7 +2,7 @@
 
 ## Getting in
 
-Press F next to a parked car, or take one that is moving in traffic (that adds 0.6 heat as Carjacking). W and S accelerate and brake, A and D steer, Space is the handbrake (the DASH button on a phone, A on a pad), Shift boosts and spends energy, H is the horn and F gets you out. The weapon panel hides while you drive. Cars come in three bodies, a low coupe, a sedan and a van, and the front wheels turn with the steering while all four spin with the road.
+Press F next to a parked car, or take one that is moving in traffic (that adds 0.6 heat as Carjacking). W and S accelerate and brake, A and D steer, Space is the handbrake (the JUMP button on a phone, A on a pad), Shift boosts and spends energy, H is the horn and F gets you out. The weapon panel hides while you drive. Cars come in three bodies, a low coupe, a sedan and a van, and the front wheels turn with the steering while all four spin with the road.
 
 ## Speed and gears
 

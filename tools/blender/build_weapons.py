@@ -81,6 +81,7 @@ class Model:
         self.bevel = {}
         self.M = None            # optional 3x3 matrix applied to every point of ball()/limb() (game axes)
         self.part = None         # while set, new geometry goes to separate '<role>.<part>' nodes (see part_on)
+        self.fuse = {}           # role -> (voxel size, kept triangle ratio): fuse that role's overlapping shells into one soft, smooth-shaded surface (gloves)
 
     def part_on(self, name):
         """Geometry from here to part_off() becomes its own node(s) named '<role>.<name>': the game animates them
@@ -266,6 +267,20 @@ class Model:
             ob = bpy.data.objects.new(key, me)  # mesh node named by role (and part)
             bpy.context.collection.objects.link(ob)
             ob.data.materials.append(mat(role))
+            fv = self.fuse.get(role)
+            if fv:   # a glove is one soft shape, not a heap of tubes and balls: voxel-remesh the union, relax the stair-steps
+                bpy.context.view_layer.objects.active = ob
+                md = ob.modifiers.new('fuse', 'REMESH')
+                md.mode = 'VOXEL'
+                md.voxel_size = fv[0]
+                bpy.ops.object.modifier_apply(modifier='fuse')
+                md = ob.modifiers.new('soft', 'SMOOTH')
+                md.factor = 0.7
+                md.iterations = 12
+                bpy.ops.object.modifier_apply(modifier='soft')
+                md = ob.modifiers.new('slim', 'DECIMATE')
+                md.ratio = fv[1]
+                bpy.ops.object.modifier_apply(modifier='slim')
             bv = self.bevel.get(role, bevel)
             sg = seg
             if isinstance(bv, tuple):
@@ -281,10 +296,13 @@ class Model:
             bpy.ops.object.select_all(action='DESELECT')
             ob.select_set(True)
             bpy.context.view_layer.objects.active = ob
-            try:
-                bpy.ops.object.shade_smooth_by_angle(angle=math.radians(40))
-            except Exception:
+            if fv:
                 bpy.ops.object.shade_smooth()
+            else:
+                try:
+                    bpy.ops.object.shade_smooth_by_angle(angle=math.radians(40))
+                except Exception:
+                    bpy.ops.object.shade_smooth()
             objs.append(ob)
             print('   ', key, len(ob.data.polygons), 'faces')
         self.bm = {}
@@ -680,8 +698,8 @@ def fist(name, a, b, hold=False):
     if hold:
         m.M = __import__('mathutils').Matrix.Rotation(math.radians(90), 3, 'X')   # (x, y, z) -> (x, -z, y)
     gl = 'glove'
-    r = 0.0112
-    tops = [0.0325, 0.0108, -0.0108, -0.0325]
+    r = 0.0104
+    tops = [0.0330, 0.0110, -0.0110, -0.0330]
     for k, y in enumerate(tops):
         sc = 1.0 - 0.07 * (k == 3)
         A = (a + 0.016, y, -b + 0.012)
@@ -702,15 +720,18 @@ def fist(name, a, b, hold=False):
     m.box('acc', (0.0016, 0.074, 0.0030), (a + 0.0420, 0.0, -b - 0.044), rot=(0, 0.12, 0))
     # thumb: over the back of the grip and along its left side
     T = [(a + 0.022, 0.050, -b - 0.020), (a - 0.002, 0.054, -b - 0.020), (-a - 0.012, 0.050, -b + 0.004), (-a - 0.0155, 0.046, b * 0.28)]
+    TR = [0.0185, 0.0150, 0.0125, 0.0108]       # a thick root (the web of the hand) thinning to the tip, not a tube of one width
     for i in range(len(T) - 1):
-        m.limb(gl, T[i], T[i + 1], 0.0118 - 0.0012 * i, 0.0118 - 0.0012 * (i + 1))
-    m.ball(gl, T[-1], 0.0098)
+        m.limb(gl, T[i], T[i + 1], TR[i], TR[i + 1])
+    m.ball(gl, T[-1], 0.0105)
+    m.ball(gl, (a + 0.018, 0.040, -b - 0.016), 0.0195)
     m.ball('body', (T[-1][0], T[-1][1] + 0.001, T[-1][2] - 0.003), 0.0088, 8, 4)
     # cuff, set back from the palm
     m.limb('sleeve', (a + 0.027, 0.0, -b - 0.060), (a + 0.040, -0.004, -b - 0.092), 0.031, 0.033, ends=False)
     m.limb('acc', (a + 0.027, 0.0, -b - 0.057), (a + 0.0285, 0.0, -b - 0.0605), 0.0322, 0.0322, ends=False)
     m.bevel['glove'] = 0
     m.bevel['body'] = 0
+    m.fuse['glove'] = (0.0024, 0.2)
     m.build()
     return m
 

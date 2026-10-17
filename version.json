@@ -1,6 +1,18 @@
 {
-  "build": 48,
+  "build": 49,
   "history": [
+    {
+      "build": 49,
+      "version": "1.49",
+      "date": "2026-10-17",
+      "notes": [
+        "Jumping: Space now jumps (and hops onto crates and low cover); dash moved to Alt",
+        "Reloads redone: the gun comes to the centre of the screen so the magazine change is easy to see",
+        "Fixed the random screen blackouts and made quality changes smoother, with a lighter Ultra preset",
+        "Smoother, rounder hands and fingers in first person",
+        "New Crosshair & cursor settings: six crosshair styles, colours, size, outline, and a custom menu pointer"
+      ]
+    },
     {
       "build": 48,
       "version": "1.48",
@@ -230,17 +242,6 @@
         "Zip-tie, search, carry and hide bodies. Guards who find a body raise the alarm",
         "Press T to whistle, and throw Noisemakers to lure patrols",
         "Nonlethal weapons now knock out instead of killing"
-      ]
-    },
-    {
-      "build": 24,
-      "version": "1.24",
-      "date": "2026-10-12",
-      "notes": [
-        "Cyberdeck: every hack now spends RAM from your deck",
-        "Two new hacking games: a HEX SEQUENCE grid and a COMMAND PROMPT",
-        "Upgrade your deck and buy nine mods at a Black Market stall",
-        "Press Z to PING and mark hostiles nearby"
       ]
     }
   ]
