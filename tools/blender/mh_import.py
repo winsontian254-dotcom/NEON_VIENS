@@ -260,6 +260,13 @@ def hand_geometry(mh=None, curl=(1.0, 1.0, 1.0, 1.0, 1.0), side='R'):
             T2[:3, 3] = -jk
             M = M @ (T1 @ Rk @ T2)
             acc[(f, k)] = (M.copy(), wts[k])
+    tips, knuck = [], []
+    for f in range(1, 6):                                            # fingertip and knuckle positions (hand node space), for the nails and the knuckle tint
+        tail = np.append(J('finger%d-3.%s____tail' % (f, side)), 1.0)
+        tp = (acc[(f, 2)][0] @ tail)[:3]
+        kp = J('finger%d-1.%s____head' % (f, side))
+        tips.append(tp * S + np.array([0.0, 0.045, 0.0]))
+        knuck.append(kp * S + np.array([0.0, 0.045, 0.0]))
     wsum = np.zeros(len(V))
     for (f, k), (M, w) in acc.items():
         wsum += w
@@ -275,7 +282,7 @@ def hand_geometry(mh=None, curl=(1.0, 1.0, 1.0, 1.0, 1.0), side='R'):
     src, uv, faces = split_faces(keep, None, mh.VT)
     pos = res[src] * S                                              # decimetres -> metres, relative to the wrist
     pos[:, 1] += 0.045                                              # the wrist sits at y = +0.045 of the hand node
-    return {'pos': pos, 'uv': uv, 'faces': faces, 'src': src}
+    return {'pos': pos, 'uv': uv, 'faces': faces, 'src': src, 'tips': np.array(tips), 'knuck': np.array(knuck)}
 
 
 if __name__ == '__main__':

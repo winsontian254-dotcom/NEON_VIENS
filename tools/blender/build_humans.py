@@ -242,7 +242,7 @@ def torso():
         (-0.250, .180, .121, 0, 0.002), (-0.170, .181, .122, 0, 0.005), (-0.050, .176, .118, 0, 0.009), (0.060, .190, .126, 0, 0.013),
         (0.160, .204, .131, 0, 0.016), (0.240, .214, .128, 0, 0.012), (0.292, .210, .118, 0, 0.004), (0.330, .168, .101, 0, -0.004),
         (0.364, .106, .088, 0, -0.020), (0.394, .090, .068, 0, -0.038), (0.414, .092, .068, 0, -0.044)]      # the collar sits round the neck, which leans back of the head centre
-    prof = [(t, a * (0.86 if t < 0.35 else 0.92), b, c1, c2) for (t, a, b, c1, c2) in prof]      # narrower shoulders: the head reads at the right size
+    prof = [(t, a * (0.92 if t < 0.35 else 0.92), b, c1, c2) for (t, a, b, c1, c2) in prof]      # narrower shoulders: the head reads at the right size
 
     def mod(th, y, u, v):
         k = 1.0
@@ -264,14 +264,14 @@ def torso():
 
 def pelvis():
     pt = Part('pelvis')
-    prof = [(-0.165, .148, .106, 0, -0.004), (-0.100, .178, .118, 0, -0.006), (-0.020, .190, .122, 0, -0.008), (0.050, .180, .115, 0, 0.0),
+    prof = [(-0.150, .030, .050, 0, -0.004), (-0.120, .095, .075, 0, -0.004), (-0.095, .190, .092, 0, -0.006), (-0.020, .205, .116, 0, -0.008), (0.050, .184, .115, 0, 0.0),
             (0.092, .172, .110, 0, 0.0)]
     prof = [(t, a * 0.88, b * 0.96, c1, c2) for (t, a, b, c1, c2) in prof]        # hips no wider than the jacket
 
     def mod(th, y, u, v):
         k = 1.0
         col = [1.0, 1.0, 1.0]
-        k += .030 * front_lobe(th, 270, 40) * math.exp(-((y + 0.08) ** 2) / (2 * .06 ** 2))          # seat
+        k += .012 * front_lobe(th, 270, 40) * math.exp(-((y + 0.08) ** 2) / (2 * .06 ** 2))          # seat
         belt = band(y, 0.028, 0.062, .004)
         k += .009 * belt
         col = [c * (1 - .55 * belt) for c in col]
@@ -367,19 +367,20 @@ def foot():
 
 def arm_u():
     pt = Part('arm_u')
-    prof = [(-0.235, .042, .045, 0, 0.0), (-0.190, .044, .047, 0, 0.0), (-0.120, .048, .052, 0, 0.002), (-0.040, .054, .058, 0, 0.002),
-            (0.060, .060, .064, 0, 0.0), (0.150, .070, .072, 0, -0.002), (0.205, .068, .072, 0, 0.0), (0.228, .056, .060, 0, 0.0)]
-    prof = [(t, a * 0.9, b * 0.9, c1, c2) for (t, a, b, c1, c2) in prof]
+    # shoulder (+y) to elbow (-y): a sleeve that follows the arm, not a balloon
+    prof = [(-0.235, .037, .040, 0, 0.0), (-0.190, .039, .042, 0, 0.0), (-0.120, .042, .046, 0, 0.002), (-0.040, .047, .051, 0, 0.002),
+            (0.060, .051, .055, 0, 0.0), (0.150, .055, .058, 0, -0.002), (0.205, .053, .056, 0, 0.0), (0.228, .045, .049, 0, 0.0)]
 
     def mod(th, y, u, v):
         k = 1.0
         col = [1.0, 1.0, 1.0]
         k += .008 * front_lobe(th, 90, 38) * band(y, -0.12, 0.10, .05)
         k += .008 * front_lobe(th, 270, 38) * band(y, -0.12, 0.10, .05)
-        seam = band(y, 0.135, 0.150, .004)
+        seam = band(y, 0.135, 0.150, .004)                                                        # the shoulder seam
         k += .004 * seam
         col = [c * (1 - .4 * seam) for c in col]
-        k += .003 * math.sin((y + 0.19) * 140) * band(y, -0.23, -0.12, .02) * front_lobe(th, 90, 70)   # sleeve creases at the elbow
+        k += .004 * math.sin((y + 0.19) * 120) * band(y, -0.23, -0.10, .02) * front_lobe(th, 90, 70)   # sleeve creases at the elbow
+        k += .004 * math.sin((y + 0.19) * 120 + 1.2) * band(y, -0.23, -0.10, .02) * front_lobe(th, 270, 50)
         return k, tuple(col)
 
     return loft(pt, prof, n=28, p=2.1, mod=mod, rows=20, cap1=0.045)
@@ -387,15 +388,16 @@ def arm_u():
 
 def arm_l():
     pt = Part('arm_l')
-    prof = [(-0.175, .046, .048, 0, 0.0), (-0.115, .036, .038, 0, 0.0), (-0.070, .036, .038, 0, 0.0), (-0.020, .042, .044, 0, 0.002),
-            (0.080, .049, .052, 0, 0.002), (0.160, .046, .049, 0, -0.002), (0.215, .044, .047, 0, 0.0)]
+    # wrist (-y) to elbow (+y): a slightly flared cuff, then a forearm no wider than the arm above it
+    prof = [(-0.175, .043, .045, 0, 0.0), (-0.150, .037, .039, 0, 0.0), (-0.100, .035, .037, 0, 0.0), (-0.020, .038, .040, 0, 0.002),
+            (0.080, .040, .042, 0, 0.002), (0.160, .035, .037, 0, -0.002), (0.215, .030, .032, 0, 0.0)]            # the top of the forearm sits inside the upper arm
 
     def mod(th, y, u, v):
         k = 1.0
         col = [1.0, 1.0, 1.0]
-        cuff = band(y, -0.170, -0.105, .006)
-        k += .0075 * cuff
-        col = [c * (1 - .40 * cuff) for c in col]
+        cuff = band(y, -0.175, -0.145, .004)                                                      # a narrow knitted cuff
+        k += .004 * cuff
+        col = [c * (1 - .22 * cuff) for c in col]
         k += .004 * front_lobe(th, 270, 40) * math.exp(-((y - 0.15) ** 2) / (2 * .02 ** 2))          # elbow point
         k += .003 * math.sin((y - 0.1) * 150) * band(y, 0.1, 0.2, .02) * front_lobe(th, 90, 70)
         return k, tuple(col)
@@ -470,7 +472,21 @@ def mh_part(name, geo, subdiv=0):
 
 def hand():
     """the relaxed right hand (the left one is this mesh mirrored): MakeHuman's hand, posed hanging with the fingers curled a little"""
-    return mh_part('hand', MHI.hand_geometry(mhdata()), subdiv=0)
+    geo = MHI.hand_geometry(mhdata())
+    pt = mh_part('hand', geo, subdiv=0)
+    v = pt.v
+    col = np.ones((len(v), 3)) * np.array([0.955, 0.905, 0.890])            # hands are a little warmer and darker than the face
+    nail = np.zeros(len(v))
+    knu = np.zeros(len(v))
+    for tp, kp in zip(geo['tips'], geo['knuck']):
+        dorsal = v[:, 0] > tp[0] - 0.003                                       # the palm faces -x, the back of the hand +x
+        nail = np.maximum(nail, np.clip((0.0085 - np.linalg.norm(v - (tp + np.array([0.0, 0.004, 0.0])), axis=1)) / 0.0035, 0, 1) * dorsal)
+        dk = np.linalg.norm(v - kp, axis=1)
+        knu = np.maximum(knu, np.clip((0.016 - dk) / 0.008, 0, 1) * (v[:, 0] > kp[0] - 0.004))
+    col = col * (1 - 0.10 * knu[:, None] * np.array([0.0, 1.0, 1.0])) + 0.0       # redder over the knuckles
+    col = col * (1 - nail[:, None]) + np.array([1.0, 0.975, 0.965]) * nail[:, None]   # nails: paler, pinker than the finger round them
+    pt.col = col
+    return pt
 
 
 BODY = [torso, pelvis, leg_u, leg_l, foot, arm_u, arm_l, hand]
@@ -1195,7 +1211,7 @@ def assembled_bvh(parts, skip=()):
     return BVHTree.FromPolygons(verts, tris, epsilon=0.0)
 
 
-AO_SETTINGS = {'head': (48, 0.05, 0.55), 'head_lo': (24, 0.05, 0.55), 'ear': (32, 0.04, 0.5), 'neck': (32, 0.08, 0.45), 'hand': (32, 0.03, 0.62)}
+AO_SETTINGS = {'head': (48, 0.05, 0.55), 'head_lo': (24, 0.05, 0.55), 'ear': (32, 0.04, 0.5), 'neck': (32, 0.08, 0.45), 'hand': (32, 0.03, 0.62), 'arm_u': (24, 0.05, 0.78), 'arm_l': (24, 0.05, 0.78), 'pelvis': (24, 0.06, 0.7), 'leg_u': (24, 0.06, 0.7), 'leg_l': (24, 0.06, 0.72)}
 
 
 def smooth_by_position(part, ao, passes=2):
