@@ -1,6 +1,16 @@
 {
-  "build": 47,
+  "build": 48,
   "history": [
+    {
+      "build": 48,
+      "version": "1.48",
+      "date": "2026-10-17",
+      "notes": [
+        "Sound overhaul: every sound is new, with gunfire, footsteps and explosions placed in the world (distance, muffling behind walls, left/right)",
+        "New ambience for the city, rooftops, apartment and every interior; heartbeat at low health, alarm siren, win and fail stingers",
+        "Richer music with a kick-pumped pad and a lead melody; new engine and tyre sounds"
+      ]
+    },
     {
       "build": 47,
       "version": "1.47",
@@ -231,14 +241,6 @@
         "Two new hacking games: a HEX SEQUENCE grid and a COMMAND PROMPT",
         "Upgrade your deck and buy nine mods at a Black Market stall",
         "Press Z to PING and mark hostiles nearby"
-      ]
-    },
-    {
-      "build": 23,
-      "version": "1.23",
-      "date": "2026-10-11",
-      "notes": [
-        "Black Markets are now hidden: ten stalls in the middle of the alleys, out of sight of the streets and not marked in the world, with the nearest a long walk from your start. The minimap points the way with pink diamonds and edge arrows"
       ]
     }
   ]
