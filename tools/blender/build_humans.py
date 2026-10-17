@@ -1003,6 +1003,112 @@ EARS = np.array([1.0, 0.86, 0.84])
 NOSE = np.array([1.0, 0.90, 0.88])
 
 
+FACE_DETAIL = False        # False: a blank, smooth mannequin face (no eyes, brows, lips or nose relief, no tints); True: the full MakeHuman face with its eyes
+
+
+def blank_face(geo, uniq, inv, nb):
+    """a smooth, featureless mannequin face. The nose, lips, eyelids and the cavities behind them (mouth, nostrils, eye sockets) are cut out of the face area, the outer surface that
+    is left is relaxed into a smooth dome (its distance from the skull centre is smoothed, the rest of the head stays fixed) and the holes are closed with flat fans"""
+    P0 = np.zeros((len(uniq), 3))
+    P0[inv] = geo['pos']
+    C = np.array([0.0, 0.004, -0.004])
+    fade = lambda a, lo, hi: np.clip((hi - a) / (hi - lo), 0.0, 1.0)
+    w = fade(np.abs(P0[:, 0]), 0.050, 0.066) * np.clip((P0[:, 2] - 0.030) / 0.025, 0.0, 1.0) * fade(P0[:, 1], 0.060, 0.085) * np.clip((P0[:, 1] + 0.125) / 0.020, 0.0, 1.0)
+    ufaces = [tuple(inv[i] for i in f) for f in geo['faces']]
+    tris = []
+    for f in ufaces:
+        for k in range(1, len(f) - 1):
+            tris.append((int(f[0]), int(f[k]), int(f[k + 1])))
+    bvh = BVHTree.FromPolygons([tuple(map(float, q)) for q in P0], tris, epsilon=0.0)
+    dirs = P0 - C
+    rad = np.linalg.norm(dirs, axis=1)
+    dirs = dirs / np.maximum(rad[:, None], 1e-9)
+    rout = rad.copy()
+    inner = np.zeros(len(uniq), bool)
+    for i in range(len(uniq)):
+        if w[i] <= 0.02:
+            continue
+        hit = bvh.ray_cast(Vector(C + dirs[i] * 0.3), Vector(-dirs[i]), 0.5)      # from outside inwards: the outermost surface in this direction
+        if hit[0] is not None:
+            rout[i] = (Vector(hit[0]) - Vector(C)).length
+            inner[i] = rad[i] < rout[i] - 0.004
+    # keep the faces that lie on the outer surface of the face area
+    keep = [k for k, f in enumerate(ufaces) if not any(inner[v] and w[v] > 0.02 for v in f)]
+    free = [i for i in range(len(uniq)) if w[i] > 0.02 and not inner[i] and nb[i]]
+    r = rout.copy()
+    nbk = [[j for j in nb[i] if not inner[j]] for i in range(len(uniq))]
+    for it in range(1200):
+        for i in free:
+            if nbk[i]:
+                r[i] = np.mean([r[j] for j in nbk[i]])
+    Pn = C + dirs * np.where(w > 0.02, r, rad)[:, None]
+    P1 = P0 * (1 - w[:, None]) + Pn * w[:, None]
+    for it in range(30):                                          # a little positional smoothing so the cut edges of the holes do not leave creases
+        P2 = P1.copy()
+        for i in free:
+            if nbk[i]:
+                P2[i] = 0.5 * P1[i] + 0.5 * np.mean([P1[j] for j in nbk[i]], axis=0)
+        P1 = P2
+    # holes: boundary edges of the kept faces, chained into loops and closed with a fan
+    edges = {}
+    for k in keep:
+        f = geo['faces'][k]
+        uf = ufaces[k]
+        for a_, b_, sa, sb in zip(uf, list(uf[1:]) + [uf[0]], f, list(f[1:]) + [f[0]]):
+            edges[(a_, b_)] = (sa, sb)
+    boundary = {(a_, b_): v for (a_, b_), v in edges.items() if (b_, a_) not in edges}
+    nxt = {}
+    for (a_, b_), (sa, sb) in boundary.items():
+        nxt.setdefault(a_, []).append((b_, sa, sb))
+    pos = list(geo['pos'])
+    uvs = list(geo['uv'])
+    srcs = list(geo['src'])
+    masks = {k: list(v) for k, v in geo['masks'].items()}
+    new_faces = [geo['faces'][k] for k in keep]
+    used = set()
+    for (a0, b0), (sa0, sb0) in boundary.items():
+        if (a0, b0) in used or not (w[a0] > 0.02 or w[b0] > 0.02):
+            continue
+        loop = [(a0, sa0)]
+        cur, used_here = b0, [(a0, b0)]
+        ok = True
+        while cur != a0 and len(loop) < 400:
+            cands = [t for t in nxt.get(cur, []) if (cur, t[0]) not in used and (cur, t[0]) not in used_here]
+            if not cands:
+                ok = False
+                break
+            nb_, sa_, sb_ = cands[0]
+            loop.append((cur, sa_))
+            used_here.append((cur, nb_))
+            cur = nb_
+        for e in used_here:
+            used.add(e)
+        if not ok or len(loop) < 3:
+            continue
+        ids = [u for u, _ in loop]
+        cen = np.mean([P1[u] for u in ids], axis=0)
+        cd = cen - C
+        cen = C + cd / np.linalg.norm(cd) * np.mean([np.linalg.norm(P1[u] - C) for u in ids])
+        cuv = np.mean([geo['uv'][sidx] for _, sidx in loop], axis=0)
+        ci = len(pos)
+        pos.append(cen)
+        uvs.append(cuv)
+        srcs.append(srcs[loop[0][1]])
+        for k in masks:
+            masks[k].append(0.0)
+        for j in range(len(loop)):
+            sa_ = loop[j][1]
+            sb_ = loop[(j + 1) % len(loop)][1]
+            new_faces.append((sb_, sa_, ci))
+    for i in range(len(geo['pos'])):
+        pos[i] = P1[inv[i]]
+    geo['pos'] = np.array(pos)
+    geo['uv'] = np.array(uvs)
+    geo['src'] = np.array(srcs)
+    geo['masks'] = {k: np.array(v) for k, v in masks.items()}
+    geo['faces'] = new_faces
+
+
 def mh_head_parts():
     global head_pos
     mh = mhdata()
@@ -1010,8 +1116,15 @@ def mh_head_parts():
     src = geo['src']
     uniq, inv = np.unique(src, return_inverse=True)
     nb = _neighbours(inv, [tuple(inv[i] for i in f) for f in geo['faces']], len(uniq))
+    if not FACE_DETAIL:
+        blank_face(geo, uniq, inv, nb)
+        src = geo['src']
+        uniq, inv = np.unique(src, return_inverse=True)
+        nb = _neighbours(inv, [tuple(inv[i] for i in f) for f in geo['faces']], len(uniq))
     col = np.ones((len(src), 3))
     for name, tint, amt in (('lips', LIPS, 1.0), ('brows', BROWS, 0.8), ('ears', EARS, 1.0), ('nose', NOSE, 0.7)):
+        if not FACE_DETAIL and name != 'ears':
+            continue
         m = np.zeros(len(uniq))
         m[inv] = geo['masks'][name]
         m = smooth_scalar(m, nb, 2)[inv] * amt
@@ -1039,7 +1152,9 @@ def HEAD_PARTS(only=None):
     if only and not (only & {'head', 'body'}):
         return {}
     head, lo, lo2, eyes = mh_head_parts()
-    out = {'head': head, 'eyes': eyes, 'head_lo': lo, 'head_lo2': lo2}
+    out = {'head': head, 'head_lo': lo, 'head_lo2': lo2}
+    if FACE_DETAIL:
+        out['eyes'] = eyes
     if not only or 'hair' in only or 'body' in only:
         for fn in HAIR_STYLES:
             h = fn()

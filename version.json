@@ -1,6 +1,15 @@
 {
-  "build": 44,
+  "build": 45,
   "history": [
+    {
+      "build": 45,
+      "version": "1.45",
+      "date": "2026-10-17",
+      "notes": [
+        "Faces are blank again: a smooth, featureless head with no eyes, brows or face texture",
+        "Hands, hair, hood and collar from the last build stay"
+      ]
+    },
     {
       "build": 44,
       "version": "1.44",
@@ -231,14 +240,6 @@
       "notes": [
         "Every building in the open city now has a door: press E to go inside. Apartments, noodle bars, clinics, offices, warehouses, server rooms, clubs and every named landmark, each generated from its district and size",
         "People inside have something to say, stashes can be searched once for credits, and the glowing door takes you back to the street where you stood"
-      ]
-    },
-    {
-      "build": 20,
-      "version": "1.20",
-      "date": "2026-10-11",
-      "notes": [
-        "The Helix trace is much harder: it climbs faster, barely recovers (not at all right after a hunt), locks harder, and intrusions start earlier with a shorter window"
       ]
     }
   ]
