@@ -1,6 +1,14 @@
 {
-  "build": 46,
+  "build": 47,
   "history": [
+    {
+      "build": 47,
+      "version": "1.47",
+      "date": "2026-10-17",
+      "notes": [
+        "Dialogue choices restyled: red skill tag, key chip, yellow selected bar and cyan options"
+      ]
+    },
     {
       "build": 46,
       "version": "1.46",
@@ -231,15 +239,6 @@
       "date": "2026-10-11",
       "notes": [
         "Black Markets are now hidden: ten stalls in the middle of the alleys, out of sight of the streets and not marked in the world, with the nearest a long walk from your start. The minimap points the way with pink diamonds and edge arrows"
-      ]
-    },
-    {
-      "build": 22,
-      "version": "1.22",
-      "date": "2026-10-11",
-      "notes": [
-        "The Black Market is no longer in the pause menu: fifteen Black Market stalls now stand in the alleys of the open city (a pink dot on the minimap, E at the counter). There is no market during an operation, so buy before you go",
-        "Interiors are much more detailed and unique: three layouts per type, counters with someone behind them, 12 new kinds of furniture, a different floor in every room, the name of the place on the wall, windows onto the night city, and ceiling fittings that move. Door frames are coloured by what is behind them"
       ]
     }
   ]
