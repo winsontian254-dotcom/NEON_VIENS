@@ -1,6 +1,14 @@
 {
-  "build": 49,
+  "build": 50,
   "history": [
+    {
+      "build": 50,
+      "version": "1.50",
+      "date": "2026-10-18",
+      "notes": [
+        "New NEON VEINS logo: one row, drawn as cyberpunk neon-tube lettering that breaks out of the menu panel and runs over the tower"
+      ]
+    },
     {
       "build": 49,
       "version": "1.49",
@@ -231,17 +239,6 @@
         "Locked caches and stashes: a lockpick minigame",
         "Cyberware at the Black Market, including the Reflex Booster slow-motion on B",
         "A Crafting tab turns Weapon Parts into lockpicks and consumables"
-      ]
-    },
-    {
-      "build": 25,
-      "version": "1.25",
-      "date": "2026-10-12",
-      "notes": [
-        "Silent work: hold E behind a guard to choke them. Let go for a knockout, hold too long and they die",
-        "Zip-tie, search, carry and hide bodies. Guards who find a body raise the alarm",
-        "Press T to whistle, and throw Noisemakers to lure patrols",
-        "Nonlethal weapons now knock out instead of killing"
       ]
     }
   ]

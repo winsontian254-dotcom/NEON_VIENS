@@ -395,6 +395,13 @@ body.mobile #title .tpanel .tagline{position:static;font-size:9px;margin-top:6px
 body.mobile #title .tpanel .menu{margin-top:2vh;display:flex!important;flex-direction:column;justify-content:flex-start;width:100%!important;top:auto!important;bottom:auto!important;position:static!important}
 body.mobile #title .tpanel .btn{height:auto!important;min-height:0!important;padding:5px 12px!important;font-size:15px}
 body.mobile #title .tdata{display:none}body.mobile #title .acctchip{min-width:0;font-size:11px;padding:7px 10px;bottom:12px;top:auto}body.mobile #title .tpanel .btn small{display:none!important}
+/* the NEON VEINS lettering (NV.Logo): one row, wider than the menu panel so it breaks out of the box and runs over the tower */
+.logo.lg{font:inherit;letter-spacing:0;transform:none;text-shadow:none;line-height:0}.logo.lg .lgsvg{display:block;width:100%;height:auto;overflow:visible}
+#title .tpanel{overflow:visible}#title .tpanel .logo.lg{width:min(63vw,1200px);margin:2vh 0 0 -16px;flex:none;position:relative;left:0;top:0;z-index:6;pointer-events:none}
+.lgsvg .f1{animation:lgfl 7s infinite steps(1)}.lgsvg .f6{animation:lgfl 5.3s 1.2s infinite steps(1)}@keyframes lgfl{0%,17%,21%,61%,100%{opacity:1}18%,20%{opacity:.2}62%{opacity:.55}63%{opacity:.15}64%{opacity:1}}
+body.noglitch .lgsvg *,body.lowfx .lgsvg *{animation:none!important}body.lowfx .lgsvg [filter]{display:none}
+@media (prefers-reduced-motion: reduce){.lgsvg *{animation:none!important}}
+body.mobile #title .tpanel .logo.lg{width:min(72vw,calc(54vh * 5.4));margin:1vh 0 0 -8px}
 @media (max-height:700px){#title .tpanel .logo{margin-top:1vh}#title .tpanel .menu{margin-top:2vh}#title .tpanel .btn{padding:4px 14px}#title .tpanel .btn small{display:none}}
 
 /* ---------- character creator: a civic-records terminal (lifepath cards, appearance rows, attributes, difficulty) ---------- */
@@ -1925,6 +1932,54 @@ NV.Cursor = (() => {
   return { COL, XS, MS, SZ, TH, DEF, get, set, apply, label: () => XS[get().xs], dyn: () => get().xdyn };
 })();
 
+/* NV.Logo: the NEON VEINS lettering, drawn as one inline SVG (custom angular capitals, neon tubes, a glitch slice, circuit veins). logo() returns the markup. */
+NV.Logo = (() => {
+  const SW = 18;                                         // stroke width of a letter
+  const H = 8, B = 92;                                   // centre-line top and bottom of a capital (cap height 100, stroke included)
+  // each glyph: width and centre-line path (stroke SW, mitred / bevelled joins, butt caps)
+  const G = {
+    N: { w: 84, d: w => `M8 ${B}V${H}L${w - 8} ${B}V${H}` },
+    E: { w: 70, d: w => `M${w - 6} ${H}H8V${B}H${w - 6}M8 50H${w - 18}` },
+    O: { w: 82, d: w => `M24 ${H}H${w - 24}L${w - 8} 24V76L${w - 24} ${B}H24L8 76V24Z` },
+    V: { w: 84, d: w => `M8 ${H}L${w / 2 - 7} ${B}H${w / 2 + 7}L${w - 8} ${H}` },
+    I: { w: 30, d: w => `M${w / 2} ${H}V${B}` },
+    S: { w: 74, d: w => `M${w - 8} 26L${w - 26} ${H}H24L8 24V38L22 50H${w - 22}L${w - 8} 62V76L${w - 24} ${B}H26L8 74` },
+  };
+  const word = (s, x0, gap) => { let x = x0; return s.split('').map(c => { const g = G[c], o = { c, x, w: g.w, d: g.d(g.w) }; x += g.w + gap; return o; }); };
+  return opts => {
+    opts = opts || {};
+    const gap = 16, a = word('NEON', 0, gap), x1 = a[a.length - 1].x + a[a.length - 1].w + 54, b = word('VEINS', x1, gap), all = a.concat(b), W = b[b.length - 1].x + b[b.length - 1].w;
+    const VW = W + 190, VH = 188, oy = 56, skew = -11;
+    // one coloured word: glow, tube, hollow, core (layers across the whole word, so a neighbour's glow never tints a letter drawn before it)
+    const lay = (list, col, i0) => {
+      const P = (g, i, extra) => `<path class="f${i0 + i}" transform="translate(${g.x} 0)" d="${g.d}" ${extra}/>`;
+      return list.map((g, i) => P(g, i, `stroke="${col}" stroke-width="${SW + 12}" filter="url(#lgb)" opacity=".8"`)).join('') +
+        list.map((g, i) => P(g, i, `stroke="${col}" stroke-width="${SW}"`)).join('') +
+        list.map((g, i) => P(g, i, `stroke="#06020c" stroke-width="${SW - 9}"`)).join('') +
+        list.map((g, i) => P(g, i, `stroke="#fff" stroke-width="1.6" opacity=".95"`)).join('');
+    };
+    const body = lay(a, '#ff2bd6', 0) + lay(b, '#19f0ff', a.length);
+    const veins = `
+      <path d="M${W + 8} 50H${W + 70}L${W + 84} 36H${W + 150}" stroke="#19f0ff" stroke-width="1.6" fill="none" opacity=".9"/>
+      <path d="M${W + 8} 78H${W + 40}L${W + 54} 92H${W + 118}L${W + 130} 104H${W + 176}" stroke="#ff2bd6" stroke-width="1.6" fill="none" opacity=".85"/>
+      <g fill="#19f0ff"><rect x="${W + 148}" y="33" width="6" height="6"/><rect x="${W + 66}" y="47" width="4" height="4" opacity=".7"/></g>
+      <g fill="#ff2bd6"><rect x="${W + 174}" y="101" width="6" height="6"/><rect x="${W + 116}" y="89" width="4" height="4" opacity=".7"/></g>
+      <path d="M-6 ${B + 24}H${W + 6}" stroke="#19f0ff" stroke-width="1.4" opacity=".55"/>
+      <g stroke="#19f0ff" stroke-width="1.4" opacity=".55">${Array.from({ length: 30 }, (_, i) => `<path d="M${i * (W / 29)} ${B + 24}v${i % 5 ? 4 : 9}"/>`).join('')}</g>`;
+    return `<svg class="lgsvg" viewBox="-12 -34 ${VW} ${VH}" role="img" aria-label="NEON VEINS" overflow="visible" xmlns="http://www.w3.org/2000/svg">
+      <defs><filter id="lgb" x="-20%" y="-40%" width="140%" height="180%"><feGaussianBlur stdDeviation="7"/></filter>
+        <clipPath id="lgtop"><rect x="-40" y="-60" width="${VW + 80}" height="${60 + 46}"/></clipPath><clipPath id="lgbot"><rect x="-40" y="51" width="${VW + 80}" height="120"/></clipPath></defs>
+      <text x="0" y="-12" fill="#19f0ff" font-family="ui-monospace,Consolas,monospace" font-size="13" letter-spacing="9" opacity=".8">ネオン · ヴェインズ</text>
+      <path d="M-8 -22V-34H12M${W + 4} -34H${W + 24}V-22" stroke="#19f0ff" stroke-width="1.6" fill="none" opacity=".7"/>
+      <g transform="skewX(${skew}) translate(22 0)" fill="none" stroke-linejoin="bevel" stroke-linecap="butt">
+        <g clip-path="url(#lgtop)" transform="translate(-6 0)">${body}</g>
+        <g clip-path="url(#lgbot)">${body}</g>
+      </g>
+      <g transform="translate(18 0)" fill="none">${veins}</g>
+    </svg>`;
+  };
+})();
+
 /* ================= Language: English · 简体中文 · 繁體中文 =================
    Translations live in window.NV_ZH (its own script block). Story lines are looked up by their
    English text (storyKeys() must mirror tools' extract order); the rest of the interface is
@@ -2614,7 +2669,7 @@ NV.Account = (() => {
 
 /* Condition evaluation for conditional blocks compiled from the script */
 NV.Update = (() => {
-  const NV_BUILD = 49;
+  const NV_BUILD = 50;
   NV.BUILD = NV_BUILD;
   const URL = 'https://winsontian254-dotcom.github.io/NEON_VIENS/version.json', KEY = 'nv_seen_build';
   let info = null, shown = 0, alerted = false;
@@ -12141,7 +12196,7 @@ NV.UI = (() => {
     const meta = NV.State.meta(), has = NV.State.hasSave();
     const hx = n => Array.from({ length: n }, () => (Math.random() * 0xffffffff >>> 0).toString(16).padStart(8, '0').toUpperCase()).join(' ');
     const el = add(`<div class="tpanel"><div class="tmicro notr">${hx(4)} · NEW AVALON CIVIC GRID · NODE 93</div>
-        <div class="logo">NEON <span class="v">VEINS</span></div><div class="tagline">IF YOU CAN READ THIS, I FAILED.</div>
+        <div class="logo lg">${NV.Logo()}</div><div class="tagline">IF YOU CAN READ THIS, I FAILED.</div>
         <div class="menu"></div>
         <div class="badge">ENDINGS DISCOVERED <span>${meta.endings.length} / 6</span></div><div class="tmicro notr">PROTOCOL 2098-NV · ONLY CERTIFIED COURIERS MAY OPERATE THIS DEVICE</div></div>
       <div class="tdata notr">HELIX CIVIC RECORD DATABASE · ${hx(3)}<br>IDENTITY QUERY: GHOST · RESULT: <b style="color:var(--cr)">NOT FOUND</b> · ${hx(2)}</div>
