@@ -1,6 +1,14 @@
 {
-  "build": 50,
+  "build": 51,
   "history": [
+    {
+      "build": 51,
+      "version": "1.51",
+      "date": "2026-10-18",
+      "notes": [
+        "Enemies and people no longer vanish, lose body parts or turn to blobs at range on the lower graphics presets"
+      ]
+    },
     {
       "build": 50,
       "version": "1.50",
@@ -228,17 +236,6 @@
         "Take a guard's uniform to walk past patrols, and interrogate tied guards for intel",
         "Guards can run to alarm panels to call reinforcements: stop them or disable the panel",
         "Vents let you crawl between two points unseen"
-      ]
-    },
-    {
-      "build": 26,
-      "version": "1.26",
-      "date": "2026-10-12",
-      "notes": [
-        "Security cameras and breaker boxes in operations: shoot a camera or cut the power",
-        "Locked caches and stashes: a lockpick minigame",
-        "Cyberware at the Black Market, including the Reflex Booster slow-motion on B",
-        "A Crafting tab turns Weapon Parts into lockpicks and consumables"
       ]
     }
   ]

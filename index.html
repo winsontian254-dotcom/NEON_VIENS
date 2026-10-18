@@ -2669,7 +2669,7 @@ NV.Account = (() => {
 
 /* Condition evaluation for conditional blocks compiled from the script */
 NV.Update = (() => {
-  const NV_BUILD = 50;
+  const NV_BUILD = 51;
   NV.BUILD = NV_BUILD;
   const URL = 'https://winsontian254-dotcom.github.io/NEON_VIENS/version.json', KEY = 'nv_seen_build';
   let info = null, shown = 0, alerted = false;
@@ -3416,7 +3416,8 @@ NV.Human = (() => {
   const CV = new Map();
   const cached = (key, fn) => { let c = CV.get(key); if (!c) { c = fn(); CV.set(key, c); if (CV.size > 48) CV.delete(CV.keys().next().value); } return c; };
   const half = () => NV.Quality.get().scale < .65 ? .5 : 1;                     // weak devices get half-size skin textures
-  const lodM = () => NV.Quality.get().lod || 1;
+  // people are never culled by the preset's detail factor alone: at .2 (the lowest presets) a guard was low-poly at 3 m and gone at 20 m, while guards shoot from 17-36 m
+  const lodM = () => Math.max(.9, NV.Quality.get().lod || 1);
   const ST = scene => scene._nvHum || (scene._nvHum = { t: null, m: {}, x: {}, g: {} });
   const tex = (scene, cv, k) => {
     if (k && k < 1) { const c2 = mk(Math.max(8, cv.width * k | 0), Math.max(8, cv.height * k | 0)); c2.getContext('2d').drawImage(cv, 0, 0, c2.width, c2.height); cv = c2; }
@@ -5916,7 +5917,7 @@ NV.Level = (() => {
   }
   const LOD_SMALL = new Set(['hand', 'foot', 'pad', 'pack', 'pg', 'parm', 'pds', 'ne', 'nc', 'nhair', 'neck', 'pelvis', 'phelm', 'pplate', 'phplate', 'pacc', 'paccH', 'ptube', 'pdcoat', 'umb', 'umbrim', 'umbh', 'pdhat']);
   function lod(mesh) {
-    const m = NV.Quality.get().lod || 1, name = mesh.name;
+    const m = Math.max(.9, NV.Quality.get().lod || 1), name = mesh.name;   // (the same floor as NV.Human: a person must stay visible within gameplay range)
     if (LOD_SMALL.has(name)) { mesh.addLODLevel(30 * m, null); return mesh; }
     const low = lowShape(name, L.scene);
     if (low) { low.material = mesh.material; low.isPickable = false; mesh.addLODLevel(20 * m, low); if (L.sg) L.sg.addShadowCaster(low, false); }
@@ -9317,7 +9318,7 @@ NV.Level = (() => {
   };
   function carProtos() {
     const s = L.scene, pal = L.palette;
-    const lm = NV.Quality.get().lod || 1, cull = { cbody: 170, cnose: 130, ccab: 125, cwheel: 60, chead: 115, ctail: 115, cglow: 85, cstrip: 70, cbrake: 80, cflame: 60 };
+    const lm = Math.max(.6, NV.Quality.get().lod || 1), cull = { cbody: 170, cnose: 130, ccab: 125, cwheel: 60, chead: 115, ctail: 115, cglow: 85, cstrip: 70, cbrake: 80, cflame: 60 };
     const P = (mesh, m) => { mesh.material = m; mesh.position.y = -1000; mesh.isPickable = false; mesh.addLODLevel(cull[mesh.name] * lm, null); return mesh; };
     const env = envCube(s);
     const paint = ['#1d1a2e', '#5a1030', '#0f3a48', '#3a3a44', '#5a3a10'].map((c, i) => {
