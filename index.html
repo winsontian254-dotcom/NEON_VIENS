@@ -398,10 +398,12 @@ body.mobile #title .tdata{display:none}body.mobile #title .acctchip{min-width:0;
 /* the NEON VEINS lettering (NV.Logo): one row, wider than the menu panel so it breaks out of the box and runs over the tower */
 .logo.lg{font:inherit;letter-spacing:0;transform:none;text-shadow:none;line-height:0}.logo.lg .lgsvg{display:block;width:100%;height:auto;overflow:visible}
 #title .tpanel{overflow:visible}#title .tpanel .logo.lg{width:min(63vw,1200px);margin:2vh 0 0 -16px;flex:none;position:relative;left:0;top:0;z-index:6;pointer-events:none}
-.lgsvg .f1{animation:lgfl 7s infinite steps(1)}.lgsvg .f6{animation:lgfl 5.3s 1.2s infinite steps(1)}@keyframes lgfl{0%,17%,21%,61%,100%{opacity:1}18%,20%{opacity:.2}62%{opacity:.55}63%{opacity:.15}64%{opacity:1}}
-body.noglitch .lgsvg *,body.lowfx .lgsvg *{animation:none!important}body.lowfx .lgsvg [filter]{display:none}
+.lgsvg .gl1>g{animation:lgg1 6s infinite steps(1)}.lgsvg .gl2>g{animation:lgg2 8.3s 1.7s infinite steps(1)}
+@keyframes lgg1{0%,86%,92%,100%{transform:translateX(16px)}87%{transform:translateX(-22px)}89%{transform:translateX(40px)}91%{transform:translateX(-6px)}}
+@keyframes lgg2{0%,70%,76%,100%{transform:translateX(-14px)}71%{transform:translateX(26px)}73%{transform:translateX(-34px)}75%{transform:translateX(6px)}}
+body.noglitch .lgsvg *,body.lowfx .lgsvg *{animation:none!important}body.lowfx .lgsvg [data-fx]{display:none}body.lowfx .lgsvg .lgmain{filter:none}
 @media (prefers-reduced-motion: reduce){.lgsvg *{animation:none!important}}
-body.mobile #title .tpanel .logo.lg{width:min(72vw,calc(54vh * 5.4));margin:1vh 0 0 -8px}
+body.mobile #title .tpanel .logo.lg{width:min(72vw,calc(54vh * 5.5));margin:1vh 0 0 -8px}
 @media (max-height:700px){#title .tpanel .logo{margin-top:1vh}#title .tpanel .menu{margin-top:2vh}#title .tpanel .btn{padding:4px 14px}#title .tpanel .btn small{display:none}}
 
 /* ---------- character creator: a civic-records terminal (lifepath cards, appearance rows, attributes, difficulty) ---------- */
@@ -1932,50 +1934,76 @@ NV.Cursor = (() => {
   return { COL, XS, MS, SZ, TH, DEF, get, set, apply, label: () => XS[get().xs], dyn: () => get().xdyn };
 })();
 
-/* NV.Logo: the NEON VEINS lettering, drawn as one inline SVG (custom angular capitals, neon tubes, a glitch slice, circuit veins). logo() returns the markup. */
+/* NV.Logo: the NEON VEINS lettering, drawn as one inline SVG (heavy angular yellow capitals cut by slashes and glitch slits, a cyan fringe, wide-spaced cyan year). logo() returns the markup. */
 NV.Logo = (() => {
-  const SW = 18;                                         // stroke width of a letter
-  const H = 8, B = 92;                                   // centre-line top and bottom of a capital (cap height 100, stroke included)
-  // each glyph: width and centre-line path (stroke SW, mitred / bevelled joins, butt caps)
+  const Y = '#fcee09', C = '#02d7f2';                    // yellow and cyan of the lettering
+  // heavy capitals, cap height 100; filled polygons, one path per glyph (evenodd for the O)
   const G = {
-    N: { w: 84, d: w => `M8 ${B}V${H}L${w - 8} ${B}V${H}` },
-    E: { w: 70, d: w => `M${w - 6} ${H}H8V${B}H${w - 6}M8 50H${w - 18}` },
-    O: { w: 82, d: w => `M24 ${H}H${w - 24}L${w - 8} 24V76L${w - 24} ${B}H24L8 76V24Z` },
-    V: { w: 84, d: w => `M8 ${H}L${w / 2 - 7} ${B}H${w / 2 + 7}L${w - 8} ${H}` },
-    I: { w: 30, d: w => `M${w / 2} ${H}V${B}` },
-    S: { w: 74, d: w => `M${w - 8} 26L${w - 26} ${H}H24L8 24V38L22 50H${w - 22}L${w - 8} 62V76L${w - 24} ${B}H26L8 74` },
+    N: { w: 100, d: 'M0 100V12L12 0H30L74 58V0H100V88L88 100H70L26 42V100Z' },
+    E: { w: 80, d: 'M0 100V12L12 0H80V22H27V39H66V61H27V78H80V100Z' },
+    O: { w: 96, d: 'M0 16L16 0H80L96 16V84L80 100H16L0 84ZM28 26V74H68V26Z' },
+    V: { w: 102, d: 'M0 0H28L51 68L74 0H102L64 100H38Z' },
+    I: { w: 30, d: 'M0 12L12 0H30V100H0Z' },
+    S: { w: 84, d: 'M16 0H84V22H30V38H68L84 54V86L68 100H0V78H56V62H16L0 46V16Z' },
   };
-  const word = (s, x0, gap) => { let x = x0; return s.split('').map(c => { const g = G[c], o = { c, x, w: g.w, d: g.d(g.w) }; x += g.w + gap; return o; }); };
+  // extra shards that stick out of a letter (glyph coordinates)
+  const SHARD = {
+    N: 'M100 88L118 100H88Z',
+    O: 'M-14 100L10 84L24 100Z',
+    E: 'M80 0L96 -8V0Z',
+    V: 'M102 0L116 -10V0Z',
+    S: 'M84 54L100 62L84 70Z',
+  };
+  const word = (s, x0, gap) => { let x = x0; return s.split('').map(c => { const g = G[c], o = { c, x, w: g.w }; x += g.w + gap; return o; }); };
   return opts => {
     opts = opts || {};
-    const gap = 16, a = word('NEON', 0, gap), x1 = a[a.length - 1].x + a[a.length - 1].w + 54, b = word('VEINS', x1, gap), all = a.concat(b), W = b[b.length - 1].x + b[b.length - 1].w;
-    const VW = W + 190, VH = 188, oy = 56, skew = -11;
-    // one coloured word: glow, tube, hollow, core (layers across the whole word, so a neighbour's glow never tints a letter drawn before it)
-    const lay = (list, col, i0) => {
-      const P = (g, i, extra) => `<path class="f${i0 + i}" transform="translate(${g.x} 0)" d="${g.d}" ${extra}/>`;
-      return list.map((g, i) => P(g, i, `stroke="${col}" stroke-width="${SW + 12}" filter="url(#lgb)" opacity=".8"`)).join('') +
-        list.map((g, i) => P(g, i, `stroke="${col}" stroke-width="${SW}"`)).join('') +
-        list.map((g, i) => P(g, i, `stroke="#06020c" stroke-width="${SW - 9}"`)).join('') +
-        list.map((g, i) => P(g, i, `stroke="#fff" stroke-width="1.6" opacity=".95"`)).join('');
+    const gap = 12, a = word('NEON', 0, gap), x1 = a[a.length - 1].x + a[a.length - 1].w + 64, b = word('VEINS', x1, gap), all = a.concat(b);
+    const W = b[b.length - 1].x + b[b.length - 1].w;
+    const P = (att) => all.map(g => `<path transform="translate(${g.x} 0)" d="${G[g.c].d}"${G[g.c].d.includes('Z', 1) && g.c === 'O' ? ' fill-rule="evenodd"' : ''} ${att || ''}/>`).join('') +
+      all.filter(g => SHARD[g.c]).map(g => `<path transform="translate(${g.x} 0)" d="${SHARD[g.c]}" ${att || ''}/>`).join('');
+    const X = c => all.find(g => g.c === c);
+    const nA = a[0], eA = a[1], oA = a[2], nB = a[3], vB = b[0], eB = b[1], iB = b[2], nC = b[3], sB = b[4];
+    // slashes: thin tapered wedges that cut the letters (x1 y1, x2 y2, thickness at the middle)
+    const slash = (x0, y0, x2, y2, t) => { const mx = (x0 + x2) / 2, my = (y0 + y2) / 2, dx = x2 - x0, dy = y2 - y0, l = Math.hypot(dx, dy), nx = -dy / l * t / 2, ny = dx / l * t / 2; return `M${x0} ${y0}L${mx + nx} ${my + ny}L${x2} ${y2}L${mx - nx} ${my - ny}Z`; };
+    const cuts = [
+      slash(nA.x - 6, 44, nA.x + 60, 36, 5),
+      slash(oA.x + 34, 6, oA.x + 62, 96, 4),
+      slash(nB.x + 38, 60, nB.x + 112, 50, 5),
+      slash(vB.x + 10, 18, vB.x + 96, 8, 4),
+      slash(iB.x - 4, 72, iB.x + 34, 64, 4),
+      slash(sB.x - 6, 72, sB.x + 94, 78, 4),
+    ];
+    const VW = W + 70, VH = 176;
+    const cx = W / 2, yr = 150;
+    const dig = {
+      2: 'M1 6L7 1H17L23 6V13L1 29H23', 0: 'M1 7L7 1H17L23 7V23L17 29H7L1 23Z',
+      9: 'M23 14L17 18H7L1 14V7L7 1H17L23 7V23L17 29H3', 8: 'M7 1H17L22 6V12L17 15H7L2 12V6ZM7 15H17L23 18V25L17 29H7L1 25V18Z',
     };
-    const body = lay(a, '#ff2bd6', 0) + lay(b, '#19f0ff', a.length);
-    const veins = `
-      <path d="M${W + 8} 50H${W + 70}L${W + 84} 36H${W + 150}" stroke="#19f0ff" stroke-width="1.6" fill="none" opacity=".9"/>
-      <path d="M${W + 8} 78H${W + 40}L${W + 54} 92H${W + 118}L${W + 130} 104H${W + 176}" stroke="#ff2bd6" stroke-width="1.6" fill="none" opacity=".85"/>
-      <g fill="#19f0ff"><rect x="${W + 148}" y="33" width="6" height="6"/><rect x="${W + 66}" y="47" width="4" height="4" opacity=".7"/></g>
-      <g fill="#ff2bd6"><rect x="${W + 174}" y="101" width="6" height="6"/><rect x="${W + 116}" y="89" width="4" height="4" opacity=".7"/></g>
-      <path d="M-6 ${B + 24}H${W + 6}" stroke="#19f0ff" stroke-width="1.4" opacity=".55"/>
-      <g stroke="#19f0ff" stroke-width="1.4" opacity=".55">${Array.from({ length: 30 }, (_, i) => `<path d="M${i * (W / 29)} ${B + 24}v${i % 5 ? 4 : 9}"/>`).join('')}</g>`;
-    return `<svg class="lgsvg" viewBox="-12 -34 ${VW} ${VH}" role="img" aria-label="NEON VEINS" overflow="visible" xmlns="http://www.w3.org/2000/svg">
-      <defs><filter id="lgb" x="-20%" y="-40%" width="140%" height="180%"><feGaussianBlur stdDeviation="7"/></filter>
-        <clipPath id="lgtop"><rect x="-40" y="-60" width="${VW + 80}" height="${60 + 46}"/></clipPath><clipPath id="lgbot"><rect x="-40" y="51" width="${VW + 80}" height="120"/></clipPath></defs>
-      <text x="0" y="-12" fill="#19f0ff" font-family="ui-monospace,Consolas,monospace" font-size="13" letter-spacing="9" opacity=".8">ネオン · ヴェインズ</text>
-      <path d="M-8 -22V-34H12M${W + 4} -34H${W + 24}V-22" stroke="#19f0ff" stroke-width="1.6" fill="none" opacity=".7"/>
-      <g transform="skewX(${skew}) translate(22 0)" fill="none" stroke-linejoin="bevel" stroke-linecap="butt">
-        <g clip-path="url(#lgtop)" transform="translate(-6 0)">${body}</g>
-        <g clip-path="url(#lgbot)">${body}</g>
+    const yearW = 4 * 24 + 3 * 46, y0 = cx - yearW / 2 + 6;
+    const year = '2098'.split('').map((c, i) => `<path transform="translate(${y0 + i * 70} ${yr - 29})" d="${dig[c]}"/>`).join('');
+    return `<svg class="lgsvg" viewBox="-30 -22 ${VW} ${VH}" role="img" aria-label="NEON VEINS" overflow="visible" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="lgy" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffa7a"/><stop offset=".45" stop-color="${Y}"/><stop offset="1" stop-color="#f2d800"/></linearGradient>
+        <filter id="lgb" x="-10%" y="-40%" width="120%" height="180%"><feGaussianBlur stdDeviation="6"/></filter>
+        <filter id="lgr" x="-5%" y="-10%" width="110%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".05 .3" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2" xChannelSelector="R" yChannelSelector="G"/></filter>
+        <mask id="lgm" maskUnits="userSpaceOnUse" x="-60" y="-40" width="${W + 140}" height="200"><rect x="-60" y="-40" width="${W + 140}" height="200" fill="#fff"/>${cuts.map(d => `<path d="${d}" fill="#000"/>`).join('')}</mask>
+        <clipPath id="lgc1"><rect x="-60" y="30" width="${W + 140}" height="9"/></clipPath>
+        <clipPath id="lgc2"><rect x="-60" y="63" width="${W + 140}" height="6"/></clipPath>
+        <clipPath id="lgc3"><rect x="-60" y="12" width="${W + 140}" height="5"/></clipPath>
+      </defs>
+      <g fill="${C}" data-fx="1" filter="url(#lgb)" opacity=".55" transform="translate(-6 5)">${P()}</g>
+      <g fill="${C}" transform="translate(-6 5)" mask="url(#lgm)">${P()}</g>
+      <g class="lgmain" filter="url(#lgr)"><g mask="url(#lgm)" fill="url(#lgy)">${P()}</g></g>
+      <g class="gl1" clip-path="url(#lgc1)"><g fill="${C}" transform="translate(16 0)">${P()}</g></g>
+      <g class="gl2" clip-path="url(#lgc2)"><g fill="${Y}" transform="translate(-14 0)">${P()}</g></g>
+      
+      <g fill="none" stroke="${C}" stroke-width="4.4" stroke-linejoin="miter" stroke-linecap="butt">
+        <g data-fx="1" filter="url(#lgb)" opacity=".7" stroke-width="7">${year}</g>${year}
       </g>
-      <g transform="translate(18 0)" fill="none">${veins}</g>
+      <g fill="none" stroke="${C}" stroke-width="2" opacity=".9">
+        <path d="M-6 ${yr - 14}H${y0 - 30}"/><path d="M${y0 + yearW + 24} ${yr - 14}H${W + 6}"/>
+        <path d="M-6 ${yr - 22}V${yr - 6}M${W + 6} ${yr - 22}V${yr - 6}" stroke-width="3"/>
+      </g>
     </svg>`;
   };
 })();
@@ -2669,7 +2697,7 @@ NV.Account = (() => {
 
 /* Condition evaluation for conditional blocks compiled from the script */
 NV.Update = (() => {
-  const NV_BUILD = 51;
+  const NV_BUILD = 52;
   NV.BUILD = NV_BUILD;
   const URL = 'https://winsontian254-dotcom.github.io/NEON_VIENS/version.json', KEY = 'nv_seen_build';
   let info = null, shown = 0, alerted = false;
@@ -12169,7 +12197,7 @@ NV.UI = (() => {
   /* first launch: pick the language (shown once; Settings → Language changes it later) */
   UI.language = () => new Promise(res => {
     const cur = NV.Settings.get().lang | 0;
-    const el = add(`<div class="center notr"><div class="logo">NEON <span class="v">VEINS</span></div>
+    const el = add(`<div class="center notr"><div class="logo lg" style="width:min(86vw,980px);margin:0 auto">${NV.Logo()}</div>
       <div class="tagline">LANGUAGE · 语言 · 語言</div>
       <div class="menu panel" style="padding:10px 0;position:static;margin:26px auto 0;width:min(380px,86vw);max-height:none;overflow:visible"></div></div>`, '', 'langpick');
     el.style.position = 'absolute'; el.style.inset = '0'; el.style.background = 'radial-gradient(ellipse at center,rgba(0,0,0,.15),rgba(0,0,0,.85))';
@@ -12184,7 +12212,7 @@ NV.UI = (() => {
   });
 
   UI.splash = () => new Promise(res => {
-    const el = add(`<div class="center"><div class="logo">NEON <span class="v">VEINS</span></div><div class="tagline">NEW AVALON · 2098</div><div class="press">PRESS ANY KEY</div></div>`, '', 'splash');
+    const el = add(`<div class="center"><div class="logo lg" style="width:min(86vw,980px);margin:0 auto">${NV.Logo()}</div><div class="tagline">NEW AVALON · 2098</div><div class="press">PRESS ANY KEY</div></div>`, '', 'splash');
     el.style.position = 'absolute'; el.style.inset = '0'; el.style.background = 'radial-gradient(ellipse at center,rgba(0,0,0,.1),rgba(0,0,0,.8))';
     const go = () => { removeEventListener('keydown', go); el.removeEventListener('click', go); NV.Audio.init(); NV.Audio.setMood('title'); NV.Audio.ambience('title'); NV.Audio.sfx('select'); UI.pop(h); el.remove(); res(); };
     addEventListener('keydown', go); el.addEventListener('click', go);
@@ -13428,7 +13456,7 @@ NV.UI = (() => {
   });
   UI.credits = (ending) => new Promise(res => {
     const c = add(`<div class="roll">
-      <div class="logo" style="font-size:64px">NEON <span class="v">VEINS</span></div>
+      <div class="logo lg" style="width:min(80vw,760px);margin:0 auto">${NV.Logo()}</div>
       ${ending ? `<p style="margin-top:20px;font-family:var(--fm);letter-spacing:.3em;color:var(--amber)">ENDING ${ending} — ${U.esc((NV_DATA.endings[ending] || {}).title || '').toUpperCase()}</p>` : ''}
       <h2>STORY &amp; SCRIPT</h2><p>Based on the NEON VEINS game script</p><p>${NV_DATA.chapters.length} chapters · 50 missions · 60 side quests · 6 endings</p>
       <h2>ENGINE</h2><p>Babylon.js — ${NV.G.engine.isWebGPU ? 'WebGPU' : 'WebGL2'} renderer</p>

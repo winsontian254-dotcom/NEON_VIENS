@@ -1,6 +1,15 @@
 {
-  "build": 51,
+  "build": 52,
   "history": [
+    {
+      "build": 52,
+      "version": "1.52",
+      "date": "2026-10-20",
+      "notes": [
+        "New NEON VEINS logo in the style of a cyberpunk game poster: heavy angular yellow lettering cut by slashes, a cyan glitch fringe with sliding glitch bars, and a wide-spaced 2098 underneath; still on one row and breaking out of the menu box",
+        "The same logo now shows on the splash, language and credits screens"
+      ]
+    },
     {
       "build": 51,
       "version": "1.51",
@@ -225,17 +234,6 @@
         "Hackable devices: decoy speakers, overload panels, vending machines",
         "Choose a daemon bonus after every terminal hack",
         "Grab an alerted guard as a hostage: the others hold fire"
-      ]
-    },
-    {
-      "build": 27,
-      "version": "1.27",
-      "date": "2026-10-12",
-      "notes": [
-        "Awareness rings over suspicious guards",
-        "Take a guard's uniform to walk past patrols, and interrogate tied guards for intel",
-        "Guards can run to alarm panels to call reinforcements: stop them or disable the panel",
-        "Vents let you crawl between two points unseen"
       ]
     }
   ]
