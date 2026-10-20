@@ -1,6 +1,14 @@
 {
-  "build": 53,
+  "build": 54,
   "history": [
+    {
+      "build": 54,
+      "version": "1.54",
+      "date": "2026-10-20",
+      "notes": [
+        "Removed the 2098 text and rules under the NEON VEINS logo on the title screen"
+      ]
+    },
     {
       "build": 53,
       "version": "1.53",
@@ -218,18 +226,6 @@
       "notes": [
         "New: Training Zone on the title menu — a practice facility that walks you through every mechanic, never touches your save",
         "Every weapon in the Training Zone is yellow and black practice gear wearing the Training Zone logo"
-      ]
-    },
-    {
-      "build": 29,
-      "version": "1.29",
-      "date": "2026-10-12",
-      "notes": [
-        "Body armor: buy a vest for an armor bar that soaks up damage",
-        "Gun attachments: suppressor, extended magazine, laser sight, stabilizer, hollow points",
-        "Experience and nine perks in three trees",
-        "Dash through a shot for a perfect dodge",
-        "Medals and XP after every operation"
       ]
     }
   ]

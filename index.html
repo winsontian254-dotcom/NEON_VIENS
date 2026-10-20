@@ -1935,7 +1935,7 @@ NV.Cursor = (() => {
   return { COL, XS, MS, SZ, TH, DEF, get, set, apply, label: () => XS[get().xs], dyn: () => get().xdyn };
 })();
 
-/* NV.Logo: the NEON VEINS lettering, drawn as one inline SVG (heavy angular yellow capitals cut by slashes and glitch slits, a cyan fringe, wide-spaced cyan year). logo() returns the markup. */
+/* NV.Logo: the NEON VEINS lettering, drawn as one inline SVG (heavy angular yellow capitals cut by slashes and glitch slits, a cyan fringe). logo() returns the markup. */
 NV.Logo = (() => {
   const Y = '#fcee09', C = '#02d7f2';                    // yellow and cyan of the lettering
   // heavy capitals, cap height 100; filled polygons, one path per glyph (evenodd for the O)
@@ -1974,14 +1974,7 @@ NV.Logo = (() => {
       slash(iB.x - 4, 72, iB.x + 34, 64, 4),
       slash(sB.x - 6, 72, sB.x + 94, 78, 4),
     ];
-    const VW = W + 70, VH = 176;
-    const cx = W / 2, yr = 150;
-    const dig = {
-      2: 'M1 6L7 1H17L23 6V13L1 29H23', 0: 'M1 7L7 1H17L23 7V23L17 29H7L1 23Z',
-      9: 'M23 14L17 18H7L1 14V7L7 1H17L23 7V23L17 29H3', 8: 'M7 1H17L22 6V12L17 15H7L2 12V6ZM7 15H17L23 18V25L17 29H7L1 25V18Z',
-    };
-    const yearW = 4 * 24 + 3 * 46, y0 = cx - yearW / 2 + 6;
-    const year = '2098'.split('').map((c, i) => `<path transform="translate(${y0 + i * 70} ${yr - 29})" d="${dig[c]}"/>`).join('');
+    const VW = W + 70, VH = 142;
     return `<svg class="lgsvg" viewBox="-30 -22 ${VW} ${VH}" role="img" aria-label="NEON VEINS" overflow="visible" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="lgy" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffa7a"/><stop offset=".45" stop-color="${Y}"/><stop offset="1" stop-color="#f2d800"/></linearGradient>
@@ -1990,21 +1983,12 @@ NV.Logo = (() => {
         <mask id="lgm" maskUnits="userSpaceOnUse" x="-60" y="-40" width="${W + 140}" height="200"><rect x="-60" y="-40" width="${W + 140}" height="200" fill="#fff"/>${cuts.map(d => `<path d="${d}" fill="#000"/>`).join('')}</mask>
         <clipPath id="lgc1"><rect x="-60" y="30" width="${W + 140}" height="9"/></clipPath>
         <clipPath id="lgc2"><rect x="-60" y="63" width="${W + 140}" height="6"/></clipPath>
-        <clipPath id="lgc3"><rect x="-60" y="12" width="${W + 140}" height="5"/></clipPath>
       </defs>
       <g fill="${C}" data-fx="1" filter="url(#lgb)" opacity=".55" transform="translate(-6 5)">${P()}</g>
       <g fill="${C}" transform="translate(-6 5)" mask="url(#lgm)">${P()}</g>
       <g class="lgmain" filter="url(#lgr)"><g mask="url(#lgm)" fill="url(#lgy)">${P()}</g></g>
       <g class="gl1" clip-path="url(#lgc1)"><g fill="${C}" transform="translate(16 0)">${P()}</g></g>
       <g class="gl2" clip-path="url(#lgc2)"><g fill="${Y}" transform="translate(-14 0)">${P()}</g></g>
-      
-      <g fill="none" stroke="${C}" stroke-width="4.4" stroke-linejoin="miter" stroke-linecap="butt">
-        <g data-fx="1" filter="url(#lgb)" opacity=".7" stroke-width="7">${year}</g>${year}
-      </g>
-      <g fill="none" stroke="${C}" stroke-width="2" opacity=".9">
-        <path d="M-6 ${yr - 14}H${y0 - 30}"/><path d="M${y0 + yearW + 24} ${yr - 14}H${W + 6}"/>
-        <path d="M-6 ${yr - 22}V${yr - 6}M${W + 6} ${yr - 22}V${yr - 6}" stroke-width="3"/>
-      </g>
     </svg>`;
   };
 })();
@@ -2698,7 +2682,7 @@ NV.Account = (() => {
 
 /* Condition evaluation for conditional blocks compiled from the script */
 NV.Update = (() => {
-  const NV_BUILD = 53;
+  const NV_BUILD = 54;
   NV.BUILD = NV_BUILD;
   const URL = 'https://winsontian254-dotcom.github.io/NEON_VIENS/version.json', KEY = 'nv_seen_build';
   let info = null, shown = 0, alerted = false;
