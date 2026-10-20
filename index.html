@@ -397,13 +397,14 @@ body.mobile #title .tpanel .btn{height:auto!important;min-height:0!important;pad
 body.mobile #title .tdata{display:none}body.mobile #title .acctchip{min-width:0;font-size:11px;padding:7px 10px;bottom:12px;top:auto}body.mobile #title .tpanel .btn small{display:none!important}
 /* the NEON VEINS lettering (NV.Logo): one row, wider than the menu panel so it breaks out of the box and runs over the tower */
 .logo.lg{font:inherit;letter-spacing:0;transform:none;text-shadow:none;line-height:0}.logo.lg .lgsvg{display:block;width:100%;height:auto;overflow:visible}
-#title .tpanel{overflow:visible}#title .tpanel .logo.lg{width:min(63vw,1200px);margin:2vh 0 0 -16px;flex:none;position:relative;left:0;top:0;z-index:6;pointer-events:none}
+#title .tpanel{overflow:visible;--tw:min(520px,40vw);--tl:clamp(16px,6vw,110px);--tp:34px}
+#title .tpanel .logo.lg{--pop:max(6px,min(calc(var(--tw) * .2),calc(var(--tl) - 10px)));width:calc(var(--tw) + 2 * var(--pop));margin:2vh 0 0 calc(-1 * (var(--pop) + var(--tp)));flex:none;position:relative;left:0;top:0;z-index:6;pointer-events:none}
 .lgsvg .gl1>g{animation:lgg1 6s infinite steps(1)}.lgsvg .gl2>g{animation:lgg2 8.3s 1.7s infinite steps(1)}
 @keyframes lgg1{0%,86%,92%,100%{transform:translateX(16px)}87%{transform:translateX(-22px)}89%{transform:translateX(40px)}91%{transform:translateX(-6px)}}
 @keyframes lgg2{0%,70%,76%,100%{transform:translateX(-14px)}71%{transform:translateX(26px)}73%{transform:translateX(-34px)}75%{transform:translateX(6px)}}
 body.noglitch .lgsvg *,body.lowfx .lgsvg *{animation:none!important}body.lowfx .lgsvg [data-fx]{display:none}body.lowfx .lgsvg .lgmain{filter:none}
 @media (prefers-reduced-motion: reduce){.lgsvg *{animation:none!important}}
-body.mobile #title .tpanel .logo.lg{width:min(72vw,calc(54vh * 5.5));margin:1vh 0 0 -8px}
+body.mobile #title .tpanel{--tw:min(440px,52vw);--tl:3vw;--tp:18px}body.mobile #title .tpanel .logo.lg{margin-top:1vh}
 @media (max-height:700px){#title .tpanel .logo{margin-top:1vh}#title .tpanel .menu{margin-top:2vh}#title .tpanel .btn{padding:4px 14px}#title .tpanel .btn small{display:none}}
 
 /* ---------- character creator: a civic-records terminal (lifepath cards, appearance rows, attributes, difficulty) ---------- */
@@ -2697,7 +2698,7 @@ NV.Account = (() => {
 
 /* Condition evaluation for conditional blocks compiled from the script */
 NV.Update = (() => {
-  const NV_BUILD = 52;
+  const NV_BUILD = 53;
   NV.BUILD = NV_BUILD;
   const URL = 'https://winsontian254-dotcom.github.io/NEON_VIENS/version.json', KEY = 'nv_seen_build';
   let info = null, shown = 0, alerted = false;

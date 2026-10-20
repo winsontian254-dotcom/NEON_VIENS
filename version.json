@@ -1,6 +1,14 @@
 {
-  "build": 52,
+  "build": 53,
   "history": [
+    {
+      "build": 53,
+      "version": "1.53",
+      "date": "2026-10-20",
+      "notes": [
+        "The title logo is smaller and centred on the menu panel, so it sticks out of both sides of it"
+      ]
+    },
     {
       "build": 52,
       "version": "1.52",
@@ -222,18 +230,6 @@
         "Experience and nine perks in three trees",
         "Dash through a shot for a perfect dodge",
         "Medals and XP after every operation"
-      ]
-    },
-    {
-      "build": 28,
-      "version": "1.28",
-      "date": "2026-10-12",
-      "notes": [
-        "Press Y to scan: devices, caches and lamps show through walls",
-        "Lamps and shadow: guards see you from less far in the dark, shoot lamps out",
-        "Hackable devices: decoy speakers, overload panels, vending machines",
-        "Choose a daemon bonus after every terminal hack",
-        "Grab an alerted guard as a hostage: the others hold fire"
       ]
     }
   ]
