@@ -49,6 +49,7 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 - Volumetric-looking light shafts, glow layer, chromatic aberration + film grain on high tier
 - Quality auto-detection for weak hardware (Chromebooks, iGPUs, phones); resolution and preset changes are applied between frames so they never flash the screen
 - Customisable crosshair (six styles, colours, size, outline, spread) and menu pointer (Settings, Crosshair & cursor)
+- A promo banner for other websites: one `<script src="https://winsontian254-dotcom.github.io/NEON_VIENS/promo/banner.js" defer></script>` line shows a full-size Neon Veins banner with the live update list (options and an `<iframe>` version are described in `promo/src/app.js`)
 - Daily reward and promo codes (**Rewards** on the title menu): a seven-day streak of credits, parts, lockpicks, consumables and XP, claimed once per calendar day, plus codes that each work once per device. Add codes with `python3 tools/promo.py add CODE "Name" cr=500 parts=10` (they are stored as hashes)
 - Dynamic resolution scaling — trades pixels for frame time to hold ~50-60 FPS
 
