@@ -1,6 +1,14 @@
 {
-  "build": 54,
+  "build": 55,
   "history": [
+    {
+      "build": 55,
+      "version": "1.55",
+      "date": "2026-10-21",
+      "notes": [
+        "New: Rewards on the title menu. Claim a daily reward (a seven-day streak of credits, parts, lockpicks, grenades, medical patches and XP) and type promo codes for one-off gifts"
+      ]
+    },
     {
       "build": 54,
       "version": "1.54",
@@ -217,15 +225,6 @@
       "notes": [
         "Training Zone: live-fire drills — bots that shoot back, five rounds that get harder (stationary gunners, movers, a heavy, a riot shield with a sniper and a drone, then everything with grenades and a rusher)",
         "You cannot die in the drills: a fall restarts the round a little easier, and three falls wave you through"
-      ]
-    },
-    {
-      "build": 30,
-      "version": "1.30",
-      "date": "2026-10-12",
-      "notes": [
-        "New: Training Zone on the title menu — a practice facility that walks you through every mechanic, never touches your save",
-        "Every weapon in the Training Zone is yellow and black practice gear wearing the Training Zone logo"
       ]
     }
   ]

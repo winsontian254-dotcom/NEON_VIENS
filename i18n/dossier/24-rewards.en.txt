@@ -1,0 +1,17 @@
+# DAILY REWARDS AND PROMO CODES
+
+## The daily reward
+
+Once a day, Rewards on the title menu pays out a gift. Open it, press Claim, and the reward goes into your current save. A day is your own calendar day on this device, and it ends at your local midnight. Claim on consecutive days to build a streak: the rewards run in a seven-day cycle, and a pulsing tile marks the one you are about to collect.
+
+Day 1 pays 100 credits. Day 2 pays 150 credits and a Trauma Patch. Day 3 pays 150 credits and 10 Weapon Parts. Day 4 pays 200 credits, 2 Lockpicks and 40 XP. Day 5 pays 250 credits, a Fragmentation Grenade and an EMP Grenade. Day 6 pays 300 credits, 15 Weapon Parts and 2 Noisemakers. Day 7 pays 600 credits, 2 Military Components and 100 XP.
+
+After day 7 the cycle starts over, and every finished week adds 10 percent to the credits it pays, up to 50 percent. If you miss a whole calendar day the streak starts again at day 1; your best streak is kept. Materials and consumables stop at the most you can carry, so a full pouch loses the surplus. You need a save to be paid: on a fresh device, start a New Game first.
+
+## Promo codes
+
+The same screen has a box for promo codes. Type one and press Redeem: the reward is paid into your current save, just like the daily one. A code can be typed in capitals or small letters, and spaces and dashes are ignored. Each code works once on a device, and some codes expire on a date. What a code gives is shown when you redeem it, and nowhere else.
+
+## Where it is kept
+
+The daily claim and the list of redeemed codes are kept with your account progress rather than inside one save. Starting a new game therefore does not let you claim the same day twice or use a code a second time, and signed-in players carry both in their cloud copy. All of it is checked on your own device, against your own clock.

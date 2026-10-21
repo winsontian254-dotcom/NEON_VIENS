@@ -24,6 +24,8 @@ PATTERNS = [
     (r'^ENDING (\w+)$', 'i', r'结局 $1'),
     (r'^MISSION (\d+)$', 'i', r'任务 $1'),
     (r'^ROUND (\d+)$', '', r'第 $1 轮'),
+    (r'^DAY (\d+)$', '', r'第 $1 天'), (r'^CLAIM DAY (\d+)$', '', r'领取第 $1 天'), (r'^NEXT REWARD IN (\d\d:\d\d:\d\d)$', '', r'距下次奖励 $1'),
+    (r'^Daily reward ready · Day (\d+)$', '', r'每日奖励可领取 · 第 $1 天'), (r'^Next daily reward in (\d+)h (\d+)m · promo codes$', '', r'下次每日奖励还有 $1 小时 $2 分 · 可兑换促销码'),
     (r'^(\d+) pts · \+(\d+) ¢$', '', r'$1 分 · +$2 ¢'), (r'^(\d+) pts$', '', r'$1 分'),
     (r'^(\d+) CHAPTERS$', 'i', r'$1 章'),
     (r'^Implant level (\d+)$', '', r'植入体等级 $1'),
