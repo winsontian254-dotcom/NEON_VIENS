@@ -9,7 +9,7 @@ Sources (UTF-8, one entry per line, TAB-separated, Simplified Chinese):
   i18n/zh/uiN.tsv   interface:    <English text>\t<translation>
 Traditional Chinese is generated from Simplified with OpenCC (s2twp): pip install opencc-python-reimplemented
 """
-import glob, json, os, re, sys
+import glob, json, os, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HTML = os.path.join(ROOT, 'index.html')

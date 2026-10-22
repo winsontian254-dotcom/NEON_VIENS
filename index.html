@@ -1173,7 +1173,6 @@ NV.Audio = (() => {
   }
   const when = (o, D) => G.c.currentTime + ((o && o.d) || 0) + (D ? D.delay : 0);
   const track = s => { G.active++; s.onended = () => { if (G) G.active--; }; };
-  const OFFSET = {};
 
   // ---------- voices ----------
   // a tone with a pitch glide and an envelope; o: at, bus, d (delay), a (attack), glide (0..1 of the length), lp (filter), det, shape (waveshaper), verb, slap
@@ -1573,7 +1572,6 @@ NV.Audio = (() => {
   }
 
   // ---------- the API ----------
-  let pendingMood = null;
   function init() {
     if (G) { if (G.c.state === 'suspended') G.c.resume(); return; }
     const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
@@ -1973,14 +1971,12 @@ NV.Logo = (() => {
     S: 'M84 54L100 62L84 70Z',
   };
   const word = (s, x0, gap) => { let x = x0; return s.split('').map(c => { const g = G[c], o = { c, x, w: g.w }; x += g.w + gap; return o; }); };
-  return opts => {
-    opts = opts || {};
+  return () => {
     const gap = 12, a = word('NEON', 0, gap), x1 = a[a.length - 1].x + a[a.length - 1].w + 64, b = word('VEINS', x1, gap), all = a.concat(b);
     const W = b[b.length - 1].x + b[b.length - 1].w;
-    const P = (att) => all.map(g => `<path transform="translate(${g.x} 0)" d="${G[g.c].d}"${G[g.c].d.includes('Z', 1) && g.c === 'O' ? ' fill-rule="evenodd"' : ''} ${att || ''}/>`).join('') +
+    const P = (att) => all.map(g => `<path transform="translate(${g.x} 0)" d="${G[g.c].d}"${g.c === 'O' ? ' fill-rule="evenodd"' : ''} ${att || ''}/>`).join('') +
       all.filter(g => SHARD[g.c]).map(g => `<path transform="translate(${g.x} 0)" d="${SHARD[g.c]}" ${att || ''}/>`).join('');
-    const X = c => all.find(g => g.c === c);
-    const nA = a[0], eA = a[1], oA = a[2], nB = a[3], vB = b[0], eB = b[1], iB = b[2], nC = b[3], sB = b[4];
+    const nA = a[0], oA = a[2], nB = a[3], vB = b[0], iB = b[2], sB = b[4];
     // slashes: thin tapered wedges that cut the letters (x1 y1, x2 y2, thickness at the middle)
     const slash = (x0, y0, x2, y2, t) => { const mx = (x0 + x2) / 2, my = (y0 + y2) / 2, dx = x2 - x0, dy = y2 - y0, l = Math.hypot(dx, dy), nx = -dy / l * t / 2, ny = dx / l * t / 2; return `M${x0} ${y0}L${mx + nx} ${my + ny}L${x2} ${y2}L${mx - nx} ${my - ny}Z`; };
     const cuts = [
@@ -3252,19 +3248,14 @@ NV.Assets = (() => {
   return { has, container, inst, pre, sync, ready };
 })();
 /* ---- NV.Human: the realistic human kit (assets/src/human_kit.glb, built by tools/blender/build_humans.py) ----
-   Smooth anatomical parts for every rig segment, a sculpted head, hair sheets; the skin, the painted face (eyes, brows, lips, pores), the hair strands and
-   the cloth are all generated here with the 2D canvas, so one model serves every skin tone, hair colour and outfit. */
+   Smooth anatomical parts for every rig segment, a sculpted head, hair sheets; the skin (faces are left blank: no painted eyes, brows or lips), the hair
+   strands and the cloth are all generated here with the 2D canvas, so one model serves every skin tone, hair colour and outfit. */
 NV.Human = (() => {
   const KIT = 'human_kit';
   const rng = seed => { let s = seed >>> 0 || 1; return () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296; };
   const hex2 = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
   const rgb = (c, a) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a == null ? 1 : a})`;
   const mix = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
-  const lum = c => (c[0] * .3 + c[1] * .59 + c[2] * .11) / 255;
-  const W = 1024, H = 512, FW = 512;                              // atlas, face half width
-  const WY = [[.125, .125], [.080, .074], [.0425, .0365], [.016, .010], [-.004, -.008], [-.0405, -.039], [-.0625, -.056], [-.082, -.0715], [-.1015, -.0915], [-.125, -.125]];   // painted feature heights (m) -> the sculpted head's
-  const warp = m => { for (let i = 0; i < WY.length - 1; i++) { const a = WY[i], b = WY[i + 1]; if (m <= a[0] && m >= b[0]) return b[1] + (a[1] - b[1]) * (m - b[0]) / (a[0] - b[0]); } return m; };
-  const X = m => (m / .24 + .5) * FW, Y = m => (.5 - warp(m) / .25) * H, MM = FW / 240;     // metres -> px (face half); MM = px per mm
   const mk = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
   // grain: pores and mottling
   function grain(g, x0, y0, w, h, base, r) {
@@ -3281,144 +3272,16 @@ NV.Human = (() => {
     }
   }
   function base(g, x0, y0, w, h, c, r) { g.fillStyle = rgb(c); g.fillRect(x0, y0, w, h); grain(g, x0, y0, w, h, c, r); }
-  function blob(g, x, y, rx, ry, col, a, hard) {
-    g.save(); g.translate(x, y); g.scale(rx, ry);
-    const gr = g.createRadialGradient(0, 0, 0, 0, 0, 1); gr.addColorStop(0, rgb(col, a)); gr.addColorStop(hard || .45, rgb(col, a * .6)); gr.addColorStop(1, rgb(col, 0));
-    g.fillStyle = gr; g.beginPath(); g.arc(0, 0, 1, 0, 7); g.fill(); g.restore();
-  }
-  function eye(g, sx, o) {
-    const cx = X(sx * .0325), cy = Y(.016), K = MM * 1000;           // K: px per metre
-    const hw = .0128 * K, up = .0050 * K, lo = .0042 * K, tilt = .14;
-    g.save(); g.translate(cx, cy); g.scale(sx, 1);                    // local: +x toward the outer corner
-    const pathAlmond = () => {
-      g.beginPath();
-      for (let i = 0; i <= 24; i++) { const t = -1 + 2 * i / 24, x = t * hw, y = -(up * Math.pow(1 - t * t, .8)) - tilt * x * .0 - t * hw * tilt; i ? g.lineTo(x, y) : g.moveTo(x, y); }
-      for (let i = 24; i >= 0; i--) { const t = -1 + 2 * i / 24, x = t * hw, y = lo * Math.pow(1 - t * t, .8) - t * hw * tilt; g.lineTo(x, y); }
-      g.closePath();
-    };
-    // shadow of the lid and the socket around the eye
-    blob(g, 0, -up * 1.4, hw * 1.5, up * 2.6, o.shade, .28); blob(g, 0, lo * 1.8, hw * 1.3, lo * 2.2, o.shade, .16);
-    g.save(); pathAlmond(); g.clip();
-    const sc = g.createLinearGradient(-hw, 0, hw, 0); sc.addColorStop(0, 'rgb(215,170,165)'); sc.addColorStop(.18, 'rgb(240,232,226)'); sc.addColorStop(.82, 'rgb(236,228,222)'); sc.addColorStop(1, 'rgb(205,185,180)');
-    g.fillStyle = sc; g.fillRect(-hw, -up * 1.5, hw * 2, up * 3 + lo);
-    const ir = .0054 * K, ix = o.look * .0006 * K, iy = -.0003 * K;
-    let gr = g.createRadialGradient(ix, iy, ir * .25, ix, iy, ir);
-    gr.addColorStop(0, rgb(mix(o.iris, [255, 255, 255], .25))); gr.addColorStop(.45, rgb(o.iris)); gr.addColorStop(.88, rgb(mix(o.iris, [0, 0, 0], .45))); gr.addColorStop(1, 'rgba(10,8,8,1)');
-    g.fillStyle = gr; g.beginPath(); g.arc(ix, iy, ir, 0, 7); g.fill();
-    g.strokeStyle = 'rgba(255,255,255,.13)'; g.lineWidth = .8;
-    for (let a = 0; a < 6.28; a += .16) { g.beginPath(); g.moveTo(ix + Math.cos(a) * ir * .32, iy + Math.sin(a) * ir * .32); g.lineTo(ix + Math.cos(a) * ir * .86, iy + Math.sin(a) * ir * .86); g.stroke(); }
-    g.fillStyle = 'rgb(8,6,6)'; g.beginPath(); g.arc(ix, iy, ir * .38, 0, 7); g.fill();
-    g.fillStyle = 'rgba(255,255,255,.95)'; g.beginPath(); g.ellipse(ix - ir * .38, iy - ir * .38, ir * .20, ir * .15, -.5, 0, 7); g.fill();
-    g.fillStyle = 'rgba(255,255,255,.35)'; g.beginPath(); g.arc(ix + ir * .42, iy + ir * .38, ir * .10, 0, 7); g.fill();
-    const sh = g.createLinearGradient(0, -up, 0, up * .7); sh.addColorStop(0, 'rgba(25,10,8,.75)'); sh.addColorStop(.55, 'rgba(25,10,8,.0)');
-    g.fillStyle = sh; g.fillRect(-hw, -up * 1.5, hw * 2, up * 3);                     // upper lid shadow on the eyeball
-    g.restore();
-    // lash line, lower lid line, crease
-    g.lineCap = 'round'; g.strokeStyle = rgb(o.lash, .95); g.lineWidth = .0010 * K;
-    g.beginPath(); for (let i = 0; i <= 24; i++) { const t = -1 + 2 * i / 24, x = t * hw, y = -(up * Math.pow(1 - t * t, .8)) - t * hw * tilt; i ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke();
-    g.lineWidth = .0017 * K; g.globalAlpha = .55; g.beginPath(); for (let i = 6; i <= 24; i++) { const t = -1 + 2 * i / 24, x = t * hw, y = -(up * Math.pow(1 - t * t, .8)) - t * hw * tilt; i > 6 ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke(); g.globalAlpha = 1;
-    g.lineWidth = .0005 * K; g.strokeStyle = rgb(o.lash, .8);
-    for (let i = 0; i < 16; i++) {                                                     // lashes
-      const t = -.45 + 1.4 * i / 15, x = t * hw, y = -(up * Math.pow(Math.max(1 - t * t, 0), .8)) - t * hw * tilt, a = -1.3 + t * .55;
-      g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + Math.cos(a) * .0022 * K, y + Math.sin(a) * .0030 * K, x + Math.cos(a + .5) * .0036 * K, y + Math.sin(a + .1) * .0040 * K - .0008 * K); g.stroke();
-    }
-    g.strokeStyle = rgb(o.shade, .5); g.lineWidth = .0006 * K; g.beginPath(); for (let i = 1; i < 24; i++) { const t = -1 + 2 * i / 24, x = t * hw * 1.02, y = lo * Math.pow(1 - t * t, .8) - t * hw * tilt + .0004 * K; i > 1 ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke();
-    g.strokeStyle = rgb(o.shade, .55); g.lineWidth = .0008 * K; g.beginPath(); for (let i = 1; i < 24; i++) { const t = -1 + 2 * i / 24, x = t * hw * 1.05, y = -(up * 1.9 * Math.pow(1 - t * t, .9)) - t * hw * tilt - .0014 * K; i > 1 ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke();
-    g.fillStyle = 'rgba(210,110,110,.8)'; g.beginPath(); g.ellipse(-hw * .88, lo * .15, .0014 * K, .0018 * K, 0, 0, 7); g.fill();     // tear duct
-    g.restore();
-  }
-  function brow(g, sx, o, r) {
-    const pts = [[.011, .0345], [.020, .0395], [.030, .0425], [.041, .0415], [.050, .0375], [.057, .0325]];
-    const at = t => { const f = t * (pts.length - 1), i = Math.min(Math.floor(f), pts.length - 2), u = f - i; return [pts[i][0] + (pts[i + 1][0] - pts[i][0]) * u, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * u]; };
-    for (let i = 0; i < 360; i++) {
-      const t = r(), c = at(t), c2 = at(Math.min(t + .08, 1)), th = .0036 * (1 - Math.abs(t - .3) * .9) * (r() * .9 + .1);
-      const x = c[0] + (r() - .5) * .0016, y = c[1] + (r() - .5) * 2 * th, dx = (c2[0] - c[0]) * 1.5, dy = (c2[1] - c[1]) * 1.5 + (y - c[1]) * .4;
-      g.strokeStyle = rgb(mix(o.brow, [0, 0, 0], r() * .3), .35 + r() * .5); g.lineWidth = .00045 * MM * 1000;
-      g.beginPath(); g.moveTo(X(sx * x), Y(y)); g.lineTo(X(sx * (x + dx)), Y(y + dy)); g.stroke();
-    }
-  }
-  function mouth(g, o) {
-    const lip = mix(o.skin, [176, 62, 78], lum(o.skin) > .5 ? .42 : .34), lipD = mix(lip, [40, 10, 16], .45);
-    const cx = X(0), cy = Y(-.082), K = MM * 1000, hw = .0255 * K;
-    // upper and lower lip as filled shapes
-    g.fillStyle = rgb(lip);
-    g.beginPath(); g.moveTo(cx - hw, cy);
-    g.bezierCurveTo(cx - hw * .6, cy - .0050 * K, cx - hw * .22, cy - .0095 * K, cx - .0042 * K, cy - .0078 * K);
-    g.quadraticCurveTo(cx, cy - .0046 * K, cx + .0042 * K, cy - .0078 * K);
-    g.bezierCurveTo(cx + hw * .22, cy - .0095 * K, cx + hw * .6, cy - .0050 * K, cx + hw, cy);
-    g.bezierCurveTo(cx + hw * .6, cy + .0006 * K, cx + hw * .25, cy + .0011 * K, cx, cy + .0010 * K); g.bezierCurveTo(cx - hw * .25, cy + .0011 * K, cx - hw * .6, cy + .0006 * K, cx - hw, cy); g.fill();
-    g.fillStyle = rgb(mix(lip, [215, 105, 115], .15));
-    g.beginPath(); g.moveTo(cx - hw * .95, cy + .0005 * K);
-    g.bezierCurveTo(cx - hw * .6, cy + .0012 * K, cx - hw * .25, cy + .0014 * K, cx, cy + .0013 * K); g.bezierCurveTo(cx + hw * .25, cy + .0014 * K, cx + hw * .6, cy + .0012 * K, cx + hw * .95, cy + .0005 * K);
-    g.bezierCurveTo(cx + hw * .6, cy + .0100 * K, cx + hw * .2, cy + .0130 * K, cx, cy + .0130 * K); g.bezierCurveTo(cx - hw * .2, cy + .0130 * K, cx - hw * .6, cy + .0100 * K, cx - hw * .95, cy + .0005 * K); g.fill();
-    // lip borders, mouth line, corners
-    g.strokeStyle = rgb(lipD, .35); g.lineWidth = .0007 * K; g.stroke();
-    g.strokeStyle = rgb([45, 14, 18], .9); g.lineWidth = .0011 * K; g.lineCap = 'round';
-    g.beginPath(); g.moveTo(cx - hw * 1.02, cy - .0002 * K); g.bezierCurveTo(cx - hw * .5, cy + .0012 * K, cx - hw * .2, cy + .0006 * K, cx, cy + .0008 * K); g.bezierCurveTo(cx + hw * .2, cy + .0006 * K, cx + hw * .5, cy + .0012 * K, cx + hw * 1.02, cy - .0002 * K); g.stroke();
-    blob(g, cx - hw * 1.05, cy, .0028 * K, .0028 * K, [60, 25, 25], .35); blob(g, cx + hw * 1.05, cy, .0028 * K, .0028 * K, [60, 25, 25], .35);
-    blob(g, cx, cy + .0075 * K, .011 * K, .0030 * K, [255, 220, 220], .22);                         // lower lip highlight
-    blob(g, cx, cy + .0160 * K, .012 * K, .0032 * K, o.shade, .30);                                  // chin crease
-    blob(g, cx, cy - .0125 * K, .0035 * K, .0040 * K, o.shade, .12);
-  }
-  function nose(g, o) {
-    const K = MM * 1000;
-    [-1, 1].forEach(s => { blob(g, X(s * .0085), Y(-.0525), .0042 * K, .0028 * K, [40, 15, 15], .75); blob(g, X(s * .019), Y(-.045), .0032 * K, .006 * K, o.shade, .28); blob(g, X(s * .030), Y(-.058), .004 * K, .016 * K, o.shade, .12); });
-    blob(g, X(0), Y(-.038), .008 * K, .009 * K, [255, 190, 175], .16); blob(g, X(0), Y(-.0575), .014 * K, .004 * K, o.shade, .22);
-  }
-  const BLANK_FACE = true;   // faces are left blank: plain skin, no eyes, brows, nose or mouth (the sculpted head keeps only a faint relief)
-  function face(o) {
-    o = Object.assign({ skin: '#c08460', iris: '#5b7a8c', brow: '#2a1c14', seed: 11, look: 0 }, o || {});
-    const skin = hex2(o.skin), c = mk(W, H), g = c.getContext('2d'), r = rng(o.seed);
-    if (BLANK_FACE) { base(g, 0, 0, W, H, skin, r); return c; }
-    const ov = { skin, iris: hex2(o.iris), brow: hex2(o.brow), lash: mix(hex2(o.brow), [10, 8, 8], .7), shade: mix(skin, [70, 25, 25], .55), look: o.look };
-    base(g, 0, 0, FW, H, skin, r);
-    // tonal map of the face: lighter forehead / brow ridge, pink cheeks and nose, darker hollows
-    blob(g, X(0), Y(.072), .050 * MM * 1000, .028 * MM * 1000, mix(skin, [255, 235, 215], .5), .12);
-    [-1, 1].forEach(s => { blob(g, X(s * .050), Y(-.022), .026 * MM * 1000, .024 * MM * 1000, [210, 110, 105], .13); blob(g, X(s * .068), Y(.035), .016 * MM * 1000, .03 * MM * 1000, ov.shade, .07); blob(g, X(s * .060), Y(-.085), .022 * MM * 1000, .028 * MM * 1000, ov.shade, .06); blob(g, X(s * .033), Y(-.006), .017 * MM * 1000, .007 * MM * 1000, [120, 70, 90], .12); });   // (the last one: a faint shadow under each eye)
-    blob(g, X(0), Y(-.115), .03 * MM * 1000, .012 * MM * 1000, ov.shade, .18);
-    [-1, 1].forEach(s => { eye(g, s, ov); brow(g, s, ov, r); });
-    nose(g, ov); mouth(g, ov);
-    { const x0 = X(-.080), x1 = X(-.058), x2 = X(.058), x3 = X(.080); const fl = (xa, xb, a0, a1) => { const gr = g.createLinearGradient(xa, 0, xb, 0); gr.addColorStop(0, rgb(skin, a0)); gr.addColorStop(1, rgb(skin, a1)); g.fillStyle = gr; g.fillRect(Math.min(xa, xb), 0, Math.abs(xb - xa), H); };
-      fl(x0, x1, 1, 0); fl(x3, x2, 1, 0); g.fillStyle = rgb(skin); g.fillRect(0, 0, x0, H); g.fillRect(x3, 0, FW - x3, H); }   // (the sides of the face blend into the plain skin of the rest of the head)
-    base(g, FW, 0, W - FW, H, skin, r);                                                                // the rest of the head
-    return c;
-  }
-  // glowing cybernetic irises: the same eye positions as eye(), drawn as light on black for the emissive channel
-  function glowMask(hex) {
-    const c = mk(W, H), g = c.getContext('2d'), K = MM * 1000, col = hex2(hex);
-    g.fillStyle = '#000'; g.fillRect(0, 0, W, H);
-    [-1, 1].forEach(sx => {
-      const cx = X(sx * .0325), cy = Y(.016), hw = .0128 * K, up = .0050 * K, lo = .0042 * K, tilt = .14, ir = .0054 * K;
-      g.save(); g.translate(cx, cy); g.scale(sx, 1);
-      g.beginPath(); for (let i = 0; i <= 24; i++) { const t = -1 + 2 * i / 24, x = t * hw, y = -(up * Math.pow(1 - t * t, .8)) - t * hw * tilt; i ? g.lineTo(x, y) : g.moveTo(x, y); }
-      for (let i = 24; i >= 0; i--) { const t = -1 + 2 * i / 24, x = t * hw, y = lo * Math.pow(1 - t * t, .8) - t * hw * tilt; g.lineTo(x, y); } g.closePath(); g.clip();
-      const gr = g.createRadialGradient(0, -.0003 * K, ir * .3, 0, -.0003 * K, ir); gr.addColorStop(0, 'rgba(0,0,0,1)'); gr.addColorStop(.12, rgb(col, .45)); gr.addColorStop(.7, rgb(col, .8)); gr.addColorStop(1, rgb(col, 0));
-      g.fillStyle = gr; g.beginPath(); g.arc(0, -.0003 * K, ir, 0, 7); g.fill(); g.restore();
-    });
-    return c;
-  }
   function plain(o) {
     o = Object.assign({ skin: '#c08460', seed: 5, size: 256 }, o || {});
     const c = mk(o.size, o.size), g = c.getContext('2d'); base(g, 0, 0, o.size, o.size, hex2(o.skin), rng(o.seed)); return c;
   }
-  // a tangent-space normal map from a height field: pores everywhere, fine wrinkles and lip lines on the face half
-  function normal(size, faceAtlas) {
-    const w = faceAtlas ? W : size, h = faceAtlas ? H : size, hc = mk(w, h), g = hc.getContext('2d'), r = rng(99);
+  // a tangent-space normal map (size x size) from a height field of pores
+  function normal(size) {
+    const w = size, h = size, hc = mk(w, h), g = hc.getContext('2d'), r = rng(99);
     g.fillStyle = '#808080'; g.fillRect(0, 0, w, h);
     for (let i = 0; i < w * h / 3; i++) { const v = r() < .5 ? 0 : 255; g.fillStyle = `rgba(${v},${v},${v},${.04 + r() * .09})`; g.fillRect(r() * w, r() * h, 1 + (r() < .2), 1); }
     for (let i = 0; i < w * h / 500; i++) { const x = r() * w, y = r() * h, rad = 3 + r() * 8, gr = g.createRadialGradient(x, y, 0, x, y, rad), v = r() < .5 ? 0 : 255; gr.addColorStop(0, `rgba(${v},${v},${v},.06)`); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(x - rad, y - rad, rad * 2, rad * 2); }
-    if (faceAtlas && !BLANK_FACE) {
-      const K = MM * 1000, line = (pts, wd, v, a) => { g.strokeStyle = `rgba(${v},${v},${v},${a})`; g.lineWidth = wd; g.lineCap = 'round'; g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(X(p[0]), Y(p[1])) : g.moveTo(X(p[0]), Y(p[1]))); g.stroke(); };
-      for (let i = 0; i < 3; i++) line([[-.045, .066 + i * .009], [-.02, .068 + i * .009], [0, .067 + i * .009], [.02, .068 + i * .009], [.045, .066 + i * .009]], 1.6, 0, .13);   // forehead lines
-      [-1, 1].forEach(s => {
-        line([[s * .030, -.040], [s * .0345, -.058], [s * .036, -.078], [s * .031, -.092]], 2.2, 0, .30);                                                     // nasolabial fold
-        line([[s * .020, .006], [s * .038, .009], [s * .052, .004]], 1.4, 0, .20); line([[s * .045, .020], [s * .058, .026]], 1.2, 0, .2); line([[s * .045, .012], [s * .060, .014]], 1.2, 0, .2);   // eyelid crease, crow's feet
-        line([[s * .028, -.002], [s * .042, -.006]], 1.2, 0, .16);
-      });
-      for (let i = 0; i < 26; i++) { const a = -.0235 + i * .0018; line([[a, -.0745], [a, -.0875]], .8, 0, .16); }                                                  // lip lines
-      line([[-.0255, -.082], [-.01, -.0835], [0, -.0825], [.01, -.0835], [.0255, -.082]], 1.8, 0, .55);
-      line([[-.014, -.1015], [0, -.1030], [.014, -.1015]], 1.6, 0, .25);
-    }
     const id = g.getImageData(0, 0, w, h), d = id.data, out = g.createImageData(w, h), o2 = out.data;
     const hAt = (x, y) => d[((((y + h) % h) * w) + ((x + w) % w)) * 4];
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
@@ -3602,7 +3465,6 @@ NV.Human = (() => {
   };
   const forCiv = (skinIdx, top, bot, hair, style, h) => ({ skin: NV.LOOK.SKIN[skinIdx], iris: irisFor(skinIdx, h), brow: browFor(hair), hair, style, jacket: top, pants: bot, boots: '#352e33', glove: '#2a2832', bareHands: true });
   // ---------- materials (cached per scene) ----------
-  const normalTex = (scene, face) => { const st = ST(scene), k = face ? 'nf' : 'np'; return st.x[k] || (st.x[k] = tex(scene, cached(k, () => normal(face ? 0 : 256, face)), face ? half() : 1)); };
   // skin: a flat tone with fine mottling and a tiling pore normal map (`tiles` = how many times they repeat over the part's UV space);
   // the lips, ears, brows and nose are tinted by the mesh's vertex colours. Eyes, brows and lashes are separate meshes (eyeMat, alphaMat).
   function skinMat(scene, o, tiles) {
@@ -3610,7 +3472,7 @@ NV.Human = (() => {
     if (st.m[key]) return st.m[key];
     const m = new BABYLON.StandardMaterial(key, scene), c = hex2(o.skin), dt = tex(scene, cached('skd' + o.skin, () => plain({ skin: o.skin })), half());
     dt.uScale = dt.vScale = tiles / 4; m.diffuseTexture = dt;
-    if (NV.Quality.get().scale >= .45 && tiles !== 27 && tiles !== true) { const nt = tex(scene, cached('nsk', () => normal(256, false))); nt.uScale = nt.vScale = tiles; m.bumpTexture = nt; nt.level = .7; }
+    if (NV.Quality.get().scale >= .45 && tiles !== 27 && tiles !== true) { const nt = tex(scene, cached('nsk', () => normal(256))); nt.uScale = nt.vScale = tiles; m.bumpTexture = nt; nt.level = .7; }
     m.diffuseColor = new BABYLON.Color3(.88, .88, .88); m.specularColor = new BABYLON.Color3(.09, .085, .08); m.specularPower = 24; m.emissiveColor = new BABYLON.Color3(c[0] / 255 * .035, c[1] / 255 * .035, c[2] / 255 * .035);
     const fr = new BABYLON.FresnelParameters(); fr.bias = 0; fr.power = 2.4; fr.leftColor = BABYLON.Color3.Black(); fr.rightColor = new BABYLON.Color3(.34, .12, .08); m.emissiveFresnelParameters = fr;
     return st.m[key] = m;
@@ -7605,12 +7467,6 @@ NV.Level = (() => {
     { const qi = st && st.quick && st.quick[st.qsel], C = qi && AR.CONS[qi]; if (L.p.hp < L.p.max * .6 && (qi === 'trauma' || qi === 'kit') && st.cons[qi] > 0) cx.push([C[0], 'G']); }
     hset('#hud .wpn .cx', 'html', cx.map(c => '<div><span>' + U.esc(c[0]) + '</span><span class="k">' + c[1] + '</span></div>').join(''));
   }
-  function ammoTxt(w) {
-    const AR = ARMS(), st = AR.state(), f = AR.ammoOf(w); if (!st || !f) return '';
-    const res = st.ammo[f] || 0, ex = (w.load === 'null' || w.load === 'quantum') ? ' +' + (st.ammo[w.load] || 0) + ' ' + w.load.toUpperCase() : w.load && w.load !== 'std' ? ' ' + w.load.toUpperCase() : '';
-    if (w.type === 'gun' && !w.beam && w.mag) { const inMag = L && L.arms ? magIn(w) : w.mag; return ' · ' + (L && L.arms && L.arms.rl ? 'RELOADING' : inMag + '/' + w.mag) + ' | ' + Math.max(0, Math.floor(res) - inMag) + ex; }
-    return ' · ' + (f === 'cells' ? res.toFixed(1) : Math.floor(res)) + ' ' + AR.AMMO[f][0].split(' ').pop().toUpperCase() + ex;
-  }
 
   /* ---------------- tactical consumables: four quick slots (G use · X next · d-pad down/up · tap the HUD slot) ---------------- */
   const CTHROW = { frag: { fx: 'frag', radius: 5, dmg: 150 }, emp: { fx: 'emp', radius: 6, dmg: 0, stunT: 10 }, gas: { fx: 'glitch', radius: 6, dmg: 0 }, static: { fx: 'freeze', radius: 5, dmg: 0 },
@@ -9809,7 +9665,7 @@ NV.Level = (() => {
     vf += sg * (Math.abs(vl) - Math.abs(vl2)) * .12; vl = vl2;
     let wx = fx * vf + rx * vl, wz = fz * vf + rz * vl;
     // turning: the nose swings with the wheels, faster when slow; a sliding car also swings back towards its travel direction unless you hold the slide
-    const sp0 = Math.hypot(wx, wz), gate = U.clamp(Math.abs(vf) / 6, 0, 1), dir = vf >= -.5 ? 1 : -1;
+    const gate = U.clamp(Math.abs(vf) / 6, 0, 1), dir = vf >= -.5 ? 1 : -1;
     let rate = 2.3 / (1 + Math.pow(Math.abs(vf) / 24, 2)) + (hand ? .8 : 0); if (Math.abs(vl) > 3) rate *= 1.15; rate *= 1 - .3 * U.clamp(Math.abs(c.slip) / .8, 0, 1);
     const stab = (hand ? .55 : (thr > .3 && Math.abs(c.st) > .5 && drifting ? .85 : 2.1)) * U.clamp(Math.abs(vf) / 8, 0, 1);
     c.yr += (c.st * rate * gate * dir + c.slip * stab - c.yr) * Math.min(1, dt * 10);
