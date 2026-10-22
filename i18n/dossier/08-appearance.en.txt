@@ -10,7 +10,7 @@ Voice is the last row. Low, Mid and High change the pitch of Ghost's speech when
 
 Nothing on this screen changes a number. Your look does not make guards notice you more or less, it does not change how much Integrity you have and it does not change how the story treats you. This is a rule of the Suite and not a limitation: the Bureau decided long ago that the face is the one thing that must never be a tactical choice, because the moment it is, everyone's face becomes the same one.
 
-What it does do is appear. Your portrait is drawn from your look, in every conversation, in the Journal and on the character screen. In multiplayer, other operators see you wearing it. In the first-person view, your sleeves and the light on your gloves come from the jacket and the glow colour, so that the arms you see in the middle of a firefight are recognisably yours. And in a few quiet scenes, where the camera lingers on you rather than the situation, there is a small pleasure in finding that the person on the screen looks the way you meant.
+What it does do is appear. Your portrait is drawn from your look, on the character screen. In multiplayer, other operators see you wearing it. In the first-person view, your sleeves and the light on your gloves come from the jacket and the glow colour, so that the arms you see in the middle of a firefight are recognisably yours. And in a few quiet scenes, where the camera lingers on you rather than the situation, there is a small pleasure in finding that the person on the screen looks the way you meant.
 
 ## Presets and the grid
 

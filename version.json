@@ -1,6 +1,14 @@
 {
-  "build": 55,
+  "build": 56,
   "history": [
+    {
+      "build": 56,
+      "version": "1.56",
+      "date": "2026-10-22",
+      "notes": [
+        "Dialogue is now one clean subtitle line everywhere: the old boxed dialogue panel with a portrait and the blinking arrow is gone"
+      ]
+    },
     {
       "build": 55,
       "version": "1.55",
@@ -216,15 +224,6 @@
       "date": "2026-10-12",
       "notes": [
         "Training Zone: a graduation-exam boss — THE INSTRUCTOR guards the exit with a pylon-powered shield and three phases (easier each time you fall)"
-      ]
-    },
-    {
-      "build": 31,
-      "version": "1.31",
-      "date": "2026-10-12",
-      "notes": [
-        "Training Zone: live-fire drills — bots that shoot back, five rounds that get harder (stationary gunners, movers, a heavy, a riot shield with a sniper and a drone, then everything with grenades and a rusher)",
-        "You cannot die in the drills: a fall restarts the round a little easier, and three falls wave you through"
       ]
     }
   ]

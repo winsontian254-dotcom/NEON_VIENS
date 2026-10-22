@@ -43,7 +43,7 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 - Cinematic title screen with animated skyline, flying traffic, holo signs, rain, searchlight beams
 - Film-style cutscenes: the cast is blocked facing each other, the camera keeps to one side of the conversation (180° rule) and cuts on speaker changes between over-the-shoulder shots, close-ups, two-shots and establishing moves; it frames around walls and street props, eases in and out of first person, and shows dialogue as subtitles in the letterbox
 - Realistic people: every character is built from one human kit (smooth anatomy and jackets made in Blender; the head, hands and eyes come from the CC0 MakeHuman base mesh, with its CC0 iris photo recoloured to the chosen eyes) with skin, brows, lashes, lips, pores and hair strands painted in code from the chosen look; the character creator shows a live 3D preview you can turn
-- Procedural character portraits (2D canvas)
+- Procedural portrait of Ghost on the character screen (2D canvas); dialogue is one subtitle line, with no box or portraits
 - Procedural WebAudio score — 8 moods (title, story, stealth, combat, boss, explore, tense, ending) with adaptive layering, kick-ducked pads, a seeded lead hook and risers
 - Spatial sound design, all synthesised: gunfire per weapon family with distance, air absorption, occlusion and a delay-based arrival; surface-aware footsteps; reloads, impacts, explosions, bullet whizz; per-level ambience beds (rain, sirens, thunder, machinery, crowd, servers); a heartbeat at low health, alarm siren and win/fail stingers
 - Volumetric-looking light shafts, glow layer, chromatic aberration + film grain on high tier
