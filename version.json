@@ -1,6 +1,14 @@
 {
-  "build": 56,
+  "build": 57,
   "history": [
+    {
+      "build": 57,
+      "version": "1.57",
+      "date": "2026-10-22",
+      "notes": [
+        "The little continue arrow is back at the end of each dialogue line"
+      ]
+    },
     {
       "build": 56,
       "version": "1.56",
@@ -216,14 +224,6 @@
       "notes": [
         "Training Zone: no hotbar, one weapon at a time — each part issues its own (sidearm, then a new gun every live-fire round, a stun pistol for stealth, a cyberweapon for netrunning, a minigun for the boss)",
         "Training Zone armory now fits attachments to your weapon; new cyberweapon step"
-      ]
-    },
-    {
-      "build": 32,
-      "version": "1.32",
-      "date": "2026-10-12",
-      "notes": [
-        "Training Zone: a graduation-exam boss — THE INSTRUCTOR guards the exit with a pylon-powered shield and three phases (easier each time you fall)"
       ]
     }
   ]

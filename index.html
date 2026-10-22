@@ -113,6 +113,7 @@ body.cine #story{z-index:5}#hud .cdip{position:absolute;inset:0;background:#000;
 .dlg .who:not(:empty)::after{content:': '}
 .dlg .txt{display:inline;font-family:var(--fb);font-weight:600;font-size:clamp(16px,1.5vw,21px);line-height:1.42;color:#e7fbff;text-shadow:0 1px 2px #000}
 .dlg.narr .txt{color:#f4ece9;font-style:italic;font-weight:500}
+.dlg .cont{visibility:hidden;margin-left:10px;font-size:.8em;color:var(--cr);animation:blink 1s infinite}.dlg .cont.on{visibility:visible}
 .choices{position:absolute;left:50%;bottom:calc(13vh + 14px);transform:translateX(-50%);width:min(760px,92vw);display:flex;flex-direction:column;gap:8px}
 @keyframes cin{from{opacity:0;transform:translateY(10px)}}
 .cprompt{font-family:var(--fm);font-size:13px;letter-spacing:.25em;color:var(--amber);text-transform:uppercase;margin-bottom:4px;text-align:center;text-shadow:0 0 8px rgba(255,178,56,.6)}
@@ -2732,7 +2733,7 @@ NV.Account = (() => {
 
 /* Condition evaluation for conditional blocks compiled from the script */
 NV.Update = (() => {
-  const NV_BUILD = 56;
+  const NV_BUILD = 57;
   NV.BUILD = NV_BUILD;
   const URL = 'https://winsontian254-dotcom.github.io/NEON_VIENS/version.json', KEY = 'nv_seen_build';
   let info = null, shown = 0, alerted = false;
@@ -12791,8 +12792,8 @@ NV.UI = (() => {
     if (story) return story;
     const el = add(`<div class="topbar"><span data-a="auto">AUTO</span><span data-a="skip">SKIP</span><span data-a="log">LOG</span><span data-a="journal">JOURNAL</span><span data-a="menu">MENU</span><span data-a="vr"${NV.CardboardVR.on ? ' class="on"' : ''}>VR</span></div>
       <div class="choices hidden"></div>
-      <div class="dlg"><div class="body"><div class="who"></div><div class="txt"></div></div></div><button class="skipbtn" title="Skip to the next choice or gameplay">Skip Ahead<span class="kbd">TAB</span></button>`, '', 'story');
-    story = { el, dlg: el.querySelector('.dlg'), who: el.querySelector('.who'), txt: el.querySelector('.txt'), ch: el.querySelector('.choices'), auto: false, skip: false, log: [] };
+      <div class="dlg"><div class="body"><div class="who"></div><div class="txt"></div><span class="cont">▼</span></div></div><button class="skipbtn" title="Skip to the next choice or gameplay">Skip Ahead<span class="kbd">TAB</span></button>`, '', 'story');
+    story = { el, dlg: el.querySelector('.dlg'), who: el.querySelector('.who'), txt: el.querySelector('.txt'), cont: el.querySelector('.cont'), ch: el.querySelector('.choices'), auto: false, skip: false, log: [] };
     el.querySelectorAll('.topbar span').forEach(s => s.onclick = e => { e.stopPropagation(); topAction(s.dataset.a); });
     el.querySelector('.skipbtn').onclick = e => { e.stopPropagation(); topAction('scene'); };
     return story;
@@ -12843,11 +12844,11 @@ NV.UI = (() => {
       s.dlg.style.setProperty('--spk', col); s.who.textContent = speaker;
       s.pitch = isGhost ? [300, 480, 700][S.profile.voice] : 300 + U.hash(speaker) % 500;
     } else { s.who.textContent = ''; s.pitch = 0; }
-    s.txt.textContent = '';
+    s.txt.textContent = ''; s.cont.classList.remove('on');
     let shown = 0, t = 0, doneT = 0, finished = false;
     const skippingNow = s.skip || s.skipScene || NV.In.key('ControlLeft') || NV.In.key('ControlRight');
     const voiced = !skippingNow && NV.Voice.speak(speaker, text);
-    const full = () => { shown = text.length; s.txt.textContent = text; };
+    const full = () => { shown = text.length; s.txt.textContent = text; s.cont.classList.add('on'); };
     const fin = v => { UI.pop(h); s.dlg.onclick = null; NV.Voice.stop(); res(v); };
     s.dlg.onclick = () => { if (shown < text.length) full(); else fin(); };
     const h = UI.push({
@@ -12865,6 +12866,7 @@ NV.UI = (() => {
         if (shown < text.length) {
           t += dt * SPEEDS[set.textSpeed]; const n = Math.min(text.length, Math.floor(t));
           if (n > shown) { if (s.pitch && Math.floor(n / 2) !== Math.floor(shown / 2)) NV.Audio.sfx('type', s.pitch); shown = n; s.txt.textContent = text.slice(0, shown); }
+          if (shown >= text.length) s.cont.classList.add('on');
           if (I.confirm() || I.lmbHit && false) full();
           return;
         }
