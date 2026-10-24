@@ -1,0 +1,17 @@
+# SAVE SLOTS AND NEW GAME+
+
+## Three slots
+
+Neon Veins keeps three separate stories, one in each save slot. The save you already had is slot 1. Continue always plays the slot you used last. New Game asks where the new story should go, and warns you before it overwrites a slot that is in use. Save Slots on the title menu lets you look at all three, continue one, copy it to another slot, or delete it.
+
+Endings, rewards, promo codes, achievements and statistics belong to the device, not to a slot, so all three share them. Chapter Select shows the chapters of the slot that is active, because each slot remembers its own chapter checkpoints. A Hardcore save cannot be copied. Copying into a slot that is in use replaces whatever it held, and asks first.
+
+## In the cloud
+
+Players who are signed in have every slot stored in the cloud as its own save, next to the shared account progress. After you sign in, the newest copy of each slot wins, and the game asks before it replaces a save on this device with a newer cloud one. Deleting a slot deletes its cloud copy too. A slot whose Hardcore run ended is removed from the cloud as well.
+
+## New Game+
+
+When a slot has reached an ending, Save Slots offers New Game+ for it. It starts the story again from the first chapter, with the same character and the same difficulty, and the world forgets what you did in it: the story state, your relationships, the journal, the Nuallink inbox, the paper stars and every chapter checkpoint are new.
+
+You keep everything you carried: your credits and upgrades, the whole armoury with its attachments, materials, consumables and ammunition, your cyberdeck and its mods, implants and armour, your XP and perks, and your lockpicks. The price is that the enemies get tougher with every New Game+ level: 30 percent more health, 20 percent more damage and 10 percent more suspicion on top of the difficulty you chose, per level, up to level 5. The new run replaces the finished save in that slot, so copy the finished save to another slot first if you want to keep it. A Hardcore character is still Hardcore in New Game+.

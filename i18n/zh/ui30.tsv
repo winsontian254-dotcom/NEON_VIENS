@@ -1,0 +1,155 @@
+STORY	剧情
+STEALTH	潜行
+COMBAT	战斗
+NETRUNNING	网络入侵
+CITY	城市
+FIRST SIGNAL	初次信号
+Finish chapter 1.	完成第 1 章。
+COURIER LICENCE	快递员执照
+Finish 10 chapters.	完成 10 章。
+FAR FROM TIER 93	远离九十三层
+Finish 25 chapters.	完成 25 章。
+THE LAST TRANSMISSION	最后的传输
+Reach any ending.	达成任意一个结局。
+MANY ROADS	殊途
+Discover 3 of the 6 endings.	发现 6 个结局中的 3 个。
+EVERY ROAD	条条大路
+Discover all 6 endings.	发现全部 6 个结局。
+AGAIN, BETTER	再来一次，更好
+Begin a New Game+.	开始二周目。
+PAPER STARS	纸星星
+Fold all 12 paper stars.	折出全部 12 颗纸星星。
+GRADUATE	毕业生
+Beat The Instructor in the Training Zone.	在训练区击败教官。
+NO SAFETY NET	没有退路
+Win 5 operations on Hardcore.	在硬核难度下赢得 5 次行动。
+NOTHING REMAINS	一无所剩
+Step off the edge of the world.	走下世界的边缘。
+UNSEEN	无人察觉
+Win an operation without raising an alarm.	不触发警报，赢得一次行动。
+THE QUIET ONE	安静的人
+Win 10 operations without raising an alarm.	不触发警报，赢得 10 次行动。
+GHOST PROTOCOL	幽灵协议
+Win 25 operations without raising an alarm.	不触发警报，赢得 25 次行动。
+SILENT HANDS	无声之手
+Make 25 takedowns.	完成 25 次制服。
+LIGHTS OUT	熄灯
+Knock out 10 guards.	击晕 10 名守卫。
+OUT OF SIGHT	眼不见
+Hide 10 bodies.	藏匿 10 具尸体。
+DRESSED FOR IT	换装上阵
+Take a guard’s uniform.	夺取一套守卫的制服。
+TALKATIVE	健谈
+Interrogate a guard.	审问一名守卫。
+BLIND SPOT	盲区
+Take out 10 cameras.	摧毁 10 个摄像头。
+NOBODY DIED	无人丧命
+Win an operation unseen, with knockouts only and nobody killed.	在未被发现的情况下赢得一次行动，只击晕、不杀人。
+FIRST BLOOD	第一滴血
+Down 25 hostiles.	击倒 25 名敌人。
+CULLER	清道夫
+Down 250 hostiles.	击倒 250 名敌人。
+ONE-PERSON ARMY	一人成军
+Down 1,000 hostiles.	击倒 1,000 名敌人。
+HEADHUNTER	猎头者
+Land 50 headshot kills.	爆头击杀 50 次。
+SCRAPPER	拆机者
+Destroy 20 drones.	击毁 20 架无人机。
+GIANT KILLER	巨人杀手
+Defeat a boss.	击败一名首领。
+NEAR MISS	擦肩而过
+Perfect-dodge 10 shots.	完美闪避 10 次射击。
+CLOSE CALL	九死一生
+Win an operation with under 15% health left.	以不足 15% 的生命值赢得一次行动。
+PROFESSIONAL	专业人士
+Win 10 operations.	赢得 10 次行动。
+VETERAN	老兵
+Win 50 operations.	赢得 50 次行动。
+SCRIPT RUNNER	脚本跑者
+Hack 10 terminals.	入侵 10 个终端。
+Hack 50 terminals.	入侵 50 个终端。
+ICEBREAKER	破冰者
+Hack 200 terminals.	入侵 200 个终端。
+LOCKSMITH	锁匠
+Open 10 locks.	打开 10 把锁。
+DAEMON LORD	守护程序之主
+Install 10 daemons.	安装 10 个守护程序。
+FLAGGED	被标记
+Get locked down by Helix.	被螺旋封锁。
+MAX RAM	内存拉满
+Upgrade your cyberdeck to tier 5.	把你的赛博甲板升到 5 级。
+SIDEWAYS	横着走
+Score 1,000 in a single drift.	单次漂移得分达到 1,000。
+TOUGE LEGEND	山道传说
+Score 5,000 in a single drift.	单次漂移得分达到 5,000。
+JOYRIDE	飙车兜风
+Drive 10 km.	驾驶 10 公里。
+LONG HAUL	长途跋涉
+Drive 50 km.	驾驶 50 公里。
+PAVEMENT POUNDER	街头行者
+Walk 10 km.	步行 10 公里。
+MARATHON	马拉松
+Walk 100 km.	步行 100 公里。
+NOSY	爱管闲事
+Walk into 20 buildings.	走进 20 栋建筑。
+FILTHY RICH	富得流油
+Hold 10,000 credits at once.	同时持有 10,000 点信用点。
+DECORATED	勋章满身
+Earn 25 mission medals.	获得 25 枚任务勋章。
+FULLY SPECCED	满配
+Unlock all 9 perks.	解锁全部 9 个天赋。
+REGULAR	常客
+Claim 7 daily rewards.	领取 7 次每日奖励。
+WEEK ONE	第一周
+Claim a full 7-day streak.	完成连续 7 天的每日奖励。
+NIGHT SHIFT	夜班
+Play for 10 hours.	游玩 10 小时。
+ON THE GRID	接入网格
+Sign in to an account.	登录账号。
+STRENGTH IN NUMBERS	人多力量大
+Finish an operation in co-op.	在合作模式中完成一次行动。
+COMPLETIONIST	全成就达人
+Earn every other achievement.	获得其余所有成就。
+Hidden achievement	隐藏成就
+ACHIEVEMENT UNLOCKED	成就已解锁
+ACHIEVEMENT REWARDS	成就奖励
+ACHIEVEMENTS	成就
+Achievements	成就
+Statistics	统计
+UNLOCKED	已解锁
+unlocked · lifetime stats	已解锁 · 生涯统计
+Unlocks · lifetime stats	解锁 · 生涯统计
+LIFETIME	生涯
+THIS SAVE	当前存档
+Time played	游玩时间
+Chapters finished	完成的章节
+Operations won	赢得的行动
+Operations won unseen	未被发现赢得的行动
+Endings discovered	已发现结局
+Hostiles downed	击倒的敌人
+Headshot kills	爆头击杀
+Takedowns	制服
+Knockouts	击晕
+Drones destroyed	击毁的无人机
+Bosses defeated	击败的首领
+Perfect dodges	完美闪避
+Bodies hidden	藏匿的尸体
+Cameras destroyed	摧毁的摄像头
+Guards interrogated	审问的守卫
+Locks opened	打开的锁
+Daemons installed	安装的守护程序
+Mission medals	任务勋章
+Distance on foot	步行距离
+Distance driven	驾驶距离
+Best drift	最佳漂移
+Buildings entered	进入的建筑
+Daily rewards claimed	领取的每日奖励
+Best reward streak	最长奖励连续天数
+days	天
+Save slot	存档位
+New Game+	二周目
+undetected	未被发现
+Perk points spent	已用天赋点
+Credits held	持有的信用点
+ON THE ROAD	公路
+Terminals hacked	已破解终端

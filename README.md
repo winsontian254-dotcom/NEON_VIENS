@@ -51,6 +51,10 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 - Customisable crosshair (six styles, colours, size, outline, spread) and menu pointer (Settings, Crosshair & cursor)
 - A promo banner for other websites: one `<script src="https://winsontian254-dotcom.github.io/NEON_VIENS/promo/banner.js" defer></script>` line shows a full-size Neon Veins banner with the live update list (options and an `<iframe>` version are described in `promo/src/app.js`)
 - Daily reward and promo codes (**Rewards** on the title menu): a seven-day streak of credits, parts, lockpicks, consumables and XP, claimed once per calendar day, plus codes that each work once per device. Add codes with `python3 tools/promo.py add CODE "Name" cr=500 parts=10` (they are stored as hashes)
+- **Achievements and lifetime stats** (title menu and both pause menus): 54 achievements in seven groups, each paying credits (and XP) once, and a statistics page (time played, kills, hacks, distance walked and driven, best drift, ...). They belong to the device and the account, are shared by all save slots and are merged between devices in the cloud.
+- **Three save slots and New Game+**: Save Slots on the title menu continues, copies or deletes a slot; New Game asks which slot to use. A slot that has reached an ending can start New Game+: the same character keeps credits, armoury, cyberdeck, implants, armour, XP and perks, the world starts again, and the enemies are tougher (+30% health, +20% damage, +10% suspicion per level, up to 5). Signed-in players sync every slot to the cloud.
+- **Key rebinding** (Settings, Controls): 21 actions, a swap when two want the same key, sprint and sneak as toggles; the key caps in the on-screen prompts follow your keys.
+- **Accessibility** (Settings, Accessibility): interface size 90-130% (menus, HUD, touch buttons), subtitle size 85-185% and backdrop, and a colour-blind filter (protanopia, deuteranopia, tritanopia), next to the existing screen-shake, glitch, scanline and field-of-view options.
 - Dynamic resolution scaling — trades pixels for frame time to hold ~50-60 FPS
 
 ---

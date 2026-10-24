@@ -1,0 +1,21 @@
+# ACHIEVEMENTS AND STATISTICS
+
+## What there is to earn
+
+There are 54 achievements in seven groups: Story, Stealth, Combat, Netrunning, Driving, City and Account. Most of them count something, and the Achievements screen shows how far along each one is. A few are one-off moments: beating the Instructor, taking a guard's uniform, being locked down by Helix, or reaching an ending. One is hidden until you earn it. Open the screen from the title menu or from the pause menu; Q and E, or the shoulder buttons, switch between the list and the lifetime statistics.
+
+Every achievement pays once, by tier. A first-tier achievement pays 100 credits. A second-tier one pays 250 credits and 40 XP. A third-tier one pays 600 credits and 90 XP. The last one, Completionist, which asks for all the others, pays 2,500 credits and 200 XP. The reward goes into the save you are playing. If you earn one where there is no save to pay, for example in the Training Zone, it waits and is paid into the next save you load.
+
+## What counts and what does not
+
+Operations, the open city and the interiors all count. The Training Zone and co-op sessions do not count towards the totals, because they run on a temporary character. The exceptions are graduating from the Training Zone and finishing an operation in co-op, which each have an achievement of their own. Chapters finished uses the largest number any one save has reached, so replaying a chapter from Chapter Select never counts twice.
+
+Stealth is judged at the end of an operation. Winning without an alarm counts as unseen. Nobody Died asks for an unseen win with at least two knockouts and not one kill, drones aside. Close Call asks for a win with less than 15 percent of your health left.
+
+## Where they are kept
+
+Achievements and statistics belong to the device and the account, not to a save. All three save slots share them, a new game does not reset them, and ending the world does not erase them. Signed-in players carry them in the cloud copy. When two devices have earned different things, they are merged: every achievement either one has is kept, and each counter takes the larger of the two numbers.
+
+## The lifetime statistics
+
+The Statistics tab lists time played (counted while a story screen or a level is open), chapters finished, operations won and won unseen, endings discovered, hostiles downed, headshot kills, takedowns, knockouts, drones destroyed, bosses defeated, perfect dodges, bodies hidden, cameras destroyed, guards interrogated, terminals hacked, locks opened, daemons installed, mission medals, distance on foot and by car, your best single drift, buildings entered, daily rewards claimed and your best reward streak. Below them is a short summary of the save you are playing.

@@ -1,0 +1,19 @@
+# CONTROLS AND ACCESSIBILITY
+
+## Key bindings
+
+Settings, then Controls, lists 21 actions in four groups: movement, actions, netrunning and options. Select an action and press the key you want for it. If another action already uses that key, the two swap, so nothing is left without a key. Escape cancels while the game is waiting for a key. Reset all to default puts every key back.
+
+Some keys cannot be given away because the game itself needs them: the mouse buttons, the number keys that pick a weapon, Escape, Tab, Enter, Backspace, the arrow keys, P, J, K, L and M, the function keys, Minus, Equal, Slash and the keys of the numeric pad. The arrow keys keep working as a second way to move. The key caps in the prompts on screen follow your own keys, and the tutorial text does too. Bindings apply inside a level; menus keep the usual keys.
+
+Sprint and sneak can each be a toggle instead of a hold: press once to start, press again to stop. The setting for each is at the bottom of the Controls screen. A toggled key lets go by itself when the level ends.
+
+## Interface and subtitles
+
+Settings, then Accessibility, sets the interface size from 90 percent to 130 percent in four steps. It scales the menus, the in-game display and the touch buttons together; the largest steps need a large window, and on a small one the on-screen panels start to overlap, so step down if that happens. Subtitles have their own size, from 85 percent to 185 percent, and a backdrop, Light (45 percent black) or Strong (85 percent black), for lines that are hard to read against a bright scene. A sample line at the top of the screen shows the change at once.
+
+## Colour-blind filter
+
+The colour-blind filter has three settings: protanopia (red-blind), deuteranopia (green-blind) and tritanopia (blue-blind). It does not just recolour the picture. It works out which differences a person with that kind of colour vision would lose, and shifts them into colours they can tell apart, so red and green markers stay distinct. It is applied to the whole screen, the 3D view and the interface together, and on a weak device it costs a little frame rate, so it is off until you choose it.
+
+Screen shake, glitch effects and the scanline filter can each be switched off on the same screen, and the field of view and Invert Y axis stay in the main Settings list.

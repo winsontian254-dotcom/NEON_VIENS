@@ -1,0 +1,84 @@
+Save Slots	存档位
+Three separate stories	三个相互独立的故事
+of 3 in use · copy, delete, New Game+	个存档位已使用（共 3 个）· 复制、删除、二周目
+SLOT	存档位
+Slot	存档位
+SAVE SLOTS	存档位
+CHOOSE A SLOT	选择存档位
+Where should the new game go? A slot that is in use is overwritten.	新游戏要放在哪里？已使用的存档位会被覆盖。
+Three separate stories. Endings, rewards and achievements are shared by all of them.	三个相互独立的故事。结局、奖励和成就由它们共享。
+Start a new game here	在这里开始新游戏
+Nothing saved here yet	这里还没有存档
+Unreadable save	无法读取的存档
+ACTIVE	当前
+RUN ENDED	行动已结束
+FINISHED	已通关
+Ending	结局
+This slot already holds a game. Overwrite it?	这个存档位里已经有游戏了。要覆盖它吗？
+New Game here	在这里开始新游戏
+Copy to another slot	复制到其他存档位
+Delete	删除
+Start New Game+ in this slot? The finished story is replaced. Your gear, credits, cyberdeck, implants and perks come with you; the world starts again and enemies hit harder.	在这个存档位开始二周目吗？已通关的故事会被替换。你的装备、信用点、赛博甲板、植入体和天赋都会带走；世界从头开始，敌人会更强。
+Delete this save for good?	永久删除这个存档吗？
+SAVE DELETED	存档已删除
+SAVE COPIED	存档已复制
+COPY TO	复制到
+Pick the slot to copy into. A slot that is in use is overwritten.	选择要复制到的存档位。已使用的存档位会被覆盖。
+IN USE	已使用
+NEW GAME+	二周目
+Your gear came with you. The enemies are tougher.	你的装备都带来了。敌人更强了。
+Operation unseen	未被发现的行动
+Controls · key bindings	操作 · 按键绑定
+Accessibility	无障碍
+changed	已更改
+Default	默认
+CONTROLS	操作
+Select an action, then press the key you want for it. If another action already uses that key, the two swap. The mouse, the number keys, Esc, Tab and the menu keys cannot be changed.	选中一个动作，再按下你想给它的按键。如果另一个动作已经在用这个键，两者会交换。鼠标、数字键、Esc、Tab 和菜单按键无法更改。
+MOVEMENT	移动
+ACTIONS	动作
+OPTIONS	选项
+Move forward	向前移动
+Move back	向后移动
+Move left	向左移动
+Move right	向右移动
+Jump	跳跃
+Sprint	冲刺
+Sneak · slide	潜行 · 滑铲
+Interact · takedown · hack	交互 · 制服 · 入侵
+Car · interact	载具 · 交互
+Reload	换弹
+EMP pulse	电磁脉冲
+Whistle	口哨
+Use quick item	使用快捷物品
+Next quick item	下一个快捷物品
+Car horn	汽车喇叭
+Ping (RAM)	探测（内存）
+Scan	扫描
+Firewall · ASCENSION	防火墙 · 飞升
+Nuallink screen	神经链路界面
+PRESS A KEY	按下一个键
+That key is reserved.	这个键已被游戏保留。
+Swapped with another action.	已与另一个动作交换。
+Bound.	已绑定。
+Every key is back to its default.	所有按键都已恢复默认。
+Reset all to default	全部恢复默认
+Sprint is a toggle (press to start, press again to stop)	冲刺改为切换（按一次开始，再按一次停止）
+Sneak is a toggle	潜行改为切换
+ACCESSIBILITY	无障碍
+Interface size (menus, HUD and touch buttons)	界面大小（菜单、游戏内显示和触屏按钮）
+Subtitle size	字幕大小
+Subtitle backdrop	字幕背景
+Colour-blind filter	色盲滤镜
+Small	小
+Large	大
+Larger	更大
+Huge	特大
+Light	浅
+Strong	深
+Off	关
+Protanopia (red-blind)	红色盲（Protanopia）
+Deuteranopia (green-blind)	绿色盲（Deuteranopia）
+Tritanopia (blue-blind)	蓝色盲（Tritanopia）
+Achievements	成就
+EMPTY SLOT	空存档位
+Dash · dodge	闪避冲刺
