@@ -8,3 +8,6 @@ CREATE TABLE IF NOT EXISTS saves (user_id INTEGER NOT NULL, slot TEXT NOT NULL, 
 CREATE TABLE IF NOT EXISTS invites (id INTEGER PRIMARY KEY AUTOINCREMENT, from_id INTEGER NOT NULL, to_id INTEGER NOT NULL, code TEXT NOT NULL, created INTEGER NOT NULL);
 CREATE INDEX IF NOT EXISTS invites_to ON invites(to_id);
 CREATE TABLE IF NOT EXISTS attempts (k TEXT PRIMARY KEY, n INTEGER NOT NULL, since INTEGER NOT NULL);
+-- Leaderboards (build 59). Existing deployments: wrangler d1 execute neon-veins-accounts --remote --file=server/schema.sql
+CREATE TABLE IF NOT EXISTS scores (user_id INTEGER NOT NULL, board TEXT NOT NULL, score INTEGER NOT NULL, detail TEXT NOT NULL DEFAULT '', updated INTEGER NOT NULL, PRIMARY KEY (user_id, board));
+CREATE INDEX IF NOT EXISTS scores_board ON scores(board, score DESC);

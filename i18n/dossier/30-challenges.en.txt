@@ -1,0 +1,17 @@
+# CHALLENGES AND LEADERBOARDS
+
+## The daily and the weekly
+
+Challenges is on the title menu. Every day there is a daily challenge and every week a weekly one, and they are the same for every player in the world. A day runs from midnight to midnight UTC, and a week from Monday to Monday. The date decides everything: the mode (infiltration, netrun, retrieval or sweep), the place out of eleven drawn plans, the twist, the complications and the gun you are given. The daily has a twist about four days in five and up to one complication, at Operative difficulty. The weekly always has a twist and two complications, at Ghost Protocol difficulty, and it is a longer operation.
+
+A challenge is played in a temporary game. Nothing you earn there, credits, XP or items, reaches your save, and nothing in your save helps you there. Everyone starts with the same bare kit: the day's gun with a full reserve, the Courier Sidearm and the Monoblade, two fragmentation grenades, one EMP, two trauma kits, two noisemakers and three lockpicks, a level 2 cyberdeck without mods, and no cyberware, armour or perks. You may play again as often as you like. The map is the same each time, and only your best score counts.
+
+## The score
+
+A cleared operation scores 1,000 points (1,800 for the weekly). On top of that: speed, 4 points for every second under the par time (3 for the weekly); stealth, 600 points minus 150 for every alert; health left, up to 400 points; and 25 points for every takedown or knockout, up to 15 of them. Every failed hack costs 50 points, up to 300. The total is then multiplied by 1 plus 0.15 for every twist and complication, plus 0.35 for the weekly. The par time is 120 seconds plus 70 for each objective, and 120 more for the weekly: 330 to 400 seconds for a daily and 590 for a weekly. The HUD shows your time against the par.
+
+A gold medal needs about a clean run at 60 percent of the par time, and a silver medal a slow or noisy one; the exact scores are on the challenge card (about 3,000 and 2,000 for a typical daily, about 6,400 and 4,800 for a weekly). Any cleared operation earns at least bronze. The best score of each day and week stays on the device, and so does your daily streak. Finishing a daily, a weekly or a gold medal counts towards the Challenges achievements.
+
+## Leaderboards
+
+Signed-in players post their best score of every challenge to the leaderboard, and the Challenges screen shows the top 25 of the day or week with your own rank. Equal scores are ranked by who reached them first. A third board, Drift, keeps the best single drift anyone has scored in the city, taken from your lifetime statistics. Your device reports its own scores, and the server only checks that they are possible (at most 20,000 for a daily, 30,000 for a weekly and 600,000 for a drift, and no more than 90 posts an hour), so the boards are for fun. Deleting your account removes your scores. If the account server has not been updated to keep scores yet, the board says so.

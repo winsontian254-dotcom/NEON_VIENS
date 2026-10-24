@@ -2,7 +2,7 @@
 
 ## What there is to earn
 
-There are 54 achievements in seven groups: Story, Stealth, Combat, Netrunning, Driving, City and Account. Most of them count something, and the Achievements screen shows how far along each one is. A few are one-off moments: beating the Instructor, taking a guard's uniform, being locked down by Helix, or reaching an ending. One is hidden until you earn it. Open the screen from the title menu or from the pause menu; Q and E, or the shoulder buttons, switch between the list and the lifetime statistics.
+There are 62 achievements in eight groups: Story, Stealth, Combat, Netrunning, Driving, City, Challenges and Account. Most of them count something, and the Achievements screen shows how far along each one is. A few are one-off moments: beating the Instructor, taking a guard's uniform, being locked down by Helix, or reaching an ending. One is hidden until you earn it. Open the screen from the title menu or from the pause menu; Q and E, or the shoulder buttons, switch between the list and the lifetime statistics.
 
 Every achievement pays once, by tier. A first-tier achievement pays 100 credits. A second-tier one pays 250 credits and 40 XP. A third-tier one pays 600 credits and 90 XP. The last one, Completionist, which asks for all the others, pays 2,500 credits and 200 XP. The reward goes into the save you are playing. If you earn one where there is no save to pay, for example in the Training Zone, it waits and is paid into the next save you load.
 

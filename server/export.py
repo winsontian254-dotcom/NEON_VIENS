@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Export the Neon Veins accounts database (users, friends, sessions, invites, cloud-save metadata) to JSON and CSV files.
+"""Export the Neon Veins accounts database (users, friends, sessions, invites, cloud-save metadata, leaderboard scores) to JSON and CSV files.
 
     NV_ADMIN_TOKEN=... python3 server/export.py [--tables users,saves] [--full] [--redact] [--out DIR] [--api URL]
 
@@ -11,7 +11,7 @@ Standard library only."""
 import argparse, csv, datetime, getpass, json, os, sys, urllib.error, urllib.parse, urllib.request
 
 DEFAULT_API = 'https://neon-veins-api.winsontian254.workers.dev'
-TABLES = ['users', 'friends', 'sessions', 'invites', 'saves']
+TABLES = ['users', 'friends', 'sessions', 'invites', 'saves', 'scores']
 TIME_COLS = ('created', 'last_seen', 'updated', 'expires')   # epoch milliseconds in the database
 
 
@@ -67,6 +67,7 @@ def main():
     write_private(os.path.join(out, 'summary.json'), json.dumps(summary, indent=2) + '\n')
     print('accounts: %d users (%d new this week, %d active today), %d friend links, %d cloud saves' % (summary['users'], summary['new_users_7d'], summary['active_users_24h'], summary['friends'], summary['saves']))
     for t in tables:
+        if t == 'scores' and summary.get('scores') is None: print('  scores     skipped: this server has no leaderboard table yet'); continue
         rows, off = [], 0
         step = 20 if (a.full and t == 'saves') else 1000
         while True:

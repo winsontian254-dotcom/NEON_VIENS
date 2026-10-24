@@ -1,0 +1,21 @@
+# DAY, NIGHT AND WEATHER
+
+## A day in the open city
+
+The open city now runs on a clock. One hour passes every real minute, so a whole day and night lasts 24 minutes. A new spot in the city starts at half past nine in the evening, and the clock and the weather are kept in your save, so they carry on where you left off. The time shows in the corner of the minimap, with the weather next to it. Dawn breaks at about six, the day is brightest around one in the afternoon, dusk falls at about half past six and the city is fully dark again from ten o'clock. The neon never goes out, but by day it glows less and the sky is a flat, pale grey-blue instead of a black one.
+
+Missions, interiors and story scenes keep their own lighting. Only the open city has a clock.
+
+## Weather
+
+There are five kinds of weather: clear sky, overcast, rain, storm and fog. Each lasts between two and five hours, which is two to five minutes of play, and then the game picks the next one. After a clear sky it is overcast half the time, clear again a quarter of the time, and raining or foggy an eighth of the time each. After overcast it is clear or raining three times in eight each, and foggy or storming one time in eight each. After rain it is overcast three times in eight, rain again or a storm twice in eight each, and clear one time in eight. A storm becomes rain two times in three and overcast one time in three. Fog clears or turns overcast, half and half. When the weather changes, a message tells you, and the sky eases into the new look over a few seconds.
+
+## What weather changes
+
+Fewer people are out in bad weather: 70 percent of the usual crowd in rain, 80 percent in fog and 40 percent in a storm. Guards see less far than usual: 88 percent in rain, 78 percent in a storm and 72 percent in fog, on top of everything else that affects their sight. Wet streets cut the grip of a car by 14 percent in rain or a storm, 5 percent in fog and 1 percent when it is only overcast, so drifts start earlier and last longer. Fog thickens the air until the far towers fade into grey.
+
+A storm throws a bolt of lightning every 6 to 20 seconds. The thunder reaches you a moment after the flash, later when the bolt was far away. Fixers pay hazard pay for working in bad weather: 10 percent more on every side job in rain or fog and 20 percent more in a storm. Spending five minutes outdoors in a storm earns the Storm Chaser achievement.
+
+## Turning it off
+
+Settings has a row, Day and night, weather (open world). Off puts the city back as it was before the clock was added: always night. It also saves a little processing time on weak devices.

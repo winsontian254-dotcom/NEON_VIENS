@@ -1,6 +1,17 @@
 {
-  "build": 58,
+  "build": 59,
   "history": [
+    {
+      "build": 59,
+      "version": "1.59",
+      "date": "2026-10-24",
+      "notes": [
+        "The open city now has day and night and weather: clear, overcast, rain, storms with lightning, and fog. They change what guards see, how many people are out and how cars grip (Settings can turn it off)",
+        "Side jobs at the cyan job boards: courier runs, bounties, hostage rescues, car theft, data heists and contract hits, in three tiers",
+        "Challenges on the title menu: a daily and a weekly operation, the same for everyone, with medals, a daily streak and leaderboards (daily, weekly, best drift) for signed-in players. Credits moved to Settings",
+        "8 new achievements (62 in all); the Dossier explains the weather, the jobs and the challenges"
+      ]
+    },
     {
       "build": 58,
       "version": "1.58",
@@ -219,14 +230,6 @@
       "date": "2026-10-12",
       "notes": [
         "Training Zone: a melee round in the live-fire drills — close in with a heavy hammer against holding gunners and rushers (six rounds now)"
-      ]
-    },
-    {
-      "build": 34,
-      "version": "1.34",
-      "date": "2026-10-12",
-      "notes": [
-        "Training Zone: a knife step in the stealth room — creep up behind a dummy and stab it with Ghost's Monoblade"
       ]
     }
   ]

@@ -1,5 +1,5 @@
 // Neon Veins account server — Cloudflare Worker + D1 (binding DB).
-// Accounts (email + username + password), sessions, friends, presence/invites and cloud saves.
+// Accounts (email + username + password), sessions, friends, presence/invites, cloud saves and leaderboards.
 // Passwords: PBKDF2-SHA256 with a per-user salt. Sessions: random bearer tokens, only their SHA-256 is stored.
 
 const DAY = 86400000;
@@ -157,6 +157,7 @@ route('DELETE', '/api/me', async (req, env) => {
   const { user } = await auth(req, env), b = await body(req);
   if (!(await verifyPassword(user, b.password))) bad('Enter your password to delete your account.', 'password');
   const id = user.id;
+  try { await env.DB.prepare('DELETE FROM scores WHERE user_id = ?').bind(id).run(); } catch (e) { /* the leaderboard table is added by schema.sql; an older database has none */ }
   await env.DB.batch([
     env.DB.prepare('DELETE FROM saves WHERE user_id = ?').bind(id),
     env.DB.prepare('DELETE FROM friends WHERE a = ? OR b = ?').bind(id, id),
@@ -280,6 +281,39 @@ route('DELETE', '/api/saves/:slot', async (req, env, p) => {
   return json({ ok: true });
 });
 
+/* ---------------- leaderboards ---------------- */
+// Boards: d:YYYY-MM-DD (the daily challenge), w:YYYY-Www (the weekly one) and drift (the best single drift, all time). Scores are reported by the player's device, so they are
+// limited to what the game can produce and only the best one per player and board is kept. Reading needs an account, like everything else here.
+const BOARD_RE = /^(d:\d{4}-\d\d-\d\d|w:\d{4}-W\d\d|drift)$/;
+const SCORE_MAX = { d: 20000, w: 30000, drift: 600000 };
+const boardKind = b => (b.startsWith('d:') ? 'd' : b.startsWith('w:') ? 'w' : 'drift');
+const parseDetail = t => { try { const d = JSON.parse(t); return d && typeof d === 'object' ? d : {}; } catch (e) { return {}; } };
+async function rankOf(env, board, score) {
+  const above = await env.DB.prepare('SELECT COUNT(*) AS n FROM scores WHERE board = ? AND score > ?').bind(board, score).first();
+  const total = await env.DB.prepare('SELECT COUNT(*) AS n FROM scores WHERE board = ?').bind(board).first();
+  return { rank: above.n + 1, total: total.n };
+}
+route('PUT', '/api/scores/:board', async (req, env, p) => {
+  const { user } = await auth(req, env), board = decodeURIComponent(p.board);
+  if (!BOARD_RE.test(board)) bad('Unknown board.');
+  const b = await body(req), score = Math.floor(Number(b.score));
+  if (!Number.isFinite(score) || score < 1 || score > SCORE_MAX[boardKind(board)]) bad('That score is not possible.');
+  await limit(env, 'score:' + user.id, 90, 3600000);
+  const detail = JSON.stringify(b.detail && typeof b.detail === 'object' ? b.detail : {}).slice(0, 240);
+  await env.DB.prepare('INSERT INTO scores (user_id, board, score, detail, updated) VALUES (?, ?, ?, ?, ?) ON CONFLICT(user_id, board) DO UPDATE SET score = excluded.score, detail = excluded.detail, updated = excluded.updated WHERE excluded.score > scores.score')
+    .bind(user.id, board, score, detail, Date.now()).run();
+  const mine = await env.DB.prepare('SELECT score FROM scores WHERE user_id = ? AND board = ?').bind(user.id, board).first();
+  return json({ ok: true, score: mine.score, ...(await rankOf(env, board, mine.score)) });
+});
+route('GET', '/api/scores/:board', async (req, env, p) => {
+  const { user } = await auth(req, env), board = decodeURIComponent(p.board);
+  if (!BOARD_RE.test(board)) bad('Unknown board.');
+  const top = await env.DB.prepare('SELECT s.user_id, s.score, s.detail, u.username, u.color FROM scores s JOIN users u ON u.id = s.user_id WHERE s.board = ? ORDER BY s.score DESC, s.updated ASC LIMIT 25').bind(board).all();
+  const mine = await env.DB.prepare('SELECT score, detail FROM scores WHERE user_id = ? AND board = ?').bind(user.id, board).first();
+  const r = mine ? await rankOf(env, board, mine.score) : { rank: 0, total: (await env.DB.prepare('SELECT COUNT(*) AS n FROM scores WHERE board = ?').bind(board).first()).n };
+  return json({ board, total: r.total, top: top.results.map((x, i) => ({ rank: i + 1, name: x.username, color: x.color, score: x.score, me: x.user_id === user.id, detail: parseDetail(x.detail) })), me: mine ? { score: mine.score, rank: r.rank, detail: parseDetail(mine.detail) } : null });
+});
+
 /* ---------------- admin export (off unless the ADMIN_TOKEN secret is set) ---------------- */
 // For whoever owns this deployment: a read-only dump of the account tables, sent with `Authorization: Bearer <ADMIN_TOKEN>`
 // (python3 server/export.py does the paging and writes the files). It never includes password hashes, salts, session token
@@ -289,6 +323,7 @@ const EXPORTS = {
   friends: { cols: 'a, b, state, requester, created', order: 'created, a, b' },
   sessions: { cols: 'user_id, created, expires, device', order: 'created DESC, user_id' },
   invites: { cols: 'from_id, to_id, created', order: 'id' },
+  scores: { cols: 'user_id, board, score, detail, updated', order: 'board, score DESC, user_id' },
   saves: { cols: 'user_id, slot, summary, updated, length(data) AS size', full: 'user_id, slot, summary, updated, length(data) AS size, data', order: 'user_id, slot' },
 };
 const adminJson = data => new Response(JSON.stringify(data), { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
@@ -307,7 +342,7 @@ route('GET', '/api/admin/export', async (req, env) => {
     const one = async (sql, ...b) => (await env.DB.prepare(sql).bind(...b).first()).n;
     return adminJson({
       exported: now, users: await one('SELECT COUNT(*) AS n FROM users'), friends: await one('SELECT COUNT(*) AS n FROM friends'), sessions: await one('SELECT COUNT(*) AS n FROM sessions'),
-      invites: await one('SELECT COUNT(*) AS n FROM invites'), saves: await one('SELECT COUNT(*) AS n FROM saves'),
+      invites: await one('SELECT COUNT(*) AS n FROM invites'), saves: await one('SELECT COUNT(*) AS n FROM saves'), scores: await one('SELECT COUNT(*) AS n FROM scores').catch(() => null),
       new_users_7d: await one('SELECT COUNT(*) AS n FROM users WHERE created > ?', now - 7 * DAY), new_users_30d: await one('SELECT COUNT(*) AS n FROM users WHERE created > ?', now - 30 * DAY),
       active_users_24h: await one('SELECT COUNT(*) AS n FROM users WHERE last_seen > ?', now - DAY), active_users_7d: await one('SELECT COUNT(*) AS n FROM users WHERE last_seen > ?', now - 7 * DAY),
     });

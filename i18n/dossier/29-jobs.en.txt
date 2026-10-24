@@ -1,0 +1,19 @@
+# SIDE JOBS
+
+## The job boards
+
+Cyan beams in the open city are job boards. Press E at one and it offers three jobs, picked from six kinds. You take one at a time, and a magenta beam marks where it leads: the drop-off, the target or the terminal. Leaving the city or quitting the level ends the job without pay. Missions have no job boards.
+
+The six kinds are a courier run (carry a package to the beam before the clock runs out), a Helix bounty (take down the squad holding the marked block), a hostage rescue (clear the guards, then free the resident with E), a car theft (take the marked car with F and deliver it to the beam without wrecking it), a data heist (hack a terminal inside a guarded compound) and a contract hit (find and take out a marked officer).
+
+## Tiers and pay
+
+Every offer has a tier of one to three stars. The first offer is always tier 1, and the others can be higher once the fixer trusts you: the highest tier on offer is 1, plus 1 for every three jobs you have finished, plus 1 more from Act 3, up to 3. Higher tiers bring bigger squads, tougher targets and shorter clocks. A tier-3 bounty is a squad of five with a heavy; a contract hit is an officer with 75 percent more health.
+
+The base pay is 60 credits for a courier run, 90 for a rescue, 100 for a car theft, 105 for a bounty, 120 for a data heist and 140 for a contract hit. Each tier above the first adds 45 percent. Every job you have finished adds 3 percent, up to 50 percent: that is the fixer trust shown on the board. Bad weather adds hazard pay of 10 or 20 percent, and your lifepath's credit bonus applies on top. A heist done without raising the alarm pays 20 percent more, a contract hit nobody sees pays 35 percent more, and a stolen car pays between 55 and 100 percent depending on how much of the car is left. Every job also gives 8 XP per tier, and a rescue gives 2 points of Hope.
+
+## Running the clock
+
+A courier run gives you 22 seconds plus the distance to the beam divided by 4.6 metres per second at tier 1, 5.5 at tier 2 and 6.4 at tier 3. A car theft gives you 25 seconds plus the distance divided by 9.5, 11 or 12.5 metres per second once you are in the car. Taking the car alerts its guards and raises your heat. If the clock runs out or the car is wrecked, the job fails and pays nothing.
+
+Finishing ten jobs earns Fixer's Favourite, finishing every kind earns All Trades, and finishing a contract hit without being seen earns Clean Hands.

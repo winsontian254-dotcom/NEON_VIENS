@@ -1,0 +1,151 @@
+CLEAR SKY	晴朗
+OVERCAST	阴天
+RAIN	下雨
+STORM	暴风雨
+FOG	大雾
+WEATHER	天气
+A storm is rolling in.	暴风雨正在逼近。
+It starts to rain.	开始下雨了。
+Fog is settling over the streets.	雾笼罩了街道。
+The sky clouds over.	天空阴了下来。
+The weather clears.	天气放晴了。
+Day and night, weather (open world)	昼夜与天气（开放世界）
+Off (always night)	关闭（永远是夜晚）
+On	开
+COURIER RUN	快递跑单
+Carry a package across the city before the clock runs out.	在时间耗尽前把包裹送过全城。
+HELIX BOUNTY	螺旋悬赏
+Take down the Helix squad holding the marked block.	解决占据标记街区的螺旋小队。
+HOSTAGE RESCUE	营救人质
+Helix is holding a resident. Clear the guards and get them out.	螺旋扣押了一名居民。清除守卫，把人救出来。
+CAR THEFT	偷车
+Steal the marked car and deliver it to the chop shop in one piece.	偷走标记的汽车，完好无损地送到拆车厂。
+DATA HEIST	数据窃取
+Hack a Helix terminal inside a guarded compound.	入侵守备森严的院区内的螺旋终端。
+CONTRACT HIT	合约刺杀
+Take out the target. A clean, quiet hit pays extra.	干掉目标。干净利落、悄无声息的刺杀有额外报酬。
+LOW RISK	低风险
+MEDIUM RISK	中等风险
+HIGH RISK	高风险
+JOB BOARD	任务板
+JOB IN PROGRESS	任务进行中
+JOBS DONE	已完成任务
+FIXER TRUST	中间人信任
+HAZARD PAY	危险津贴
+JOB	任务
+JOB · COURIER RUN	任务 · 快递跑单
+JOB · HELIX BOUNTY	任务 · 螺旋悬赏
+JOB · HOSTAGE RESCUE	任务 · 营救人质
+JOB · CAR THEFT	任务 · 偷车
+JOB · DATA HEIST	任务 · 数据窃取
+JOB · CONTRACT HIT	任务 · 合约刺杀
+Get the package to the magenta beam before the timer runs out.	在计时结束前把包裹送到洋红色光柱。
+Disable the Helix squad at the magenta beam.	解决洋红色光柱处的螺旋小队。
+Helix is holding a resident at the magenta beam. Get them out.	螺旋在洋红色光柱处扣押了一名居民。把人救出来。
+Hack the terminal at the magenta beam. The guards will not like it.	入侵洋红色光柱处的终端。守卫们不会喜欢的。
+Find and take out the marked Helix officer. Stay unseen for a bonus.	找到并干掉被标记的螺旋军官。不被发现可获额外奖励。
+Take the marked car (cyan beam, F) to the magenta beam. It must not be wrecked.	把标记的汽车（青色光柱，F）开到洋红色光柱。不能撞毁。
+Now get it to the magenta beam. Do not wreck it.	现在把它开到洋红色光柱。别撞坏。
+Guards down — free the hostage [E].	守卫已倒下——解救人质 [E]。
+JOB COMPLETE	任务完成
+JOB FAILED	任务失败
+Delivery window missed.	错过了送达时限。
+The car was wrecked.	汽车被撞毁了。
+Courier run	快递跑单
+Bounty targets left	剩余悬赏目标
+Hostage rescue	营救人质
+Hack the terminal	入侵终端
+Contract target	合约目标
+ALERTED	已警觉
+UNAWARE	未察觉
+Deliver the car	交付汽车
+Steal the marked car	偷走标记的汽车
+Stolen car	被盗的汽车
+Not now	暂不接单
+FIXER’S FAVOURITE	中间人的宠儿
+Finish 10 side jobs.	完成 10 个支线任务。
+ALL TRADES	样样精通
+Finish every kind of side job.	完成每一种支线任务。
+CLEAN HANDS	一尘不染
+Finish a contract hit without being seen.	在不被发现的情况下完成一次合约刺杀。
+STORM CHASER	追风暴者
+Spend 5 minutes out in the open during a storm.	在暴风雨中于户外度过 5 分钟。
+ON THE BOARD	榜上有名
+Finish a daily challenge.	完成一次每日挑战。
+THE LONG SHIFT	漫长的值班
+Finish a weekly challenge.	完成一次每周挑战。
+GOLD STANDARD	金牌标准
+Win a gold medal in a challenge.	在挑战中赢得金牌。
+DAILY GRIND	日复一日
+Finish 7 daily challenges.	完成 7 次每日挑战。
+CHALLENGES	挑战
+Challenges	挑战
+Daily and weekly operations · leaderboards	每日与每周行动 · 排行榜
+Daily	每日
+Weekly	每周
+Drift	漂移
+Play	开始
+DAILY CHALLENGE	每日挑战
+WEEKLY CHALLENGE	每周挑战
+MODE	模式
+PLACE	地点
+COMPLICATION	突发状况
+KIT	装备
+PAR	标准时间
+MULTIPLIER	倍率
+MEDALS	奖牌
+GOLD	金牌
+SILVER	银牌
+RESETS IN	重置倒计时
+YOUR BEST	你的最佳
+Not played yet this day.	今天还没玩过。
+Not played yet this week.	本周还没玩过。
+LEADERBOARD	排行榜
+players	位玩家
+Nobody has posted a score yet.	还没有人提交成绩。
+Sign in to see the leaderboard and post your scores.	登录后可查看排行榜并提交成绩。
+You	你
+DRIFT BOARD	漂移榜
+ALL TIME	历史总榜
+Your best single drift in the city, from the lifetime statistics.	你在城市中单次漂移的最高分，取自生涯统计。
+YOUR BEST DRIFT	你的最佳漂移
+Drive in the city to set a score	在城市里驾驶以创造成绩
+The server has no leaderboards yet.	服务器尚未启用排行榜。
+DAILY CHALLENGE COMPLETE	每日挑战完成
+WEEKLY CHALLENGE COMPLETE	每周挑战完成
+TIME	用时
+ALERTS	警报
+Operation cleared	行动完成
+Speed bonus	速度奖励
+Stealth bonus	潜行奖励
+Health left	剩余生命
+Hack mistakes	入侵失误
+Subtotal	小计
+SCORE	得分
+NEW BEST	新纪录
+RANK	排名
+OF	共
+Posting your score…	正在提交成绩…
+Sign in to post your scores to the leaderboard.	登录后可把成绩提交到排行榜。
+Play again	再玩一次
+The operation failed. Try it again?	行动失败了。再试一次吗？
+Par time	标准时间
+INFILTRATION	渗透
+NETRUN	黑入
+RETRIEVAL	回收
+SWEEP	搜查
+HELIX OFFICE	螺旋办公室
+DOCKSIDE WAREHOUSE	码头仓库
+NOAH CLINIC	诺亚诊所
+METRO SECTOR 9	地铁九区
+THE UNDERDEEP	深渊地下城
+DREAMHOUSE CLUB	梦屋俱乐部
+THE ARCHIVE VAULT	档案库
+LATTICE SERVER FARM	格网服务器农场
+ORBITAL STATION	轨道站
+CARGO BAY	货舱
+Helix Vector SMG	螺旋矢量冲锋枪
+Tide Knife Deck Sweeper	潮刃甲板清扫者
+Foundry Six Worker Rifle	铸造六号工人步枪
+Iron Angel Furnace Shotgun	钢铁天使熔炉霰弹枪
+Iron Angel Service Pistol	钢铁天使制式手枪
