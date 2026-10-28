@@ -24,9 +24,11 @@ A single-file browser-based cyberpunk narrative RPG built with Babylon.js.
 ## What's in the box
 
 **Story**
-- 70 chapters across 5 acts, ~3,100 dialogue lines, ~390 branching choices
+- 76 chapters across 5 acts plus six endings, ~3,300 dialogue lines, ~410 branching choices
 - 6 endings (A–F), stat-gated and flag-gated
-- 50 main missions, 60 side quests
+- 52 main missions, 66 side quests
+- **Act II-B, the Tidelines** (chapters 20A–20G, between "Break the Chain" and "Fire Across Avalon"): Rust Harbor's reef crustaci (Snippy, Pearl, Shelly, Hermit, Pincher and Claw'd, who speaks through CrustAI) against Helix's Cold Engine water pumps. Seven chapters, nine operations, side quests SQ61–SQ66, three encrypted "bubble signal" intercepts and a Tideline Reef entry in the Journal codex.
+- The dialogue was rewritten in the cast's slang (Build 60); the Chinese translation follows it
 - Walkable story scenes — speakers from the script stand in the level; walk up and talk to them
 - Compiled script data (`NV_DATA`) is baked into the HTML
 

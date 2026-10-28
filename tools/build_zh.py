@@ -75,6 +75,7 @@ def story_keys(d):  # must mirror NV.I18n.storyKeys() in index.html
         add(c['title']); walk(c['n'])
     for k in sorted(d['acts']): add(d['acts'][k])
     for p in d['premise']: add(p)
+    for p in d.get('reef', []): add(p)
     for k in sorted(d['endings']):
         e = d['endings'][k]; add(e['title']); add(e['desc'])
         if e['desc'].startswith('Choice: '): add(e['desc'][8:])

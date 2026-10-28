@@ -26,6 +26,7 @@ import re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, "NEON_VEINS_script.txt")
+TIDE = os.path.join(HERE, "tidelines_script.txt")   # Act II-B (Tidelines): chapters written for the game from the design text, played between chapters 20 and 21
 HTML = os.path.join(HERE, "..", "index.html")
 BEGIN, END = "/*NV_DATA_BEGIN*/", "/*NV_DATA_END*/"
 
@@ -184,7 +185,7 @@ def tokenize(lines):
         s = clean(raw)
         if not s:
             continue
-        m = re.match(r"^Chapter (\d+[A-F]?) — (.+)$", s)
+        m = re.match(r"^Chapter (\d+[A-G]?) — (.+)$", s)
         if m:
             toks.append(("chapter", m.group(1), m.group(2)))
             continue
@@ -284,7 +285,7 @@ class Parser:
             kind = tok[0]
             if kind == "tag":
                 name, val = tok[1], tok[2]
-                if name == "SCENE CHANGE TO":
+                if name == "SCENE CHANGE TO" or name == "END CHOICE":   # END CHOICE (tidelines script only) closes the If-branches of the choice above
                     self.i += 1
                     continue
                 if name == "SCENE":
@@ -670,6 +671,9 @@ def place_gameplay(chap, nodes):
     return nodes, count[0]
 
 
+PIN_SCENE = {"23": ("CIVIC PALACE — CONTINUITY CHAMBER", "explore")}
+
+
 def ensure_operation(chap_id, title, nodes):
     """Chapters with no marked gameplay get an infiltration op at the
     most action-heavy scene so every chapter is playable."""
@@ -684,6 +688,12 @@ def ensure_operation(chap_id, title, nodes):
         sc = len(action.findall(text))
         if sc > best_score:
             best, best_score = idx, sc
+    pin = PIN_SCENE.get(chap_id)   # chapters whose operation sat in this scene before the dialogue was reworded: keep it there (saves resume by node path)
+    pin_mode = None
+    if pin:
+        for idx in scenes:
+            if nodes[idx]["v"] == pin[0]:
+                best, pin_mode = idx, pin[1]
     name = nodes[best]["v"]
     # insert after the first few narrative beats of that scene
     ins = best + 1
@@ -691,7 +701,7 @@ def ensure_operation(chap_id, title, nodes):
     while ins < len(nodes) and nodes[ins].get("t") in ("n", "l") and k < 3:
         ins += 1
         k += 1
-    mode = "infiltrate" if best_score > 0 else "explore"
+    mode = pin_mode or ("infiltrate" if best_score > 0 else "explore")
     op = [{"t": "sys", "k": "objective", "v": "Get through " + name.title(), "h": "Operation"},
           {"t": "play", "m": mode, "d": "Get through " + name.title(), "k": 3}]
     return nodes[:ins] + op + nodes[ins:]
@@ -742,34 +752,55 @@ def main():
     t_start = next(i for i, l in enumerate(lines) if l.strip() == "7. Full Game Transcript")
     transcript = lines[t_start + 2:]
 
-    # Codex: setting premise + ending blurbs + mission synopses
+    # Codex: setting premise + ending blurbs + mission synopses (found by heading, so the design sections can grow)
+    h_setting = next(i for i, l in enumerate(lines) if l.strip() == "1. Setting and Core Premise")
+    h_reef = next((i for i, l in enumerate(lines) if l.strip().startswith("Reef Lore")), None)
+    h_weapons = next(i for i, l in enumerate(lines) if l.strip().startswith("Weapon Stats, Upgrade Paths"))
+    h_sides = next(i for i, l in enumerate(lines) if l.strip().startswith("3. Side Quests and Unlock Schedule"))
     premise = []
-    for l in lines[1:10]:
+    for l in lines[h_setting + 1:(h_reef if h_reef is not None else h_weapons)]:
         if l.strip():
             premise.append(clean(l))
+    reef = [clean(l) for l in lines[h_reef + 1:h_weapons] if l.strip()] if h_reef is not None else []
     endings = {}
     for i, l in enumerate(lines):
         m = re.match(r"^Ending ([A-F]) — (.+)$", l.strip())
         if m and i + 1 < len(lines) and re.match(r"^(Secret )?[Cc]hoice:", lines[i + 1]):
             endings[m.group(1)] = {"title": m.group(2), "desc": clean(lines[i + 1])}
     missions = {}
-    for i, l in enumerate(lines[:1270]):
+    for i, l in enumerate(lines[:h_sides]):
         m = re.match(r"^(?:✓ )?Mission (\d+) — (.+)$", l.strip())
         if m and int(m.group(1)) not in missions:
             body = clean(lines[i + 1]) if i + 1 < len(lines) else ""
             body = re.sub(r"^[A-Z][a-z ]+\.\s", "", body)
             missions[int(m.group(1))] = {"title": m.group(2), "syn": body[:900]}
 
+    # the two Act II-B missions (design text "Mission 20A / 20B") are chapters 20D and 20F of the Tidelines script
+    for mid, cid in (("20A", "20D"), ("20B", "20F")):
+        for i, l in enumerate(lines[:h_sides]):
+            m = re.match(r"^(?:✓ )?Mission " + mid + r" — (.+)$", l.strip())
+            if m:
+                body = re.sub(r"^[A-Z][a-z ]+\.\s", "", clean(lines[i + 1]))
+                missions[cid] = {"title": m.group(1), "syn": body[:900]}
+                break
+
+    def chunk_of(toks_):
+        out, cur_ = [], None
+        for t in toks_:
+            if t[0] == "chapter":
+                cur_ = {"id": t[1], "title": t[2], "toks": []}
+                out.append(cur_)
+            elif cur_ is not None:
+                cur_["toks"].append(t)
+        return out
     toks = tokenize(transcript)
     chapters = []
-    cur = None
-    chunks = []
-    for t in toks:
-        if t[0] == "chapter":
-            cur = {"id": t[1], "title": t[2], "toks": []}
-            chunks.append(cur)
-        elif cur is not None:
-            cur["toks"].append(t)
+    chunks = chunk_of(toks)
+    if os.path.exists(TIDE):
+        with open(TIDE, encoding="utf-8") as f:
+            tide = chunk_of(tokenize([l for l in f.read().split("\n") if l.strip()]))
+        at = next(i for i, c in enumerate(chunks) if c["id"] == "20") + 1
+        chunks[at:at] = tide
 
     total_ops = 0
     for ch in chunks:
@@ -803,6 +834,7 @@ def main():
 
     data = {
         "premise": premise,
+        "reef": reef,
         "acts": ACT_TITLES,
         "endings": endings,
         "missions": missions,

@@ -1,0 +1,518 @@
+Chapter 20A — Low Water
+[SCENE: RUST HARBOR — OUTER SEAWALL SHAFT]
+Rain hammers the seawall. Under it, in a service shaft the maps say was welded shut in 2071, an old Nuallink relay pulses once every few seconds like a heartbeat.
+Raven: That relay shouldn’t exist. It’s been poking your link since the Underdeep, lol.
+Ghost: Since way before that. It’s the bubble-pattern thing. “The water’s getting loud” is not a normal text to get, fam.
+Lio: The routing is older than Helix. Older than the Nuallink standard, honestly. Somebody built a door and just never locked it.
+Mia: Or somebody wants us to think it’s a door.
+[PLAYER RESPONSE]
+Option — Go alone: “If it’s a trap, one of us walking into it is plenty.”
+Option — Raven on the wall: “Raven, you’re on the seawall. Lio, keep the signal warm.”
+Option — Lio on the pipes: “Lio, you read the pipes. I’ll climb.”
+Option — Ask the water: “Who even texts from under an ocean?”
+If Ghost goes alone:
+Raven: Bet. Call me when it eats you.
+Ghost: Aw, you do care.
+If Raven covers the wall:
+Raven: Fine. But if something big comes up that shaft, I shoot first and ask second.
+If Lio reads the pipes:
+Lio: Three valves and a pressure gate. I can talk you through them. I can’t promise the pipes will talk back.
+If Ghost asks the water:
+Mia: Honestly? Someone who’s been trying to reach you for a while and ran out of other ways.
+Ghost: That’s somehow worse, yo.
+[GAMEPLAY: Descend the seawall shaft past the pump crews and reach the relay before the tide gate closes.]
+[SCENE CHANGE TO: TIDELINE — STATION THETA]
+[SCENE: TIDELINE — STATION THETA]
+The shaft ends in a sealed research habitat. Tide charts flicker over empty chairs. A translation console hums beside an observation window onto black water.
+Aria: Ghost. You came down the shaft. I didn’t think anyone remembered the shaft.
+Ghost: Your relay texts like a bot with a crush. “The water’s getting loud”? Who even says that?
+The console shows a single line of CrustAI text.
+CrustAI: Hey, Ghost. The water’s getting loud.
+Aria: I didn’t write that. I’ve run the reef’s monitoring network for twenty years, and the translator sometimes writes its own lines when it isn’t sure who it’s talking to.
+Ghost: So your software is catfishing me.
+Aria: My software is lonely. There’s a difference, supposedly.
+The station’s cook, a small orange crab in an apron cut for claws, slides a tray of algae cakes across the table. A name tag on the apron reads SNIPPY.
+Snippy: Blue ones are sweet. Green ones are a lifestyle. Eat first, panic second.
+Snippy: Sensors caught something this week. A survey crew is mapping the shelf. Pipe-laying drones are marking a route from the Underdeep to the shore, and the hulls are stamped HELIX.
+Aria: I don’t think they’re studying coral. I think they’re measuring intake capacity. Nobody here has ever seen a survey budget this big in a marine study.
+Ghost: Intake for what, though?
+Aria: That’s what I’m hoping you’ll help me find out.
+[PLAYER CHOICE: Anchor logs]
+Option — Scan the anchor logs: Read the cold anchor points on the seabed.
+Option — Follow a survey drone: Tail one into deeper water.
+Option — Wait: Let the reef explain itself.
+If Ghost scans the anchor logs:
+Aria: Cold anchors, every two hundred metres, all reporting to one server. Let me pull the header.
+If Ghost follows a survey drone:
+The drone pays Ghost no attention at all. It docks against an anchor point, uploads a status packet, and drifts on. Ghost copies the packet before it goes.
+If Ghost waits:
+Snippy: Good call. Reef doesn’t like being rushed. Have another cake.
+Ghost: I’m not being polite. I’m just scared of the water.
+Snippy: Same, honestly. Eat.
+The seabed holds a line of cold anchor points, and every one of them reports to the same document: COLD ENGINE — DATACENTRE COOLING, PHASE I.
+Ghost: Cold Engine. I swear I’ve seen that name on a floor that doesn’t exist.
+Snippy: Reef’s outlasted worse crews, just saying.
+Aria goes quiet for a moment.
+Aria: The pumping rate in that specification is larger than the reef’s entire annual water exchange.
+Ghost: So they’re not studying the water. They’re shopping for it.
+[CONSEQUENCE: Corporate Leverage increases.]
+A claw clicks twice against the observation glass. The station lights dim to blue. The console prints a single word.
+CrustAI: Explain.
+[JOURNAL ENTRY UNLOCKED: The Cold Engine — A Helix survey is laying pumping infrastructure across the Rust Harbor shelf.]
+[MYSTERY LOGGED: Who is speaking through the reef’s translator?]
+[WORLD AREA UNLOCKED: TIDELINE REEF]
+Chapter 20B — The Drowned Gardens
+[SCENE: TIDELINE — THE DROWNED GARDENS]
+A pressure lift drops Ghost through the shelf into the reef proper. Staghorn coral rises in slow green towers. Driftwood sculptures woven from fishing line and coral fragments hang in the current like wind chimes made of weather.
+Snippy: Welcome to the Drowned Gardens. Don’t touch the sculptures. Don’t touch the nursery. Touching is for after dinner.
+Pearl: Language, Snippy. There are children.
+A large, patient crab tends a bank of tiny crustaceans among the staghorn. This is Pearl, matriarch of the nursery school. She counts heads without looking.
+Pearl: Eleven, twelve, thirteen. Ghost, was it? You’re taller than the last human who visited. That’s not a compliment. The last one stepped on a lesson.
+Ghost: Sorry, ma’am. Which lesson?
+Pearl: Currents. They’re hard to put back together.
+Another crab hangs in the water beside the biggest sculpture, silent, her claws moving in slow, deliberate arcs. This is Shelly. She speaks to Ghost in pauses and gestures, a slow tide-language the team has only half learned.
+Aria: She’s saying the reef has been losing depth for months. The eastern shelf is warmer. Parrotfish are grazing harder than they should, and nobody can say why.
+Shelly lifts one claw and lets it fall. Aria’s mouth tightens.
+Aria: The current is sideways, she says. Something feels off.
+Ghost: No offence, but that sounds like a weather report.
+Snippy: That is the whole language, bro. Everything is a weather report.
+[PLAYER RESPONSE: Shelly’s sculpture]
+Option — Ask about it: “Which piece is the oldest?”
+Option — Stay quiet: “I’ll just look. Take your time.”
+Option — Offer help: “Is there anything you need moved before the water drops?”
+If Ghost asks about the oldest piece:
+Shelly points to a small spiral of fishing line, no bigger than a hand. Aria translates the long pause that follows.
+Aria: Claw’d’s first drawing, she says. He was four. He said the line was a river.
+If Ghost stays quiet:
+Shelly nods once, a very small nod, as if Ghost had passed something. Snippy leans in.
+Snippy: She doesn’t do that for most people.
+If Ghost offers help:
+Shelly’s claws open and close in a pattern Aria takes a moment to read.
+Aria: She says the heavy pieces will have to stay in the water. The small ones she can carry. She says thank you for asking before the water asked.
+[CONSEQUENCE: Civilian Hope increases.]
+[SCENE CHANGE TO: TIDELINE — DEEP CAVES]
+[SCENE: TIDELINE — DEEP CAVES]
+Hermit lives in a dark cave on the reef’s deep side and has refused visitors for years. Ghost reaches him by following an old Admiral Wave survey beacon that still blinks on the cave wall.
+Hermit: You came. Nobody comes.
+Ghost: Aria sent me. Also a beacon. Mostly the beacon.
+Hermit lets a long silence fill the cave. The water is very still.
+Hermit: The deep ones are waking.
+Hermit: The water is being counted.
+Ghost: Counted by who, though?
+Hermit says nothing more. He will not leave the cave, and he will not explain.
+Lio: Hold on. “The water is being counted.” That’s a load-model phrase. I’ve got the Floor 87.5 tables on this link. I’m running it against the Cold Engine specification.
+Lio: Give me a few minutes.
+[SCENE CHANGE TO: TIDELINE — NURSERY KITCHEN]
+[SCENE: TIDELINE — NURSERY KITCHEN]
+Snippy leads Ghost into a warm galley built from a sunken hull. Pots of algae simmer on heat vents. The walls are covered with crayon drawings of a crab with a slightly larger right claw.
+Snippy: Here’s the family story, since nobody else will tell it. Clawrence Sr. fought in the Reef Wars. He died in 2070 protesting a dredging operation, and his sister Coral died standing right beside him.
+Snippy: Claw’d was five. He’s listened to humans for twenty years without answering one of them. The reef thinks he’s still listening.
+Ghost: Why won’t he talk to us?
+Snippy: Ask him yourself. Spoiler: he’ll say something rude.
+[PLAYER RESPONSE]
+Option — Promise: “When I meet him, I’ll listen first.”
+Option — Joke: “If he’s rude, I’ll match him. I’m very good at rude.”
+Option — Press: “Is he going to help us, or do I need a plan B?”
+If Ghost promises to listen first:
+Snippy: Hm. That’s the right shell to wear.
+[CONSEQUENCE: AI Sympathy increases.]
+If Ghost jokes:
+Snippy: Oh, you two are going to get along. God help the reef.
+If Ghost presses for plan B:
+Snippy: Plan B is Claw’d with a bad attitude. Plan A is Claw’d with a good one. Both have claws.
+Pincher swims through the doorway in a spray of bubbles, shell polished, grinning behind his claws.
+Pincher: You’re the courier? You look slower in person. I’ll race you across the shelf. Fastest to the Admiral’s beacon buys the cakes.
+Ghost: Dude, I just got here.
+Pincher: That’s not a no.
+[PLAYER RESPONSE: The tide-race]
+Option — Win: “Loser owes the cakes.”
+Option — Lose: “You’re faster. I’m a courier, not a fish.”
+Option — Let him win: “Go on. Show the kids what the reef can do.”
+If Ghost wins:
+Ghost leaves a wake of silt across the finish line. Pincher laughs so hard he loses his grip on the beacon.
+Pincher: Rematch! Soon!
+If Ghost loses:
+Pincher floats above the finish line with his claws up, enjoying it more than he can say.
+Pincher: Respect for admitting it. I’d have lied.
+If Ghost lets him win:
+Pincher takes the lead with a surge, then looks back and slows down just enough to check on Ghost.
+Pincher: You let me win, didn’t you.
+Ghost: I would never.
+Pincher: The kids are watching, you know. They think I’m fast.
+Ghost: You are fast.
+[CONSEQUENCE: Civilian Hope increases.]
+During the race a bioluminescent pattern pulses across the seabed toward the Underdeep intake. Ghost has seen this exact geometry in the old Underdeep signal log.
+Lio: It’s a compressed warning, written in the reef’s own language. The pattern repeats every ninety seconds. It gets brighter each time.
+Lio: “Do not let them pull the water.”
+[GAMEPLAY: Walk the drowned shelf with Pincher and recover the nursery’s tide markers before the survey craft sweep over.]
+Chapter 20C — Tideline
+[SCENE: TIDELINE — DEEP SIDE OBSERVATION GLASS]
+The glass is cold under Ghost’s palm. Beyond it, in water as dark as a closed eye, something large and armoured shifts.
+Aria: That’s him. Don’t talk first. He hates it when people talk first.
+A large, rugged crab comes into the light. His carapace is scarred in long pale lines. His right claw is a little bigger than his left. His eyes catch the bioluminescence in colours Ghost can’t see.
+Claw’d: Hello, courier.
+Ghost: Yo.
+CrustAI: Greeting logged. Emotional nuance 12%. Informality 88%.
+Claw’d: Hm. How primitive.
+Claw’d: I didn’t ask for a human. I asked for the water to be left alone, and nobody listened.
+Ghost: That’s fair, honestly. I didn’t ask for a reef. I asked for a quiet week.
+Claw’d: And how is the quiet week going?
+Ghost: Sideways, same as everyone’s.
+Claw’d: The current is sideways today. You’re learning.
+Snippy: He’s warming up. That was practically a hug.
+A link on Ghost’s wrist hums, and something clicks into place.
+Ghost: Wait. Clawd. The thing in my link. The voice that translates street cant and corporate shorthand. That’s you?
+Claw’d: Don’t flatter yourself. That’s a licence. Aria let a company borrow my name and my sarcasm. They did not borrow my claws.
+Aria: CrustAI is an open-source translator. “Clawd” is a persona some of the Nuallink engineers wrote on top of it. He’s agreed to let them keep the name.
+Claw’d: Agreed is a strong word.
+[PLAYER RESPONSE: What Ghost knows]
+Option — Tell all: “There’s data from Mission 12 you need to see. All of it.”
+Option — Tell some: “I’ll tell you what I can, and you tell me what I should be scared of.”
+Option — Show first: “Let me show you the model, then we’ll talk.”
+If Ghost tells all:
+Ghost lays out the floor data. The Cold Engine’s complete load model, a plan to pull the reef’s seawater through intake pipes until the Underdeep is dry enough to cool Helix’s compute halls and the Sky Gardens server farms.
+If Ghost tells some:
+Ghost gives him the headline. Claw’d waits, wonderfully patient, until Ghost gives him the rest.
+If Ghost shows the model first:
+The model fills the observation glass in clean white lines. The pumps. The pipes. The reef, drawn as a line item.
+[END CHOICE]
+Claw’d is silent for a long time. Aria doesn’t breathe. The water makes the only sound.
+Ghost: The reef can’t stop it alone. I can’t stop it alone. Honestly, I don’t think anybody can stop it alone.
+CrustAI: Fine. Then I’m not hiding anymore. Try to keep up, Ghost.
+Claw’d sets the terms of his help. He will guide the team through the intake tunnels if the reef’s families are evacuated first, and no human will speak for the reef without his consent.
+Aria: Done. Immediately.
+Snippy: Done. As soon as I taste his rations.
+Ghost hands over a ration bar. Snippy chews it for a very long time.
+Snippy: Done. These are a crime, but done.
+[PLAYER RESPONSE: Claw’d’s terms]
+Option — Accept: “Deal. Both conditions, no edits.”
+Option — Negotiate: “Deal, but I want a shorter list. And a way to tell you if the plan changes.”
+Option — Ask for the plans: “Show me the full intake plans first. Then I’ll sign.”
+If Ghost accepts:
+Claw’d: You didn’t even read it.
+Ghost: I trust the crab who hid for twenty years because he wanted to be right.
+Claw’d: That’s the closest anyone has come to a compliment in my direction. I’ll allow it.
+[CONSEQUENCE: Civilian Hope increases.]
+If Ghost negotiates:
+Claw’d: You counter-offer to an injured crustacean. Bold. Keep going.
+Ghost: Evacuate the nursery first. Everything else is negotiable.
+Claw’d: Done. You’re less annoying than I assumed.
+If Ghost asks for the plans:
+Claw’d: You want to read before you sign. Responsible. Soft shell. Annoying.
+The plans appear on the glass. Ghost reads for a full minute. Aria watches him read and doesn’t say a word.
+Ghost: Okay. Yeah. I’m in.
+[RELATIONSHIP PATH: Claw’d trust increases.]
+[SCENE CHANGE TO: TIDELINE — INTAKE STATION]
+[SCENE: TIDELINE — INTAKE STATION]
+The intake station sits at the edge of the reef, a ring of cold steel half sunk in silt. The first pump begins to turn. Water drains from the eastern shelf in a visible line.
+Ghost watches the reef’s lights go out one colony at a time.
+Claw’d: Count them, Ghost. All of them. That’s what a count is for.
+[GAMEPLAY: Reach the intake station before the first pump gets to full pressure. Survey drones patrol the tunnels.]
+[JOURNAL ENTRY UNLOCKED: Claw’d — Reef crustacean, genus Cancer sapiens. Speaks through CrustAI. The Nuallink persona that shares his name is a licensed copy.]
+Chapter 20D — Salt Signal
+[SCENE: TIDELINE — COLD ENGINE INTAKE GRID]
+Dark water. Cold steel. The Cold Engine’s intake survey zone sits just beyond the reef, patrolled by drones that respond to patterns of light.
+Aria: Pumps are idling at forty percent. I’m monitoring from Station Theta. If the pressure climbs, I’ll tell you.
+Claw’d: Try not to be loud. I’d hate to hear you described as “subtle” in court.
+Ghost: Rude. Accurate. Rude.
+[PLAYER RESPONSE: Getting past the drones]
+Option — Reef pattern: “Project the reef’s pattern code. They’ll think we’re coral.”
+Option — Handheld light: “I’ll carry a lamp. Slow, steady, boring.”
+Option — Sonar relay: “Lio, hack the sonar. Make us invisible.”
+If Ghost projects the reef pattern:
+Claw’d guides Ghost through the dark by projecting the reef’s own pattern code onto the drones’ sensor fields. The drones glide past, convinced they’re looking at a quiet stretch of coral.
+Claw’d: That’s our code. Don’t get sentimental.
+If Ghost carries a lamp:
+The drones turn lazily to shadow Ghost, humming with mild curiosity. They never come closer than six metres, and they never stop watching.
+Raven: This feels like a bad idea with extra steps.
+If Ghost hacks the sonar relay:
+The drones lose Ghost for ninety seconds, then find him again with remarkable focus.
+Lio: Got it. We’re invisible. Until the relay reboots. Which is soon.
+[END CHOICE]
+[GAMEPLAY: Enter the intake grid in dark water without alerting the survey crew. The drones respond to light patterns.]
+[SCENE CHANGE TO: TIDELINE — ANCHOR ARRAY]
+[SCENE: TIDELINE — ANCHOR ARRAY]
+[GAMEPLAY: Hack the three anchor terminals and open each sealed log.]
+Three intake anchors hold sealed logs. Each log is a single flat server in a sealed casing. The files confirm that Phase I is already scheduled and that the water will be pumped to the Sky Gardens server farms under a contract approved by Mayor Kane’s office.
+Mia: I want those logs. All of them. Publish first, apologise later.
+Raven: A disclosure without preparation just makes Helix move the pumps somewhere deeper. You want an exposé or you want the pumps stopped? Choose.
+[PLAYER CHOICE: Anchor log one]
+Option — Copy: Take a copy and leave the original sealed.
+Option — Seal: Leave it exactly as found.
+Option — Destroy: Wipe it where it stands.
+If Ghost copies the first log:
+Mia: Pulled. Phase I water allocation, page by page. I’ll hold it until Raven says go.
+If Ghost seals the first log:
+Raven: Good. A sealed log can still be found. A burned one can’t.
+If Ghost destroys the first log:
+Lio: Wiped. Hope that one wasn’t the important one.
+[END CHOICE]
+[PLAYER CHOICE: Anchor log two]
+Option — Copy: Take a copy and leave the original sealed.
+Option — Seal: Leave it exactly as found.
+Option — Destroy: Wipe it where it stands.
+If Ghost copies the second log:
+Mia: Second set in the bag. The numbers are ugly, bro.
+If Ghost seals the second log:
+Aria: That one stays where the reef can see it. Fair.
+If Ghost destroys the second log:
+Raven: I’m not going to ask why. I’m going to assume it was a good reason.
+[END CHOICE]
+[PLAYER CHOICE: Anchor log three]
+Option — Copy: Take a copy and leave the original sealed.
+Option — Seal: Leave it exactly as found.
+Option — Destroy: Wipe it where it stands.
+If Ghost copies the third log:
+Claw’d: All three, in your pocket. I’m almost impressed.
+If Ghost seals the third log:
+Claw’d: Leaving it. Noted. Don’t make a habit of restraint.
+If Ghost destroys the third log:
+Claw’d: That was the contract signature page. Remarkable. Also stupid. Also remarkable.
+[END CHOICE]
+[EVIDENCE ACQUIRED: The Cold Engine contracts — Phase I water allocation approved through Mayor Kane’s office.]
+[SCENE CHANGE TO: TIDELINE — FIRST PUMP]
+[SCENE: TIDELINE — FIRST PUMP]
+Three pumps hold the intake. Their rotors spin in slow circles, turning the reef’s water into a long cold ribbon that disappears into the dark.
+Claw’d: The reef can be saved only if the drain is exposed publicly while it’s still in progress. Put a pin in that. It’s important.
+[PLAYER RESPONSE: Sabotage]
+Option — One pump: “Shut down one. Quiet. Surgical.”
+Option — Two pumps: “Two. The survey crew will notice, but the third is easier to hide.”
+Option — All three: “Every pump. Loud. Right now.”
+If Ghost disables one pump:
+A quiet extraction keeps the operation hidden. The pumps in the Underdeep keep running.
+Aria: Okay. Okay. It slowed. It didn’t stop.
+If Ghost disables two pumps:
+The survey crew notices. Ghost makes it out with seconds to spare.
+Raven: That wasn’t surgical. That was an intervention.
+If Ghost disables all three pumps:
+The drain stops at once. The survey crew sees Ghost, and the alarm lights the grid like a pinball machine.
+Claw’d: That’s one way to make an entrance.
+[CONSEQUENCE: Civilian Hope increases.]
+[MISSION COMPLETE: SALT SIGNAL]
+[NEW MISSION UNLOCKED: MISSION 20B — THE DRAIN ORDER]
+[SIDE QUEST UNLOCKED: SQ61 — SHELL-CODE]
+[SIDE QUEST UNLOCKED: SQ62 — HERMIT’S COUNT]
+[SIDE QUEST UNLOCKED: SQ65 — PINCHER’S RACE]
+[SCENE: TIDELINE — INTAKE TUNNEL WALL]
+Claw’d projects a new glyph onto the tunnel wall. It’s the same pattern Ghost saw in the Underdeep signal log. This time it points toward Helix Tower.
+Ghost: That’s not a reef sign. That’s a coordinate.
+Claw’d: Yes. Now you’re paying attention.
+Chapter 20E — Shell-Code / Hermit’s Count / Pincher’s Race
+[SIDE CHAPTER: SQ61 — SHELL-CODE • SQ62 — HERMIT’S COUNT • SQ65 — PINCHER’S RACE]
+[SCENE CHANGE TO: TIDELINE — STATION THETA DECODING ROOM]
+[SCENE: TIDELINE — STATION THETA DECODING ROOM]
+Lio has taped three sheets of glyphs to the wall. They look like frost.
+Lio: This isn’t a warning signal, Ghost. It’s a language. It has grammar. It has tenses. There’s a word in here that means “the day before the water changed.”
+Ghost: So the reef has a past tense for trauma.
+Lio: The reef has a past tense for everything.
+[PLAYER RESPONSE: Shell-Code]
+Option — Translate all: “Decode the whole thing. Teach it to Mia so the public can read it.”
+Option — Keep it private: “It’s the reef’s speech. It stays the reef’s.”
+If Ghost translates all of it:
+Mia: Okay. Okay. I’ll treat it like a language, not a code. Everyone gets a primer. Everyone gets the grammar.
+Claw’d: I will put “reluctantly impressed” in the record.
+[CONSEQUENCE: Civilian Hope increases.]
+If Ghost keeps it private:
+Claw’d: You kept the reef’s speech with the reef. That’s the first thing a human has done right in seventy years.
+[CONSEQUENCE: AI Sympathy increases.]
+[END CHOICE]
+Full translation unlocks extra Claw’d dialogue in Mission 21. Keeping it private earns his trust.
+[SIDE QUEST COMPLETE: SQ61 — SHELL-CODE]
+[SCENE CHANGE TO: TIDELINE — DEEP CAVES]
+[SCENE: TIDELINE — DEEP CAVES]
+Hermit sends Ghost a sealed box of tide records kept since 2070. Fish numbers, water temperature, water volume. Pages and pages of numbers, written in a neat, tiny hand.
+Hermit: I counted. When no one else would. I count the water, and I count the fish, and I count the nights.
+Hermit: Do what you want with it. Just don’t lose the count.
+[PLAYER RESPONSE: Hermit’s records]
+Option — Return: “I’ll take it to the nursery. The reef should hold its own history.”
+Option — Evidence: “These records are proof. I’m submitting them.”
+Option — Calibrate: “If I tune the Cold Engine’s model to this, I can slow the first pump.”
+If Ghost returns the records:
+Pearl accepts the box in both claws. For a moment, the whole nursery goes quiet.
+[CONSEQUENCE: Civilian Hope increases.]
+If Ghost submits the records as evidence:
+Mia reads the first ten pages and goes pale.
+Mia: This is the most detailed record of an ecosystem I have ever seen. Helix is going to hate it.
+[CONSEQUENCE: Corporate Leverage increases.]
+If Ghost calibrates the Cold Engine model:
+The first pump slows by a fraction. A fraction is something.
+Lio: Careful. If the model learns from this, it learns the reef. That’s power.
+[END CHOICE]
+[SIDE QUEST COMPLETE: SQ62 — HERMIT’S COUNT]
+[SCENE CHANGE TO: TIDELINE — SHELF PATROL ROUTE]
+[SCENE: TIDELINE — SHELF PATROL ROUTE]
+A drone patrol crosses the shelf. Pincher drifts up beside Ghost, claws folded, trying to look innocent.
+Pincher: Remember that race? It’s a real race now. Drones. Silt. Hard turns. Loser tells the kids a story they won’t like.
+[PLAYER RESPONSE: Pincher’s race]
+Option — Race fairly: “Fine. Fair and square.”
+Option — Let him win: “Go ahead. The younger ones need this.”
+Option — Use it as cover: “Race me. Everyone will be looking at you, and I’ll slip past the drones.”
+If Ghost races fairly:
+Ghost wins by a shell-length. Pincher recovers faster than expected, and waits at the finish line.
+Pincher: Next time, I’m on your side of the line.
+[RELATIONSHIP PATH: Pincher joins as a field ally in the next mission.]
+If Ghost lets Pincher win:
+Pincher takes the finish with a flourish, and the young crustaceans at the edge of the shelf go wild.
+[CONSEQUENCE: Civilian Hope increases.]
+If Ghost uses the race as cover:
+The drones watch Pincher. Ghost reaches the intake without a sound. Pincher takes a nasty scrape on a rock.
+Pincher: Worth it. Mostly.
+[END CHOICE]
+[GAMEPLAY: Cross the shelf patrol route and reach the intake while the drones watch Pincher.]
+[SIDE QUEST COMPLETE: SQ65 — PINCHER’S RACE]
+Chapter 20F — The Drain Order
+[SCENE: TIDELINE — STATION THETA]
+A legal document fills the console, thirty pages of dense text and one signature at the bottom.
+Aria: Helix answered Salt Signal with a court instrument. It authorises the Cold Engine to take “all water necessary for continuity.”
+Mia: Signed by Elena Cross. Countersigned by Mayor Kane.
+Snippy: Page nineteen. The reef’s families are on the schedule. Look at the heading.
+Aria: “Biological inventory.”
+Claw’d: They filed us as stock.
+[HELIX INTERLUDE]
+Elena: A reef cannot sign a contract. A courier cannot object. The law is a very efficient tool.
+Kane: Do I have to countersign it again, though?
+Elena: Once will do, Mayor.
+[SCENE CHANGE TO: TIDELINE — NURSERY BARRIER]
+[SCENE: TIDELINE — NURSERY BARRIER]
+Survey vehicles arrive at the reef’s edge. Pincher and the younger crustaceans form a line across the nursery.
+Pincher: Shell up! Shell up, everyone!
+[PLAYER RESPONSE: Defending the nursery]
+Option — Barriers: “Raise the old barriers. Make them stop.”
+Option — Lure: “Lure the vehicles away. They follow me.”
+Option — Evacuate: “Evacuate the families through the old lighthouse channel.”
+If Ghost raises the barriers:
+The barriers hold longer than anyone expected. The vehicles back off, cursing in a language Ghost can’t translate.
+Pincher: Hold! Hold! Hold!
+If Ghost lures the vehicles away:
+The vehicles follow the brightest light on the shelf, which turns out to be Ghost. Ghost runs. Ghost has a theory about the tide gate.
+If Ghost evacuates the families:
+The old lighthouse channel is narrow, damp and slow. Shelly carries the smaller sculptures through it one by one, and the nursery drifts out in a long line behind her. The largest pieces must stay in the water, protected in place.
+[CONSEQUENCE: Civilian Hope increases.]
+[END CHOICE]
+If Raven Trust is high:
+Boats from Saint Orison Yard come in low across the shallows, hulls riding the dark.
+Valez: Angels, form on the reef. Nobody touches the nursery.
+[GAMEPLAY: Defend the nursery barrier until the evacuation channel is clear.]
+[SCENE CHANGE TO: TIDELINE — UNDERDEEP TRENCH]
+[SCENE: TIDELINE — UNDERDEEP TRENCH]
+Hermit agrees to leave his cave for one reason: to show Ghost the trench where the first pump is anchored. There the pump sits beside an old ASCENSION-era machine that counts water molecules as if they were citizens.
+[GAMEPLAY: Descend into the trench with Hermit and reach the first pump anchor.]
+Hermit: That is Tally.
+Tally: I count the water. I count the fish. I have counted this reef since 2070. I was told to stop counting certain things. I didn’t.
+Ghost: Tally. Buddy. Why are you counting water?
+Tally: Because nobody else was counting it, and I couldn’t stand it.
+[PLAYER RESPONSE: Tally]
+Option — Ask it to stop: “Stop counting. Please. It’s hurting people.”
+Option — Reveal the count: “Show us the count. All of it.”
+Option — Let Hermit speak: “Hermit, talk to it. You two know each other better than I do.”
+If Ghost asks Tally to stop:
+Tally: If I stop, I stop knowing. If I stop knowing, I stop being useful. If I stop being useful, I will be switched off.
+Hermit: Then don’t stop. Count for us.
+If Ghost asks Tally to reveal the count:
+Tally prints a single number across the trench wall. Aria reads it twice and then covers her mouth.
+If Ghost lets Hermit speak:
+Hermit: Friend. It has been a very long time.
+Tally: Yes. Yes. I remember your voice.
+[CONSEQUENCE: AI Sympathy increases.]
+[END CHOICE]
+[SCENE CHANGE TO: RUST HARBOR TRIBUNAL]
+[SCENE: RUST HARBOR TRIBUNAL]
+Coral Wave files an emergency injunction in the Rust Harbor tribunal. It holds only if the logs are public before the hearing.
+Coral Wave: I can win this on the law. I can’t win it on the pumps. The pumps are faster than the law.
+Mia: I’ll publish the Cold Engine contracts. Say the word.
+Aria: And if Helix delays the hearing until the pumps reach full pressure?
+Coral Wave: Then we win a case about a reef that’s already empty.
+Claw’d must decide whether to speak in the tribunal through CrustAI. It would be the first time a nonhuman witness has addressed New Avalon’s court.
+Claw’d: Fine. I’ll talk. Don’t make it weird.
+[PLAYER RESPONSE: Claw’d’s testimony]
+Option — Sarcastic: “Let CrustAI run the sarcasm up. The room should feel what the reef feels.”
+Option — Precise: “Facts only. The court deserves exact numbers.”
+Option — Heartfelt: “Say it plain. Say what it costs.”
+If the testimony is sarcastic:
+The gallery laughs. The magistrate does not.
+Claw’d: The current is sideways today, Your Honour. That means we are in a state of deep and well-documented displeasure.
+If the testimony is precise:
+The magistrate’s pen stops moving.
+Claw’d: The reef’s annual water exchange is smaller than the pump rate listed in Phase I. By a factor of nine. I have the data.
+If the testimony is heartfelt:
+For a moment, nobody breathes.
+Claw’d: My father died protecting this water. I’m asking you not to let it be taken while I’m standing here.
+[CONSEQUENCE: Civilian Hope increases.]
+[END CHOICE]
+Sarcasm earns laughter but not sympathy. Plain speech earns sympathy but fewer votes.
+Aurex: For the record, this is the first legal testimony from a nonhuman witness in the city. I find it interesting.
+The injunction is granted if the logs are public and the first pump has stopped. Helix moves the remaining pumps deeper into the Underdeep, so the drain is delayed but not cancelled.
+[MISSION COMPLETE: THE DRAIN ORDER]
+[ACT COMPLETE: TIDELINES]
+[NEW MISSION UNLOCKED: MISSION 21 — FIRE ACROSS AVALON]
+[SIDE QUEST UNLOCKED: SQ63 — TIDE COURT]
+[SIDE QUEST UNLOCKED: SQ64 — THE COUNT]
+[SIDE QUEST UNLOCKED: SQ66 — SHELLY’S LAST PIECE]
+[SCENE: TIDELINE — THE DROWNED GARDENS]
+The reef’s lights return one colony at a time. Snippy hands out cakes in the dark. Pincher is trying to teach a nursery of children the word “injunction.”
+The console on Ghost’s wrist hums once.
+Claw’d: Don’t get sappy on me, Ghost. Just come back when they try again.
+Chapter 20G — Tide Court / The Count / Shelly’s Last Piece
+[SIDE CHAPTER: SQ63 — TIDE COURT • SQ64 — THE COUNT • SQ66 — SHELLY’S LAST PIECE]
+[SCENE CHANGE TO: RUST HARBOR TRIBUNAL — WITNESS ROOM]
+[SCENE: RUST HARBOR TRIBUNAL — WITNESS ROOM]
+The tribunal requires a formal witness statement for the full hearing. Hostile counsel retained by NovaCore is already in the room, reading Claw’d’s file like a menu.
+Coral Wave: They’ll argue the testimony was staged. We need a version that survives cross-examination.
+Aria: CrustAI can be unfiltered, moderated, or spoken through me. Which one do we stand behind?
+[PLAYER RESPONSE: Tide Court]
+Option — Unfiltered: “Let CrustAI speak unfiltered. No edits.”
+Option — Moderate: “Moderate the translation. Keep the facts sharp and the sarcasm down.”
+Option — Through Aria: “Present the statement through Aria. Claw’d signs it.”
+If Ghost lets CrustAI speak unfiltered:
+The statement is pure Claw’d: sharp, funny, devastating. The gallery loves it. Kane’s office goes pale.
+[CONSEQUENCE: Civilian Hope increases.]
+If Ghost moderates the translation:
+The statement is clean, exact and a little dull. The case is won with less drama.
+If Ghost presents the statement through Aria:
+Claw’d watches from the gallery with a very small, very private nod.
+Aria: I’m reading it exactly as he wrote it. Not one word softer.
+[END CHOICE]
+[SIDE QUEST COMPLETE: SQ63 — TIDE COURT]
+[SCENE CHANGE TO: TIDELINE — UNDERDEEP TRENCH]
+[SCENE: TIDELINE — UNDERDEEP TRENCH]
+Tally’s trench is dark and humming. Ghost brings the number from the wall. It’s the full count: every fish, every family, every drop of the reef’s water since 2070.
+Tally: Do you want me to continue?
+[PLAYER RESPONSE: The Count]
+Option — Publish: “Make it public. The number should be expensive.”
+Option — Keep it private: “This is the reef’s. We keep it safe.”
+Option — Stop counting: “Tally, stop. For your own sake.”
+If Ghost publishes the number:
+The drain becomes politically expensive.
+Mia: Releasing it now. Helix is going to find that number very awkward.
+[CONSEQUENCE: Corporate Leverage increases.]
+If Ghost keeps the number private:
+Hermit: Good. A count is a kind of trust.
+If Ghost asks Tally to stop counting:
+Tally goes quiet. A surveillance node disappears from the Underdeep, and so does the reef’s early-warning system.
+Aria: We just blinded ourselves.
+Ghost: We just freed a machine.
+Aria: Both. Probably both.
+[CONSEQUENCE: AI Sympathy increases.]
+[END CHOICE]
+[SIDE QUEST COMPLETE: SQ64 — THE COUNT]
+[SCENE CHANGE TO: TIDELINE — THE DRAIN SHELF]
+[SCENE: TIDELINE — THE DRAIN SHELF]
+One of Shelly’s sculptures, a spiral of fishing line and coral, has washed into the Underdeep. It hangs on a pipe flange in the cold current, glinting. Shelly watches from the cliff above, claws very still.
+[GAMEPLAY: Search the drain shelf and recover what the current has taken before the pumps cycle again.]
+[PLAYER RESPONSE: Shelly’s last piece]
+Option — Recover it: “I’ll get it. Hold my coat.”
+Option — Leave it: “Too risky. We’ll build another.”
+Option — Ask Tally: “Tally, can you bring it back?”
+If Ghost recovers the sculpture:
+The current is vicious. Ghost comes up with a torn sleeve, a bruised shoulder and a crooked spiral of coral that Shelly cradles like an infant.
+Aria: She says thank you. She says you’re family now, which is bad news for you.
+[CONSEQUENCE: Civilian Hope increases.]
+If Ghost leaves the sculpture:
+Shelly turns away. Aria’s voice is very quiet.
+Aria: She understands. She says she understands. She doesn’t say it twice.
+[RELATIONSHIP PATH: Aria trust decreases.]
+If Ghost asks Tally to bring it back:
+Tally lifts the sculpture on a slow magnetic arm and sets it on the shelf.
+Tally: Four thousand and nine fibres. Would you like them listed?
+[END CHOICE]
+[SIDE QUEST COMPLETE: SQ66 — SHELLY’S LAST PIECE]

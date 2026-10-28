@@ -1,6 +1,17 @@
 {
-  "build": 59,
+  "build": 60,
   "history": [
+    {
+      "build": 60,
+      "version": "1.60",
+      "date": "2026-10-28",
+      "notes": [
+        "The story has a new script: the dialogue is rewritten in the cast's own slang, and the Chinese translation follows it line by line",
+        "Act II-B, the Tidelines: seven new chapters (20A-20G) between Break the Chain and Fire Across Avalon. Rust Harbor's reef crustaceans (Snippy, Pearl, Shelly, Hermit, Pincher and Claw'd, who speaks through CrustAI) against Helix's Cold Engine water pumps: nine operations, six side quests (SQ61-66), three encrypted BUBBLE SIGNAL intercepts and a Tideline Reef entry in the Journal",
+        "Saves from before this build keep their place. If you are already past chapter 20, the Tidelines wait in Chapter Select",
+        "Kitchens, decoding rooms and tribunals in the story now play in indoor spaces"
+      ]
+    },
     {
       "build": 59,
       "version": "1.59",
@@ -222,14 +233,6 @@
         "Weapon overhaul: spring recoil, working slides, bolts and pumps, flying casings, muzzle smoke, a different report for every gun",
         "Animated reloads: magazine out, support hand brings the next one in, rack the slide; the shotgun loads shell by shell",
         "Gun sway, sprint pose, landing dip and a raise animation when you swap weapons; the ammo counter animates through a reload"
-      ]
-    },
-    {
-      "build": 35,
-      "version": "1.35",
-      "date": "2026-10-12",
-      "notes": [
-        "Training Zone: a melee round in the live-fire drills — close in with a heavy hammer against holding gunners and rushers (six rounds now)"
       ]
     }
   ]
