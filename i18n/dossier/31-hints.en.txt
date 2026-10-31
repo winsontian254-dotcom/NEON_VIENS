@@ -1,0 +1,17 @@
+# HINTS AND THE NEXT LINE
+
+## What they are
+
+Two small helpers for a player who is not sure what to do. The NEXT line is one sentence of advice drawn from your save: it sits under the title menu, at the top of both pause menus and, in the open city, in the objective panel under the next chapter. Tips are short pop-ups that appear once, the first time something in a level is worth knowing. Neither is ever required, and neither changes the game.
+
+## The NEXT line
+
+It shows the first of these that applies, and nothing at all when none does. On the title screen with no save: start a New Game, or learn the mechanics in the Training Zone first. On the title screen with a save, if you have not graduated from the Training Zone and have finished fewer than four chapters: the Training Zone teaches every mechanic and never touches your save. On the title screen, when your daily reward is ready: it is waiting in Rewards. Everywhere: when you hold at least one unspent perk point, spend it at a Black Market stall. In the open city: when you carry 120 credits or more and have never opened a Black Market, the stalls hide in the alleys (pink pointers on the minimap). In the open city, once you have finished three chapters and never done a job: cyan beams are job boards.
+
+## Tips
+
+Each tip shows once ever, on this device and on any device your account syncs to, not once per game. Two tips are never shown within 16 seconds of each other, so they cannot pile up. They stay silent in the tutorial and the Training Zone, which have their own guidance, and in calm story spaces, cars, hacks and cutscenes. The open city tip comes 22 seconds after you start roaming: the gold beam is the story, cyan beams are jobs, and the journal, Nuallink and menu keys. Low health appears the first time your health falls below 35 percent: use a medkit from the quick bar. Spotted appears the first time guards are hunting you in an operation: break line of sight, hide, and they search for a few seconds before going back to their patrol. Low ammo appears once you have fired more than ten shots and the weapon in your hands has no reserve and half a magazine or less: loot fallen enemies or visit a Black Market stall.
+
+## Switching them off
+
+Settings, Hints and next-step tips, turns the NEXT line and every tip off. Show every hint again forgets which tips you have seen, so each can appear once more.

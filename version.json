@@ -1,6 +1,16 @@
 {
-  "build": 60,
+  "build": 61,
   "history": [
+    {
+      "build": 61,
+      "version": "1.61",
+      "date": "2026-10-31",
+      "notes": [
+        "A NEXT line now tells you what to do: under the title menu, at the top of the pause menus and in the open city's objective panel (a perk point to spend, your daily reward, a first Black Market visit, the job boards, the Training Zone if you are new)",
+        "One-time tips for the first hours: the open city, low health, being spotted and running out of ammo. Settings, Hints and next-step tips, turns them off, and Show every hint again brings them back",
+        "The Dossier has a new section that says exactly when each hint appears"
+      ]
+    },
     {
       "build": 60,
       "version": "1.60",
@@ -223,16 +233,6 @@
       "notes": [
         "Melee weapons now have a cooldown: at least 0.6 s between swings, shown as a time and a filling bar on the weapon panel",
         "The Training Zone no longer shows a minimap"
-      ]
-    },
-    {
-      "build": 36,
-      "version": "1.36",
-      "date": "2026-10-12",
-      "notes": [
-        "Weapon overhaul: spring recoil, working slides, bolts and pumps, flying casings, muzzle smoke, a different report for every gun",
-        "Animated reloads: magazine out, support hand brings the next one in, rack the slide; the shotgun loads shell by shell",
-        "Gun sway, sprint pose, landing dip and a raise animation when you swap weapons; the ammo counter animates through a reload"
       ]
     }
   ]
