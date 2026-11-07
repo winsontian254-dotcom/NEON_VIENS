@@ -284,9 +284,11 @@ route('DELETE', '/api/saves/:slot', async (req, env, p) => {
 /* ---------------- leaderboards ---------------- */
 // Boards: d:YYYY-MM-DD (the daily challenge), w:YYYY-Www (the weekly one) and drift (the best single drift, all time). Scores are reported by the player's device, so they are
 // limited to what the game can produce and only the best one per player and board is kept. Reading needs an account, like everything else here.
-const BOARD_RE = /^(d:\d{4}-\d\d-\d\d|w:\d{4}-W\d\d|drift)$/;
-const SCORE_MAX = { d: 20000, w: 30000, drift: 600000 };
-const boardKind = b => (b.startsWith('d:') ? 'd' : b.startsWith('w:') ? 'w' : 'drift');
+// LIVE FIRE (the sister game, same accounts) adds lf:<mode>:YYYY-MM (UTC month) and lf:<mode>:all: the best match score per mode (capped at 100000),
+// and lf:xp:YYYY-MM / lf:xp:all: the XP earned that month / in total (capped at 50 million).
+const BOARD_RE = /^(d:\d{4}-\d\d-\d\d|w:\d{4}-W\d\d|drift|lf:[a-z0-9_]{2,16}:(\d{4}-(0[1-9]|1[0-2])|all))$/;
+const SCORE_MAX = { d: 20000, w: 30000, drift: 600000, lf: 100000, lfxp: 50000000 };
+const boardKind = b => (b.startsWith('d:') ? 'd' : b.startsWith('w:') ? 'w' : b.startsWith('lf:xp:') ? 'lfxp' : b.startsWith('lf:') ? 'lf' : 'drift');
 const parseDetail = t => { try { const d = JSON.parse(t); return d && typeof d === 'object' ? d : {}; } catch (e) { return {}; } };
 async function rankOf(env, board, score) {
   const above = await env.DB.prepare('SELECT COUNT(*) AS n FROM scores WHERE board = ? AND score > ?').bind(board, score).first();
