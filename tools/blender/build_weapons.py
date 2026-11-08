@@ -731,7 +731,7 @@ def fist(name, a, b, hold=False):
     m.limb('acc', (a + 0.027, 0.0, -b - 0.057), (a + 0.0285, 0.0, -b - 0.0605), 0.0322, 0.0322, ends=False)
     m.bevel['glove'] = 0
     m.bevel['body'] = 0
-    m.fuse['glove'] = (0.0024, 0.2)
+    m.fuse['glove'] = (0.0042, 0.07)       # coarse on purpose (Build 62, low-poly): a few hundred facets, not 6000
     m.build()
     return m
 

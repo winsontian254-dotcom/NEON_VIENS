@@ -1,0 +1,13 @@
+# ART STYLE
+
+## Low-poly, on purpose
+
+New Avalon is drawn in a low-poly style. People, hands, cars and props are built from a few hundred flat facets, and every facet is lit by itself, so a curved shape reads as a clean set of planes with crisp edges instead of a soft, blurry surface. A person is about three thousand triangles in all, roughly twenty times fewer than the old realistic figures. Skin, trousers, boots and hair are single flat colours; the jacket keeps its painted zip, pockets and hem, because that is graphic design and not texture noise.
+
+## The setting
+
+Settings, Art style, has two choices. Low-poly is the default. Smooth shading draws the same shapes with soft, interpolated lighting, the way the game looked before. The switch is live: the lighting changes at once, while the flat skin and hair colours are picked when a level starts. It does not touch graphics presets, performance or your save.
+
+## What changed for the people
+
+Everyone in the city, soldiers, civilians, pedestrians and the figure in the character creator, now comes from one low-poly kit. Faces stay blank on purpose. Hair is a solid shape in the hair colour you chose. Heads, bodies and hair are drawn whole at every distance, and a person simply disappears far away, as before.

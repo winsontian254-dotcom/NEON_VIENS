@@ -1406,7 +1406,7 @@ def build_all(only=None):
     except NameError:
         pass
     bake_ao(parts)
-    export(parts, os.path.join(OUT, 'human_kit.glb'))
+    export(parts, os.path.join(OUT, 'human_kit_hires.glb'))      # the shipped kit is the low-poly one: run lowpoly_kit.py afterwards
 
 
 if __name__ == '__main__':

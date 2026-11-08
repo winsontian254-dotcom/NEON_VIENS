@@ -1,6 +1,17 @@
 {
-  "build": 61,
+  "build": 62,
   "history": [
+    {
+      "build": 62,
+      "version": "1.62",
+      "date": "2026-11-08",
+      "notes": [
+        "A deliberate low-poly look for the whole game: every surface is lit face by face, so curved shapes read as crisp facets. Settings, Art style, switches back to smooth shading",
+        "People are rebuilt as faceted low-poly figures with flat skin, hair and clothing colours (about 3,000 triangles instead of 50,000), and your gloved hands in first person are low-poly too",
+        "Fixed: the heads and bodies of civilians, pedestrians and story characters could vanish a few metres away",
+        "The Dossier has an Art style section"
+      ]
+    },
     {
       "build": 61,
       "version": "1.61",
@@ -224,15 +235,6 @@
         "Drift scoring pays credits and a mini-turbo (combo up to x5)",
         "Coupe, sedan and van bodies with turning wheels, brake lights, five gears, tyre smoke and skid marks",
         "Cars take damage: smoke and sparks, and a full-speed wall still blows them up"
-      ]
-    },
-    {
-      "build": 37,
-      "version": "1.37",
-      "date": "2026-10-13",
-      "notes": [
-        "Melee weapons now have a cooldown: at least 0.6 s between swings, shown as a time and a filling bar on the weapon panel",
-        "The Training Zone no longer shows a minimap"
       ]
     }
   ]

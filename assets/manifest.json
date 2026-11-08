@@ -93,8 +93,15 @@
   "human_kit": {
     "file": "src/human_kit.glb",
     "license": "Original (Neon Veins)",
-    "source": "Built by tools/blender/build_humans.py: torso, legs, arms, boots, hair and hoods are original; the head, hands and eyes are built from the CC0 MakeHuman base mesh and high-poly eyes in assets/src/makehuman by tools/blender/mh_import.py",
+    "source": "The low-poly version (Build 62) of the human kit: tools/blender/lowpoly_kit.py collapses every part of assets/src/human_kit_hires.glb to a few hundred triangles. The hires kit was built by tools/blender/build_humans.py: torso, legs, arms, boots, hair and hoods are original; the head and hands are built from the CC0 MakeHuman base mesh in assets/src/makehuman by tools/blender/mh_import.py",
     "keep_attributes": true
+  },
+  "human_kit_hires": {
+    "file": "src/human_kit_hires.glb",
+    "license": "Original (Neon Veins)",
+    "source": "Full-detail human kit written by tools/blender/build_humans.py (input of tools/blender/lowpoly_kit.py; not shipped)",
+    "keep_attributes": true,
+    "embed": false
   },
   "eye_brown": {
     "file": "src/makehuman/eye_brown.jpg",
