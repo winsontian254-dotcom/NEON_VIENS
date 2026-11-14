@@ -3249,7 +3249,7 @@ NV.Account = (() => {
 
 /* Condition evaluation for conditional blocks compiled from the script */
 NV.Update = (() => {
-  const NV_BUILD = 62;
+  const NV_BUILD = 63;
   NV.BUILD = NV_BUILD;
   const URL = 'https://winsontian254-dotcom.github.io/NEON_VIENS/version.json', KEY = 'nv_seen_build';
   let info = null, shown = 0, alerted = false;
@@ -6134,7 +6134,7 @@ NV.Level = (() => {
     const statics = [];
     const { W, H, g } = L.map;
     // floor
-    const floor = BABYLON.MeshBuilder.CreateGround('floor', { width: W * TILE, height: H * TILE }, scene); floor.position.set(W * TILE / 2, 0, H * TILE / 2); statics.push(floor);
+    const floor = BABYLON.MeshBuilder.CreateGround('floor', { width: W * TILE, height: H * TILE }, scene); floor.position.set(W * TILE / 2, 0, H * TILE / 2); statics.push(floor); glow.addExcludedMesh(floor);
     if (cyber && BABYLON.GridMaterial) { const gm = new BABYLON.GridMaterial('fg', scene); gm.gridRatio = TILE / 2; gm.majorUnitFrequency = 2; gm.mainColor = new BABYLON.Color3(.01, 0, .03); gm.lineColor = C3(pal.a); floor.material = gm; }
     else {
       const fm = mat(scene, 'fm', '#ffffff'); fm.diffuseTexture = NV.tex(scene, 256, 256, (c, w, h) => { c.fillStyle = th === 'water' ? '#15242a' : '#221e2e'; c.fillRect(0, 0, w, h); c.strokeStyle = 'rgba(255,255,255,.12)'; c.lineWidth = 3; c.strokeRect(0, 0, w, h); c.strokeStyle = 'rgba(255,255,255,.035)'; c.beginPath(); c.moveTo(w / 2, 0); c.lineTo(w / 2, h); c.moveTo(0, h / 2); c.lineTo(w, h / 2); c.stroke(); const rr = U.rng(4); for (let i = 0; i < 300; i++) { c.fillStyle = `rgba(0,0,0,${rr() * .25})`; c.fillRect(rr() * w, rr() * h, 3 + rr() * 12, 2); } c.fillStyle = 'rgba(255,200,80,.08)'; c.fillRect(0, h - 10, w, 4); }, 'floortex');
@@ -6202,6 +6202,7 @@ NV.Level = (() => {
     wm.specularColor = new BABYLON.Color3(.25, .25, .3);
     wm.emissiveColor = C3(pal.a).scale(cyber ? .12 : L.map.authored ? .09 : .035); if (cyber) wm.alpha = .92;
     walls.material = wm;
+    if (!outdoor && !cyber) glow.addExcludedMesh(walls);   // big surfaces never feed the bloom (it turned the whole ceiling into a flat colour wash); the trims, panels and signs still glow
     if (trims.length) { const tm = BABYLON.Mesh.MergeMeshes(trims, true, true); tm.material = trimMat; statics.push(tm); }
     const r = U.rng(L.seed + 5);
     // holo signs on walls (shared atlas, one draw call)
@@ -6220,7 +6221,7 @@ NV.Level = (() => {
     if (!outdoor && !cyber) {
       const ceil = BABYLON.MeshBuilder.CreatePlane('ceil', { width: W * TILE, height: H * TILE, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene);
       ceil.rotation.x = Math.PI / 2; ceil.position.set(W * TILE / 2, WALLH, H * TILE / 2);
-      ceil.material = mat(scene, 'cm', L.map.authored ? '#16121f' : '#0a0810', L.map.authored ? U.mixHex('#000000', pal.a, .1) : null); statics.push(ceil);
+      ceil.material = mat(scene, 'cm', L.map.authored ? '#16121f' : '#0a0810', L.map.authored ? U.mixHex('#000000', pal.a, .1) : null); statics.push(ceil); glow.addExcludedMesh(ceil);
       const panels = [], cones = [];
       L.map.rooms.forEach(rm => {
         const p = BABYLON.MeshBuilder.CreateBox('lp', { width: 2.4, height: .08, depth: .5 }, scene); p.position.set((rm.cx + .5) * TILE, WALLH - .06, (rm.cy + .5) * TILE); panels.push(p);

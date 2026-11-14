@@ -1,6 +1,14 @@
 {
-  "build": 62,
+  "build": 63,
   "history": [
+    {
+      "build": 63,
+      "version": "1.63",
+      "date": "2026-11-14",
+      "notes": [
+        "Rooms and arenas read clearly now: the ceiling, walls and floor no longer light up in the bloom, so interiors are dark spaces with glowing strips and windows instead of one flat wash of amber, magenta or teal"
+      ]
+    },
     {
       "build": 62,
       "version": "1.62",
@@ -224,17 +232,6 @@
       "date": "2026-10-15",
       "notes": [
         "Fixed a black 3D view (only the HUD showing) in browsers that use WebGPU"
-      ]
-    },
-    {
-      "build": 38,
-      "version": "1.38",
-      "date": "2026-10-13",
-      "notes": [
-        "Cars rebuilt: real grip and sliding, so you can drift with the handbrake or by cornering hard",
-        "Drift scoring pays credits and a mini-turbo (combo up to x5)",
-        "Coupe, sedan and van bodies with turning wheels, brake lights, five gears, tyre smoke and skid marks",
-        "Cars take damage: smoke and sparks, and a full-speed wall still blows them up"
       ]
     }
   ]
