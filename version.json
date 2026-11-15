@@ -1,6 +1,16 @@
 {
-  "build": 63,
+  "build": 64,
   "history": [
+    {
+      "build": 64,
+      "version": "1.64",
+      "date": "2026-11-15",
+      "notes": [
+        "The Training Zone is now six levels, one per room, each with its own briefing",
+        "New guide Juno talks you through every level and stands in the room with you",
+        "Clearing a level teleports you to the next one, and the title lets you start again from any level you have cleared"
+      ]
+    },
     {
       "build": 63,
       "version": "1.63",
@@ -224,14 +234,6 @@
       "notes": [
         "Graphics now start in WebGL, which draws every level correctly; this fixes the black 3D view (only the HUD showing) in the apartment and the city on some computers",
         "WebGPU is optional now: add #webgpu to the address to try it (add #gl to go back); a red notice appears if it misbehaves"
-      ]
-    },
-    {
-      "build": 39,
-      "version": "1.39",
-      "date": "2026-10-15",
-      "notes": [
-        "Fixed a black 3D view (only the HUD showing) in browsers that use WebGPU"
       ]
     }
   ]
