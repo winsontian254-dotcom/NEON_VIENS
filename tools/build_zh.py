@@ -30,6 +30,8 @@ PATTERNS = [
     (r'^Gold beam: the next story chapter\. Cyan beams: jobs for credits\. \[(.+?)\] journal · \[(.+?)\] Nuallink · \[Esc\] menu\.$', '', r'金色光柱：下一章剧情。青色光柱：换信用点的零工。[$1] 日志 · [$2] 脑联 · [Esc] 菜单。'),
     (r'^Use a medkit from your quick bar: \[(.+?)\] uses the selected item, \[(.+?)\] switches to the next\.$', '', r'从快捷栏使用医疗包：[$1] 使用所选物品，[$2] 切换到下一个。'),
     (r'^You have (\d+) perk points to spend at a Black Market stall\.$', '', r'你有 $1 点天赋点可以在黑市摊位花掉。'),
+    (r'^You have cleared (\d+) of 6 Training Zone levels\. Level (\d+) is waiting\.$', '', r'你已通过训练区 6 个关卡中的 $1 个。第 $2 关在等你。'),
+    (r'^You have cleared (\d+) of 6 Training Zone levels\. Level (\d+) is waiting, or start a New Game\.$', '', r'你已通过训练区 6 个关卡中的 $1 个。第 $2 关在等你，或者开始新游戏。'),
     (r'^You are carrying (\d+) ¢\. Black market stalls hide in the alleys: look for pink pointers on the minimap\.$', '', r'你带着 $1 ¢。黑市摊位藏在小巷里：留意小地图上的粉色标记。'),
     (r'^SLOT (\d+)$', '', r'存档位 $1'), (r'^NG\+(\d+)$', '', r'二周目 +$1'), (r'^(\d+) changed$', '', r'已更改 $1 项'),
     (r'^(\d+) pts · \+(\d+) ¢$', '', r'$1 分 · +$2 ¢'), (r'^(\d+) pts$', '', r'$1 分'),

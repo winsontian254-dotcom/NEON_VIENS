@@ -1,6 +1,14 @@
 {
-  "build": 64,
+  "build": 65,
   "history": [
+    {
+      "build": 65,
+      "version": "1.65",
+      "date": "2026-11-16",
+      "notes": [
+        "The title's NEXT line now tells you which Training Zone level is waiting if you have not finished the course"
+      ]
+    },
     {
       "build": 64,
       "version": "1.64",
@@ -225,15 +233,6 @@
         "Realistic people: enemies, civilians, pedestrians, story characters, Ghost and other players now have smooth human bodies, a sculpted face with painted eyes, brows, lips and skin pores, real hair and proper jackets instead of the old low-poly blocks",
         "Ghost's look drives the 3D body: skin tone, hair style and colour, jacket, visor, shades, glowing optics and cyberware all show on the model",
         "The character creator now shows a live 3D preview of Ghost that you can drag to turn"
-      ]
-    },
-    {
-      "build": 40,
-      "version": "1.40",
-      "date": "2026-10-15",
-      "notes": [
-        "Graphics now start in WebGL, which draws every level correctly; this fixes the black 3D view (only the HUD showing) in the apartment and the city on some computers",
-        "WebGPU is optional now: add #webgpu to the address to try it (add #gl to go back); a red notice appears if it misbehaves"
       ]
     }
   ]
