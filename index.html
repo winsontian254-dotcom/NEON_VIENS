@@ -678,6 +678,13 @@ body.touch .dse,body.mobile .dse{opacity:1;transform:none}
 #hud .tzlv em{display:block;font:600 16px var(--fm);font-style:normal;letter-spacing:.14em;color:#eafcff}
 @keyframes tzlv{0%{opacity:0;transform:translateX(-50%) scale(1.18);filter:blur(6px)}10%{opacity:1;transform:translateX(-50%) scale(1);filter:none}80%{opacity:1}100%{opacity:0;transform:translateX(-50%) scale(.98)}}
 body.lowfx #hud .tzlv{animation-name:tzlvl}@keyframes tzlvl{0%{opacity:0}10%{opacity:1}80%{opacity:1}100%{opacity:0}}
+/* phones: the banner sits top left (the middle belongs to the step text and the aim), the consumable bar steps aside for the guide's card */
+@keyframes tzlvm{0%{opacity:0;filter:blur(5px)}10%{opacity:1;filter:none}80%{opacity:1}100%{opacity:0}}
+body.mobile #hud .tzlv{left:14px;top:10%;transform:none;text-align:left;max-width:46vw;animation-name:tzlvm}
+body.mobile #hud .tzlv .k{justify-content:flex-start;font-size:11px;gap:6px}body.mobile #hud .tzlv .k b{font-size:13px}
+body.mobile #hud .tzlv u{font-size:clamp(22px,5.4vw,36px);padding:0;margin:3px 0 2px}body.mobile #hud .tzlv em{font-size:11px}
+body.touch #hud.nomap .qbar{left:48%}body.touch #hud .tut.tz{top:27%!important}
+@media (max-height:520px){.tzl .panel>p{display:none}.tzl .btn small{display:none}.tzl .btn{margin:3px 0}}
 #hud .lhack{position:absolute;left:50%;top:27%;transform:translateX(-50%);min-width:300px;padding:10px 22px 12px;text-align:center;border:1px solid var(--red);background:rgba(40,6,10,.88);box-shadow:0 0 30px rgba(255,51,71,.45);clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px))}
 #hud .lhack b{display:block;font:700 22px var(--fh);letter-spacing:.2em;color:#ff8a84;animation:blink .35s steps(2,end) infinite}
 #hud .lhack>span{display:block;margin-top:3px;font:700 15px var(--fh);letter-spacing:.14em;color:#fff}
@@ -3261,7 +3268,7 @@ NV.Account = (() => {
 
 /* Condition evaluation for conditional blocks compiled from the script */
 NV.Update = (() => {
-  const NV_BUILD = 65;
+  const NV_BUILD = 66;
   NV.BUILD = NV_BUILD;
   const URL = 'https://winsontian254-dotcom.github.io/NEON_VIENS/version.json', KEY = 'nv_seen_build';
   let info = null, shown = 0, alerted = false;
@@ -8967,7 +8974,8 @@ NV.Level = (() => {
   function tzIssue(k) {
     const z = L.tz, g = TZG[k], A = NV.Arms.state(), w = g && NV.Arms.ALL.find(q => g[0].test(q.name)); if (!w || !A || z.gun === k) return;
     z.gun = k; A.bar = [w.id, null, null, null, null, null, null, null, null]; A.sel = 0; armsSync(true);
-    NV.Audio.sfx('pickup'); NV.toast('WEAPON ISSUED', w.name + ' — ' + g[1], '#ffd000', 5);
+    NV.Audio.sfx('pickup'); const say = () => { if (L && L.tz === z) NV.toast('WEAPON ISSUED', w.name + ' — ' + g[1], '#ffd000', 5); }, wait = z.arrAt ? 4800 - (performance.now() - z.arrAt) : 0;   // after the level banner, not on top of it
+    if (wait > 0) setTimeout(say, wait); else say();
   }
   const tzNote = k => { if (L.tz) L.tz[k] = (L.tz[k] || 0) + 1; };
   // the logo, drawn in code: a hazard-striped badge with a target and the name
@@ -9105,7 +9113,7 @@ NV.Level = (() => {
   function tzArrive(lv, fx) {
     const z = L.tz, p = L.p, T = TZL[lv], c = cellC(T.at[0], T.at[1]);
     if (fx) { tzFlash(); spark(V3(p.x, 1, p.z), '#19f0ff', 26); NV.glitch(420); NV.Audio.sfx('glitch'); NV.Audio.sfx('unlock'); }
-    z.lv = lv; z.i = Math.max(z.i, T.from); p.x = c.x; p.z = c.z; p.yaw = T.yaw; p.pitch = 0; p.vxs = p.vzs = 0; p.vy = 0; p.y = 0; p.inv = Math.max(p.inv || 0, 1.5);
+    z.lv = lv; z.arrAt = performance.now(); z.i = Math.max(z.i, T.from); p.x = c.x; p.z = c.z; p.yaw = T.yaw; p.pitch = 0; p.vxs = p.vzs = 0; p.vy = 0; p.y = 0; p.inv = Math.max(p.inv || 0, 1.5);
     p.hp = p.max; p.ar = p.arMax; p.en = p.enMax || 100; z.last = { x: p.x, z: p.z };
     if (fx) spark(V3(c.x, 1, c.z), '#19f0ff', 26);
     tzGuideTo(c, T.yaw); if (lv === TZL.length - 1) z.bwait = Math.max(z.bwait, 7);
@@ -9207,7 +9215,7 @@ NV.Level = (() => {
   }
   function tzTick(dt) {
     const z = L.tz, p = L.p; if (!z.begun && L.started) { z.begun = true; tzArrive(z.lv, z.lv > 0); } tzSayTick(dt);
-    { const cs = TZS[z.i]; if (cs && cs.gun) tzIssue(cs.gun); } z.walk += Math.hypot(p.x - z.last.x, p.z - z.last.z) * (Math.hypot(p.x - z.last.x, p.z - z.last.z) < 3 ? 1 : 0); z.last = { x: p.x, z: p.z };
+    { const cs = TZS[z.i]; if (cs && cs.gun && !z.warp) tzIssue(cs.gun); }   // the next level's weapon is issued when you arrive, not during the countdown z.walk += Math.hypot(p.x - z.last.x, p.z - z.last.z) * (Math.hypot(p.x - z.last.x, p.z - z.last.z) < 3 ? 1 : 0); z.last = { x: p.x, z: p.z };
     z.dummies.forEach(e => { if (e.state !== 'down' || L.carry === e) { e.dt = 0; return; } e.dt = (e.dt || 0) + dt; if (e.dt > (e.hidden ? 14 : 8) && Math.hypot(e.x - p.x, e.z - p.z) > 4) dummyReset(e); });
     z.junk = z.junk.filter(j => { j.t -= dt; if (j.t > 0) return true; botGone(j.e); return false; }); if (TZS[z.i] && TZS[z.i].drill) drillTick(dt); if (TZS[z.i] && TZS[z.i].boss) bossTick(dt); if (z.bossGone && (z.bossGone.t -= dt) <= 0) { z.bossGone.root.dispose(); z.bossGone = null; }
     const s = TZS[z.i]; if (s && s.ok(z) && !(L.tact || L.hack) && !z.warp) { z.i++; NV.Audio.sfx('pickup'); if (z.i >= TZS.length - 1) { openExit(); NV.toast('TRAINING COMPLETE', 'Step into the green beam to graduate.', '#ffd000', 4); } else if (z.i > TZL[z.lv].to) tzClear(); }
@@ -9219,7 +9227,7 @@ NV.Level = (() => {
     const lv = TZL[Math.min(z.lv, TZL.length - 1)], w = z.warp;
     const html = w ? '<span>LEVEL CLEARED</span> <span>TELEPORTING TO</span> <b>' + TZL[w.to].n + '</b> <span>IN</span> <b>' + Math.max(1, Math.ceil(w.t)) + '</b>'
       : '<small><span>TRAINING LEVEL</span> <b>' + (z.lv + 1) + ' / ' + TZL.length + '</b> <span>' + lv.n + '</span> · <span>STEP</span> <b>' + (i - lv.from + 1) + ' / ' + (lv.to - lv.from + 1) + '</b></small><span>' + s.t + '</span>' + (s.n ? ' <b>' + s.n(z) + '</b>' : '');
-    el.classList.remove('hidden'); el.classList.toggle('warp', !!w); if (el._h !== html) { el._h = html; el.innerHTML = html; }
+    el.classList.remove('hidden'); el.classList.add('tz'); el.classList.toggle('warp', !!w); if (el._h !== html) { el._h = html; el.innerHTML = html; }
   }
 
   /* ---------------- progression: armor, perfect dodge, medals ----------------
@@ -13031,7 +13039,7 @@ NV.UI = (() => {
     const open = Math.min(list.length, (cleared | 0) + 1);
     const rows = list.map((l, k) => `<button class="btn"${k >= open ? ' disabled' : ''}><span style="opacity:.6">${k + 1}</span> ${U.esc(l.n)}<br><small style="opacity:.65;font-size:13px">${U.esc(k < open ? l.sub : 'Clear the previous level first')}</small></button>`).join('');
     const m = modal(`<div class="stitle" style="font-size:20px">TRAINING ZONE</div><p class="muted" style="font-size:15px;margin-bottom:10px">Pick a level. Juno teleports you to its room.</p>${rows}<button class="btn">Back</button>`, true);
-    const b = [...m.querySelectorAll('.btn')];
+    m.classList.add('tzl'); const b = [...m.querySelectorAll('.btn')];
     const fin = v => { UI.pop(h); m.remove(); res(v); };
     const h = UI.push(nav(b, { start: Math.min(open - 1, list.length - 1), select: k => fin(k < list.length ? k : null), back: () => fin(null) }));
   });

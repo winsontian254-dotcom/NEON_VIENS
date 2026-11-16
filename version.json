@@ -1,6 +1,15 @@
 {
-  "build": 65,
+  "build": 66,
   "history": [
+    {
+      "build": 66,
+      "version": "1.66",
+      "date": "2026-11-16",
+      "notes": [
+        "Training Zone fits phone screens: the level banner, guide card and level list were rearranged",
+        "The next level's weapon is now issued when you arrive, not during the teleport countdown"
+      ]
+    },
     {
       "build": 65,
       "version": "1.65",
@@ -223,16 +232,6 @@
         "Faces and clothes look much more natural: reworked head proportions (eyes, nose, mouth and chin in the right places, a firmer jaw), calmer matte skin, softer hairlines and better hair shapes",
         "Clothes are real garments now: a zip jacket with pockets, collar, seams and a ribbed hem, woven fabric on sleeves and trousers, leather boots and gloves, and narrower shoulders so heads are the right size",
         "Cybernetic eyes now glow from the eye itself instead of a flat glowing slab"
-      ]
-    },
-    {
-      "build": 41,
-      "version": "1.41",
-      "date": "2026-10-16",
-      "notes": [
-        "Realistic people: enemies, civilians, pedestrians, story characters, Ghost and other players now have smooth human bodies, a sculpted face with painted eyes, brows, lips and skin pores, real hair and proper jackets instead of the old low-poly blocks",
-        "Ghost's look drives the 3D body: skin tone, hair style and colour, jacket, visor, shades, glowing optics and cyberware all show on the model",
-        "The character creator now shows a live 3D preview of Ghost that you can drag to turn"
       ]
     }
   ]
