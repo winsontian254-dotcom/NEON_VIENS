@@ -3268,7 +3268,7 @@ NV.Account = (() => {
 
 /* Condition evaluation for conditional blocks compiled from the script */
 NV.Update = (() => {
-  const NV_BUILD = 66;
+  const NV_BUILD = 67;
   NV.BUILD = NV_BUILD;
   const URL = 'https://winsontian254-dotcom.github.io/NEON_VIENS/version.json', KEY = 'nv_seen_build';
   let info = null, shown = 0, alerted = false;
@@ -3394,6 +3394,7 @@ NV.Style = (() => {
   class Facet extends BABYLON.MaterialPluginBase {
     constructor(m) { super(m, 'NVFacet', 250, { NVFACET: false }); this._enable(true); }
     getClassName() { return 'NVFacetPlugin'; }
+    isCompatible() { return true; }   // the base class only accepts GLSL: this plugin has a WGSL twin too (without this the game does not start under #webgpu)
     prepareDefines(defines) { defines.NVFACET = on; }
     getCustomCode(type, lang) { return type === 'fragment' ? { CUSTOM_FRAGMENT_BEFORE_LIGHTS: lang === 1 ? WGSL : GLSL } : null; }
   }

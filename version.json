@@ -1,6 +1,14 @@
 {
-  "build": 66,
+  "build": 67,
   "history": [
+    {
+      "build": 67,
+      "version": "1.67",
+      "date": "2026-11-16",
+      "notes": [
+        "Fixed the game not starting with the experimental WebGPU renderer (#webgpu)"
+      ]
+    },
     {
       "build": 66,
       "version": "1.66",
@@ -222,16 +230,6 @@
         "Faces are left blank (plain smooth skin, no painted eyes, nose or mouth) instead of the uncanny painted faces; Ghost's courier hood is now a proper draped hood instead of a cap with a brim",
         "New human hands with separate fingers and a thumb, bare skin for everyone except soldiers; narrower hips and legs",
         "Hair has more strand detail and soft ends, long hair now falls clear of the face"
-      ]
-    },
-    {
-      "build": 42,
-      "version": "1.42",
-      "date": "2026-10-16",
-      "notes": [
-        "Faces and clothes look much more natural: reworked head proportions (eyes, nose, mouth and chin in the right places, a firmer jaw), calmer matte skin, softer hairlines and better hair shapes",
-        "Clothes are real garments now: a zip jacket with pockets, collar, seams and a ribbed hem, woven fabric on sleeves and trousers, leather boots and gloves, and narrower shoulders so heads are the right size",
-        "Cybernetic eyes now glow from the eye itself instead of a flat glowing slab"
       ]
     }
   ]
