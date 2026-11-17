@@ -1,6 +1,15 @@
 {
-  "build": 67,
+  "build": 68,
   "history": [
+    {
+      "build": 68,
+      "version": "1.68",
+      "date": "2026-11-17",
+      "notes": [
+        "The Tidelines chapters have their own places now: seawall shaft, Station Theta, drowned gardens, deep caves, nursery kitchen and the tribunal room",
+        "New operation maps for the shaft descent, the drowned gardens, the intake grid and the shelf, and a new nursery barrier defence arena"
+      ]
+    },
     {
       "build": 67,
       "version": "1.67",
@@ -220,16 +229,6 @@
         "Characters rebuilt around a real human head: proper eyes with an iris and pupil, brows, lashes, lips, ears and a neck",
         "Realistic relaxed hands that come out of the sleeves, and fitted hair, hood and braids",
         "Pedestrians now have eyes too"
-      ]
-    },
-    {
-      "build": 43,
-      "version": "1.43",
-      "date": "2026-10-16",
-      "notes": [
-        "Faces are left blank (plain smooth skin, no painted eyes, nose or mouth) instead of the uncanny painted faces; Ghost's courier hood is now a proper draped hood instead of a cap with a brim",
-        "New human hands with separate fingers and a thumb, bare skin for everyone except soldiers; narrower hips and legs",
-        "Hair has more strand detail and soft ends, long hair now falls clear of the face"
       ]
     }
   ]

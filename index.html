@@ -3268,7 +3268,7 @@ NV.Account = (() => {
 
 /* Condition evaluation for conditional blocks compiled from the script */
 NV.Update = (() => {
-  const NV_BUILD = 67;
+  const NV_BUILD = 68;
   NV.BUILD = NV_BUILD;
   const URL = 'https://winsontian254-dotcom.github.io/NEON_VIENS/version.json', KEY = 'nv_seen_build';
   let info = null, shown = 0, alerted = false;
@@ -5337,6 +5337,206 @@ NV.LAYOUTS = {
       '#C..........N#',
       '#.........S..#',
       '##############'
+  ] },
+  // The Tidelines (Build 68): six story spaces, four operations and the nursery barrier arena, so the new chapters do not play on a Rust Harbor street.
+  // Chosen in NV.sceneInterior (story spaces) and NV.layoutFor (operations) by the TIDELINE scene headings.
+  s_seawall: { kind: 'scene', pal: { a: '#2be6c8', b: '#6aa8ff' }, rows: [
+      '########################',
+      '#gg..c.............gg..#',
+      '#......................#',
+      '#.S...g..........g..c..#',
+      '#..........MM..........#',
+      '#c.........X...........#',
+      '#.....g..........g..Y..#',
+      '#......................#',
+      '#..c.............1.....#',
+      '#gg.........c.......gg.#',
+      '########################'
+  ] },
+  s_theta: { kind: 'scene', pal: { a: '#2be6c8', b: '#e8f4ff' }, rows: [
+      '######################',
+      '#KKKK..........KKKK..#',
+      '#.....DD....DD.......#',
+      '#.........1..........#',
+      '#c..Y..........Y...c.#',
+      '#S.......UU.X........#',
+      '#c..Y..........Y...c.#',
+      '#.........2..........#',
+      '#.....DD....DD.......#',
+      '#KKKK..........KKKK..#',
+      '######################'
+  ] },
+  s_gardens: { kind: 'scene', pal: { a: '#3dffa8', b: '#2be6c8' }, rows: [
+      '##########################',
+      '#N.N....Y.......N..N..N..#',
+      '#..................c.....#',
+      '#.S...Y.....1.....Y......#',
+      '#NN.NN.NN.NN.NN.NN.NN.NN.#',
+      '#.......N.......X....N...#',
+      '#..c.............Y.......#',
+      '#.N.....2.........N......#',
+      '#.....Y......c...........#',
+      '#...N........3......Y..N.#',
+      '#c...........N...........#',
+      '##########################'
+  ] },
+  s_caves: { kind: 'scene', pal: { a: '#2be6c8', b: '#6aa8ff' }, rows: [
+      '##########################',
+      '####....######.....#######',
+      '###......####.......######',
+      '##...1.........Y.....2.###',
+      '##..c...###...N......c..##',
+      '#.......#####.........X..#',
+      '#.S.....#####.....Y......#',
+      '#.......###.........#....#',
+      '##..N.........3...c.##...#',
+      '###......######.......####',
+      '####..Y...#######....#####',
+      '######....########..######',
+      '##########################'
+  ] },
+  s_nursery: { kind: 'scene', pal: { a: '#ffb27a', b: '#3dffa8' }, rows: [
+      '######################',
+      '#oooo.oooo......YY...#',
+      '#....................#',
+      '#..UU....UU....UU....#',
+      '#....................#',
+      '#.N..........1....N..#',
+      '#S.......UU..X.......#',
+      '#.N.................N#',
+      '#....c....UU....c....#',
+      '#YY.........2....YY..#',
+      '######################'
+  ] },
+  s_tribunal: { kind: 'scene', pal: { a: '#b7a6ff', b: '#e8f4ff' }, rows: [
+      '########################',
+      '#......CCCCCCCCCC......#',
+      '#......................#',
+      '#..ppp.....X......ppp..#',
+      '#......................#',
+      '#..ppp............ppp..#',
+      '#......................#',
+      '#..ppp.....1......ppp..#',
+      '#......................#',
+      '#.S....................#',
+      '#..c................c..#',
+      '########################'
+  ] },
+  tl_shaft: { kind: 'mission', pal: { a: '#2be6c8', b: '#6aa8ff' }, rows: [
+      '##########################',
+      '#.....gg.........gg..m.###',
+      '#.S.........e.c........###',
+      '#.........YY.......e...###',
+      '#......e...............###',
+      '#.......c...1..........###',
+      '###################....###',
+      '###################....###',
+      '###...........2..........#',
+      '###..c....e.........c....#',
+      '###............Y......e..#',
+      '###.m.....c..............#',
+      '###...g.........e....g...#',
+      '##....####################',
+      '##....####################',
+      '#.gg...................###',
+      '#......e....3.....c....###',
+      '#.......YY.....e.......###',
+      '#....c...............e.###',
+      '#.m............gg......###',
+      '###################....###',
+      '###################....###',
+      '###.gg...e....c........m.#',
+      '###.........Y.4........X.#',
+      '###..........e.....e.c...#',
+      '##########################'
+  ] },
+  tl_gardens: { kind: 'mission', pal: { a: '#3dffa8', b: '#2be6c8' }, rows: [
+      '##############################',
+      '#............................#',
+      '#.S.....NN.e.NN...NN...NN....#',
+      '#...............YY.........P.#',
+      '#.....NN...NN...NN...NN......#',
+      '#....c........1.......c..e...#',
+      '#m.....e.......P.............#',
+      '###...######...###############',
+      '###...######...###############',
+      '#......c....................m#',
+      '#.....N...NN...NN.e.NN..PN...#',
+      '#........YY...2.....YY.......#',
+      '#...e...NN...NN...NN...NN.c..#',
+      '#.P........e.................#',
+      '########################...###',
+      '########################...###',
+      '#................c...........#',
+      '#...c...NN...N3...NN.e.NN..e.#',
+      '#......P......YY.............#',
+      '#.....NN...NN...NN...NN....X.#',
+      '#.......e..........P....c....#',
+      '##############################'
+  ] },
+  tl_grid: { kind: 'mission', pal: { a: '#19c8ff', b: '#2be6c8' }, rows: [
+      '############################',
+      '############################',
+      '#.S...e...1................#',
+      '#..m..........e.......e....#',
+      '##..#M..K#..######..M..K#.##',
+      '##..#....#c.######......#.##',
+      '##..#....#..######......#.##',
+      '##..#K..M#..######..K..M#.##',
+      '##..######..######..#####c##',
+      '#.....e...........2........#',
+      '#..........................#',
+      '##..######..#M..K#..#####.##',
+      '##e.######..#....#e.#####.##',
+      '##..######..#....#..#####.##',
+      '##..######..#K..M#..#####.##',
+      '##..######..######..#####m##',
+      '#.........3...c.......e....#',
+      '#..........................#',
+      '##c.#M..K#c.######..M..K#.##',
+      '##..#....#..######......#.##',
+      '##..#K..M#..######c.K..M#.##',
+      '##..######..######..#####.##',
+      '#...........e.....4.e....X.#',
+      '############################'
+  ] },
+  tl_shelf: { kind: 'mission', pal: { a: '#2be6c8', b: '#6aa8ff' }, rows: [
+      '######################################',
+      '########.......###############......##',
+      '########....P..###############..P...##',
+      '#.....c..............................#',
+      '#...P.......e.......e.#####....c..m..#',
+      '#......####..........c#####..c...e...#',
+      '#......####.P.....2...#####.e.4......#',
+      '#......####.....e.....#####..........#',
+      '#.S....####...c..............####...X#',
+      '#.......1......#####.P..e....####....#',
+      '#........e.c...#####.......c.####.e..#',
+      '#....e.........#####.3.......####....#',
+      '#..c.........P.#####.e......P.....Pc.#',
+      '#.m...............P.....c............#',
+      '########################.......#######',
+      '########################...P...#######',
+      '######################################'
+  ] },
+  arena_barrier: { kind: 'arena', pal: { a: '#2be6c8', b: '#6aa8ff' }, rows: [
+      '#################',
+      '########.########',
+      '##.............##',
+      '##......X......##',
+      '##.............##',
+      '##YNYN..Y..NYNY##',
+      '##.............##',
+      '##.............##',
+      '#...c.......c...#',
+      '##.............##',
+      '##.............##',
+      '##...c.....c...##',
+      '##c...........c##',
+      '##......S......##',
+      '##.............##',
+      '########.########',
+      '#################'
   ] }
 };
 
@@ -5347,6 +5547,11 @@ NV.layoutFor = (op, ctx, wantCity) => {
   const pal = (ctx && ctx.palette) || {}, th = pal.th, m = op.m, arena = m === 'boss' || m === 'arena' || m === 'defend';
   const text = [ctx && ctx.scene, op.title, op.d].filter(Boolean).join(' ').toUpperCase().replace(/[’]/g, "'"), h = U.hash(text + '|' + m);
   let id = null;
+  if (/TIDELINE|OUTER SEAWALL SHAFT/.test(text)) {   // the Tidelines: their own operation plans (the intake station and the trench keep the metro and underdeep plans through the rules below)
+    if (arena && /NURSERY BARRIER/.test(text)) return 'arena_barrier';
+    const TL = [[/SEAWALL SHAFT/, 'tl_shaft'], [/NURSERY KITCHEN|DROWNED GARDENS/, 'tl_gardens'], [/COLD ENGINE|INTAKE GRID/, 'tl_grid'], [/SHELF PATROL|DRAIN SHELF/, 'tl_shelf']];
+    const tl = !arena && TL.find(([re]) => re.test(text)); if (tl) return tl[1];
+  }
   if (th === 'cyber') id = ['server', 'lattice'][h % 2];
   else if (th === 'space') id = ['station', 'cargo'][h % 2];
   else {
@@ -5371,9 +5576,13 @@ NV.layoutFor = (op, ctx, wantCity) => {
 /* the walkable story spaces that have their own interior */
 NV.sceneInterior = heading => {
   const T = String(heading || '').toUpperCase().replace(/[’]/g, "'");
+  if (/TIDELINE|OUTER SEAWALL SHAFT|RUST HARBOR TRIBUNAL/.test(T)) {   // the Tidelines (chapters 20A-20G) have their own spaces
+    const TL = [[/TRIBUNAL/, 's_tribunal'], [/SEAWALL SHAFT|INTAKE TUNNEL WALL|FIRST PUMP/, 's_seawall'], [/NURSERY KITCHEN/, 's_nursery'], [/STATION THETA|INTAKE STATION|COLD ENGINE|ANCHOR ARRAY/, 's_theta'], [/DEEP CAVES|UNDERDEEP TRENCH|OBSERVATION GLASS/, 's_caves'], [/DROWNED GARDENS|NURSERY BARRIER|SHELF/, 's_gardens']];
+    const tl = TL.find(([re]) => re.test(T)); if (tl) return tl[1];
+  }
   if (/ORBITAL|SKYFALL|OBSERVATION|ROOF|SPIRE|EXTERIOR/.test(T)) return null;
   const RULES = [
-    [/NOODLE|DANNY|RAMEN|NURSERY KITCHEN/, 's_noodle'],
+    [/NOODLE|DANNY|RAMEN/, 's_noodle'],
     [/CLINIC|\bWARD\b|HOSPITAL|BIOSTASIS|BETTER YESTERDAY|MEMORY POD|PAEDIATRIC/, 's_clinic'],
     [/CLUB|DREAMHOUSE|\bHALO\b|NEON ARENA|ENTERTAINMENT|AUCTION|GALA/, 's_club'],
     [/\bBAR\b|LOW TIDE|MERCENARY/, 's_bar'],
@@ -12426,8 +12635,8 @@ NV.Level = (() => {
     if (op.m === 'apartment') { A.setSpace({ space: 'room', surface: 'carpet' }); A.ambience('apartment', { rain: true }); return; }
     if (I) { const t = I.type || ''; A.setSpace({ space: /hall|cathedral|vault|dome|warehouse|factory/.test(t) ? 'hall' : 'room', surface: /factory|warehouse|workshop|server|vault/.test(t) ? 'metal' : /club|bar|noodle|shop|clinic|office/.test(t) ? 'tile' : 'carpet' }); A.ambience(t); return; }
     if (lay) {
-      const big = /warehouse|cargo|factory|metro|station|platform|underdeep|arena|vault/.test(lay), hard = /warehouse|cargo|factory|metro|station|platform|underdeep|server|lattice|vault/.test(lay);
-      const k = /training/.test(lay) ? 'facility' : /clinic/.test(lay) ? 'clinic' : /warehouse|cargo|factory/.test(lay) ? 'factory' : /club/.test(lay) ? 'club' : /vault/.test(lay) ? 'vault' : /server|lattice/.test(lay) ? 'server' : /metro|station|platform|underdeep|arena/.test(lay) ? 'hall' : /noodle|bar/.test(lay) ? 'noodle' : /flat/.test(lay) ? 'room' : /office/.test(lay) ? 'office' : 'facility';
+      const big = /warehouse|cargo|factory|metro|station|platform|underdeep|arena|vault|tl_|s_seawall|s_caves|s_gardens/.test(lay), hard = /warehouse|cargo|factory|metro|station|platform|underdeep|server|lattice|vault|tl_|s_seawall|s_caves|s_theta/.test(lay);
+      const k = /training/.test(lay) ? 'facility' : /clinic/.test(lay) ? 'clinic' : /warehouse|cargo|factory/.test(lay) ? 'factory' : /club/.test(lay) ? 'club' : /vault/.test(lay) ? 'vault' : /server|lattice/.test(lay) ? 'server' : /metro|station|platform|underdeep|arena|tl_|s_seawall|s_caves|s_gardens/.test(lay) ? 'hall' : /s_theta/.test(lay) ? 'server' : /noodle|bar|s_nursery/.test(lay) ? 'noodle' : /flat/.test(lay) ? 'room' : /office|s_tribunal/.test(lay) ? 'office' : 'facility';
       A.setSpace({ space: big ? 'hall' : 'room', surface: hard ? 'metal' : /arena/.test(lay) ? 'concrete' : /flat/.test(lay) ? 'carpet' : 'tile' });
       A.ambience(k); return;
     }
